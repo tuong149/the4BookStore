@@ -1,0 +1,27 @@
+package vn.bookstore.the4bookstore.entity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "KHACH_HANG")
+@Data @NoArgsConstructor @AllArgsConstructor
+public class KhachHang {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maKH;
+    @Column(nullable = false, length = 100)
+    private String hoTen;
+    @Column(unique = true, nullable = false, length = 20)
+    private String soDienThoai;
+    @Column(length = 100)
+    private String email;
+    @Column(length = 255)
+    private String diaChi;
+    
+    @OneToOne
+    @JoinColumn(name = "maTaiKhoan", unique = true)
+    private TaiKhoan taiKhoan;
+    
+    @Column(nullable = false)
+    private LocalDateTime ngayDangKy = LocalDateTime.now();
+}

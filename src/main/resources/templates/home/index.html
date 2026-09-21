@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - the4BookStore</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="logo">the4BookStore</a>
+        <div class="nav-links">
+            <a href="/">Trang Chủ</a>
+            <a href="/sach">Kho Sách</a>
+            <a href="/gio-hang">Giỏ Hàng</a>
+            
+            <!-- Chưa đăng nhập -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="btn-login">Đăng Nhập</a>
+                <a th:href="@{/register}" class="btn-register">Đăng Ký</a>
+            </th:block>
+
+            <!-- Đã đăng nhập -->
+            <th:block sec:authorize="isAuthenticated()">
+                <div class="user-profile">
+                    Xin chào, <span th:text="${username}"></span>!
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <button type="submit" class="btn-logout" style="border:none; cursor:pointer;">Đăng xuất</button>
+                    </form>
+                </div>
+            </th:block>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Khám Phá Thế Giới Qua <span>Từng Trang Sách</span></h1>
+            <p>Tuyển tập những tác phẩm văn học kinh điển, sách chuyên ngành và sách kỹ năng sống được chọn lọc kỹ càng nhất.</p>
+            <a href="#featured" class="btn-explore">Khám Phá Ngay</a>
+        </div>
+    </section>
+
+    <!-- Featured Books -->
+    <section id="featured" class="section">
+        <h2 class="section-title">Sách Nổi Bật</h2>
+        
+        <div class="book-grid">
+            <!-- Hiển thị khi chưa có sách trong Database -->
+            <div th:if="${#lists.isEmpty(featuredBooks)}" class="empty-state">
+                <h3>Chưa có dữ liệu sách</h3>
+                <p>Vui lòng thêm sách từ trang Quản trị viên để hiển thị tại đây.</p>
+            </div>
+
+            <!-- Loop danh sách sách -->
+            <div class="book-card" th:each="book : ${featuredBooks}">
+                <img th:if="${null != null}" th:src="${null}" class="book-img" alt="Ảnh sách">
+                <div th:unless="${null != null}" class="book-img">Chưa có ảnh</div>
+                
+                <h3 class="book-title" th:text="${book.tenSP}">Tên sách</h3>
+                <div class="book-price" th:text="${#numbers.formatDecimal(book.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

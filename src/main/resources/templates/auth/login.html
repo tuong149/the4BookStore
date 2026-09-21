@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - the4BookStore</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>Mừng Trở Lại!</h2>
+            <p>Đăng nhập để trải nghiệm thế giới sách tuyệt vời</p>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-error">
+            Sai tên đăng nhập hoặc mật khẩu!
+        </div>
+        <div th:if="${param.logout}" class="alert alert-success">
+            Bạn đã đăng xuất thành công.
+        </div>
+        <div th:if="${param.registered}" class="alert alert-success">
+            Đăng ký thành công! Vui lòng đăng nhập.
+        </div>
+
+        <form th:action="@{/process-login}" method="post">
+            <div class="input-group">
+                <input type="text" id="username" name="username" required>
+                <label for="username">Tên đăng nhập</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Mật khẩu</label>
+            </div>
+            <button type="submit" class="btn-submit">Đăng Nhập</button>
+        </form>
+
+        <div class="auth-footer">
+            Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+        </div>
+    </div>
+</body>
+</html>

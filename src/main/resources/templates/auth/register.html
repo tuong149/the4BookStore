@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - the4BookStore</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <style>
+        .auth-container { max-width: 600px; }
+        .row { display: flex; gap: 15px; }
+        .row .input-group { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>Tạo Tài Khoản</h2>
+            <p>Tham gia cộng đồng yêu sách ngay hôm nay</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <form th:action="@{/register}" th:object="${registerRequest}" method="post">
+            <div class="row">
+                <div class="input-group">
+                    <input type="text" id="tenDangNhap" th:field="*{tenDangNhap}" required>
+                    <label for="tenDangNhap">Tên đăng nhập</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" th:field="*{email}" required>
+                    <label for="email">Email</label>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="input-group">
+                    <input type="password" id="matKhau" th:field="*{matKhau}" required>
+                    <label for="matKhau">Mật khẩu</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="soDienThoai" th:field="*{soDienThoai}" required>
+                    <label for="soDienThoai">Số điện thoại</label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="hoTen" th:field="*{hoTen}" required>
+                <label for="hoTen">Họ và tên</label>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="diaChi" th:field="*{diaChi}" required>
+                <label for="diaChi">Địa chỉ</label>
+            </div>
+
+            <button type="submit" class="btn-submit">Đăng Ký</button>
+        </form>
+
+        <div class="auth-footer">
+            Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
+        </div>
+    </div>
+</body>
+</html>
