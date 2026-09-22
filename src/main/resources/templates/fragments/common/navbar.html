@@ -40,7 +40,7 @@
                     </a>
 
                     <!-- Cart CTA -->
-                    <a th:href="@{/gio-hang}" class="relative p-2 text-on-surface-variant hover:text-on-surface rounded-xl hover:bg-surface-container transition-colors" title="Giỏ hàng của bạn">
+                    <a th:href="@{/gio-hang}" th:class="${activePage == 'cart'} ? 'relative p-2 text-primary bg-surface-container rounded-xl transition-colors' : 'relative p-2 text-on-surface-variant hover:text-on-surface rounded-xl hover:bg-surface-container transition-colors'" title="Giỏ hàng của bạn">
                         <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
                         <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 font-label-sm text-[10px] font-bold bg-secondary text-on-secondary rounded-full transform translate-x-1 -translate-y-1">3</span>
                     </a>
@@ -73,7 +73,6 @@
                 <a th:href="@{/}" th:class="${activePage == 'home'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Trang Chủ</a>
                 <a th:href="@{/#bestsellers-grid}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Sách Bán Chạy</a>
                 <a th:href="@{/#categories}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Danh Mục Thể Loại</a>
-                <a th:href="@{/gio-hang}" th:class="${activePage == 'cart'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Giỏ Hàng &amp; Thanh Toán</a>
                 <a sec:authorize="hasAnyRole('ADMIN', 'QUANLY')" th:href="@{/admin/books}" class="text-primary hover:text-primary-container font-semibold py-1 transition-colors">Quản Lý Kho Sách</a>
             </nav>
         </div>
