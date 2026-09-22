@@ -2,43 +2,43 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/common/head :: common_head('Đăng ký - The4BookStore')}"></head>
 
-<body class="min-h-screen bg-slate-900/10 flex items-center justify-center p-3 sm:p-6 md:p-10 font-body-md antialiased selection:bg-primary selection:text-white">
+<body class="min-h-screen w-screen bg-[#eaedf1] flex items-center justify-center p-1.5 sm:p-2.5 md:p-3 font-body-md antialiased selection:bg-primary selection:text-white overflow-hidden">
 
-    <!-- Main Container Card with Bookshelf Background -->
-    <main class="relative w-full max-w-5xl rounded-[32px] overflow-hidden shadow-2xl border border-white/40 bg-cover bg-center min-h-[660px] flex items-center justify-end"
+    <!-- Main Container Card with Bookshelf Background (Nearly full screen) -->
+    <main class="relative w-[98vw] h-[96vh] min-h-[660px] rounded-[24px] sm:rounded-[36px] overflow-hidden shadow-2xl border border-white/50 bg-cover bg-center flex items-center justify-end pr-4 sm:pr-8 md:pr-12 lg:pr-16"
           th:style="|background-image: url('@{/images/login-bookshelf.jpg}');|">
         
-        <!-- Subtle gradient overlay on bookshelf image -->
-        <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-black/15 to-black/35 pointer-events-none"></div>
+        <!-- Subtle ambient shade to ensure rich background depth -->
+        <div class="absolute inset-0 bg-black/10 pointer-events-none"></div>
 
-        <!-- Glassmorphism Register Card (Right Side) -->
-        <div class="relative z-10 w-full sm:max-w-xl lg:w-[54%] xl:w-[50%] m-3 sm:m-6 md:m-8 bg-white/90 backdrop-blur-md rounded-[28px] p-6 sm:p-8 shadow-2xl border border-white/70 flex flex-col justify-between">
+        <!-- Glassmorphism Register Card (Enlarged & High-Contrast Balanced Glass) -->
+        <div class="relative z-10 w-full sm:max-w-xl lg:w-[600px] xl:w-[650px] my-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-11 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between">
             
             <!-- Brand Logo Header -->
-            <div class="flex items-center justify-center gap-3 pt-1">
-                <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm shrink-0">
-                    <span class="material-symbols-outlined text-[24px]">menu_book</span>
+            <div class="flex items-center justify-center gap-3.5 pt-1">
+                <div class="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-md shrink-0">
+                    <span class="material-symbols-outlined text-[28px]">menu_book</span>
                 </div>
                 <div class="flex flex-col text-left">
-                    <span class="font-headline-sm text-sm font-extrabold text-primary tracking-wide leading-tight">THE4BOOKSTORE</span>
-                    <span class="font-headline-sm text-[9px] font-bold text-primary tracking-wider uppercase leading-none mt-0.5">Nhà Sách Trực Tuyến &amp; Quản Trị</span>
+                    <span class="font-headline-sm text-base sm:text-lg font-black text-primary tracking-wider leading-tight drop-shadow-sm">THE4BOOKSTORE</span>
+                    <span class="font-headline-sm text-[10px] sm:text-[11px] font-extrabold text-primary tracking-widest uppercase leading-none mt-1">Nhà Sách Trực Tuyến &amp; Quản Trị</span>
                 </div>
             </div>
 
             <!-- Main Heading -->
-            <h1 class="font-headline-xl text-2xl sm:text-3xl font-extrabold text-primary text-center tracking-tight my-3 sm:my-4">
+            <h1 class="font-headline-xl text-3xl sm:text-4xl font-black text-primary text-center tracking-tight my-4 sm:my-5 drop-shadow-sm">
                 TẠO TÀI KHOẢN
             </h1>
 
             <!-- Feedback Alerts -->
-            <div th:if="${error}" class="mb-3 px-4 py-2.5 rounded-2xl bg-error/10 border border-error/20 text-error text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-300">
-                <span class="material-symbols-outlined text-[18px]">error</span>
+            <div th:if="${error}" class="mb-3.5 px-4 py-3 rounded-2xl bg-white/95 border-2 border-error/50 text-error text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-md animate-in fade-in duration-300">
+                <span class="material-symbols-outlined text-[20px]">error</span>
                 <span th:text="${error}">Lỗi đăng ký</span>
             </div>
 
             <!-- Register Form -->
-            <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Username -->
                     <div>
                         <input type="text"
@@ -46,7 +46,7 @@
                                th:field="*{tenDangNhap}"
                                required
                                placeholder="Tên đăng nhập *"
-                               class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                     </div>
 
                     <!-- Email -->
@@ -56,11 +56,11 @@
                                th:field="*{email}"
                                required
                                placeholder="Email liên hệ *"
-                               class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Password -->
                     <div>
                         <input type="password"
@@ -68,7 +68,7 @@
                                th:field="*{matKhau}"
                                required
                                placeholder="Mật khẩu *"
-                               class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                     </div>
 
                     <!-- Phone Number -->
@@ -79,7 +79,7 @@
                                required
                                placeholder="Số điện thoại *"
                                pattern="[0-9]{10,11}"
-                               class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                     </div>
                 </div>
 
@@ -90,7 +90,7 @@
                            th:field="*{hoTen}"
                            required
                            placeholder="Họ và tên đầy đủ *"
-                           class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                           class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                 </div>
 
                 <!-- Address -->
@@ -100,28 +100,28 @@
                            th:field="*{diaChi}"
                            required
                            placeholder="Địa chỉ giao nhận sách *"
-                           class="w-full px-4 py-2.5 rounded-full border-2 border-primary/80 focus:border-primary focus:ring-4 focus:ring-primary/15 bg-white text-on-surface text-xs font-medium placeholder:text-neutral-400 outline-none transition-all duration-200" />
+                           class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full py-3 mt-1 bg-primary text-on-primary font-headline-sm text-sm font-bold rounded-full hover:bg-primary-container transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.99] cursor-pointer tracking-wide">
+                        class="w-full py-3.5 mt-2 bg-primary text-on-primary font-headline-sm text-base sm:text-lg font-bold rounded-full hover:bg-primary-container transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.99] cursor-pointer tracking-wider">
                     Đăng ký tài khoản
                 </button>
             </form>
 
             <!-- Login Footer Link -->
-            <div class="text-center text-xs text-neutral-600 pt-3">
+            <div class="text-center text-xs sm:text-sm text-slate-900 pt-3.5 font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                 <span>Đã có tài khoản? </span>
-                <a th:href="@{/login}" class="font-bold text-primary hover:underline transition-all">
+                <a th:href="@{/login}" class="font-black text-primary hover:underline transition-all">
                     Đăng nhập ngay
                 </a>
             </div>
 
             <!-- Back to Home Floating Link -->
-            <div class="text-center pt-1.5">
-                <a th:href="@{/}" class="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+            <div class="text-center pt-2">
+                <a th:href="@{/}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-800 hover:text-primary font-bold transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                     <span>Quay về trang chủ</span>
                 </a>
             </div>
