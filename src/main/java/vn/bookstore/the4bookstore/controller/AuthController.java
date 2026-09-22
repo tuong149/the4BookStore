@@ -40,6 +40,14 @@ public class AuthController {
             model.addAttribute("error", "Tên đăng nhập đã tồn tại!");
             return "auth/register";
         }
+        if (taiKhoanRepository.findByEmail(request.getEmail()).isPresent()) {
+            model.addAttribute("error", "Email đã được sử dụng!");
+            return "auth/register";
+        }
+        if (khachHangRepository.findBySoDienThoai(request.getSoDienThoai()).isPresent()) {
+            model.addAttribute("error", "Số điện thoại đã được sử dụng!");
+            return "auth/register";
+        }
 
         // Tạo tài khoản
         TaiKhoan tk = new TaiKhoan();

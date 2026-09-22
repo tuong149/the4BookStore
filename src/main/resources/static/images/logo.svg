@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" width="260" height="60" fill="none">
+  <rect x="2" y="6" width="48" height="48" rx="12" fill="#166534"/>
+  <path d="M14 36V22C14 20.3431 15.3431 19 17 19H26V37H17C15.3431 37 14 36.3431 14 36Z" fill="#86EFAC" fill-opacity="0.9"/>
+  <path d="M38 36V22C38 20.3431 36.6569 19 35 19H26V37H35C36.6569 37 38 36.3431 38 36Z" fill="#FFFFFF"/>
+  <path d="M26 19V37" stroke="#166534" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="26" cy="15" r="3" fill="#F59E0B"/>
+  <text x="60" y="32" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="20" fill="#14532D" letter-spacing="-0.5">THE4<tspan fill="#166534" font-weight="600">BOOKSTORE</tspan></text>
+  <text x="61" y="45" font-family="Plus Jakarta Sans, sans-serif" font-weight="600" font-size="9" fill="#059669" letter-spacing="1.2">NHÀ SÁCH TRỰC TUYẾN &amp; QUẢN TRỊ</text>
+</svg>

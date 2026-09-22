@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Common Storefront Footer Fragment -->
+    <footer th:fragment="common_footer" class="bg-surface-container-low border-t border-surface-container py-space-xl mt-space-xl text-on-surface-variant">
+        <div class="max-w-7xl mx-auto px-space-md md:px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-space-lg text-xs">
+            <div class="space-y-space-xs">
+                <img th:src="@{/images/logo.svg}" alt="Logo" class="h-8 w-auto mb-2"/>
+                <p class="leading-relaxed">Không gian văn hóa tuyển chọn, nơi tri thức và cảm hứng hội tụ dành cho độc giả yêu sách Việt Nam.</p>
+                <div class="text-[11px] text-outline pt-2">
+                    <p>📍 123 Đường Sách Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
+                    <p>📞 Hotline: 1900 6868 (8:00 - 21:00 hàng ngày)</p>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-headline-sm font-bold text-on-surface text-sm mb-3">Danh Mục Tuyển Chọn</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-primary transition-colors">Văn Học Trong Nước &amp; Quốc Tế</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Kinh Tế &amp; Khởi Nghiệp Đổi Mới</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Tâm Lý Học &amp; Phát Triển Bản Thân</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Sách Thiếu Nhi &amp; Giáo Dục Sớm</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Khoa Học Công Nghệ &amp; AI</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-headline-sm font-bold text-on-surface text-sm mb-3">Chính Sách &amp; Hỗ Trợ</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-primary transition-colors">Chính Sách Vận Chuyển Hỏa Tốc</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Chính Sách Đổi Trả Trong 7 Ngày</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Bảo Mật Thông Tin Khách Hàng</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Quy Trình Xử Lý Khiếu Nại</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Hướng Dẫn Mua Hàng &amp; Thanh Toán</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-headline-sm font-bold text-on-surface text-sm mb-3">Bản Tin Tri Thức</h4>
+                <p class="mb-3 leading-relaxed">Đăng ký để nhận thông tin về sách mới tuyển chọn và mã giảm giá 15% độc quyền.</p>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="Email của bạn..." class="bg-surface-container-lowest px-3 py-2 rounded-xl text-xs flex-1 border border-surface-container focus:outline-none focus:ring-1 focus:ring-primary"/>
+                    <button class="px-4 py-2 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-all shadow-xs">Gửi</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-space-md md:px-margin-desktop mt-8 pt-4 border-t border-surface-container flex flex-col sm:flex-row justify-between items-center text-[11px] text-outline gap-2">
+            <p>© 2026 The4BookStore. Thiết kế chuẩn Forest Folio Design System.</p>
+            <div class="flex items-center gap-4">
+                <span>Chuẩn thanh toán PCI DSS 100%</span>
+                <span>Giao hàng 24h</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

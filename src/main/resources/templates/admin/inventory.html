@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Danh Mục & Kho Sách')}">
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('inventory')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full">
+
+                <!-- Ambient Glow Behind Page Title -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Page Title & Micro Metrics Bento Strip -->
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+                        <div class="flex flex-col gap-space-xs">
+                            <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                                <span>VẬN HÀNH THE4BOOKSTORE</span>
+                                <span>/</span>
+                                <span class="text-primary font-semibold">KHO LƯU TRỮ</span>
+                            </div>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Danh Mục &amp; Kho Sách</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                                Quản lý siêu dữ liệu sách trực tiếp, theo dõi số lượng tồn kho thực tế và kiểm soát bảng giá niêm yết trên toàn hệ thống.
+                            </p>
+                        </div>
+
+                        <!-- Micro Metric Bento Strip -->
+                        <div class="flex items-center gap-space-sm flex-wrap">
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">auto_stories</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG TỰA SÁCH</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${#lists.size(books)}">1.420</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">production_quantity_limits</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">SẮP HẾT HÀNG</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-secondary tabular-nums" th:text="${lowStockCount} ?: '0'">18</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-error-container flex items-center justify-center text-error shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">warning</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">HẾT HÀNG</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-error tabular-nums" th:text="${outOfStockCount} ?: '0'">7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Toolbar Surface -->
+                    <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm mb-space-md flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-space-md border border-surface-container/60">
+                        <!-- Left Filters Group -->
+                        <div class="flex flex-wrap items-center gap-space-sm flex-1">
+                            <!-- Live Search Field -->
+                            <div class="relative flex-1 min-w-[260px] max-w-md">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+                                <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="catalogSearchInput" placeholder="Tìm theo tiêu đề, tác giả, ISBN-13..." type="text"/>
+                            </div>
+                            <!-- Category Dropdown Filter -->
+                            <div class="relative">
+                                <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="categoryFilter">
+                                    <option value="all">Tất cả danh mục</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.maDanhMuc}" th:text="${cat.tenDanhMuc}">Văn học</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                            </div>
+                            <!-- Stock Status Dropdown Filter -->
+                            <div class="relative">
+                                <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="stockFilter">
+                                    <option value="all">Tất cả trạng thái kho</option>
+                                    <option value="in_stock">Còn Hàng (&gt; 5 cuốn)</option>
+                                    <option value="low_stock">Sắp Hết (&le; 5 cuốn)</option>
+                                    <option value="out_of_stock">Hết Hàng (0 cuốn)</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                            </div>
+                            <button class="text-on-surface-variant hover:text-primary px-3 py-2 rounded-xl hover:bg-surface-container transition-colors flex items-center gap-1 font-label-sm text-label-sm" onclick="resetFilters()" title="Đặt lại bộ lọc" type="button">
+                                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                                <span>Đặt lại</span>
+                            </button>
+                        </div>
+
+                        <!-- Right Actions Group -->
+                        <div class="flex items-center gap-space-sm flex-wrap self-end xl:self-auto">
+                            <!-- Add Book CTA -->
+                            <button class="bg-primary-container text-on-primary hover:bg-primary px-space-md py-2.5 rounded-xl font-label-md text-label-md font-bold flex items-center gap-space-xs shadow-sm transition-all transform active:scale-95" onclick="openBookModal('add')" type="button">
+                                <span class="material-symbols-outlined text-[18px]">add_box</span>
+                                <span>Thêm Sách Mới</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Batch Action Toolbar (Hidden by default) -->
+                    <div id="batchActionToolbar" class="hidden bg-primary text-on-primary p-space-sm rounded-xl mb-space-md flex items-center justify-between shadow-md">
+                        <div class="flex items-center gap-space-md pl-space-xs">
+                            <span id="selectedCountLabel" class="font-label-md font-bold">Đã chọn 0 tựa sách</span>
+                        </div>
+                        <div class="flex items-center gap-space-sm">
+                            <button class="bg-surface-container-lowest text-on-surface px-3 py-1.5 rounded-lg text-label-sm font-semibold hover:bg-surface-container transition-colors shadow-sm">
+                                Xuất danh sách đã chọn
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Data Table Container -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden mb-space-md border border-surface-container/60">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left" id="booksInventoryTable">
+                                <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-space-md w-12 text-center" scope="col">
+                                            <input class="w-4 h-4 rounded text-primary focus:ring-0 accent-primary cursor-pointer" id="selectAllCheckbox" onchange="toggleSelectAll(this)" type="checkbox"/>
+                                        </th>
+                                        <th class="py-3 px-space-sm w-24" scope="col">MÃ SÁCH</th>
+                                        <th class="py-3 px-space-sm w-16" scope="col">BÌA</th>
+                                        <th class="py-3 px-space-md" scope="col">TIÊU ĐỀ, TÁC GIẢ &amp; ISBN</th>
+                                        <th class="py-3 px-space-md" scope="col">THỂ LOẠI</th>
+                                        <th class="py-3 px-space-md w-48" scope="col">TỒN KHO</th>
+                                        <th class="py-3 px-space-md text-right w-36" scope="col">GIÁ NIÊM YẾT</th>
+                                        <th class="py-3 px-space-md w-36" scope="col">TRẠNG THÁI</th>
+                                        <th class="py-3 px-space-md text-center w-28" scope="col">THAO TÁC</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface" id="inventoryTableBody">
+                                    
+                                    <!-- Fallback empty state -->
+                                    <tr th:if="${#lists.isEmpty(books)}">
+                                        <td colspan="9" class="py-8 text-center text-on-surface-variant">
+                                            Chưa có dữ liệu sách trong hệ thống. Nhấp "Thêm Sách Mới" để bắt đầu.
+                                        </td>
+                                    </tr>
+
+                                    <!-- Dynamic Rows -->
+                                    <tr th:each="b : ${books}" 
+                                        class="hover:bg-surface-container-low/60 transition-colors group" 
+                                        th:attr="data-title=${b.tenSP?.toLowerCase()}, data-isbn=${b.ISBN}, data-category=${b.danhMuc?.maDanhMuc}, data-status=${b.soLuongTon == 0 ? 'out_of_stock' : (b.soLuongTon <= 5 ? 'low_stock' : 'in_stock')}">
+                                        
+                                        <td class="py-3 px-space-md text-center">
+                                            <input class="row-checkbox w-4 h-4 rounded text-primary accent-primary cursor-pointer" type="checkbox"/>
+                                        </td>
+                                        
+                                        <td class="py-3 px-space-sm font-label-sm text-label-sm font-bold text-on-surface-variant font-mono" th:text="'#BK-' + ${b.maSP}">
+                                            #BK-001
+                                        </td>
+
+                                        <td class="py-3 px-space-sm">
+                                            <div class="w-11 h-16 bg-surface-container rounded-lg overflow-hidden shadow-sm flex-shrink-0">
+                                                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
+                                                     th:src="${b.moTa != null && b.moTa.startsWith('http') ? b.moTa : 'https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y'}" 
+                                                     alt="Bìa sách"/>
+                                            </div>
+                                        </td>
+
+                                        <td class="py-3 px-space-md">
+                                            <div class="flex flex-col">
+                                                <span class="font-headline-sm text-headline-sm font-semibold text-on-surface group-hover:text-primary transition-colors" th:text="${b.tenSP}">
+                                                    Tên tác phẩm
+                                                </span>
+                                                <span class="font-body-sm text-body-sm text-on-surface-variant">The4BookStore Ed.</span>
+                                                <span class="font-label-sm text-label-sm text-on-surface-variant/80 font-mono mt-0.5" th:text="'ISBN: ' + (${b.ISBN} ?: 'N/A')">
+                                                    ISBN: 978-0525559474
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td class="py-3 px-space-md">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-label-sm font-medium bg-surface-container text-on-surface" th:text="${b.danhMuc != null ? b.danhMuc.tenDanhMuc : 'Chung'}">
+                                                Tiểu thuyết
+                                            </span>
+                                        </td>
+
+                                        <td class="py-3 px-space-md">
+                                            <div class="flex flex-col gap-1 w-32">
+                                                <div class="flex items-center justify-between text-body-sm font-mono">
+                                                    <span class="font-bold text-on-surface" th:text="${b.soLuongTon} + ' bản'">25 bản</span>
+                                                </div>
+                                                <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+                                                    <div class="h-full rounded-full transition-all duration-300" 
+                                                         th:classappend="${b.soLuongTon == 0 ? 'bg-error' : (b.soLuongTon <= 5 ? 'bg-secondary' : 'bg-primary')}" 
+                                                         th:style="'width: ' + (${b.soLuongTon} > 50 ? 100 : ${b.soLuongTon} * 2) + '%'"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-right font-mono font-bold text-on-surface" th:text="${#numbers.formatDecimal(b.giaBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                            150.000 đ
+                                        </td>
+
+                                        <td class="py-3 px-space-md">
+                                            <span th:if="${b.soLuongTon > 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-primary bg-primary-fixed/30 px-2.5 py-0.5 rounded-full">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                                Còn Hàng
+                                            </span>
+                                            <span th:if="${b.soLuongTon > 0 && b.soLuongTon <= 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-secondary bg-secondary-fixed/40 px-2.5 py-0.5 rounded-full">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                                Sắp Hết
+                                            </span>
+                                            <span th:if="${b.soLuongTon == 0}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-error bg-error-container/60 px-2.5 py-0.5 rounded-full">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                                Hết Hàng
+                                            </span>
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-center">
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" 
+                                                        th:data-masp="${b.maSP}"
+                                                        th:data-tensp="${b.tenSP}"
+                                                        th:data-isbn="${b.ISBN}"
+                                                        th:data-danhmuc="${b.danhMuc != null ? b.danhMuc.maDanhMuc : ''}"
+                                                        th:data-soluong="${b.soLuongTon}"
+                                                        th:data-giaban="${b.giaBan}"
+                                                        onclick="editBook(this)" 
+                                                        title="Chỉnh sửa bản ghi" 
+                                                        type="button">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </button>
+                                                
+                                                <form th:action="@{'/admin/books/delete/' + ${b.maSP}}" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tựa sách này?');">
+                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Xóa sách" type="submit">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Slide-over Drawer / Modal for Book Details (Add / Edit) Fragment -->
+            <div th:replace="~{fragments/admin/book_drawer :: book_drawer(${categories})}"></div>
+
+            <!-- Operational Toast Alert Container -->
+            <div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-space-sm px-space-md py-3 rounded-xl shadow-xl bg-inverse-surface text-inverse-on-surface font-label-md text-label-md" id="statusToast">
+                <span class="material-symbols-outlined text-primary-fixed text-[20px]" id="toastIcon">check_circle</span>
+                <span id="toastMessage">Bản ghi danh mục đã được cập nhật thành công.</span>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Client-side Interactive Filter & Drawer Script -->
+    <script>
+        const searchInput = document.getElementById('catalogSearchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const stockFilter = document.getElementById('stockFilter');
+        const tableRows = document.querySelectorAll('#inventoryTableBody tr');
+        const quickEditModal = document.getElementById('quickEditModal');
+        const modalDrawerTitle = document.getElementById('modalDrawerTitle');
+        const modalMaSP = document.getElementById('modalMaSP');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalIsbn = document.getElementById('modalIsbn');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalStock = document.getElementById('modalStock');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalMoTa = document.getElementById('modalMoTa');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const batchActionToolbar = document.getElementById('batchActionToolbar');
+        const selectedCountLabel = document.getElementById('selectedCountLabel');
+        const statusToast = document.getElementById('statusToast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        function filterCatalog() {
+            const query = searchInput.value.toLowerCase().trim();
+            const catVal = categoryFilter.value;
+            const stockVal = stockFilter.value;
+
+            tableRows.forEach(row => {
+                const title = row.getAttribute('data-title') || '';
+                const isbn = row.getAttribute('data-isbn') || '';
+                const rowCat = row.getAttribute('data-category') || '';
+                const rowStatus = row.getAttribute('data-status') || '';
+
+                const matchesSearch = query === '' || title.includes(query) || isbn.includes(query);
+                const matchesCategory = catVal === 'all' || rowCat === catVal;
+                const matchesStock = stockVal === 'all' || rowStatus === stockVal;
+
+                if (matchesSearch && matchesCategory && matchesStock) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterCatalog);
+        if (categoryFilter) categoryFilter.addEventListener('change', filterCatalog);
+        if (stockFilter) stockFilter.addEventListener('change', filterCatalog);
+
+        function resetFilters() {
+            if (searchInput) searchInput.value = '';
+            if (categoryFilter) categoryFilter.value = 'all';
+            if (stockFilter) stockFilter.value = 'all';
+            filterCatalog();
+            showToast('Bộ lọc đã được đặt lại về mặc định.');
+        }
+
+        function updateBatchToolbar() {
+            const checked = document.querySelectorAll('.row-checkbox:checked');
+            if (checked.length > 0) {
+                batchActionToolbar.classList.remove('hidden');
+                selectedCountLabel.textContent = `Đã chọn ${checked.length} tựa sách`;
+            } else {
+                batchActionToolbar.classList.add('hidden');
+            }
+        }
+
+        function toggleSelectAll(master) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => {
+                if (!cb.closest('tr').classList.contains('hidden')) {
+                    cb.checked = master.checked;
+                }
+            });
+            updateBatchToolbar();
+        }
+
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const all = document.querySelectorAll('.row-checkbox');
+                const checked = document.querySelectorAll('.row-checkbox:checked');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = checked.length === all.length && all.length > 0;
+                }
+                updateBatchToolbar();
+            });
+        });
+
+        function openBookModal(mode) {
+            if (mode === 'add') {
+                modalDrawerTitle.textContent = 'Thêm Tựa Sách Mới';
+                modalMaSP.value = '';
+                modalTitle.value = '';
+                modalIsbn.value = '978-';
+                modalStock.value = '25';
+                modalPrice.value = '150000';
+                modalMoTa.value = '';
+            }
+            quickEditModal.classList.remove('hidden');
+        }
+
+        function editBook(button) {
+            modalDrawerTitle.textContent = 'Chỉnh Sửa Sách: ' + button.getAttribute('data-tensp');
+            modalMaSP.value = button.getAttribute('data-masp') || '';
+            modalTitle.value = button.getAttribute('data-tensp') || '';
+            modalIsbn.value = button.getAttribute('data-isbn') || '';
+            modalCategory.value = button.getAttribute('data-danhmuc') || '';
+            modalStock.value = button.getAttribute('data-soluong') || '0';
+            modalPrice.value = button.getAttribute('data-giaban') || '0';
+            quickEditModal.classList.remove('hidden');
+        }
+
+        function closeBookModal() {
+            quickEditModal.classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            if (!statusToast) return;
+            toastMessage.textContent = msg;
+            statusToast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                statusToast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // Open modal automatically if query param openModal is true
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openModal') === 'true') {
+            openBookModal('add');
+        }
+    </script>
+</body>
+</html>

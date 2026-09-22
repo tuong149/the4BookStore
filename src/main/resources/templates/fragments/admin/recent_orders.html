@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Recent Orders Table Fragment for Dashboard -->
+    <div th:fragment="recent_orders" class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm border border-surface-container space-y-space-md">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-space-xs">
+                <span class="material-symbols-outlined text-primary text-[22px]">receipt_long</span>
+                <h3 class="font-headline-sm text-sm md:text-base font-bold text-on-surface">Đơn Hàng Gần Đây</h3>
+            </div>
+            <a href="#" class="text-xs text-primary hover:underline font-semibold flex items-center gap-0.5">
+                <span>Xem tất cả</span>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-surface-container-low text-on-surface-variant font-bold">
+                    <tr>
+                        <th class="p-3 rounded-l-xl">Mã Đơn</th>
+                        <th class="p-3">Khách Hàng</th>
+                        <th class="p-3">Số Lượng</th>
+                        <th class="p-3">Tổng Tiền</th>
+                        <th class="p-3">Thanh Toán</th>
+                        <th class="p-3 rounded-r-xl text-right">Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container-low">
+                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-primary">#DH-8492</td>
+                        <td class="p-3 font-medium">Nguyễn Văn An</td>
+                        <td class="p-3">3 cuốn</td>
+                        <td class="p-3 font-mono font-bold">475.150 đ</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[11px]">Chuyển khoản</span></td>
+                        <td class="p-3 text-right"><span class="px-2.5 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-bold text-[11px]">Đã giao</span></td>
+                    </tr>
+                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-primary">#DH-8491</td>
+                        <td class="p-3 font-medium">Trần Thị Bích</td>
+                        <td class="p-3">1 cuốn</td>
+                        <td class="p-3 font-mono font-bold">189.000 đ</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-bold text-[11px]">COD</span></td>
+                        <td class="p-3 text-right"><span class="px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary font-bold text-[11px]">Đang giao</span></td>
+                    </tr>
+                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-primary">#DH-8490</td>
+                        <td class="p-3 font-medium">Lê Hoàng Nam</td>
+                        <td class="p-3">2 cuốn</td>
+                        <td class="p-3 font-mono font-bold">370.000 đ</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[11px]">Ví điện tử</span></td>
+                        <td class="p-3 text-right"><span class="px-2.5 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-bold text-[11px]">Đã thanh toán</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

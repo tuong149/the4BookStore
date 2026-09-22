@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Order Summary & Voucher Fragment (4 Cols on Desktop) -->
+    <aside th:fragment="order_summary" class="w-full lg:col-span-4 flex flex-col gap-space-md">
+        <!-- Promo Code Box -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm border border-surface-container">
+            <h2 class="font-headline-sm text-sm font-bold text-on-surface mb-space-sm flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-secondary text-[20px]">loyalty</span>
+                <span>Mã Giảm Giá &amp; Khuyến Mãi</span>
+            </h2>
+            <div class="flex gap-2">
+                <input class="bg-surface-container-low px-space-sm py-2 rounded-xl font-body-md text-xs md:text-sm text-on-surface flex-1 focus:outline-none placeholder:text-on-surface-variant uppercase font-mono border border-surface-container" id="voucherCode" placeholder="THE4BOOK15" type="text"/>
+                <button class="bg-primary text-on-primary font-label-md text-xs font-bold px-space-md py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm cursor-pointer" onclick="applyVoucher()" type="button">
+                    Áp Dụng
+                </button>
+            </div>
+            <div class="mt-2 text-xs text-primary hidden items-center gap-1" id="voucherSuccessMsg">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span id="voucherSuccessText">Đã kích hoạt ưu đãi giảm 15% cho đơn hàng.</span>
+            </div>
+        </div>
+
+        <!-- Order Summary Card -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm border border-surface-container flex flex-col gap-space-sm">
+            <h2 class="font-headline-sm text-base font-bold text-on-surface pb-space-xs border-b border-surface-container">
+                Tóm Tắt Đơn Hàng
+            </h2>
+
+            <div class="flex justify-between text-xs md:text-sm text-on-surface-variant">
+                <span id="summaryItemCount">Tạm tính (3 cuốn)</span>
+                <span class="font-mono text-on-surface font-semibold" id="summarySubtotal">559.000 đ</span>
+            </div>
+
+            <div class="flex justify-between text-xs md:text-sm text-on-surface-variant">
+                <span id="summaryDiscountLabel">Giảm giá voucher</span>
+                <span class="font-mono text-primary font-semibold" id="summaryDiscount">0 đ</span>
+            </div>
+
+            <div class="flex justify-between text-xs md:text-sm text-on-surface-variant">
+                <span>Phí vận chuyển</span>
+                <span class="font-mono text-primary font-semibold" id="summaryShippingFee">Miễn Phí</span>
+            </div>
+
+            <div class="pt-space-xs border-t border-surface-container flex justify-between items-center">
+                <span class="font-headline-sm text-sm font-bold text-on-surface">Tổng Thanh Toán</span>
+                <span class="font-headline-xl text-xl font-bold text-primary font-mono" id="summaryTotal">559.000 đ</span>
+            </div>
+
+            <button class="w-full mt-space-sm py-3 bg-secondary text-on-secondary font-headline-sm text-sm font-bold rounded-xl hover:bg-amber-700 transition-all shadow-md flex items-center justify-center gap-space-xs cursor-pointer active:scale-[0.99]" onclick="openCheckoutModal()" type="button" id="btnProceedCheckout">
+                <span class="material-symbols-outlined text-[20px]">lock</span>
+                <span>Tiến Hành Thanh Toán</span>
+            </button>
+
+            <div class="mt-space-xs flex flex-col gap-1 text-[11px] text-on-surface-variant pt-2 border-t border-surface-container">
+                <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+                    <span>Bảo mật thanh toán chuẩn PCI DSS 100%</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-primary text-[16px]">autorenew</span>
+                    <span>Đổi trả miễn phí trong vòng 7 ngày làm việc</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</body>
+</html>
