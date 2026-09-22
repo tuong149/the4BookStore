@@ -24,7 +24,8 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "QUANLY")
                 .requestMatchers("/kho/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENKHO")
                 .requestMatchers("/ban-hang/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENBANHANG")
-                .requestMatchers("/khach-hang/**", "/gio-hang/**", "/thanh-toan/**").hasAnyRole("KHACHHANG")
+                .requestMatchers("/khach-hang/**", "/thanh-toan/**").hasAnyRole("KHACHHANG")
+                .requestMatchers("/gio-hang/**").permitAll()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form

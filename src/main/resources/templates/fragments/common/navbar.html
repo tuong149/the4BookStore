@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+    <!-- Common Storefront Navigation Fragment -->
+    <header th:fragment="common_navbar(activePage)" class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <!-- Top Announce Bar -->
+        <div class="bg-primary px-space-md py-1 text-center text-xs font-semibold text-on-primary tracking-wide">
+            <span>✨ Ưu đãi đặc biệt: Miễn phí vận chuyển hỏa tốc toàn quốc cho đơn hàng từ 350.000 đ!</span>
+        </div>
+
+        <div class="h-24 max-w-7xl mx-auto px-space-md md:px-margin-desktop flex flex-col justify-between py-space-xs">
+            <!-- Top Row: Logo, Live Search, Right Actions -->
+            <div class="flex items-center justify-between gap-space-md pt-space-xs">
+                <!-- Brand Logo -->
+                <a class="flex items-center gap-space-sm shrink-0" th:href="@{/}">
+                    <img alt="The4BookStore Logo" class="h-9 w-auto object-contain" th:src="@{/images/logo.svg}"/>
+                </a>
+
+                <!-- Live Search Bar -->
+                <div class="flex-1 max-w-2xl mx-space-md hidden sm:flex items-center bg-surface-container-low rounded-2xl px-space-md py-1.5 shadow-inner">
+                    <button class="flex items-center gap-1 text-on-surface-variant font-label-md text-xs px-space-xs py-1 hover:text-on-surface transition-colors" type="button">
+                        <span class="material-symbols-outlined text-[18px]">category</span>
+                        <span>Thể loại</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+                    </button>
+                    <div class="h-4 w-[1px] bg-outline-variant mx-space-xs"></div>
+                    <div class="flex-1 flex items-center gap-space-xs px-space-xs">
+                        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+                        <input class="w-full bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant focus:outline-none font-body-md text-xs md:text-sm" placeholder="Tìm kiếm theo Tên sách, Tác giả hoặc mã ISBN..." type="text"/>
+                    </div>
+                </div>
+
+                <!-- Right Actions: Admin Link, Cart, User Auth Status -->
+                <div class="flex items-center gap-space-md shrink-0">
+                    <!-- Quick Admin Button (Visible for Admin or Staff) -->
+                    <a sec:authorize="hasAnyRole('ADMIN', 'QUANLY')" th:href="@{/admin/dashboard}" class="inline-flex items-center gap-1 px-space-sm py-2 rounded-xl bg-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-high transition-colors shadow-sm">
+                        <span class="material-symbols-outlined text-[18px] text-primary">admin_panel_settings</span>
+                        <span>Quản Trị</span>
+                    </a>
+
+                    <!-- Cart CTA -->
+                    <a th:href="@{/gio-hang}" class="relative p-2 text-on-surface-variant hover:text-on-surface rounded-xl hover:bg-surface-container transition-colors" title="Giỏ hàng của bạn">
+                        <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 font-label-sm text-[10px] font-bold bg-secondary text-on-secondary rounded-full transform translate-x-1 -translate-y-1">3</span>
+                    </a>
+
+                    <!-- Not Logged In -->
+                    <th:block sec:authorize="!isAuthenticated()">
+                        <div class="flex items-center gap-space-xs">
+                            <a th:href="@{/login}" class="px-3.5 py-2 text-xs font-semibold text-primary hover:bg-surface-container rounded-xl transition-colors">Đăng Nhập</a>
+                            <a th:href="@{/register}" class="px-3.5 py-2 text-xs font-bold bg-primary-container text-on-primary hover:bg-primary rounded-xl shadow-sm transition-colors">Đăng Ký</a>
+                        </div>
+                    </th:block>
+
+                    <!-- Logged In Dropdown -->
+                    <th:block sec:authorize="isAuthenticated()">
+                        <div class="flex items-center gap-space-xs pl-space-xs">
+                            <img alt="Tài khoản" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 shadow-sm" th:src="@{/images/manager-avatar.png}"/>
+                            <span class="font-label-md text-on-surface text-xs font-semibold hidden md:inline" sec:authentication="name">User</span>
+                            <form th:action="@{/logout}" method="post" class="inline">
+                                <button type="submit" class="p-1.5 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container transition-colors ml-1" title="Đăng xuất">
+                                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Navigation Menu Links -->
+            <nav class="flex items-center gap-space-lg overflow-x-auto pb-1 font-label-md text-xs">
+                <a th:href="@{/}" th:class="${activePage == 'home'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Trang Chủ</a>
+                <a th:href="@{/#bestsellers-grid}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Sách Bán Chạy</a>
+                <a th:href="@{/#categories}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Danh Mục Thể Loại</a>
+                <a th:href="@{/gio-hang}" th:class="${activePage == 'cart'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Giỏ Hàng &amp; Thanh Toán</a>
+                <a sec:authorize="hasAnyRole('ADMIN', 'QUANLY')" th:href="@{/admin/books}" class="text-primary hover:text-primary-container font-semibold py-1 transition-colors">Quản Lý Kho Sách</a>
+            </nav>
+        </div>
+    </header>
+
+</body>
+</html>

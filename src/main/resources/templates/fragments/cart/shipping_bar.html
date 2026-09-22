@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Free Shipping Progress Bar Fragment -->
+    <div th:fragment="shipping_bar" class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm border border-surface-container">
+        <div class="flex items-center justify-between mb-space-xs">
+            <div class="flex items-center gap-space-xs">
+                <span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+                <span class="font-label-md text-label-md font-semibold text-on-surface">Chính Sách Vận Chuyển The4BookStore</span>
+            </div>
+            <span class="font-label-sm text-label-sm font-medium text-primary" id="shipping-threshold-text">
+                Bạn đã đủ điều kiện nhận <strong>MIỄN PHÍ VẬN CHUYỂN HỎA TỐC!</strong>
+            </span>
+        </div>
+        <div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+            <div id="shipping-progress-bar" class="bg-primary h-full rounded-full transition-all duration-500 ease-out" style="width: 100%;"></div>
+        </div>
+        <div class="flex justify-between items-center mt-2 font-body-sm text-xs text-on-surface-variant">
+            <span>Tạm tính giỏ: <strong class="text-on-surface font-semibold" id="bar-subtotal">559.000 đ</strong></span>
+            <span>Mức Freeship: <strong class="text-on-surface font-semibold">350.000 đ</strong></span>
+        </div>
+    </div>
+
+</body>
+</html>

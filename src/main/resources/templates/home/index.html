@@ -1,69 +1,160 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - the4BookStore</title>
-    <link rel="stylesheet" th:href="@{/css/home.css}">
-</head>
-<body>
+<head th:replace="~{fragments/common/head :: common_head('The4BookStore - Nhà Sách Trực Tuyến Tuyển Chọn')}"></head>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <a href="/" class="logo">the4BookStore</a>
-        <div class="nav-links">
-            <a href="/">Trang Chủ</a>
-            <a href="/sach">Kho Sách</a>
-            <a href="/gio-hang">Giỏ Hàng</a>
-            
-            <!-- Chưa đăng nhập -->
-            <th:block sec:authorize="!isAuthenticated()">
-                <a th:href="@{/login}" class="btn-login">Đăng Nhập</a>
-                <a th:href="@{/register}" class="btn-register">Đăng Ký</a>
-            </th:block>
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
-            <!-- Đã đăng nhập -->
-            <th:block sec:authorize="isAuthenticated()">
-                <div class="user-profile">
-                    Xin chào, <span th:text="${username}"></span>!
-                    <form th:action="@{/logout}" method="post" style="display:inline;">
-                        <button type="submit" class="btn-logout" style="border:none; cursor:pointer;">Đăng xuất</button>
-                    </form>
+    <!-- Storefront Common Header Navigation Fragment -->
+    <header th:replace="~{fragments/common/navbar :: common_navbar('home')}"></header>
+
+    <!-- Main Storefront Content -->
+    <main class="w-full pt-28 bg-background flex-1">
+        <div class="flex flex-col w-full">
+
+            <!-- 1. HERO SPOTLIGHT SECTION -->
+            <section class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+                <div class="bg-gradient-to-br from-surface-container-low via-surface to-surface-container-high rounded-3xl p-space-lg md:p-space-xl border border-surface-container shadow-sm relative overflow-hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center relative z-10">
+                        
+                        <!-- Left Hero Column (7 cols) -->
+                        <div class="lg:col-span-7 flex flex-col gap-space-md">
+                            <div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-primary/10 text-primary font-label-sm text-xs font-bold w-fit">
+                                <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                                <span>Lễ Hội Sách Tuyển Chọn Mùa Thu 2026</span>
+                            </div>
+
+                            <h1 class="font-headline-xl text-3xl sm:text-5xl font-extrabold text-on-surface tracking-tight leading-[1.15]">
+                                Nơi Mỗi Trang Sách<br/>
+                                Là Một <span class="text-primary underline decoration-secondary decoration-4">Hành Trình Mới</span>
+                            </h1>
+
+                            <p class="font-body-lg text-sm sm:text-base text-on-surface-variant max-w-xl leading-relaxed">
+                                Tuyển tập hơn 10.000+ ấn bản chọn lọc từ những tác giả và nhà xuất bản uy tín nhất. Ưu đãi độc quyền giảm đến 35% cùng chính sách giao nhanh hỏa tốc.
+                            </p>
+
+                            <!-- Hero CTA & Bento Micro Widgets -->
+                            <div class="pt-space-xs flex flex-wrap items-center gap-space-md">
+                                <a href="#bestsellers-grid" class="px-space-lg py-3 rounded-xl bg-primary text-on-primary font-headline-sm text-xs font-bold hover:bg-primary-container transition-all shadow-md flex items-center gap-space-xs">
+                                    <span>Khám Phá Sách Bán Chạy</span>
+                                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                </a>
+                                <a th:href="@{/gio-hang}" class="px-space-md py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-xs font-semibold transition-colors flex items-center gap-space-xs">
+                                    <span class="material-symbols-outlined text-[18px] text-primary">shopping_bag</span>
+                                    <span>Xem Giỏ Hàng</span>
+                                </a>
+                            </div>
+
+                            <!-- Bento Metric Widgets -->
+                            <div class="grid grid-cols-3 gap-space-sm pt-space-md border-t border-surface-container/60 mt-space-xs">
+                                <div class="flex flex-col bg-surface-container-lowest/80 backdrop-blur-sm p-3 rounded-2xl border border-surface-container/60 shadow-xs">
+                                    <span class="font-headline-lg text-lg font-bold text-primary font-mono">10.000+</span>
+                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Đầu sách tuyển chọn</span>
+                                </div>
+                                <div class="flex flex-col bg-surface-container-lowest/80 backdrop-blur-sm p-3 rounded-2xl border border-surface-container/60 shadow-xs">
+                                    <span class="font-headline-lg text-lg font-bold text-secondary font-mono">100%</span>
+                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Sách thật chính hãng</span>
+                                </div>
+                                <div class="flex flex-col bg-surface-container-lowest/80 backdrop-blur-sm p-3 rounded-2xl border border-surface-container/60 shadow-xs">
+                                    <span class="font-headline-lg text-lg font-bold text-tertiary font-mono">24 Giờ</span>
+                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Giao hàng hỏa tốc</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Hero Column: Featured Book Spotlight (5 cols) -->
+                        <div class="lg:col-span-5 flex justify-center items-center">
+                            <div class="relative group">
+                                <div class="absolute -inset-4 bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-700"></div>
+                                <div class="relative w-56 sm:w-64 aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl bg-surface-container border-2 border-white/50">
+                                    <img alt="The Midnight Library" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y"/>
+                                    <div class="absolute bottom-3 inset-x-3 bg-on-surface/85 backdrop-blur-md rounded-2xl p-space-sm text-on-primary">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="font-label-sm text-[10px] text-primary-fixed font-bold uppercase">Sách Nổi Bật Tháng</p>
+                                                <h4 class="font-headline-sm text-xs font-bold truncate">The Midnight Library</h4>
+                                            </div>
+                                            <span class="font-mono text-xs font-bold text-secondary-fixed">189.000 đ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </th:block>
-        </div>
-    </nav>
+            </section>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Khám Phá Thế Giới Qua <span>Từng Trang Sách</span></h1>
-            <p>Tuyển tập những tác phẩm văn học kinh điển, sách chuyên ngành và sách kỹ năng sống được chọn lọc kỹ càng nhất.</p>
-            <a href="#featured" class="btn-explore">Khám Phá Ngay</a>
-        </div>
-    </section>
+            <!-- 2. BEST-SELLERS GRID SECTION -->
+            <section class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg" id="bestsellers-grid">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-lg gap-space-xs">
+                    <div>
+                        <div class="inline-flex items-center gap-1 text-primary font-label-sm text-xs font-bold mb-1">
+                            <span class="material-symbols-outlined text-[16px]">local_fire_department</span>
+                            <span>Được Độc Giả Yêu Thích Nhất</span>
+                        </div>
+                        <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
+                            Sách Tuyển Chọn Bán Chạy
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-xs text-on-surface-variant">Sắp xếp theo:</span>
+                        <select class="bg-surface-container-low border-0 rounded-xl px-space-sm py-1.5 font-label-md text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary">
+                            <option>Phổ biến nhất</option>
+                            <option>Mới phát hành</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- Featured Books -->
-    <section id="featured" class="section">
-        <h2 class="section-title">Sách Nổi Bật</h2>
-        
-        <div class="book-grid">
-            <!-- Hiển thị khi chưa có sách trong Database -->
-            <div th:if="${#lists.isEmpty(featuredBooks)}" class="empty-state">
-                <h3>Chưa có dữ liệu sách</h3>
-                <p>Vui lòng thêm sách từ trang Quản trị viên để hiển thị tại đây.</p>
-            </div>
+                <!-- Book Cards Grid Using Reusable Component -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
+                    <th:block th:each="book : ${featuredBooks}">
+                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                    </th:block>
+                </div>
+            </section>
 
-            <!-- Loop danh sách sách -->
-            <div class="book-card" th:each="book : ${featuredBooks}">
-                <img th:if="${null != null}" th:src="${null}" class="book-img" alt="Ảnh sách">
-                <div th:unless="${null != null}" class="book-img">Chưa có ảnh</div>
-                
-                <h3 class="book-title" th:text="${book.tenSP}">Tên sách</h3>
-                <div class="book-price" th:text="${#numbers.formatDecimal(book.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</div>
-            </div>
+            <!-- 3. INDEPENDENT BOOKSTORE BENEFITS -->
+            <section class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+                    <div class="bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm flex items-start gap-space-md">
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">verified</span>
+                        </div>
+                        <div>
+                            <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Ấn Bản Chọn Lọc 100%</h3>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Mỗi tựa sách đều được đội ngũ The4BookStore đọc thử và kiểm định chất lượng nội dung.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm flex items-start gap-space-md">
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">package_2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Đóng Gói Chuyên Nghiệp</h3>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Bọc màng co và hộp carton cứng cáp 3 lớp, kèm theo bookmark độc quyền bảo vệ mép sách.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm flex items-start gap-space-md">
+                        <div class="w-12 h-12 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">support_agent</span>
+                        </div>
+                        <div>
+                            <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Tư Vấn Tận Tâm 24/7</h3>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Đội ngũ thủ thư đam mê đọc sách sẵn sàng gợi ý tựa sách phù hợp nhất cho bạn.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
-    </section>
+    </main>
+
+    <!-- Storefront Common Footer Fragment -->
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
 </body>
 </html>

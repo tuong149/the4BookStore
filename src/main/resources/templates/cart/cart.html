@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common/head :: common_head('The4BookStore - Giỏ Hàng &amp; Thanh Toán')}"></head>
+
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <!-- Storefront Common Header Navigation Fragment -->
+    <header th:replace="~{fragments/common/navbar :: common_navbar('cart')}"></header>
+
+    <!-- Main Cart Body -->
+    <main class="w-full pt-28 bg-background flex-1">
+        <div class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+            
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="Breadcrumb" class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-xs mb-space-lg">
+                <a class="hover:text-primary transition-colors flex items-center gap-1" th:href="@{/}">
+                    <span class="material-symbols-outlined text-[16px]">home</span>
+                    <span>Trang chủ</span>
+                </a>
+                <span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+                <span class="text-on-surface font-semibold">Giỏ hàng &amp; Thanh toán</span>
+            </nav>
+
+            <!-- Main Cart Layout Grid (12 cols) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+                
+                <!-- LEFT COLUMN: Cart Items & Shipping Bar (8 cols) -->
+                <section class="lg:col-span-8 flex flex-col gap-space-md">
+                    <!-- Header Strip -->
+                    <div class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm border border-surface-container flex items-center justify-between">
+                        <div class="flex items-center gap-space-sm">
+                            <span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
+                            <h1 class="font-headline-md text-base md:text-lg text-on-surface font-bold tracking-tight">Giỏ Hàng Của Bạn</h1>
+                            <span class="bg-surface-container px-2.5 py-0.5 rounded-full font-label-sm text-[11px] font-semibold text-on-surface-variant" id="cart-count-badge">3 sản phẩm</span>
+                        </div>
+                        <button class="text-error hover:text-on-error-container font-label-md text-xs font-medium transition-colors flex items-center gap-1 px-2.5 py-1 rounded-xl hover:bg-error/10" onclick="clearCart()" type="button">
+                            <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                            <span>Xóa tất cả</span>
+                        </button>
+                    </div>
+
+                    <!-- Free Shipping Incentive Bar Fragment -->
+                    <div th:replace="~{fragments/cart/shipping_bar :: shipping_bar}"></div>
+
+                    <!-- Cart Items List Container -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container overflow-hidden divide-y divide-surface-container-low" id="cart-items-container">
+                        
+                        <!-- Cart Item 1 -->
+                        <article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-1">
+                            <div class="flex gap-space-md items-start w-full sm:w-auto">
+                                <div class="w-16 h-24 sm:w-20 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-surface-container relative shadow-xs">
+                                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y" alt="The Midnight Library"/>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="bg-surface-container px-2.5 py-0.5 rounded-full font-label-sm text-[10px] font-semibold text-on-surface-variant">Tiểu thuyết</span>
+                                        <span class="text-tertiary font-label-sm text-[11px] font-semibold flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Còn hàng</span>
+                                    </div>
+                                    <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight">The Midnight Library</h3>
+                                    <span class="text-xs text-on-surface-variant">Matt Haig</span>
+                                    <div class="mt-2 text-primary font-bold font-mono text-sm sm:text-base">189.000 đ</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between sm:justify-end gap-space-lg w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-container-low">
+                                <!-- Quantity controller -->
+                                <div class="flex items-center border border-surface-container rounded-xl bg-surface-container-low overflow-hidden text-xs">
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-1', -1)">-</button>
+                                    <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-1">1</span>
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-1', 1)">+</button>
+                                </div>
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-1')" title="Xóa cuốn này">
+                                    <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                                </button>
+                            </div>
+                        </article>
+
+                        <!-- Cart Item 2 -->
+                        <article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-2">
+                            <div class="flex gap-space-md items-start w-full sm:w-auto">
+                                <div class="w-16 h-24 sm:w-20 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-surface-container relative shadow-xs">
+                                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0ZepDd_foKXu3i6ER1m8WWEdur0sxuw_PzY9MNfI4REnQ3rf6R_2Cm9EnfFAhXCPxQTTtVl4s2CrHSmtbVz08lHsAHDSiErKboS8Y4p5NQiHrun0Ek56kgIt1soK3hBbriVWEntfW_SHfXzkp7nmY2OyfVyfhAuJ50SpGyqZseN_277pw-RUdZgMOpRkN3ksmBAnBDCRnpGWTd3UWhZiP2GhZTpYd0mZ4A0F2WZ20z_Y2aCKwxl9w" alt="Atomic Habits"/>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="bg-surface-container px-2.5 py-0.5 rounded-full font-label-sm text-[10px] font-semibold text-on-surface-variant">Phát triển bản thân</span>
+                                        <span class="text-tertiary font-label-sm text-[11px] font-semibold flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Còn hàng</span>
+                                    </div>
+                                    <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight">Atomic Habits - Thay Đổi Tí Hon</h3>
+                                    <span class="text-xs text-on-surface-variant">James Clear</span>
+                                    <div class="mt-2 text-primary font-bold font-mono text-sm sm:text-base">220.000 đ</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between sm:justify-end gap-space-lg w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-container-low">
+                                <div class="flex items-center border border-surface-container rounded-xl bg-surface-container-low overflow-hidden text-xs">
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-2', -1)">-</button>
+                                    <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-2">1</span>
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-2', 1)">+</button>
+                                </div>
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-2')" title="Xóa cuốn này">
+                                    <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                                </button>
+                            </div>
+                        </article>
+
+                        <!-- Cart Item 3 -->
+                        <article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-3">
+                            <div class="flex gap-space-md items-start w-full sm:w-auto">
+                                <div class="w-16 h-24 sm:w-20 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-surface-container relative shadow-xs">
+                                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUSZ5dqoRMUTssXIap1lFtbGqNj76EO4_JpeLICxgK6i8RQ-b6FBevsmTpBNYLqOGOhEJmM72f7BeRd_P6wYVJ0WrTJJCFwjmrX7y4IYbT9cGZhUYpfZ41NtYpK8wDRUwUU5JolPlF4JYof0nf-Mnjr2hBZFwxagtPhNGSVfaR65hlzsL-oDdP7Q53Ww7C4vzv_B90IFfI-_FjyHy7V4wP5GHZfTpmShIiBp4oEL19xwu0tRaTGEgW" alt="Tâm Lý Học Về Tiền"/>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="bg-surface-container px-2.5 py-0.5 rounded-full font-label-sm text-[10px] font-semibold text-on-surface-variant">Tâm lý &amp; Tài chính</span>
+                                        <span class="text-tertiary font-label-sm text-[11px] font-semibold flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Còn hàng</span>
+                                    </div>
+                                    <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight">Tâm Lý Học Về Tiền</h3>
+                                    <span class="text-xs text-on-surface-variant">Morgan Housel</span>
+                                    <div class="mt-2 text-primary font-bold font-mono text-sm sm:text-base">150.000 đ</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between sm:justify-end gap-space-lg w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-container-low">
+                                <div class="flex items-center border border-surface-container rounded-xl bg-surface-container-low overflow-hidden text-xs">
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-3', -1)">-</button>
+                                    <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-3">1</span>
+                                    <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-3', 1)">+</button>
+                                </div>
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-3')" title="Xóa cuốn này">
+                                    <span class="material-symbols-outlined text-[20px]">delete_outline</span>
+                                </button>
+                            </div>
+                        </article>
+
+                    </div>
+                </section>
+
+                <!-- RIGHT COLUMN: Order Summary & Voucher Fragment (4 cols) -->
+                <aside class="w-full lg:col-span-4" th:replace="~{fragments/cart/order_summary :: order_summary}"></aside>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Checkout Modal Backdrop & Dialog -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-on-surface/50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-surface-container-lowest rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-surface-container max-h-[90vh] overflow-y-auto relative">
+            <!-- Close Button -->
+            <button onclick="closeCheckoutModal()" type="button" class="absolute top-5 right-5 p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors cursor-pointer">
+                <span class="material-symbols-outlined text-[22px]">close</span>
+            </button>
+
+            <!-- Step 1: Checkout Form -->
+            <div id="checkoutFormStep">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px]">local_mall</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-md text-lg font-bold text-on-surface">Thông Tin Thanh Toán &amp; Đặt Hàng</h3>
+                        <p class="font-body-sm text-xs text-on-surface-variant">Vui lòng kiểm tra địa chỉ và chọn phương thức thanh toán phù hợp</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handlePlaceOrder(event)" class="space-y-4">
+                    <!-- Customer Details -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Họ và tên người nhận <span class="text-error">*</span></label>
+                            <input id="checkoutName" required type="text" placeholder="Nguyễn Văn A" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Số điện thoại <span class="text-error">*</span></label>
+                            <input id="checkoutPhone" required type="tel" placeholder="0912 345 678" pattern="[0-9]{10,11}" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Email nhận thông báo</label>
+                            <input id="checkoutEmail" type="email" placeholder="example@email.com" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Tỉnh / Thành phố <span class="text-error">*</span></label>
+                            <select id="checkoutCity" required class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Khác">Tỉnh / Thành phố khác</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Địa chỉ chi tiết (Số nhà, tên đường, phường/xã) <span class="text-error">*</span></label>
+                        <input id="checkoutAddress" required type="text" placeholder="123 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                    </div>
+
+                    <div>
+                        <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Ghi chú giao hàng (Tùy chọn)</label>
+                        <input id="checkoutNote" type="text" placeholder="Giao hàng trong giờ hành chính, gọi trước khi giao..." class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="pt-2">
+                        <label class="block font-label-md text-xs font-semibold text-on-surface mb-2">Phương thức thanh toán <span class="text-error">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <label class="flex items-center gap-2.5 p-3 rounded-2xl border border-primary bg-primary/5 cursor-pointer transition-all">
+                                <input type="radio" name="paymentMethod" value="Tiền Mặt (COD)" checked class="text-primary focus:ring-primary" />
+                                <div class="text-left">
+                                    <div class="font-headline-sm text-xs font-bold text-on-surface">Tiền Mặt (COD)</div>
+                                    <div class="text-[10px] text-on-surface-variant">Trả tiền khi nhận hàng</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-3 rounded-2xl border border-surface-container hover:border-outline-variant cursor-pointer transition-all">
+                                <input type="radio" name="paymentMethod" value="VietQR Chuyển Khoản" class="text-primary focus:ring-primary" />
+                                <div class="text-left">
+                                    <div class="font-headline-sm text-xs font-bold text-on-surface">VietQR Nhanh</div>
+                                    <div class="text-[10px] text-on-surface-variant">Quét mã QR 30s</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-3 rounded-2xl border border-surface-container hover:border-outline-variant cursor-pointer transition-all">
+                                <input type="radio" name="paymentMethod" value="Ví VNPAY" class="text-primary focus:ring-primary" />
+                                <div class="text-left">
+                                    <div class="font-headline-sm text-xs font-bold text-on-surface">Ví VNPAY</div>
+                                    <div class="text-[10px] text-on-surface-variant">Bảo mật PCI DSS</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary Review in Modal -->
+                    <div class="bg-surface-container-low rounded-2xl p-4 mt-3 space-y-2 border border-surface-container text-xs">
+                        <div class="flex justify-between text-on-surface-variant">
+                            <span>Tạm tính tiền hàng:</span>
+                            <span id="modalSubtotal" class="font-mono font-semibold text-on-surface">559.000 đ</span>
+                        </div>
+                        <div class="flex justify-between text-on-surface-variant">
+                            <span>Giảm giá voucher:</span>
+                            <span id="modalDiscount" class="font-mono font-semibold text-primary">0 đ</span>
+                        </div>
+                        <div class="flex justify-between text-on-surface-variant">
+                            <span>Phí vận chuyển:</span>
+                            <span id="modalShipping" class="font-mono font-semibold text-primary">Miễn Phí</span>
+                        </div>
+                        <div class="pt-2 border-t border-surface-container flex justify-between items-center text-sm font-bold">
+                            <span class="text-on-surface">Tổng tiền cần thanh toán:</span>
+                            <span id="modalTotal" class="text-base font-headline-lg font-bold text-primary font-mono">559.000 đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="flex items-center justify-end gap-3 pt-4">
+                        <button type="button" onclick="closeCheckoutModal()" class="px-5 py-2.5 rounded-xl border border-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container transition-colors cursor-pointer">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" id="btnSubmitOrder" class="px-6 py-2.5 bg-primary text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-primary-container transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">verified</span>
+                            <span>Xác Nhận Đặt Hàng</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Order Success View -->
+            <div id="checkoutSuccessStep" class="hidden text-center py-6">
+                <div class="w-16 h-16 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-[36px]">check_circle</span>
+                </div>
+                <h3 class="font-headline-lg text-xl font-bold text-on-surface mb-2">Đặt Hàng Thành Công!</h3>
+                <p class="font-body-md text-xs text-on-surface-variant max-w-md mx-auto mb-6">
+                    Cảm ơn bạn đã tin tưởng mua sắm tại <strong>The4BookStore</strong>. Đơn hàng của bạn đã được ghi nhận và nhân viên sẽ liên hệ để xác nhận giao hàng.
+                </p>
+                <div class="bg-surface-container-low rounded-2xl p-4 text-xs space-y-2 border border-surface-container max-w-sm mx-auto mb-6 text-left">
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Mã đơn hàng:</span>
+                        <strong class="font-mono text-primary" id="successOrderCode">#T4B-88392</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Người nhận:</span>
+                        <strong class="text-on-surface" id="successCustomerName">Nguyễn Văn A</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Hình thức thanh toán:</span>
+                        <strong class="text-on-surface" id="successPaymentMethod">Tiền Mặt (COD)</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-on-surface-variant">Thời gian giao dự kiến:</span>
+                        <strong class="text-tertiary">24 - 48 Giờ làm việc</strong>
+                    </div>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <a th:href="@{/}" class="px-6 py-2.5 bg-primary text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-primary-container transition-all shadow-md">
+                        Tiếp Tục Mua Sắm
+                    </a>
+                    <button type="button" onclick="closeCheckoutModal()" class="px-5 py-2.5 rounded-xl border border-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container transition-colors cursor-pointer">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storefront Common Footer Fragment -->
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <!-- Cart Scripts -->
+    <script>
+        const cartState = {
+            items: [
+                { id: 'item-1', domId: 'cart-item-1', price: 189000, qty: 1 },
+                { id: 'item-2', domId: 'cart-item-2', price: 220000, qty: 1 },
+                { id: 'item-3', domId: 'cart-item-3', price: 150000, qty: 1 }
+            ],
+            voucher: null,
+            freeShippingThreshold: 350000,
+            standardShippingFee: 30000
+        };
+
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+        }
+
+        function calculateCart() {
+            const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const totalQty = cartState.items.reduce((sum, item) => sum + item.qty, 0);
+            const discount = cartState.voucher ? Math.round(subtotal * cartState.voucher.discountPercent) : 0;
+            const isFreeShipping = subtotal >= cartState.freeShippingThreshold || subtotal === 0;
+            const shippingFee = (subtotal === 0) ? 0 : (isFreeShipping ? 0 : cartState.standardShippingFee);
+            const total = Math.max(0, subtotal - discount + shippingFee);
+
+            return { subtotal, totalQty, discount, shippingFee, isFreeShipping, total };
+        }
+
+        function renderCart() {
+            const calc = calculateCart();
+
+            // Order summary elements
+            const subtotalEl = document.getElementById('summarySubtotal');
+            const itemCountEl = document.getElementById('summaryItemCount');
+            const discountEl = document.getElementById('summaryDiscount');
+            const discountLabelEl = document.getElementById('summaryDiscountLabel');
+            const shippingEl = document.getElementById('summaryShippingFee');
+            const totalEl = document.getElementById('summaryTotal');
+            const badgeCountEl = document.getElementById('cart-count-badge');
+            const proceedBtn = document.getElementById('btnProceedCheckout');
+
+            if (subtotalEl) subtotalEl.textContent = formatVND(calc.subtotal);
+            if (itemCountEl) itemCountEl.textContent = `Tạm tính (${calc.totalQty} cuốn)`;
+            if (discountEl) discountEl.textContent = calc.discount > 0 ? `-${formatVND(calc.discount)}` : '0 đ';
+            if (discountLabelEl) {
+                discountLabelEl.textContent = cartState.voucher ? `Giảm giá voucher (${Math.round(cartState.voucher.discountPercent * 100)}%)` : 'Giảm giá voucher';
+            }
+            if (shippingEl) {
+                shippingEl.textContent = calc.shippingFee === 0 ? 'Miễn Phí' : formatVND(calc.shippingFee);
+            }
+            if (totalEl) totalEl.textContent = formatVND(calc.total);
+            if (badgeCountEl) badgeCountEl.textContent = `${calc.totalQty} sản phẩm`;
+
+            // Free shipping bar elements
+            const barSubtotal = document.getElementById('bar-subtotal');
+            const progressBar = document.getElementById('shipping-progress-bar');
+            const shippingText = document.getElementById('shipping-threshold-text');
+
+            if (barSubtotal) barSubtotal.textContent = formatVND(calc.subtotal);
+            if (progressBar) {
+                const percent = calc.subtotal === 0 ? 0 : Math.min(100, Math.round((calc.subtotal / cartState.freeShippingThreshold) * 100));
+                progressBar.style.width = percent + '%';
+            }
+            if (shippingText) {
+                if (calc.subtotal >= cartState.freeShippingThreshold) {
+                    shippingText.innerHTML = 'Bạn đã đủ điều kiện nhận <strong>MIỄN PHÍ VẬN CHUYỂN HỎA TỐC!</strong>';
+                } else if (calc.subtotal > 0) {
+                    const remain = cartState.freeShippingThreshold - calc.subtotal;
+                    shippingText.innerHTML = `Mua thêm <strong>${formatVND(remain)}</strong> để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>`;
+                } else {
+                    shippingText.innerHTML = 'Miễn phí vận chuyển cho đơn hàng từ <strong>350.000 đ</strong>';
+                }
+            }
+
+            // Empty cart state
+            if (cartState.items.length === 0) {
+                const container = document.getElementById('cart-items-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
+                            <span class="material-symbols-outlined text-[64px] text-outline-variant">remove_shopping_cart</span>
+                            <div class="text-base font-bold text-on-surface">Giỏ hàng của bạn đang trống</div>
+                            <p class="text-xs text-on-surface-variant max-w-sm">Hãy khám phá hàng ngàn tựa sách hay chọn lọc tại The4BookStore để tiếp tục mua sắm nhé!</p>
+                            <a href="/" class="mt-2 px-6 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all shadow-sm">
+                                Khám Phá Sách Ngay
+                            </a>
+                        </div>
+                    `;
+                }
+                if (proceedBtn) {
+                    proceedBtn.disabled = true;
+                    proceedBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        }
+
+        function updateQty(id, delta) {
+            const item = cartState.items.find(i => i.id === id);
+            if (!item) return;
+
+            item.qty += delta;
+            if (item.qty < 1) item.qty = 1;
+
+            const el = document.getElementById('qty-' + id);
+            if (el) el.textContent = item.qty;
+
+            renderCart();
+        }
+
+        function removeItem(domId) {
+            const index = cartState.items.findIndex(i => i.domId === domId);
+            if (index !== -1) {
+                cartState.items.splice(index, 1);
+            }
+
+            const el = document.getElementById(domId);
+            if (el) el.remove();
+
+            renderCart();
+        }
+
+        function clearCart() {
+            if (cartState.items.length === 0) return;
+            if (confirm('Bạn có chắc muốn xóa tất cả sản phẩm trong giỏ hàng?')) {
+                cartState.items = [];
+                renderCart();
+            }
+        }
+
+        function applyVoucher() {
+            const codeInput = document.getElementById('voucherCode');
+            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            const msgEl = document.getElementById('voucherSuccessMsg');
+            const textEl = document.getElementById('voucherSuccessText');
+
+            if (!code) {
+                alert('Vui lòng nhập mã giảm giá của bạn.');
+                return;
+            }
+
+            if (code === 'THE4BOOK15' || code === 'BOOK15' || code === 'SALE15') {
+                cartState.voucher = { code: code, discountPercent: 0.15 };
+                if (msgEl) {
+                    msgEl.classList.remove('hidden');
+                    msgEl.classList.add('flex');
+                }
+                if (textEl) {
+                    textEl.textContent = `Đã kích hoạt ưu đãi giảm 15% cho mã [${code}]`;
+                }
+                renderCart();
+            } else {
+                alert('Mã giảm giá không hợp lệ hoặc đã hết lượt sử dụng. Gợi ý: THE4BOOK15');
+            }
+        }
+
+        // Checkout Modal Functions
+        function openCheckoutModal() {
+            if (cartState.items.length === 0) {
+                alert('Giỏ hàng của bạn đang trống!');
+                return;
+            }
+
+            const calc = calculateCart();
+            const modalSubtotal = document.getElementById('modalSubtotal');
+            const modalDiscount = document.getElementById('modalDiscount');
+            const modalShipping = document.getElementById('modalShipping');
+            const modalTotal = document.getElementById('modalTotal');
+
+            if (modalSubtotal) modalSubtotal.textContent = formatVND(calc.subtotal);
+            if (modalDiscount) modalDiscount.textContent = calc.discount > 0 ? `-${formatVND(calc.discount)}` : '0 đ';
+            if (modalShipping) modalShipping.textContent = calc.shippingFee === 0 ? 'Miễn Phí' : formatVND(calc.shippingFee);
+            if (modalTotal) modalTotal.textContent = formatVND(calc.total);
+
+            // Reset modal step view
+            document.getElementById('checkoutFormStep').classList.remove('hidden');
+            document.getElementById('checkoutSuccessStep').classList.add('hidden');
+
+            const modal = document.getElementById('checkoutModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkoutModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handlePlaceOrder(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('checkoutName').value.trim();
+            const paymentMethodInput = document.querySelector('input[name="paymentMethod"]:checked');
+            const paymentMethod = paymentMethodInput ? paymentMethodInput.value : 'Tiền Mặt (COD)';
+
+            const randomCode = '#T4B-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('successOrderCode').textContent = randomCode;
+            document.getElementById('successCustomerName').textContent = name;
+            document.getElementById('successPaymentMethod').textContent = paymentMethod;
+
+            // Switch to success view
+            document.getElementById('checkoutFormStep').classList.add('hidden');
+            document.getElementById('checkoutSuccessStep').classList.remove('hidden');
+
+            // Clear cart
+            cartState.items = [];
+            renderCart();
+        }
+
+        // Initialize cart calculations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCart();
+        });
+    </script>
+
+</body>
+</html>

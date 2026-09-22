@@ -41,4 +41,11 @@ public class SanPham {
     private String trangThai = "DangBan";
     @Column(nullable = false)
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    public String getHinhAnh() {
+        if (moTa != null && moTa.startsWith("http")) {
+            return moTa;
+        }
+        return null;
+    }
 }

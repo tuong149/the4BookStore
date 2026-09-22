@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- 4 Bento KPI Metric Cards Fragment -->
+    <div th:fragment="kpi_cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <!-- Card 1: Doanh Thu -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
+                <span class="font-medium">Tổng Doanh Thu</span>
+                <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center material-symbols-outlined text-[18px]">payments</span>
+            </div>
+            <div class="font-headline-lg text-xl font-extrabold text-on-surface font-mono" th:text="${totalRevenueFormatted ?: '128.450.000 đ'}">
+                128.450.000 đ
+            </div>
+            <div class="text-[11px] text-tertiary font-bold flex items-center gap-1 mt-2">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                <span>+14.2% so với tháng trước</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Đơn Hàng -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
+                <span class="font-medium">Đơn Hàng Hôm Nay</span>
+                <span class="w-8 h-8 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center material-symbols-outlined text-[18px]">shopping_cart</span>
+            </div>
+            <div class="font-headline-lg text-xl font-extrabold text-on-surface font-mono">
+                <span th:text="${ordersTodayCount ?: '84'}">84</span> đơn
+            </div>
+            <div class="text-[11px] text-secondary font-bold flex items-center gap-1 mt-2">
+                <span class="material-symbols-outlined text-[14px]">pace</span>
+                <span>Đang xử lý xuất kho</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Tựa Sách Hoạt Động -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
+                <span class="font-medium">Tựa Sách Hoạt Động</span>
+                <span class="w-8 h-8 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center material-symbols-outlined text-[18px]">auto_stories</span>
+            </div>
+            <div class="font-headline-lg text-xl font-extrabold text-on-surface font-mono">
+                <span th:text="${totalBooksCount ?: '6'}">6</span> tựa
+            </div>
+            <div class="text-[11px] text-tertiary font-bold flex items-center gap-1 mt-2">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                <span>Đang sẵn sàng bán</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Cảnh Báo Tồn Kho -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container flex flex-col justify-between">
+            <div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
+                <span class="font-medium">Cảnh Báo Tồn Kho</span>
+                <span class="w-8 h-8 rounded-xl bg-error/10 text-error flex items-center justify-center material-symbols-outlined text-[18px]">warning</span>
+            </div>
+            <div class="font-headline-lg text-xl font-extrabold text-error font-mono">
+                <span th:text="${lowStockCount ?: '1'}">1</span> tựa
+            </div>
+            <div class="text-[11px] text-error font-bold flex items-center gap-1 mt-2">
+                <span class="material-symbols-outlined text-[14px]">notification_important</span>
+                <span>Mức tồn kho &lt; 5 cuốn</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

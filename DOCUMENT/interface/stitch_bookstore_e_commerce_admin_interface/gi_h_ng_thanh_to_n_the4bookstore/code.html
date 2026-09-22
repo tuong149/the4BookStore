@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>The4BookStore - Giỏ Hàng &amp; Thanh Toán</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "on-background": "#141b2b", "on-tertiary-fixed": "#002114", "background": "#f9f9ff", "primary-container": "#166534", "surface-container-lowest": "#ffffff", "tertiary": "#004b32", "tertiary-fixed": "#85f8c4", "on-tertiary": "#ffffff", "on-primary": "#ffffff", "on-tertiary-fixed-variant": "#005137", "secondary": "#904d00", "on-tertiary-container": "#70e4b1", "surface-bright": "#f9f9ff", "on-secondary-container": "#663500", "primary-fixed": "#a6f4b5", "on-primary-fixed-variant": "#005226", "on-primary-fixed": "#00210b", "on-error": "#ffffff", "surface-container-high": "#e1e8fd", "on-secondary-fixed-variant": "#6e3900", "on-secondary-fixed": "#2f1500", "tertiary-container": "#006545", "on-surface-variant": "#404940", "secondary-fixed-dim": "#ffb77d", "error-container": "#ffdad6", "primary-fixed-dim": "#8bd79b", "tertiary-fixed-dim": "#68dba9", "surface-tint": "#1f6c3a", "surface-dim": "#d3daef", "on-error-container": "#93000a", "on-surface": "#141b2b", "inverse-surface": "#293040", "surface-container-low": "#f1f3ff", "outline-variant": "#bfc9bd", "outline": "#707a6f", "primary": "#004c22", "surface": "#f9f9ff", "surface-container-highest": "#dce2f7", "surface-variant": "#dce2f7", "on-secondary": "#ffffff", "inverse-on-surface": "#edf0ff", "inverse-primary": "#8bd79b", "secondary-container": "#fe932c", "on-primary-container": "#93e0a2", "secondary-fixed": "#ffdcc3", "surface-container": "#e9edff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-desktop": "1.5rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "margin-desktop": "2rem", "margin-tablet": "1.5rem", "space-md": "1rem", "margin": "1rem", "gutter": "1rem", "space-xs": "0.25rem", "space-xl": "2rem" }, "fontFamily": { "body-md": ["Inter"], "headline-xl-mobile": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "headline-xl": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "label-md": ["Inter"], "body-sm": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"] }, "fontSize": { "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-xl-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-xl": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "display-lg-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.025em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-28 max-w-7xl mx-auto px-margin-desktop flex flex-col justify-between py-space-xs"><div class="flex items-center justify-between gap-space-md pt-space-xs"><div class="flex items-center gap-space-sm shrink-0"><a class="flex items-center gap-space-xs" href="#"><img alt="The4BookStore Logo" class="h-9 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1ULmZ3jCt5i7dwCZj_Ci9rTXCGrMBSiyu3-4kTA2VZTZxvG06f1KnRm1I_4G0lThxf3UaGevZEoW8jUozpcX3_oA-b5V21gcZYPLlYiznSwPfOlL8UySOTEUKx-zbXocRiB9BwOxstPDwvRsMEHkSEuMUFPOYdD3Lgpr0hphClWuHhfiAf8xlTnjE2y_a7a98Xjku_hFZIILMk7t5RmSd4v9bP_rTbfZmN79Ze0jtrBHpBNiYMwHgex5BM"/></a></div><div class="flex-1 max-w-2xl mx-space-md hidden sm:flex items-center bg-surface-container-low rounded-xl px-space-sm py-1 shadow-inner"><button class="flex items-center gap-1 text-on-surface-variant font-label-md text-label-md px-space-xs py-1 hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">category</span><span>Tất cả thể loại</span><span class="material-symbols-outlined text-[16px]">arrow_drop_down</span></button><div class="h-4 w-[1px] bg-outline-variant mx-space-xs"></div><div class="flex-1 flex items-center gap-space-xs px-space-xs"><span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span><input class="w-full bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant focus:outline-none font-body-md text-body-md" placeholder="Tìm kiếm theo Tên sách, Tác giả hoặc mã ISBN..." type="text"/></div></div><div class="flex items-center gap-space-md shrink-0"><a class="hidden lg:inline-flex items-center gap-1 px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" data-path="admin-dashboard" href="#"><span class="material-symbols-outlined text-[18px]">admin_panel_settings</span><span>Trang Quản Trị</span></a><button aria-label="Giỏ hàng" class="relative p-space-xs text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-[24px]">shopping_bag</span><span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 font-label-sm text-label-sm font-bold bg-secondary text-on-secondary rounded-full transform translate-x-1 -translate-y-1">3</span></button><div class="flex items-center gap-space-xs pl-space-xs cursor-pointer group"><img alt="Tài khoản" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUSZ5dqoRMUTssXIap1lFtbGqNj76EO4_JpeLICxgK6i8RQ-b6FBevsmTpBNYLqOGOhEJmM72f7BeRd_P6wYVJ0WrTJJCFwjmrX7y4IYbT9cGZhUYpfZ41NtYpK8wDRUwUU5JolPlF4JYof0nf-Mnjr2hBZFwxagtPhNGSVfaR65hlzsL-oDdP7Q53Ww7C4vzv_B90IFfI-_FjyHy7V4wP5GHZfTpmShIiBp4oEL19xwu0tRaTGEgW"/><span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface text-[18px]">expand_more</span></div></div></div><nav class="flex items-center gap-space-lg overflow-x-auto pb-1" data-active-classes="text-primary font-bold border-b-2 border-primary"><a class="transition-colors py-1 text-on-surface-variant hover:text-on-surface font-label-md text-label-md" data-path="store-home" href="#">Trang Chủ</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors py-1" data-path="best-sellers" href="#">Sách Bán Chạy</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors py-1" data-path="fiction-catalog" href="#">Văn Học</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors py-1" data-path="non-fiction-catalog" href="#">Phi Hư Cấu</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors py-1" data-path="deals-and-promotions" href="#">Khuyến Mãi</a><a class="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors py-1" data-path="book-details" href="#">Đọc Thử</a></nav></div></header><main class="w-full pt-28 bg-background flex-1"><div class="flex flex-col w-full">
+<div class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+<!-- Breadcrumb Navigation -->
+<nav aria-label="Breadcrumb" class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md mb-space-lg">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">home</span>
+<span>Trang chủ</span>
+</a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Giỏ hàng</a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<span class="text-on-surface font-semibold">Xem lại giỏ hàng</span>
+</nav>
+<!-- Main Cart Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: Cart Items & Add-ons (8 cols) -->
+<section class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Header Strip -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">shopping_bag</span>
+<h1 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Giỏ Hàng</h1>
+<span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold text-on-surface-variant" id="cart-count-badge">3 sản phẩm</span>
+</div>
+<button class="text-error hover:text-on-error-container font-label-md text-label-md font-medium transition-colors flex items-center gap-1" onclick="clearCart()" type="button">
+<span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+<span>Xóa Tất Cả</span>
+</button>
+</div>
+<!-- Free Shipping Incentive Bar -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Chính Sách Vận Chuyển The4BookStore</span>
+</div>
+<span class="font-label-sm text-label-sm font-medium text-primary" id="shipping-threshold-text">Bạn chỉ còn cách mức MIỄN PHÍ Vận Chuyển Hỏa Tốc 120.000đ!</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500 ease-out" style="width: 86.6%;"></div>
+</div>
+<div class="flex justify-between items-center mt-1.5 font-body-sm text-body-sm text-on-surface-variant">
+<span>Tạm tính: <strong class="text-on-surface font-semibold">$77.99</strong></span>
+<span>Mục tiêu Freeship: <strong class="text-on-surface font-semibold">900.000đ</strong></span>
+</div>
+</div>
+<!-- Cart Items List Container -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden divide-y divide-surface-container-low" id="cart-items-container">
+<!-- Cart Item 1 -->
+<article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-1">
+<div class="flex gap-space-md items-start w-full sm:w-auto">
+<div class="w-20 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Cover of The Midnight Library novel by Matt Haig, featuring deep cerulean and emerald hues with glowing luminous clock face and ethereal bibliophile aesthetic, professional studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0ZepDd_foKXu3i6ER1m8WWEdur0sxuw_PzY9MNfI4REnQ3rf6R_2Cm9EnfFAhXCPxQTTtVl4s2CrHSmtbVz08lHsAHDSiErKboS8Y4p5NQiHrun0Ek56kgIt1soK3hBbriVWEntfW_SHfXzkp7nmY2OyfVyfhAuJ50SpGyqZseN_277pw-RUdZgMOpRkN3ksmBAnBDCRnpGWTd3UWhZiP2GhZTpYd0mZ4A0F2WZ20z_Y2aCKwxl9w"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold text-on-surface-variant">Bìa cứng</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">Còn Hàng</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold hover:text-primary transition-colors cursor-pointer truncate">The Midnight Library</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tác giả: Matt Haig</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1">ISBN: 978-0525559474</p>
+<div class="mt-2 flex items-center gap-space-md sm:hidden">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">$18.50</span>
+</div>
+</div>
+</div>
+<!-- Stepper, Total & Action Controls -->
+<div class="flex items-center justify-between w-full sm:w-auto sm:gap-space-xl pt-2 sm:pt-0">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1">
+<button aria-label="Giảm số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(1, -1)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface" id="qty-1">2</span>
+<button aria-label="Tăng số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(1, 1)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="text-right min-w-[5rem]">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface" id="line-price-1">$37.00</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">$18.50 mỗi cuốn</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Lưu để mua sau" type="button">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/20 transition-colors" onclick="removeItem(1)" title="Xóa khỏi giỏ" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Cart Item 2 -->
+<article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-2">
+<div class="flex gap-space-md items-start w-full sm:w-auto">
+<div class="w-20 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Cover of Atomic Habits by James Clear with clean minimalist typographic layout, warm off-white cover with subtle yellow and dark charcoal text, editorial design aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW-9V8t3IAOf1IgnEXw3YEsjLeEEaRrZI2deV_xIOfNqm6F3ET91drnI1Sabei8pJwoLyOGe02m-6MRD3-_FqH1hyXDVvfegOL57DRjNoDsLWtjMPQxHo5mfVWpQ-QmIk1Yfrvhp5Txy7hidEjtHKuLfcLw7h9GQsXKnWuvYdKFSmgemfm19TmpE0Z-N1qxPcMK1ZCW-5oL7eL8k1d7knANzrhBzbdUSW2t-avUfE2J4ddKTZfplf-"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold text-on-surface-variant">Bìa mềm</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">Còn Hàng</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold hover:text-primary transition-colors cursor-pointer truncate">Atomic Habits</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tác giả: James Clear</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1">ISBN: 978-0735211292</p>
+<div class="mt-2 flex items-center gap-space-md sm:hidden">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">$21.00</span>
+</div>
+</div>
+</div>
+<!-- Stepper, Total & Action Controls -->
+<div class="flex items-center justify-between w-full sm:w-auto sm:gap-space-xl pt-2 sm:pt-0">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1">
+<button aria-label="Giảm số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(2, -1)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface" id="qty-2">1</span>
+<button aria-label="Tăng số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(2, 1)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="text-right min-w-[5rem]">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface" id="line-price-2">$21.00</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">$21.00 mỗi cuốn</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Lưu để mua sau" type="button">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/20 transition-colors" onclick="removeItem(2)" title="Xóa khỏi giỏ" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Cart Item 3 -->
+<article class="p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between" id="cart-item-3">
+<div class="flex gap-space-md items-start w-full sm:w-auto">
+<div class="w-20 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Cover of Tomorrow, and Tomorrow, and Tomorrow by Gabrielle Zevin, artistic Japanese wave woodblock pattern in brilliant indigo and cream tones, literary fiction masterpiece aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-X2M79b37K5cvPmU_CRVDSI2ezMfFx0B8JZmzbX1XqLrsBK0v0Za_s2p2FrSciiRsfsgwTKSGBskiYtjrn83arBthfZfa1MduWJQ6xrlIiYjKqNUfqhDNfbY-ytFAFS6fj8011j7_HwhrfGt0nNuoMiATkwAM4zcSSy1f1nHRIVx0t7c0WklfB5z94s5vXOiEQLQ53W1sy77Xkqj5TpSPMZRXVtAlkLEM4n68g0WF1FjoaesuqOPS"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold text-on-surface-variant">Bìa cứng</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-semibold">Sắp Hết Hàng</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold hover:text-primary transition-colors cursor-pointer truncate">Tomorrow, and Tomorrow, and Tomorrow</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tác giả: Gabrielle Zevin</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant/80 mt-1">ISBN: 978-0593321201</p>
+<div class="mt-2 flex items-center gap-space-md sm:hidden">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">$19.99</span>
+</div>
+</div>
+</div>
+<!-- Stepper, Total & Action Controls -->
+<div class="flex items-center justify-between w-full sm:w-auto sm:gap-space-xl pt-2 sm:pt-0">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1">
+<button aria-label="Giảm số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(3, -1)" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface" id="qty-3">1</span>
+<button aria-label="Tăng số lượng" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface transition-colors" onclick="updateQty(3, 1)" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<div class="text-right min-w-[5rem]">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface" id="line-price-3">$19.99</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">$19.99 mỗi cuốn</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Lưu để mua sau" type="button">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container/20 transition-colors" onclick="removeItem(3)" title="Xóa khỏi giỏ" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Recommended Quick Add-ons Strip -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">auto_awesome</span>
+<span>Gợi Ý Phụ Kiện Đọc Sách Hoàn Hảo</span>
+</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Thêm vào để nhận miễn phí vận chuyển</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<!-- Addon 1 -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-14 rounded bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Set of 3 embossed copper foil bookmarks with botanical engravings on heavy forest green stock, artisan crafted reader gift" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAymfS4Bt0D4rQHjh8ndhYl_b1Y4V2csSiYTSADGt8OL3eoAylLOInDNykms1hvEUFQwdKQL7W5Qjtlw1V1S8pC0Ee_5iN4zwUCyzVY4xFy6UpBjIPW2E_D75hjaasz6j-YeV6_w4DRMVEYJcwq28Yf5wAuV8LmH48NrIm5IHDSecQPHYS5zcZpJRKESROeJ8TweMsYfPA8TnmmGCov1aIPZCLAEmUGfLBSfvWbbOrlf7EQVV8a0C31"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Bộ Dấu Trang Kim Loại Họa Tiết Thực Vật</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">$4.99 • Bộ 3 món</p>
+</div>
+</div>
+<button class="px-3 py-1.5 bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-primary font-label-md text-label-md font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1" onclick="quickAdd('Bộ Dấu Trang Kim Loại', 4.99)" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+ Thêm</span>
+</button>
+</div>
+<!-- Addon 2 -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-14 rounded bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Heavyweight unbleached natural canvas tote bag featuring FolioBooks forest green vintage bookshop seal typography, lifestyle still life" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD1VzR2_2A1nxT7VT0I5D898mq7LpxKiHo0j_yjSpSUPQE3JaN1zuXYDeHkX2kVrBM8_fW94Yts_awHQwBbJNnWMAUZ5MavICu0N6bmgSwvxH-zjnqWgbUTthw0Jh1SF1jz3ZXub4iYGmO4ih-VYrugiUGhJT70m4H0HKsgGr6gOmb65auzwqmDfFx-5UrKiGCd5aCjhWPkBnXJ-F8FpsXK132uT2mYjeKnYyacCTy3vzGD2LnV6Ao"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface">Túi Tote Vải Canvas The4BookStore</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">$12.00 • 100% Cotton</p>
+</div>
+</div>
+<button class="px-3 py-1.5 bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-primary font-label-md text-label-md font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1" onclick="quickAdd('Túi Tote Vải Canvas The4BookStore', 12.00)" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+ Thêm</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Back to browse link -->
+<div class="flex items-center justify-between pt-space-xs">
+<a class="inline-flex items-center gap-1 text-primary hover:text-primary-container font-label-md text-label-md font-semibold transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>← Tiếp tục chọn sách</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tất cả đơn hàng đều được đóng gói trung hòa carbon</span>
+</div>
+</section>
+<!-- RIGHT COLUMN: Sticky Order Summary & Checkout Card (4 cols) -->
+<aside class="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest rounded-lg p-space-lg shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Tóm Tắt Đơn Hàng</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">VND / USD</span>
+</div>
+<!-- Promo Code Section -->
+<div class="space-y-space-xs pt-space-xs">
+<label class="block font-label-md text-label-md font-medium text-on-surface" for="promo-input">Bạn có mã giảm giá hoặc Voucher?</label>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">sell</span>
+<input class="w-full bg-surface-container-low pl-9 pr-3 py-2 rounded-lg font-body-sm text-body-sm text-on-surface uppercase placeholder:normal-case placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest transition-all" id="promo-input" placeholder="Nhập mã giảm giá (ví dụ: THE4BOOK15)" type="text" value=""/>
+</div>
+<button class="px-4 py-2 bg-primary text-on-primary font-label-md text-label-md font-semibold rounded-lg hover:bg-primary-container transition-colors shrink-0 shadow-sm" onclick="applyPromo()" type="button">
+                Áp Dụng
+              </button>
+</div>
+<!-- Applied Voucher Tag -->
+<div class="flex items-center justify-between bg-primary-fixed/30 text-on-primary-fixed-variant px-space-sm py-1.5 rounded-lg text-body-sm font-medium mt-2" id="voucher-pill">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+<span class="font-semibold uppercase tracking-wider font-label-sm">BOOKLOVER15</span>
+<span class="bg-surface-container-lowest px-1.5 py-0.5 rounded text-[11px] font-bold text-primary">Giảm 15%</span>
+</div>
+<button aria-label="Xóa mã giảm giá" class="hover:text-error transition-colors flex items-center p-0.5" onclick="removePromo()" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- Cost Breakdown List -->
+<div class="space-y-space-xs font-body-md text-body-md text-on-surface-variant pt-space-xs">
+<div class="flex justify-between items-center">
+<span>Tạm tính tiền sách (4 cuốn)</span>
+<span class="text-on-surface font-semibold font-variant-numeric tabular-nums" id="summary-subtotal">$77.99</span>
+</div>
+<div class="flex justify-between items-center text-primary" id="voucher-discount-row">
+<span class="flex items-center gap-1">
+<span>Giảm giá từ Voucher</span>
+</span>
+<span class="font-semibold font-variant-numeric tabular-nums" id="summary-discount">-$11.70</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1">
+<span>Phí vận chuyển ước tính</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant/70 cursor-help" title="Tiêu chuẩn vận chuyển an toàn">info</span>
+</div>
+<span class="text-on-surface font-semibold font-variant-numeric tabular-nums" id="summary-shipping">$4.99</span>
+</div>
+<div class="flex justify-between items-center">
+<span>Thuế VAT (8%)</span>
+<span class="text-on-surface font-semibold font-variant-numeric tabular-nums" id="summary-tax">$5.30</span>
+</div>
+</div>
+<!-- Total Calculation Banner -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-baseline justify-between mt-space-xs">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant block font-bold">TỔNG TIỀN THANH TOÁN</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Đã bao gồm thuế và phụ phí</span>
+</div>
+<div class="text-right">
+<span class="font-headline-xl text-headline-xl font-bold text-primary tracking-tight" id="summary-total">$71.58</span>
+</div>
+</div>
+<!-- Primary Checkout CTA -->
+<button class="w-full py-3.5 px-space-md bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm font-bold rounded-lg shadow-md transition-all flex items-center justify-center gap-space-sm group" type="button">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">lock</span>
+<span>Tiến Hành Đặt Hàng &amp; Thanh Toán</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<!-- Alternative Payment Strip -->
+<div class="flex items-center justify-center gap-2 pt-1 text-on-surface-variant">
+<span class="font-label-sm text-label-sm">Hoặc thanh toán nhanh qua</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 bg-[#000000] text-white rounded-lg font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+<span>Apple Pay</span>
+</button>
+<button class="py-2 px-3 bg-[#ffc439] text-[#003087] rounded-lg font-label-md text-label-md font-bold flex items-center justify-center gap-1 hover:brightness-95 transition-all" type="button">
+<span class="italic font-serif text-[15px] font-bold">PayPal</span>
+</button>
+</div>
+<!-- Trust & Guarantees Section -->
+<div class="space-y-space-xs pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+<span>Thanh toán bảo mật mã hóa 256-bit SSL</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">cycle</span>
+<span>Đổi trả miễn phí trong 30 ngày cho sách nguyên vẹn</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">package_2</span>
+<span>Đóng gói chống ẩm, hộp carton bảo vệ góc sách</span>
+</div>
+</div>
+<!-- Accepted Payment Brand Badges -->
+<div class="pt-space-xs flex items-center justify-center gap-3 text-on-surface-variant/70 text-body-sm">
+<span class="font-semibold text-xs tracking-wider uppercase">VISA</span>
+<span class="text-outline-variant">•</span>
+<span class="font-semibold text-xs tracking-wider uppercase">MASTERCARD</span>
+<span class="text-outline-variant">•</span>
+<span class="font-semibold text-xs tracking-wider uppercase">JCB</span>
+<span class="text-outline-variant">•</span>
+<span class="font-semibold text-xs tracking-wider uppercase">NỘI ĐỊA</span>
+</div>
+</div>
+<!-- Curated Member Benefits Callout -->
+<div class="bg-surface-container rounded-lg p-space-md flex gap-space-sm items-start">
+<span class="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5">military_tech</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Hội Viên Thân Thiết The4BookStore</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-snug">Bạn sẽ tích lũy được <strong>141 Điểm Thưởng</strong> từ đơn hàng này. Điểm có thể quy đổi thành sách quà tặng giới hạn.</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<script>
+  // Simple interactive cart calculations & state simulation
+  let state = {
+    items: {
+      1: { price: 18.50, qty: 2 },
+      2: { price: 21.00, qty: 1 },
+      3: { price: 19.99, qty: 1 }
+    },
+    promoApplied: true,
+    promoDiscountRate: 0.15,
+    shippingCost: 4.99,
+    taxRate: 0.08
+  };
+
+  function updateQty(id, change) {
+    if (!state.items[id]) return;
+    state.items[id].qty = Math.max(1, state.items[id].qty + change);
+    document.getElementById('qty-' + id).textContent = state.items[id].qty;
+    const lineTotal = (state.items[id].price * state.items[id].qty).toFixed(2);
+    document.getElementById('line-price-' + id).textContent = '$' + lineTotal;
+    recalculate();
+  }
+
+  function removeItem(id) {
+    const el = document.getElementById('cart-item-' + id);
+    if (el) {
+      el.remove();
+      delete state.items[id];
+      recalculate();
+      updateItemCount();
+    }
+  }
+
+  function clearCart() {
+    const container = document.getElementById('cart-items-container');
+    container.innerHTML = `
+      <div class="p-space-xl text-center flex flex-col items-center justify-center">
+        <span class="material-symbols-outlined text-outline-variant text-[48px] mb-2">production_quantity_limits</span>
+        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Giỏ hàng của bạn đang trống</h3>
+        <p class="font-body-sm text-body-sm text-on-surface-variant max-w-sm mt-1">Khám phá các tựa sách hay nhất và các bộ sưu tập được tuyển chọn kỹ lưỡng tại The4BookStore.</p>
+      </div>`;
+    state.items = {};
+    recalculate();
+    updateItemCount();
+  }
+
+  function applyPromo() {
+    const input = document.getElementById('promo-input');
+    const val = input.value.trim().toUpperCase();
+    if (val === 'THE4BOOK15' || val === 'BOOKLOVER15') {
+      state.promoApplied = true;
+      state.promoDiscountRate = 0.15;
+      showPromoPill(val, 'Giảm 15%');
+      input.value = '';
+    } else if (val === 'BOOKLOVER20' || val === 'THE4BOOK20') {
+      state.promoApplied = true;
+      state.promoDiscountRate = 0.20;
+      showPromoPill(val, 'Giảm 20%');
+      input.value = '';
+    } else if (val.length > 0) {
+      state.promoApplied = true;
+      state.promoDiscountRate = 0.10;
+      showPromoPill(val, 'Giảm 10%');
+      input.value = '';
+    }
+    recalculate();
+  }
+
+  function showPromoPill(code, label) {
+    const pill = document.getElementById('voucher-pill');
+    pill.classList.remove('hidden');
+    pill.innerHTML = `
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+        <span class="font-semibold uppercase tracking-wider font-label-sm">${code}</span>
+        <span class="bg-surface-container-lowest px-1.5 py-0.5 rounded text-[11px] font-bold text-primary">${label}</span>
+      </div>
+      <button type="button" onclick="removePromo()" class="hover:text-error transition-colors flex items-center p-0.5" aria-label="Xóa mã">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+    `;
+    const discountRow = document.getElementById('voucher-discount-row');
+    if (discountRow) discountRow.classList.remove('hidden');
+  }
+
+  function removePromo() {
+    state.promoApplied = false;
+    const pill = document.getElementById('voucher-pill');
+    pill.classList.add('hidden');
+    const discountRow = document.getElementById('voucher-discount-row');
+    if (discountRow) discountRow.classList.add('hidden');
+    recalculate();
+  }
+
+  function quickAdd(name, price) {
+    const newId = Date.now();
+    state.items[newId] = { price: price, qty: 1 };
+    
+    // Append minimal cart item
+    const container = document.getElementById('cart-items-container');
+    const itemEl = document.createElement('article');
+    itemEl.id = 'cart-item-' + newId;
+    itemEl.className = 'p-space-md md:p-space-lg flex flex-col sm:flex-row gap-space-md items-start sm:items-center justify-between';
+    itemEl.innerHTML = `
+      <div class="flex gap-space-md items-start w-full sm:w-auto">
+        <div class="w-20 h-28 shrink-0 rounded-lg overflow-hidden bg-surface-container flex items-center justify-center text-primary shadow-sm">
+          <span class="material-symbols-outlined text-[32px]">auto_stories</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold text-on-surface-variant w-fit mb-1">Phụ kiện</span>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">${name}</h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">The4BookStore Chọn Lọc</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between w-full sm:w-auto sm:gap-space-xl pt-2 sm:pt-0">
+        <div class="flex items-center bg-surface-container-low rounded-lg p-1">
+          <button type="button" onclick="updateQty(${newId}, -1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface">
+            <span class="material-symbols-outlined text-[18px]">remove</span>
+          </button>
+          <span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface" id="qty-${newId}">1</span>
+          <button type="button" onclick="updateQty(${newId}, 1)" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+          </button>
+        </div>
+        <div class="text-right min-w-[5rem]">
+          <div class="font-headline-sm text-headline-sm font-bold text-on-surface" id="line-price-${newId}">$${price.toFixed(2)}</div>
+        </div>
+        <button type="button" onclick="removeItem(${newId})" class="p-2 text-on-surface-variant hover:text-error rounded-lg">
+          <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>
+      </div>
+    `;
+    container.appendChild(itemEl);
+    updateItemCount();
+    recalculate();
+  }
+
+  function updateItemCount() {
+    const keys = Object.keys(state.items);
+    const count = keys.reduce((acc, k) => acc + state.items[k].qty, 0);
+    const badge = document.getElementById('cart-count-badge');
+    if (badge) badge.textContent = count + ' sản phẩm';
+  }
+
+  function recalculate() {
+    let subtotal = 0;
+    for (let k in state.items) {
+      subtotal += state.items[k].price * state.items[k].qty;
+    }
+    
+    let discount = 0;
+    if (state.promoApplied) {
+      discount = subtotal * state.promoDiscountRate;
+    }
+
+    let shipping = subtotal >= 90 || subtotal === 0 ? 0.00 : 4.99;
+    let taxable = Math.max(0, subtotal - discount);
+    let tax = taxable * state.taxRate;
+    let grandTotal = taxable + shipping + tax;
+
+    // Update DOM
+    const subEl = document.getElementById('summary-subtotal');
+    if (subEl) subEl.textContent = '$' + subtotal.toFixed(2);
+    
+    const discEl = document.getElementById('summary-discount');
+    if (discEl) discEl.textContent = '-$' + discount.toFixed(2);
+
+    const shipEl = document.getElementById('summary-shipping');
+    if (shipEl) shipEl.textContent = shipping === 0 ? 'MIỄN PHÍ' : '$' + shipping.toFixed(2);
+
+    const taxEl = document.getElementById('summary-tax');
+    if (taxEl) taxEl.textContent = '$' + tax.toFixed(2);
+
+    const totalEl = document.getElementById('summary-total');
+    if (totalEl) totalEl.textContent = '$' + grandTotal.toFixed(2);
+
+    // Free shipping incentive text update
+    const thresholdText = document.getElementById('shipping-threshold-text');
+    if (thresholdText) {
+      if (subtotal >= 90) {
+        thresholdText.textContent = '🎉 Bạn đã đủ điều kiện nhận MIỄN PHÍ Vận Chuyển Hỏa Tốc!';
+      } else {
+        let diff = (90 - subtotal).toFixed(2);
+        thresholdText.textContent = `Bạn chỉ còn cách mức MIỄN PHÍ Vận Chuyển Hỏa Tốc 120.000đ!`;
+      }
+    }
+  }
+</script></main><footer class="w-full bg-surface-container-lowest shadow-[0_-1px_6px_rgba(0,0,0,0.03)] mt-auto"><div class="max-w-7xl mx-auto px-margin-desktop py-space-xl"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl"><div class="space-y-space-sm"><div class="flex items-center gap-space-sm"><img alt="The4BookStore Logo" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1ULmZ3jCt5i7dwCZj_Ci9rTXCGrMBSiyu3-4kTA2VZTZxvG06f1KnRm1I_4G0lThxf3UaGevZEoW8jUozpcX3_oA-b5V21gcZYPLlYiznSwPfOlL8UySOTEUKx-zbXocRiB9BwOxstPDwvRsMEHkSEuMUFPOYdD3Lgpr0hphClWuHhfiAf8xlTnjE2y_a7a98Xjku_hFZIILMk7t5RmSd4v9bP_rTbfZmN79Ze0jtrBHpBNiYMwHgex5BM"/></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">Không gian lý tưởng cho độc giả yêu sách, cung cấp những tác phẩm tinh hoa, sách bản quyền chất lượng cao và dịch vụ khách hàng tận tâm.</p></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-sm">Chăm Sóc Khách Hàng</h4><ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"><li><a class="hover:text-primary transition-colors" href="#">Tra cứu đơn hàng</a></li><li><a class="hover:text-primary transition-colors" href="#">Chính sách giao hàng</a></li><li><a class="hover:text-primary transition-colors" href="#">Chính sách đổi trả &amp; hoàn tiền</a></li><li><a class="hover:text-primary transition-colors" href="#">Hệ thống nhà sách</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-sm">Bộ Sưu Tập Tuyển Chọn</h4><ul class="space-y-space-xs font-body-sm text-body-sm text-on-surface-variant"><li><a class="hover:text-primary transition-colors" href="#">Tác phẩm đoạt giải thưởng</a></li><li><a class="hover:text-primary transition-colors" href="#">Sách khuyên đọc từ Ban biên tập</a></li><li><a class="hover:text-primary transition-colors" href="#">Sách mới phát hành</a></li><li><a class="hover:text-primary transition-colors" href="#">Thẻ quà tặng &amp; Phiếu mua hàng</a></li></ul></div><div><h4 class="font-headline-sm text-headline-sm text-on-surface mb-space-sm">Bản Tin Văn Học</h4><p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">Đăng ký để nhận gợi ý sách hay mỗi tuần, bài viết từ tác giả và các ưu đãi độc quyền.</p><div class="flex gap-space-xs"><input class="w-full bg-surface-container-low px-space-sm py-2 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nhập địa chỉ email của bạn" type="email"/><button class="bg-primary text-on-primary font-label-md text-label-md px-space-md py-2 rounded-lg hover:bg-primary-container transition-colors shrink-0" type="button">Đăng Ký</button></div></div></div><div class="mt-space-xl pt-space-md border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant"><p>© 2024 The4BookStore. Tất cả quyền được bảo lưu.</p><div class="flex items-center gap-space-lg"><a class="hover:text-primary" href="#">Chính sách bảo mật</a><a class="hover:text-primary" href="#">Điều khoản sử dụng</a><a class="hover:text-primary" href="#">Hỗ trợ tiếp cận</a></div></div></div></footer></body></html>
