@@ -20,6 +20,7 @@ target/
 cookies.txt
 docx_temp/
 docx_text.txt
+PHAN_CONG_MODULE.md
 /nbproject/private/
 /nbbuild/
 /dist/
