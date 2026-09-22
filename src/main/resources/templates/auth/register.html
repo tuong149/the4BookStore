@@ -1,64 +1,134 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - the4BookStore</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}">
-    <style>
-        .auth-container { max-width: 600px; }
-        .row { display: flex; gap: 15px; }
-        .row .input-group { flex: 1; }
-    </style>
-</head>
-<body>
-    <div class="auth-container">
-        <div class="auth-header">
-            <h2>Tạo Tài Khoản</h2>
-            <p>Tham gia cộng đồng yêu sách ngay hôm nay</p>
-        </div>
+<head th:replace="~{fragments/common/head :: common_head('Đăng ký - The4BookStore')}"></head>
 
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+<body class="min-h-screen w-screen bg-[#eaedf1] flex items-center justify-center p-1.5 sm:p-2.5 md:p-3 font-body-md antialiased selection:bg-primary selection:text-white overflow-hidden">
 
-        <form th:action="@{/register}" th:object="${registerRequest}" method="post">
-            <div class="row">
-                <div class="input-group">
-                    <input type="text" id="tenDangNhap" th:field="*{tenDangNhap}" required>
-                    <label for="tenDangNhap">Tên đăng nhập</label>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="email" th:field="*{email}" required>
-                    <label for="email">Email</label>
-                </div>
-            </div>
+    <!-- Main Container Card with Bookshelf Background (Nearly full screen) -->
+    <main class="relative w-[98vw] h-[96vh] min-h-[660px] rounded-[24px] sm:rounded-[36px] overflow-hidden shadow-2xl border border-white/50 bg-cover bg-center flex items-center justify-end pr-4 sm:pr-8 md:pr-12 lg:pr-16"
+          th:style="|background-image: url('@{/images/login-bookshelf.jpg}');|">
+        
+        <!-- Subtle ambient shade to ensure rich background depth -->
+        <div class="absolute inset-0 bg-black/10 pointer-events-none"></div>
+
+        <!-- Glassmorphism Register Card (Enlarged & High-Contrast Balanced Glass) -->
+        <div class="relative z-10 w-full sm:max-w-xl lg:w-[600px] xl:w-[650px] my-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-11 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between">
             
-            <div class="row">
-                <div class="input-group">
-                    <input type="password" id="matKhau" th:field="*{matKhau}" required>
-                    <label for="matKhau">Mật khẩu</label>
+            <!-- Brand Logo Header -->
+            <div class="flex items-center justify-center gap-3.5 pt-1">
+                <div class="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-md shrink-0">
+                    <span class="material-symbols-outlined text-[28px]">menu_book</span>
                 </div>
-                <div class="input-group">
-                    <input type="text" id="soDienThoai" th:field="*{soDienThoai}" required>
-                    <label for="soDienThoai">Số điện thoại</label>
+                <div class="flex flex-col text-left">
+                    <span class="font-headline-sm text-base sm:text-lg font-black text-primary tracking-wider leading-tight drop-shadow-sm">THE4BOOKSTORE</span>
+                    <span class="font-headline-sm text-[10px] sm:text-[11px] font-extrabold text-primary tracking-widest uppercase leading-none mt-1">Nhà Sách Trực Tuyến &amp; Quản Trị</span>
                 </div>
             </div>
 
-            <div class="input-group">
-                <input type="text" id="hoTen" th:field="*{hoTen}" required>
-                <label for="hoTen">Họ và tên</label>
+            <!-- Main Heading -->
+            <h1 class="font-headline-xl text-3xl sm:text-4xl font-black text-primary text-center tracking-tight my-4 sm:my-5 drop-shadow-sm">
+                TẠO TÀI KHOẢN
+            </h1>
+
+            <!-- Feedback Alerts -->
+            <div th:if="${error}" class="mb-3.5 px-4 py-3 rounded-2xl bg-white/95 border-2 border-error/50 text-error text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-md animate-in fade-in duration-300">
+                <span class="material-symbols-outlined text-[20px]">error</span>
+                <span th:text="${error}">Lỗi đăng ký</span>
             </div>
 
-            <div class="input-group">
-                <input type="text" id="diaChi" th:field="*{diaChi}" required>
-                <label for="diaChi">Địa chỉ</label>
+            <!-- Register Form -->
+            <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Username -->
+                    <div>
+                        <input type="text"
+                               id="tenDangNhap"
+                               th:field="*{tenDangNhap}"
+                               required
+                               placeholder="Tên đăng nhập *"
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <input type="email"
+                               id="email"
+                               th:field="*{email}"
+                               required
+                               placeholder="Email liên hệ *"
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Password -->
+                    <div>
+                        <input type="password"
+                               id="matKhau"
+                               th:field="*{matKhau}"
+                               required
+                               placeholder="Mật khẩu *"
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <input type="tel"
+                               id="soDienThoai"
+                               th:field="*{soDienThoai}"
+                               required
+                               placeholder="Số điện thoại *"
+                               pattern="[0-9]{10,11}"
+                               class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                    </div>
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <input type="text"
+                           id="hoTen"
+                           th:field="*{hoTen}"
+                           required
+                           placeholder="Họ và tên đầy đủ *"
+                           class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <input type="text"
+                           id="diaChi"
+                           th:field="*{diaChi}"
+                           required
+                           placeholder="Địa chỉ giao nhận sách *"
+                           class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="w-full py-3.5 mt-2 bg-primary text-on-primary font-headline-sm text-base sm:text-lg font-bold rounded-full hover:bg-primary-container transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.99] cursor-pointer tracking-wider">
+                    Đăng ký tài khoản
+                </button>
+            </form>
+
+            <!-- Login Footer Link -->
+            <div class="text-center text-xs sm:text-sm text-slate-900 pt-3.5 font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+                <span>Đã có tài khoản? </span>
+                <a th:href="@{/login}" class="font-black text-primary hover:underline transition-all">
+                    Đăng nhập ngay
+                </a>
             </div>
 
-            <button type="submit" class="btn-submit">Đăng Ký</button>
-        </form>
+            <!-- Back to Home Floating Link -->
+            <div class="text-center pt-2">
+                <a th:href="@{/}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-800 hover:text-primary font-bold transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Quay về trang chủ</span>
+                </a>
+            </div>
 
-        <div class="auth-footer">
-            Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
         </div>
-    </div>
+
+    </main>
+
 </body>
 </html>
