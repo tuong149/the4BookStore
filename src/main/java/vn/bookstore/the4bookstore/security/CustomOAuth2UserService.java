@@ -43,74 +43,206 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String sub = oAuth2User.getAttribute("sub");
         String name = oAuth2User.getAttribute("name");
+        if (name == null || name.isBlank()) {
+            Object given = oAuth2User.getAttribute("given_name");
+            Object family = oAuth2User.getAttribute("family_name");
+            if (given != null || family != null) {
+                name = ((family != null ? family.toString() + " " : "") + (given != null ? given.toString() : "")).trim();
+            }
+        }
         String picture = oAuth2User.getAttribute("picture");
+        if (picture == null || picture.isBlank()) {
+            Object pic = oAuth2User.getAttribute("avatar_url");
+            if (pic != null) {
+                picture = pic.toString();
+            }
+        }
 
-        TaiKhoan taiKhoan = processOAuthUser(email, sub, name, picture, registrationId);
+        try {
+            TaiKhoan taiKhoan = processOAuthUser(email, sub, name, picture, registrationId);
 
-        return new CustomOAuth2User(taiKhoan, oAuth2User.getAttributes(), "sub");
+            String nameAttributeKey = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+            if (nameAttributeKey == null || !oAuth2User.getAttributes().containsKey(nameAttributeKey)) {
+                nameAttributeKey = "sub";
+            }
+
+            return new CustomOAuth2User(taiKhoan, oAuth2User.getAttributes(), nameAttributeKey);
+        } catch (OAuth2AuthenticationException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Error processing OAuth user: " + e.getMessage());
+            e.printStackTrace();
+            throw new OAuth2AuthenticationException(new OAuth2Error("oauth_processing_failed", "Lỗi xử lý tài khoản Google: " + e.getMessage(), null), e);
+        }
     }
 
-    private TaiKhoan processOAuthUser(String email, String sub, String name, String picture, String registrationId) {
-        Optional<TaiKhoan> optionalTaiKhoan = taiKhoanRepository.findByEmail(email);
+    public TaiKhoan processOAuthUser(String email, String sub, String name, String picture, String registrationId) {
+        String normalizedEmail = (email != null) ? email.trim().toLowerCase() : "";
+        String provider = (registrationId != null && !registrationId.isBlank()) ? registrationId.toUpperCase() : "GOOGLE";
+        String safeSub = (sub != null && sub.length() > 100) ? sub.substring(0, 100) : sub;
+
+        // Chuẩn hóa tên hiển thị thật từ Google
+        String displayName = (name != null && !name.isBlank() && !name.matches("\\d+"))
+                ? name.trim()
+                : (normalizedEmail.contains("@") ? normalizedEmail.split("@")[0] : "Khách Hàng");
+        if (displayName.length() > 100) {
+            displayName = displayName.substring(0, 100);
+        }
+
+        String safePicture = picture;
+        if (safePicture != null && safePicture.length() > 200) {
+            safePicture = safePicture.substring(0, 200);
+        }
+
+        // Tìm tài khoản theo email hoặc theo providerId
+        Optional<TaiKhoan> optionalTaiKhoan = taiKhoanRepository.findByEmail(normalizedEmail);
+        if (optionalTaiKhoan.isEmpty() && safeSub != null && !safeSub.isBlank()) {
+            optionalTaiKhoan = taiKhoanRepository.findByProviderId(safeSub);
+        }
+
         TaiKhoan tk;
 
         if (optionalTaiKhoan.isPresent()) {
             tk = optionalTaiKhoan.get();
-            // Cập nhật thông tin nhà cung cấp OAuth nếu chưa có
-            if (tk.getProviderId() == null) {
-                tk.setProviderId(sub);
+            boolean needUpdateTk = false;
+
+            if (tk.getProviderId() == null && safeSub != null) {
+                tk.setProviderId(safeSub);
+                needUpdateTk = true;
             }
             if (tk.getAuthProvider() == null || "LOCAL".equalsIgnoreCase(tk.getAuthProvider())) {
-                tk.setAuthProvider(registrationId.toUpperCase());
+                tk.setAuthProvider(provider);
+                needUpdateTk = true;
             }
-            tk = taiKhoanRepository.save(tk);
-
-            // Kiểm tra và đồng bộ thông tin khách hàng
-            Optional<KhachHang> optionalKh = khachHangRepository.findByTaiKhoan(tk);
-            if (optionalKh.isPresent()) {
-                KhachHang kh = optionalKh.get();
-                if (picture != null && (kh.getAnhDaiDien() == null || kh.getAnhDaiDien().isBlank())) {
-                    kh.setAnhDaiDien(picture);
-                    khachHangRepository.save(kh);
+            // Nếu tên đăng nhập cũ là chuỗi số hoặc rỗng, cập nhật thành tên đăng nhập chuẩn hóa
+            if (tk.getTenDangNhap() == null || tk.getTenDangNhap().isBlank() || tk.getTenDangNhap().matches("\\d+")) {
+                String candidate = generateSafeUsername(normalizedEmail, displayName);
+                tk.setTenDangNhap(candidate);
+                needUpdateTk = true;
+            }
+            if (needUpdateTk) {
+                try {
+                    tk = taiKhoanRepository.save(tk);
+                } catch (Exception e) {
+                    System.err.println("Notice: Could not update TaiKhoan during OAuth: " + e.getMessage());
                 }
-            } else {
-                KhachHang newKh = new KhachHang();
-                newKh.setHoTen(name != null && !name.isBlank() ? name : email);
-                newKh.setEmail(email);
-                newKh.setAnhDaiDien(picture);
-                newKh.setTaiKhoan(tk);
-                newKh.setNgayDangKy(LocalDateTime.now());
-                khachHangRepository.save(newKh);
+            }
+
+            // Đồng bộ trực tiếp Họ tên và Ảnh đại diện thực từ tài khoản Google vào KhachHang
+            try {
+                KhachHang kh = khachHangRepository.findByTaiKhoan(tk).orElse(null);
+                if (kh == null) {
+                    kh = khachHangRepository.findByEmail(normalizedEmail).orElse(null);
+                }
+                if (kh == null) {
+                    kh = new KhachHang();
+                    kh.setTaiKhoan(tk);
+                }
+
+                if (kh.getHoTen() == null || kh.getHoTen().isBlank() || kh.getHoTen().matches("\\d+") || kh.getHoTen().contains("@")) {
+                    kh.setHoTen(displayName);
+                }
+                kh.setEmail(normalizedEmail);
+                if (safePicture != null && !safePicture.isBlank()) {
+                    kh.setAnhDaiDien(safePicture);
+                }
+                // Đảm bảo số điện thoại không bị null nếu DB có ràng buộc NOT NULL
+                if (kh.getSoDienThoai() == null || kh.getSoDienThoai().isBlank()) {
+                    String seed = String.format("%08d", Math.abs((normalizedEmail + "_" + tk.getMaTaiKhoan()).hashCode() % 100000000));
+                    String tempPhone = "09" + seed;
+                    while (khachHangRepository.findBySoDienThoai(tempPhone).isPresent()) {
+                        tempPhone = "09" + String.format("%08d", (int)(Math.random() * 100000000));
+                    }
+                    kh.setSoDienThoai(tempPhone);
+                }
+                if (kh.getNgayDangKy() == null) {
+                    kh.setNgayDangKy(LocalDateTime.now());
+                }
+                khachHangRepository.save(kh);
+            } catch (Exception e) {
+                System.err.println("Notice: Could not sync KhachHang during OAuth: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
-            // Tạo tài khoản mới cho người dùng OAuth2
+            // TỰ ĐỘNG TẠO TÀI KHOẢN MỚI CHO NGƯỜI DÙNG ĐĂNG NHẬP GOOGLE CHƯA ĐĂNG KÝ
             tk = new TaiKhoan();
-            
-            // Đảm bảo tên đăng nhập là duy nhất
-            String baseUsername = email;
-            if (taiKhoanRepository.findByTenDangNhap(baseUsername).isPresent()) {
-                baseUsername = email.split("@")[0] + "_" + UUID.randomUUID().toString().substring(0, 5);
-            }
-            tk.setTenDangNhap(baseUsername);
-            tk.setEmail(email);
+            String candidate = generateSafeUsername(normalizedEmail, displayName);
+            tk.setTenDangNhap(candidate);
+            tk.setEmail(normalizedEmail);
             tk.setMatKhauHash("OAUTH2_" + UUID.randomUUID());
             tk.setVaiTro("KHACHHANG");
             tk.setTrangThai("HoatDong");
-            tk.setAuthProvider(registrationId.toUpperCase());
-            tk.setProviderId(sub);
+            tk.setAuthProvider(provider);
+            tk.setProviderId(safeSub);
             tk.setNgayTao(LocalDateTime.now());
             tk = taiKhoanRepository.save(tk);
 
-            // Tạo hồ sơ khách hàng tương ứng
-            KhachHang newKh = new KhachHang();
-            newKh.setHoTen(name != null && !name.isBlank() ? name : email);
-            newKh.setEmail(email);
-            newKh.setAnhDaiDien(picture);
-            newKh.setTaiKhoan(tk);
-            newKh.setNgayDangKy(LocalDateTime.now());
-            khachHangRepository.save(newKh);
+            // Tự động khởi tạo hồ sơ Khách hàng đồng bộ với tài khoản Google
+            try {
+                KhachHang newKh = khachHangRepository.findByEmail(normalizedEmail).orElse(null);
+                if (newKh == null) {
+                    newKh = new KhachHang();
+                }
+                newKh.setTaiKhoan(tk);
+                newKh.setHoTen(displayName);
+                newKh.setEmail(normalizedEmail);
+                if (safePicture != null && !safePicture.isBlank()) {
+                    newKh.setAnhDaiDien(safePicture);
+                }
+                // Tạo số điện thoại giữ chỗ hợp lệ và duy nhất để thỏa mãn ràng buộc NOT NULL & UNIQUE
+                if (newKh.getSoDienThoai() == null || newKh.getSoDienThoai().isBlank()) {
+                    String seed = String.format("%08d", Math.abs((normalizedEmail + "_" + tk.getMaTaiKhoan()).hashCode() % 100000000));
+                    String tempPhone = "09" + seed;
+                    while (khachHangRepository.findBySoDienThoai(tempPhone).isPresent()) {
+                        tempPhone = "09" + String.format("%08d", (int)(Math.random() * 100000000));
+                    }
+                    newKh.setSoDienThoai(tempPhone);
+                }
+                if (newKh.getNgayDangKy() == null) {
+                    newKh.setNgayDangKy(LocalDateTime.now());
+                }
+                khachHangRepository.save(newKh);
+            } catch (Exception e) {
+                System.err.println("Notice: Could not create KhachHang during OAuth: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         return tk;
+    }
+
+    private String generateSafeUsername(String email, String displayName) {
+        String base = "";
+        // Ưu tiên tạo username chuẩn không dấu từ Họ Tên Google (nếu họ tên không phải là chuỗi số)
+        if (displayName != null && !displayName.isBlank() && !displayName.matches("\\d+")) {
+            String normalized = java.text.Normalizer.normalize(displayName, java.text.Normalizer.Form.NFD);
+            String ascii = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                    .toLowerCase()
+                    .replaceAll("[^a-z0-9]", "_")
+                    .replaceAll("_+", "_")
+                    .replaceAll("^_|_$", "");
+            if (!ascii.isBlank()) {
+                base = ascii;
+            }
+        }
+        // Fallback sang tiền tố email nếu cần
+        if (base.isBlank() && email != null && email.contains("@")) {
+            base = email.split("@")[0].replaceAll("[^a-zA-Z0-9._-]", "").toLowerCase();
+        }
+        if (base.isBlank()) {
+            base = "user";
+        }
+        if (base.length() > 30) {
+            base = base.substring(0, 30);
+        }
+
+        String candidate = base;
+        while (taiKhoanRepository.findByTenDangNhap(candidate).isPresent()) {
+            candidate = base + "_" + UUID.randomUUID().toString().substring(0, 4);
+            if (candidate.length() > 45) {
+                candidate = candidate.substring(0, 45);
+            }
+        }
+        return candidate;
     }
 }

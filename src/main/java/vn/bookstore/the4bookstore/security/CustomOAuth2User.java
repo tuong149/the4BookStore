@@ -18,7 +18,7 @@ public class CustomOAuth2User implements OAuth2User {
     public CustomOAuth2User(TaiKhoan taiKhoan, Map<String, Object> attributes, String nameAttributeKey) {
         this.taiKhoan = taiKhoan;
         this.attributes = attributes;
-        this.nameAttributeKey = nameAttributeKey != null ? nameAttributeKey : "sub";
+        this.nameAttributeKey = (nameAttributeKey != null && attributes != null && attributes.containsKey(nameAttributeKey)) ? nameAttributeKey : "sub";
     }
 
     @Override
@@ -28,28 +28,53 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = (taiKhoan.getVaiTro() != null) ? taiKhoan.getVaiTro().toUpperCase() : "KHACHHANG";
+        String role = (taiKhoan != null && taiKhoan.getVaiTro() != null) ? taiKhoan.getVaiTro().toUpperCase() : "KHACHHANG";
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
     @Override
     public String getName() {
-        if (attributes.containsKey("name") && attributes.get("name") != null) {
-            return (String) attributes.get("name");
+        if (attributes != null) {
+            Object name = attributes.get("name");
+            if (name != null && !name.toString().isBlank() && !name.toString().matches("\\d+")) {
+                return name.toString();
+            }
+            Object givenName = attributes.get("given_name");
+            Object familyName = attributes.get("family_name");
+            if (givenName != null || familyName != null) {
+                String full = ((familyName != null ? familyName + " " : "") + (givenName != null ? givenName : "")).trim();
+                if (!full.isBlank() && !full.matches("\\d+")) {
+                    return full;
+                }
+            }
         }
-        return taiKhoan.getEmail();
+        if (taiKhoan != null && taiKhoan.getTenDangNhap() != null && !taiKhoan.getTenDangNhap().matches("\\d+")) {
+            return taiKhoan.getTenDangNhap();
+        }
+        return getEmail();
     }
 
     public String getEmail() {
-        if (attributes.containsKey("email") && attributes.get("email") != null) {
-            return (String) attributes.get("email");
+        if (attributes != null && attributes.containsKey("email") && attributes.get("email") != null) {
+            return attributes.get("email").toString();
         }
-        return taiKhoan.getEmail();
+        return taiKhoan != null ? taiKhoan.getEmail() : "";
     }
 
     public String getPicture() {
-        if (attributes.containsKey("picture") && attributes.get("picture") != null) {
-            return (String) attributes.get("picture");
+        if (attributes != null) {
+            if (attributes.get("picture") != null) {
+                String pic = attributes.get("picture").toString();
+                if (!pic.isBlank()) {
+                    return pic;
+                }
+            }
+            if (attributes.get("avatar_url") != null) {
+                String pic = attributes.get("avatar_url").toString();
+                if (!pic.isBlank()) {
+                    return pic;
+                }
+            }
         }
         return null;
     }
