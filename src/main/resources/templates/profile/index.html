@@ -62,13 +62,22 @@
                                 <!-- Decorative Accent Gradient Backdrop -->
                                 <div class="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-primary/5 pointer-events-none"></div>
 
+                                <!-- Flash message for avatar -->
+                                <div th:if="${avatarSuccess}" class="p-3 bg-secondary-container/20 border border-secondary/30 rounded-xl text-xs text-secondary font-medium flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                    <span th:text="${avatarSuccess}"></span>
+                                </div>
+                                <div th:if="${avatarError}" class="p-3 bg-error-container/20 border border-error/30 rounded-xl text-xs text-error font-medium flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[16px]">error</span>
+                                    <span th:text="${avatarError}"></span>
+                                </div>
+
                                 <div class="flex items-center gap-space-md">
-                                    <div class="relative group cursor-pointer">
+                                    <div class="relative group cursor-pointer" onclick="document.getElementById('avatarFileInput').click()" title="Bấm để tải lên ảnh đại diện">
                                         <img alt="Ảnh đại diện"
-                                             class="w-16 h-16 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low"
-                                             th:src="${userAvatar != null ? userAvatar : ((khachHang != null and khachHang.anhDaiDien != null) ? khachHang.anhDaiDien : '/images/manager-avatar.png')}"
-                                             onerror="this.src='/images/manager-avatar.png'"/>
-                                        <button aria-label="Đổi ảnh đại diện" class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shadow hover:bg-primary-container transition-colors">
+                                             class="w-16 h-16 rounded-full object-cover shadow-sm ring-4 ring-surface-container-low group-hover:ring-primary/40 transition-all"
+                                             th:src="${userAvatar}"/>
+                                        <button type="button" aria-label="Đổi ảnh đại diện" class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shadow hover:bg-primary-container transition-colors">
                                             <span class="material-symbols-outlined text-[14px]">photo_camera</span>
                                         </button>
                                     </div>
@@ -81,12 +90,25 @@
                                            th:text="${khachHang != null and khachHang.email != null ? khachHang.email : taiKhoan.email}">
                                             minhthu.nguyen@example.com
                                         </p>
-                                        <div class="mt-1 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-label-sm font-label-sm font-semibold">
-                                            <span class="material-symbols-outlined text-[14px] text-primary">person</span>
-                                            <span th:text="${taiKhoan != null and taiKhoan.vaiTro == 'KHACHHANG' ? 'Khách Hàng' : (taiKhoan != null ? taiKhoan.vaiTro : 'Khách Hàng')}">Khách Hàng</span>
+                                        <div class="mt-1 flex flex-wrap items-center gap-2">
+                                            <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-label-sm font-label-sm font-semibold">
+                                                <span class="material-symbols-outlined text-[14px] text-primary">person</span>
+                                                <span th:text="${taiKhoan != null and taiKhoan.vaiTro == 'KHACHHANG' ? 'Khách Hàng' : (taiKhoan != null ? taiKhoan.vaiTro : 'Khách Hàng')}">Khách Hàng</span>
+                                            </div>
+                                            <!-- Option to revert to Initial avatar if user has a custom uploaded avatar -->
+                                            <form th:if="${userHasCustomAvatar}" th:action="@{/profile/remove-avatar}" method="post" class="inline">
+                                                <button type="submit" class="text-[11px] text-on-surface-variant hover:text-error transition-colors flex items-center gap-0.5 cursor-pointer underline" title="Gỡ ảnh tùy chỉnh, quay về dùng avatar chữ cái đầu">
+                                                    <span>Dùng avatar chữ cái</span>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Hidden avatar upload form -->
+                                <form id="avatarUploadForm" th:action="@{/profile/upload-avatar}" method="post" enctype="multipart/form-data" class="hidden">
+                                    <input type="file" id="avatarFileInput" name="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif" onchange="document.getElementById('avatarUploadForm').submit()"/>
+                                </form>
                             </div>
 
                             <!-- Account Navigation Drawer / Sidebar Menu -->
@@ -388,7 +410,7 @@
                                         <!-- Order Books List -->
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md" th:if="${dh.chiTietDonHangs != null and !dh.chiTietDonHangs.isEmpty()}">
                                             <div th:each="ct : ${dh.chiTietDonHangs}" class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/50">
-                                                <img alt="Bìa sách" class="w-12 h-16 object-cover rounded shadow-inner shrink-0" th:src="${ct.sanPham.hinhAnh ?: '/images/manager-avatar.png'}"/>
+                                                <img alt="Bìa sách" class="w-12 h-16 object-cover rounded shadow-inner shrink-0" th:src="${ct.sanPham.hinhAnh ?: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300'}"/>
                                                 <div class="min-w-0 flex-1">
                                                     <h3 class="font-headline-sm text-sm font-bold text-on-surface truncate" th:text="${ct.sanPham.tenSP}">Tên sách</h3>
                                                     <p class="font-label-md text-xs font-semibold text-primary mt-1">

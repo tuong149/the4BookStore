@@ -19,7 +19,14 @@ import vn.bookstore.the4bookstore.security.CustomOidcUser;
 import vn.bookstore.the4bookstore.security.CustomUserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.UUID;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -290,5 +297,90 @@ public class ProfileController {
 
         redirectAttributes.addFlashAttribute("pwdSuccess", "Đổi mật khẩu thành công!");
         return "redirect:/profile?pwdSuccess=true";
+    }
+
+    @PostMapping("/profile/upload-avatar")
+    public String uploadAvatar(Authentication authentication,
+                               @RequestParam("avatarFile") MultipartFile avatarFile,
+                               RedirectAttributes redirectAttributes) {
+        TaiKhoan tk = getCurrentTaiKhoan(authentication);
+        if (tk == null) {
+            return "redirect:/login";
+        }
+
+        if (avatarFile == null || avatarFile.isEmpty()) {
+            redirectAttributes.addFlashAttribute("avatarError", "Vui lòng chọn tệp ảnh hợp lệ!");
+            return "redirect:/profile";
+        }
+
+        if (avatarFile.getSize() > 5 * 1024 * 1024) {
+            redirectAttributes.addFlashAttribute("avatarError", "Dung lượng ảnh không được vượt quá 5MB!");
+            return "redirect:/profile";
+        }
+
+        String contentType = avatarFile.getContentType();
+        if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/octet-stream"))) {
+            redirectAttributes.addFlashAttribute("avatarError", "Định dạng tệp không được hỗ trợ! Vui lòng chọn ảnh JPG, PNG hoặc WebP.");
+            return "redirect:/profile";
+        }
+
+        String originalFilename = avatarFile.getOriginalFilename();
+        String extension = ".png";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+            if (!extension.matches("\\.(png|jpg|jpeg|webp|gif)")) {
+                extension = ".png";
+            }
+        }
+
+        try {
+            Path uploadDir = Paths.get("uploads", "avatars");
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            String filename = "avatar_" + tk.getMaTaiKhoan() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            Path filePath = uploadDir.resolve(filename);
+
+            try (InputStream inputStream = avatarFile.getInputStream()) {
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            KhachHang kh = khachHangRepository.findByTaiKhoan(tk).orElseGet(() -> {
+                KhachHang newKh = new KhachHang();
+                newKh.setTaiKhoan(tk);
+                newKh.setEmail(tk.getEmail());
+                newKh.setHoTen(tk.getTenDangNhap());
+                newKh.setNgayDangKy(LocalDateTime.now());
+                return newKh;
+            });
+
+            kh.setAnhDaiDien("/uploads/avatars/" + filename);
+            khachHangRepository.save(kh);
+
+            redirectAttributes.addFlashAttribute("avatarSuccess", "Tải lên ảnh đại diện thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("avatarError", "Đã xảy ra lỗi khi lưu ảnh: " + e.getMessage());
+        }
+
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/remove-avatar")
+    public String removeAvatar(Authentication authentication, RedirectAttributes redirectAttributes) {
+        TaiKhoan tk = getCurrentTaiKhoan(authentication);
+        if (tk == null) {
+            return "redirect:/login";
+        }
+
+        Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(tk);
+        if (khOpt.isPresent()) {
+            KhachHang kh = khOpt.get();
+            kh.setAnhDaiDien(null);
+            khachHangRepository.save(kh);
+            redirectAttributes.addFlashAttribute("avatarSuccess", "Đã gỡ ảnh đại diện, chuyển về sử dụng avatar chữ cái đầu!");
+        }
+
+        return "redirect:/profile";
     }
 }

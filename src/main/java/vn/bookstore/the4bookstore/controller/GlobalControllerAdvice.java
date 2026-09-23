@@ -26,65 +26,89 @@ public class GlobalControllerAdvice {
         this.taiKhoanRepository = taiKhoanRepository;
     }
 
-    @ModelAttribute("userAvatar")
-    public String getUserAvatar(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
-            Object principal = authentication.getPrincipal();
+    private String getCustomAvatar(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return null;
+        }
 
-            if (principal instanceof CustomOAuth2User oAuth2User) {
-                String picture = oAuth2User.getPicture();
-                if (picture != null && !picture.isBlank()) {
-                    return picture;
-                }
-                if (oAuth2User.getTaiKhoan() != null) {
-                    Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(oAuth2User.getTaiKhoan());
-                    if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank()) {
-                        return khOpt.get().getAnhDaiDien();
-                    }
-                }
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomOAuth2User oAuth2User) {
+            String picture = oAuth2User.getPicture();
+            if (picture != null && !picture.isBlank() && !picture.contains("manager-avatar.png")) {
+                return picture;
             }
-
-            if (principal instanceof CustomOidcUser oidcUser) {
-                String picture = oidcUser.getPicture();
-                if (picture != null && !picture.isBlank()) {
-                    return picture;
-                }
-                if (oidcUser.getTaiKhoan() != null) {
-                    Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(oidcUser.getTaiKhoan());
-                    if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank()) {
-                        return khOpt.get().getAnhDaiDien();
-                    }
-                }
-            }
-
-            if (principal instanceof OAuth2User oauth2User) {
-                Object pic = oauth2User.getAttribute("picture");
-                if (pic == null) {
-                    pic = oauth2User.getAttribute("avatar_url");
-                }
-                if (pic != null && !pic.toString().isBlank()) {
-                    return pic.toString();
-                }
-                Object emailObj = oauth2User.getAttribute("email");
-                if (emailObj != null) {
-                    Optional<TaiKhoan> tkOpt = taiKhoanRepository.findByEmail(emailObj.toString());
-                    if (tkOpt.isPresent()) {
-                        Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(tkOpt.get());
-                        if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank()) {
-                            return khOpt.get().getAnhDaiDien();
-                        }
-                    }
-                }
-            }
-
-            if (principal instanceof CustomUserDetails userDetails) {
-                Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(userDetails.getTaiKhoan());
-                if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank()) {
+            if (oAuth2User.getTaiKhoan() != null) {
+                Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(oAuth2User.getTaiKhoan());
+                if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank() && !khOpt.get().getAnhDaiDien().contains("manager-avatar.png")) {
                     return khOpt.get().getAnhDaiDien();
                 }
             }
         }
-        return "/images/manager-avatar.png";
+
+        if (principal instanceof CustomOidcUser oidcUser) {
+            String picture = oidcUser.getPicture();
+            if (picture != null && !picture.isBlank() && !picture.contains("manager-avatar.png")) {
+                return picture;
+            }
+            if (oidcUser.getTaiKhoan() != null) {
+                Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(oidcUser.getTaiKhoan());
+                if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank() && !khOpt.get().getAnhDaiDien().contains("manager-avatar.png")) {
+                    return khOpt.get().getAnhDaiDien();
+                }
+            }
+        }
+
+        if (principal instanceof OAuth2User oauth2User) {
+            Object pic = oauth2User.getAttribute("picture");
+            if (pic == null) {
+                pic = oauth2User.getAttribute("avatar_url");
+            }
+            if (pic != null && !pic.toString().isBlank() && !pic.toString().contains("manager-avatar.png")) {
+                return pic.toString();
+            }
+            Object emailObj = oauth2User.getAttribute("email");
+            if (emailObj != null) {
+                Optional<TaiKhoan> tkOpt = taiKhoanRepository.findByEmail(emailObj.toString());
+                if (tkOpt.isPresent()) {
+                    Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(tkOpt.get());
+                    if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank() && !khOpt.get().getAnhDaiDien().contains("manager-avatar.png")) {
+                        return khOpt.get().getAnhDaiDien();
+                    }
+                }
+            }
+        }
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            Optional<KhachHang> khOpt = khachHangRepository.findByTaiKhoan(userDetails.getTaiKhoan());
+            if (khOpt.isPresent() && khOpt.get().getAnhDaiDien() != null && !khOpt.get().getAnhDaiDien().isBlank() && !khOpt.get().getAnhDaiDien().contains("manager-avatar.png")) {
+                return khOpt.get().getAnhDaiDien();
+            }
+        }
+
+        return null;
+    }
+
+    @ModelAttribute("userAvatar")
+    public String getUserAvatar(Authentication authentication) {
+        String customAvatar = getCustomAvatar(authentication);
+        if (customAvatar != null) {
+            return customAvatar;
+        }
+        String displayName = getUserDisplayName(authentication);
+        return vn.bookstore.the4bookstore.util.AvatarUtils.generateInitialAvatarSvg(displayName);
+    }
+
+    @ModelAttribute("userInitial")
+    public String getUserInitial(Authentication authentication) {
+        String displayName = getUserDisplayName(authentication);
+        return vn.bookstore.the4bookstore.util.AvatarUtils.extractInitial(displayName);
+    }
+
+    @ModelAttribute("userHasCustomAvatar")
+    public boolean getUserHasCustomAvatar(Authentication authentication) {
+        String customAvatar = getCustomAvatar(authentication);
+        return vn.bookstore.the4bookstore.util.AvatarUtils.hasCustomAvatar(customAvatar);
     }
 
     @ModelAttribute("userDisplayName")
