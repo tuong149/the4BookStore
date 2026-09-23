@@ -53,4 +53,8 @@ public class CustomUserDetails implements UserDetails {
     public TaiKhoan getTaiKhoan() {
         return taiKhoan;
     }
+
+    public String getPicture() {
+        return null;
+    }
 }

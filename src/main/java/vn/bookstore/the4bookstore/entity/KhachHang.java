@@ -11,12 +11,14 @@ public class KhachHang {
     private Integer maKH;
     @Column(nullable = false, length = 100)
     private String hoTen;
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(unique = true, nullable = true, length = 20)
     private String soDienThoai;
     @Column(length = 100)
     private String email;
     @Column(length = 255)
     private String diaChi;
+    @Column(length = 500)
+    private String anhDaiDien;
     
     @OneToOne
     @JoinColumn(name = "maTaiKhoan", unique = true)
