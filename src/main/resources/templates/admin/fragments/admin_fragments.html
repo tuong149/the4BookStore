@@ -146,7 +146,7 @@
 
             <!-- Public Storefront Jump Link -->
             <div class="px-space-md py-space-sm">
-                <a th:href="@{/}" target="_blank" class="w-full flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors">
+                <a th:href="@{/}" class="w-full flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors">
                     <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
                     <span>Xem Cửa Hàng</span>
                 </a>
@@ -174,11 +174,38 @@
 
                 <!-- Orders (Mock / Upcoming) -->
                 <a th:href="@{/admin/orders}"
-                   th:class="${activePage == 'orders'} ? 
-                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                   th:class="${activePage == 'orders'} ?
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' :
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
                     <span class="material-symbols-outlined text-[20px]">receipt_long</span>
                     <span>Đơn Hàng</span>
+                </a>
+
+                <!-- Kho Hàng -->
+                <a th:href="@{/admin/kho}"
+                   th:class="${activePage == 'kho'} ?
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' :
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">warehouse</span>
+                    <span>Kho Hàng</span>
+                </a>
+
+                <!-- Phiếu Nhập -->
+                <a th:href="@{/admin/kho/phieu-nhap}"
+                   th:class="${activePage == 'phieu-nhap'} ?
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[18px]">input</span>
+                    <span>Phiếu Nhập</span>
+                </a>
+
+                <!-- Phiếu Kiểm Kê -->
+                <a th:href="@{/admin/kho/phieu-ke}"
+                   th:class="${activePage == 'phieu-ke'} ?
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                    <span>Phiếu Kiểm Kê</span>
                 </a>
 
                 <!-- Vouchers & Promotions -->

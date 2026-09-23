@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <th:block th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Đơn Hàng')}"></th:block>
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('orders')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full">
+
+                <!-- Page Title -->
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+                    <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                            <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                            <span>VẬN HÀNH THE4BOOKSTORE</span>
+                            <span>/</span>
+                            <span class="text-primary font-semibold">ĐƠN HÀNG</span>
+                        </div>
+                        <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Đơn Hàng</h1>
+                        <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                            Theo dõi, kiểm duyệt và cập nhật trạng thái đơn hàng từ khách hàng trong hệ thống.
+                        </p>
+                    </div>
+
+                    <!-- Summary metrics -->
+                    <div class="flex items-center gap-space-sm flex-wrap">
+                        <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                            <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+                                <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG ĐƠN</span>
+                                <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${orders != null ? #lists.size(orders) : 0}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar / Filters -->
+                <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm mb-space-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md border border-surface-container/60">
+                    <div class="flex flex-wrap items-center gap-space-sm flex-1">
+                        <!-- Search Box -->
+                        <div class="relative flex-1 min-w-[240px] max-w-md">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+                            <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30"
+                                   id="orderSearchInput"
+                                   placeholder="Tìm kiếm theo mã đơn, tên KH, SĐT..."
+                                   type="text"
+                                   onkeyup="filterOrders()"/>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="relative">
+                            <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30"
+                                    id="statusFilter"
+                                    onchange="filterOrders()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="ChoXuLy">Chờ xử lý / Chờ duyệt</option>
+                                <option value="DangGiao">Đang giao</option>
+                                <option value="DaGiao">Đã giao</option>
+                                <option value="DaHuy">Đã hủy</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Table Container -->
+                <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-surface-container/60">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse" id="ordersTable">
+                            <thead>
+                                <tr class="border-b border-surface-container/60 bg-surface-container-low/40 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                    <th class="py-3.5 px-space-md">MÃ ĐƠN</th>
+                                    <th class="py-3.5 px-space-md">KHÁCH HÀNG</th>
+                                    <th class="py-3.5 px-space-md">NGÀY ĐẶT</th>
+                                    <th class="py-3.5 px-space-md">ĐỊA CHỈ GIAO</th>
+                                    <th class="py-3.5 px-space-md text-right">TỔNG TIỀN</th>
+                                    <th class="py-3.5 px-space-md text-center">TRẠNG THÁI</th>
+                                    <th class="py-3.5 px-space-md text-right">THAO TÁC</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-surface-container/40">
+                                <tr th:if="${orders == null || #lists.isEmpty(orders)}">
+                                    <td colspan="7" class="py-8 text-center text-on-surface-variant">
+                                        Không tìm thấy đơn hàng nào.
+                                    </td>
+                                </tr>
+
+                                <tr th:each="dh : ${orders}"
+                                    class="order-row hover:bg-surface-container-low/50 transition-colors"
+                                    th:attr="data-id=${dh.maDH}, data-customer=${dh.khachHang != null ? dh.khachHang.hoTen?.toLowerCase() : ''}, data-phone=${dh.soDienThoaiGiao}, data-status=${dh.trangThai}">
+
+                                    <!-- Order ID -->
+                                    <td class="py-3.5 px-space-md font-mono font-bold text-primary" th:text="'#DH-' + ${dh.maDH}">#DH-001</td>
+
+                                    <!-- Customer Info -->
+                                    <td class="py-3.5 px-space-md">
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-on-surface" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Nguyễn Văn A</span>
+                                            <span class="text-xs text-on-surface-variant" th:text="${dh.soDienThoaiGiao}">0912345678</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Order Date -->
+                                    <td class="py-3.5 px-space-md text-on-surface-variant text-sm" th:text="${#temporals.format(dh.ngayDat, 'dd/MM/yyyy HH:mm')}">
+                                        01/01/2026 10:00
+                                    </td>
+
+                                    <!-- Shipping Address -->
+                                    <td class="py-3.5 px-space-md max-w-xs truncate text-sm text-on-surface-variant" th:title="${dh.diaChiGiao}" th:text="${dh.diaChiGiao}">
+                                        123 Đường ABC, Quận 1, TP.HCM
+                                    </td>
+
+                                    <!-- Total Amount -->
+                                    <td class="py-3.5 px-space-md text-right font-semibold text-on-surface tabular-nums" th:text="${#numbers.formatDecimal(dh.tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'">
+                                        250.000 ₫
+                                    </td>
+
+                                    <!-- Status Badge -->
+                                    <td class="py-3.5 px-space-md text-center">
+                                        <span th:if="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                            Chờ duyệt
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DangGiao'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Đang giao
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DaGiao'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                            Đã giao
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                                            Đã hủy
+                                        </span>
+                                        <span th:if="${dh.trangThai != 'ChoXuLy' and dh.trangThai != 'ChoDuyet' and dh.trangThai != 'DangGiao' and dh.trangThai != 'DaGiao' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" th:text="${dh.trangThai}">
+                                            Khác
+                                        </span>
+                                    </td>
+
+                                    <!-- Actions: Quick status changer -->
+                                    <td class="py-3.5 px-space-md text-right">
+                                        <select class="text-xs bg-surface-container-low border border-surface-container rounded-lg px-2 py-1 text-on-surface focus:outline-none focus:border-primary/50"
+                                                th:onchange="'updateOrderStatus(' + ${dh.maDH} + ', this.value)'">
+                                            <option value="" disabled selected>Đổi trạng thái...</option>
+                                            <option value="ChoXuLy" th:selected="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}">Chờ duyệt</option>
+                                            <option value="DangGiao" th:selected="${dh.trangThai == 'DangGiao'}">Đang giao</option>
+                                            <option value="DaGiao" th:selected="${dh.trangThai == 'DaGiao'}">Đã giao</option>
+                                            <option value="DaHuy" th:selected="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}">Hủy đơn</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script to handle dynamic filtering and updating status -->
+    <script>
+        function filterOrders() {
+            const query = document.getElementById('orderSearchInput').value.toLowerCase().trim();
+            const selectedStatus = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('.order-row');
+
+            rows.forEach(row => {
+                const id = row.getAttribute('data-id') || '';
+                const customer = row.getAttribute('data-customer') || '';
+                const phone = row.getAttribute('data-phone') || '';
+                const status = row.getAttribute('data-status') || '';
+
+                const matchesQuery = id.includes(query) || customer.includes(query) || phone.includes(query);
+
+                let matchesStatus = true;
+                if (selectedStatus !== 'all') {
+                    if (selectedStatus === 'ChoXuLy') {
+                        matchesStatus = (status === 'ChoXuLy' || status === 'ChoDuyet');
+                    } else if (selectedStatus === 'DaHuy') {
+                        matchesStatus = (status === 'DaHuy' || status === 'Huy');
+                    } else {
+                        matchesStatus = (status === selectedStatus);
+                    }
+                }
+
+                if (matchesQuery && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            if (!newStatus) return;
+
+            if (!confirm(`Bạn có chắc muốn chuyển trạng thái đơn hàng #${orderId} sang "${newStatus}"?`)) {
+                window.location.reload();
+                return;
+            }
+
+            try {
+                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                const response = await fetch(`/admin/orders/${orderId}/status?status=${encodeURIComponent(newStatus)}`, {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    window.location.reload();
+                } else {
+                    alert("Cập nhật trạng thái thất bại: " + (data.error || "Không rõ nguyên nhân"));
+                }
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ: " + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

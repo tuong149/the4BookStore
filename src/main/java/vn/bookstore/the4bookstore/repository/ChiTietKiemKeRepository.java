@@ -6,5 +6,6 @@ import vn.bookstore.the4bookstore.entity.ChiTietKiemKeId;
 
 @Repository
 public interface ChiTietKiemKeRepository extends JpaRepository<ChiTietKiemKe, ChiTietKiemKeId> {
+    java.util.List<ChiTietKiemKe> findByPhieuKiemKe(vn.bookstore.the4bookstore.entity.PhieuKiemKe phieuKiemKe);
 }
 

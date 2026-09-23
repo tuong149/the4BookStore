@@ -729,3 +729,78 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-09-22 23:26:25
+
+-- Kho
+CREATE TABLE IF NOT EXISTS khos (
+    ma_kho BIGINT PRIMARY KEY AUTO_INCREMENT,
+    ten_kho VARCHAR(100) NOT NULL,
+    dia_chi VARCHAR(255),
+    email VARCHAR(100),
+    sdt VARCHAR(20),
+    ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Kho Hang (Tồn kho)
+CREATE TABLE IF NOT EXISTS khohang (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    sach_id INT NOT NULL,
+    kho_id BIGINT NOT NULL,
+    so_luong_ton INT DEFAULT 0,
+    muc_toi_thieu INT DEFAULT 10,
+    muc_toi_da INT DEFAULT 1000,
+    ngay_cap_nhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_sach_kho (sach_id, kho_id),
+    FOREIGN KEY (sach_id) REFERENCES san_phams(ma_sp) ON DELETE CASCADE,
+    FOREIGN KEY (kho_id) REFERENCES khos(ma_kho) ON DELETE CASCADE,
+    INDEX idx_khohang_kho (kho_id),
+    INDEX idx_khohang_ton (so_luong_ton)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Phieu Nhap
+CREATE TABLE IF NOT EXISTS phieunhap (
+    ma_phieu_nhap BIGINT PRIMARY KEY AUTO_INCREMENT,
+    kho_id BIGINT NOT NULL,
+    nha_cung_cap_id INT NOT NULL,
+    ngay_nhap DATETIME DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(20) DEFAULT 'DRAFT',
+    ghi_chu VARCHAR(500),
+    FOREIGN KEY (kho_id) REFERENCES khos(ma_kho) ON DELETE CASCADE,
+    FOREIGN KEY (nha_cung_cap_id) REFERENCES nha_cung_caps(ma_ncc) ON DELETE RESTRICT,
+    INDEX idx_phieunhap_kho (kho_id),
+    INDEX idx_phieunhap_status (trang_thai)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Chi tiet Phieu Nhap
+CREATE TABLE IF NOT EXISTS phieunhapct (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    phieu_nhap_id BIGINT NOT NULL,
+    sach_id INT NOT NULL,
+    so_luong INT NOT NULL,
+    gia_nhap DECIMAL(12, 2) NOT NULL,
+    FOREIGN KEY (phieu_nhap_id) REFERENCES phieunhap(ma_phieu_nhap) ON DELETE CASCADE,
+    FOREIGN KEY (sach_id) REFERENCES san_phams(ma_sp) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Phieu Ke
+CREATE TABLE IF NOT EXISTS phieuke (
+    ma_phieu_ke BIGINT PRIMARY KEY AUTO_INCREMENT,
+    kho_id BIGINT NOT NULL,
+    ngay_ke DATETIME DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(20) DEFAULT 'DRAFT',
+    ghi_chu VARCHAR(500),
+    FOREIGN KEY (kho_id) REFERENCES khos(ma_kho) ON DELETE CASCADE,
+    INDEX idx_phieuke_kho (kho_id),
+    INDEX idx_phieuke_status (trang_thai)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Chi tiet Phieu Ke
+CREATE TABLE IF NOT EXISTS phieukect (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    phieu_ke_id BIGINT NOT NULL,
+    sach_id INT NOT NULL,
+    so_luong_ly_thuyet INT NOT NULL,
+    so_luong_thuc_te INT NOT NULL,
+    chenh_lech INT GENERATED ALWAYS AS (so_luong_ly_thuyet - so_luong_thuc_te) STORED,
+    FOREIGN KEY (phieu_ke_id) REFERENCES phieuke(ma_phieu_ke) ON DELETE CASCADE,
+    FOREIGN KEY (sach_id) REFERENCES san_phams(ma_sp) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

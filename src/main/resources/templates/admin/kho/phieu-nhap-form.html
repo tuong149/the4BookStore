@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <th:block th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Tạo Phiếu Nhập')}"></th:block>
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('phieu-nhap')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full max-w-5xl mx-auto">
+
+                <!-- Breadcrumbs & Header -->
+                <div class="flex flex-col gap-space-xs mb-space-lg">
+                    <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                        <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                        <span>VẬN HÀNH THE4BOOKSTORE</span>
+                        <span>/</span>
+                        <a th:href="@{/admin/kho/phieu-nhap}" class="hover:text-primary transition-colors">PHIẾU NHẬP</a>
+                        <span>/</span>
+                        <span class="text-primary font-semibold">TẠO MỚI</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Tạo Phiếu Nhập Mới</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant">
+                                Nhập hàng hoá từ nhà cung cấp vào kho lưu trữ của hệ thống.
+                            </p>
+                        </div>
+                        <a th:href="@{/admin/kho/phieu-nhap}" class="px-4 py-2 rounded-xl border border-surface-container bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md font-semibold transition-colors flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                            <span>Quay Lại</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <form id="phieuNhapForm" onsubmit="handleFormSubmit(event)" class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container/60 overflow-hidden">
+
+                    <div class="p-space-lg">
+
+                        <!-- Alert Box -->
+                        <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium"></div>
+
+                        <!-- Info Select Grid (3 Cols) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-8">
+
+                            <!-- Kho -->
+                            <div class="flex flex-col gap-2">
+                                <label for="khoId" class="font-label-md text-label-md font-semibold text-on-surface">Kho Nhập Hàng <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <select id="khoId" name="khoId" class="w-full appearance-none bg-surface-container-low px-4 py-2.5 pr-8 rounded-xl font-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 shadow-sm" required>
+                                        <option value="" disabled selected>Chọn kho hàng...</option>
+                                        <option th:each="kho : ${khos}" th:value="${kho.maKho}" th:text="${kho.tenKho}"></option>
+                                    </select>
+                                    <span class="material-symbols-outlined absolute right-2.5 top-3 text-[18px] text-on-surface-variant pointer-events-none">expand_more</span>
+                                </div>
+                            </div>
+
+                            <!-- NCC -->
+                            <div class="flex flex-col gap-2">
+                                <label for="nhaCungCapId" class="font-label-md text-label-md font-semibold text-on-surface">Nhà Cung Cấp <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <select id="nhaCungCapId" name="nhaCungCapId" class="w-full appearance-none bg-surface-container-low px-4 py-2.5 pr-8 rounded-xl font-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 shadow-sm" required>
+                                        <option value="" disabled selected>Chọn nhà cung cấp...</option>
+                                        <option th:each="ncc : ${nhaCungCaps}" th:value="${ncc.maNCC}" th:text="${ncc.tenNCC}"></option>
+                                    </select>
+                                    <span class="material-symbols-outlined absolute right-2.5 top-3 text-[18px] text-on-surface-variant pointer-events-none">expand_more</span>
+                                </div>
+                            </div>
+
+                            <!-- Nhân Viên -->
+                            <div class="flex flex-col gap-2">
+                                <label for="nhanVienId" class="font-label-md text-label-md font-semibold text-on-surface">Nhân Viên Nhập <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <select id="nhanVienId" name="nhanVienId" class="w-full appearance-none bg-surface-container-low px-4 py-2.5 pr-8 rounded-xl font-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 shadow-sm" required>
+                                        <option value="" disabled selected>Chọn nhân viên...</option>
+                                        <option th:each="nv : ${nhanViens}" th:value="${nv.maNV}" th:text="${nv.hoTen}"></option>
+                                    </select>
+                                    <span class="material-symbols-outlined absolute right-2.5 top-3 text-[18px] text-on-surface-variant pointer-events-none">expand_more</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Items Section Header -->
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Danh Sách Sản Phẩm Nhập</h2>
+                            <button type="button" onclick="addItemRow()" class="px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md font-semibold transition-colors inline-flex items-center gap-1 text-xs">
+                                <span class="material-symbols-outlined text-[16px]">add</span>
+                                <span>Thêm Dòng Sách</span>
+                            </button>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="rounded-xl border border-surface-container/60 overflow-hidden mb-6">
+                            <table class="w-full text-left border-collapse" id="itemsTable">
+                                <thead>
+                                    <tr class="border-b border-surface-container/60 bg-surface-container-low/40 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                        <th class="py-3 px-4" style="width: 50%;">SẢN PHẨM (SÁCH)</th>
+                                        <th class="py-3 px-4 text-right" style="width: 20%;">SỐ LƯỢNG</th>
+                                        <th class="py-3 px-4 text-right" style="width: 20%;">GIÁ NHẬP (VND)</th>
+                                        <th class="py-3 px-4 text-center" style="width: 10%;">XÓA</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="divide-y divide-surface-container/40">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- Total Section Footer -->
+                    <div class="px-space-lg py-4 bg-surface-container-low/30 border-t border-surface-container/60 flex items-center justify-between">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sm font-semibold text-on-surface-variant">Tổng Giá Trị Phiếu:</span>
+                            <span id="totalCostDisplay" class="font-headline-xl text-headline-xl font-bold text-primary tabular-nums">0 ₫</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="reset" onclick="resetForm()" class="px-4 py-2 rounded-xl text-on-surface font-label-md font-semibold hover:bg-surface-container transition-colors">
+                                Làm Mới
+                            </button>
+                            <button type="submit" id="submitBtn" class="px-5 py-2.5 rounded-xl bg-primary-container hover:bg-primary-container/90 text-on-primary font-label-md font-semibold shadow-sm transition-all inline-flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">save</span>
+                                <span>Lưu Phiếu Nhập</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden Template Row -->
+    <table style="display: none;">
+        <tbody id="rowTemplate">
+            <tr class="item-row hover:bg-surface-container-low/30 transition-colors">
+                <td class="p-3">
+                    <div class="relative">
+                        <select class="item-sach w-full appearance-none bg-surface-container-low px-3 py-2 pr-8 rounded-lg text-sm text-on-surface focus:outline-none border border-transparent focus:border-primary/40" required onchange="updateTotalCost()">
+                            <option value="" disabled selected>-- Chọn Sách --</option>
+                            <option th:each="sach : ${sachs}" th:value="${sach.maSP}" th:text="|${sach.tenSP} (${sach.ISBN != null ? sach.ISBN : 'N/A'})|"></option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                    </div>
+                </td>
+                <td class="p-3">
+                    <input type="number" class="item-soluong w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-right tabular-nums text-on-surface focus:outline-none border border-transparent focus:border-primary/40" min="1" step="1" placeholder="0" required oninput="updateTotalCost()">
+                </td>
+                <td class="p-3">
+                    <input type="number" class="item-gianhap w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-right tabular-nums text-on-surface focus:outline-none border border-transparent focus:border-primary/40" min="0" step="1000" placeholder="0" required oninput="updateTotalCost()">
+                </td>
+                <td class="p-3 text-center">
+                    <button type="button" onclick="removeItemRow(this)" class="w-8 h-8 rounded-lg hover:bg-rose-50 text-on-surface-variant hover:text-rose-600 inline-flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addItemRow();
+        });
+
+        function addItemRow() {
+            const tableBody = document.getElementById('tableBody');
+            const template = document.getElementById('rowTemplate').querySelector('tr');
+            const clone = template.cloneNode(true);
+            tableBody.appendChild(clone);
+            updateTotalCost();
+        }
+
+        function removeItemRow(buttonElement) {
+            const row = buttonElement.closest('tr');
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody.querySelectorAll('tr').length > 1) {
+                row.remove();
+                updateTotalCost();
+            } else {
+                showAlert("Phiếu nhập phải có ít nhất 1 dòng sản phẩm.", "error");
+            }
+        }
+
+        function updateTotalCost() {
+            let total = 0;
+            const rows = document.querySelectorAll('#tableBody .item-row');
+
+            rows.forEach(row => {
+                const qty = parseInt(row.querySelector('.item-soluong').value) || 0;
+                const cost = parseInt(row.querySelector('.item-gianhap').value) || 0;
+                total += (qty * cost);
+            });
+
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
+
+            document.getElementById('totalCostDisplay').innerText = formatter.format(total);
+        }
+
+        function resetForm() {
+            setTimeout(() => {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+                addItemRow();
+                hideAlert();
+            }, 10);
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+            alertBox.classList.add('block', 'border');
+
+            if (type === 'error') {
+                alertBox.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+            } else {
+                alertBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+            }
+
+            alertBox.textContent = message;
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function hideAlert() {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.add('hidden');
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            hideAlert();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Đang xử lý...</span>';
+
+            try {
+                const khoId = document.getElementById('khoId').value;
+                const nhaCungCapId = document.getElementById('nhaCungCapId').value;
+                const nhanVienId = document.getElementById('nhanVienId').value;
+
+                if (!khoId || !nhaCungCapId) {
+                    throw new Error("Vui lòng chọn Kho và Nhà cung cấp hợp lệ.");
+                }
+                if (!nhanVienId) {
+                    throw new Error("Vui lòng chọn Nhân viên nhập.");
+                }
+
+                const chiTiets = [];
+                const rows = document.querySelectorAll('#tableBody .item-row');
+
+                rows.forEach((row, index) => {
+                    const sachId = row.querySelector('.item-sach').value;
+                    const soLuong = parseInt(row.querySelector('.item-soluong').value);
+                    const giaNhap = parseInt(row.querySelector('.item-gianhap').value);
+
+                    if (!sachId || isNaN(soLuong) || soLuong <= 0 || isNaN(giaNhap) || giaNhap < 0) {
+                        throw new Error(`Kiểm tra lại dữ liệu tại dòng thứ ${index + 1}.`);
+                    }
+
+                    chiTiets.push({
+                        sachId: parseInt(sachId),
+                        soLuong: soLuong,
+                        giaNhap: giaNhap
+                    });
+                });
+
+                if (chiTiets.length === 0) {
+                    throw new Error("Không có sản phẩm nào để nhập.");
+                }
+
+                const requestPayload = {
+                    khoId: parseInt(khoId),
+                    nhaCungCapId: parseInt(nhaCungCapId),
+                    nhanVienId: parseInt(nhanVienId),
+                    chiTiets: chiTiets
+                };
+
+                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                const response = await fetch('/admin/kho/phieu-nhap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(requestPayload)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || "Giao dịch thất bại do lỗi phía server.");
+                }
+
+                showAlert("Tạo phiếu nhập #" + result.id + " thành công! Đang chuyển hướng...", "success");
+
+                setTimeout(() => {
+                    window.location.href = '/admin/kho/phieu-nhap';
+                }, 1200);
+
+            } catch (error) {
+                showAlert(error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
+        }
+
+        /*]]>*/
+    </script>
+</body>
+</html>
