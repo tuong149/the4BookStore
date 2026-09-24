@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common/head :: common_head(${groupName + ' - The4BookStore'})}"></head>
+
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('products')}"></header>
+
+    <main class="w-full pt-28 bg-background flex-1">
+        <div class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+
+            <!-- Breadcrumb -->
+            <div class="flex items-center gap-1 text-on-surface-variant text-xs uppercase tracking-wider mb-space-lg">
+                <a th:href="@{/}" class="hover:text-primary transition-colors">Trang Chủ</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <a th:href="@{/san-pham}" class="hover:text-primary transition-colors">Tất Cả Sản Phẩm</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary font-semibold" th:text="${groupName}">Sách</span>
+            </div>
+
+            <!-- Page header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-lg gap-space-sm">
+                <div>
+                    <h1 class="font-headline-xl text-2xl md:text-3xl font-bold text-on-surface tracking-tight" th:text="${groupName}">Sách</h1>
+                    <p class="text-on-surface-variant text-sm mt-1" th:text="'Hiển thị ' + ${totalElements} + ' sản phẩm'">0 sản phẩm</p>
+                </div>
+                <a th:href="@{/san-pham}" class="inline-flex items-center gap-1 text-on-surface-variant text-xs hover:text-primary transition-colors self-start md:self-auto">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Về Tất cả sản phẩm</span>
+                </a>
+            </div>
+
+            <!-- Pill Filters khi chưa chọn Danh mục: Hiển thị 3 Danh mục chính -->
+            <div th:if="${loaiSP == null || loaiSP == '' || loaiSP == 'ALL'}" class="flex items-center gap-2 overflow-x-auto py-2 px-3 mb-space-md bg-surface-container-lowest rounded-2xl border border-surface-container/60 shadow-xs flex-nowrap scroll-smooth">
+                <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                    <span class="material-symbols-outlined text-[16px] text-primary">category</span>
+                    <span>Danh mục:</span>
+                </span>
+                <a th:href="@{/san-pham(q=${keyword}, sort=${sortBy})}"
+                   class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs">
+                    Tất cả danh mục
+                </a>
+                <a th:href="@{/san-pham/sach(q=${keyword}, sort=${sortBy})}"
+                   class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">
+                    Sách
+                </a>
+                <a th:href="@{/san-pham/van-phong-pham(q=${keyword}, sort=${sortBy})}"
+                   class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">
+                    Văn phòng phẩm
+                </a>
+                <a th:href="@{/san-pham/qua-tang(q=${keyword}, sort=${sortBy})}"
+                   class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">
+                    Quà tặng &amp; Trang trí
+                </a>
+            </div>
+
+            <!-- Pill Filters khi ĐÃ CHỌN Danh mục: Hiển thị các loại thuộc Danh mục đó -->
+            <div th:if="${loaiSP != null && loaiSP != '' && loaiSP != 'ALL' && !#lists.isEmpty(categories)}" class="flex items-center gap-2 overflow-x-auto py-2 px-3 mb-space-md bg-surface-container-lowest rounded-2xl border border-surface-container/60 shadow-xs flex-nowrap scroll-smooth">
+                <a th:href="@{/san-pham(q=${keyword}, sort=${sortBy})}"
+                   class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold flex items-center gap-1 transition-all">
+                    <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                    <span>Tất cả danh mục</span>
+                </a>
+                <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1 border-l border-surface-container/60 pl-2">
+                    <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
+                    <span th:text="${loaiSP == 'Sach' ? 'Loại sách:' : (loaiSP == 'VanPhongPham' ? 'Loại VPP:' : 'Loại quà tặng:')}">Loại:</span>
+                </span>
+                <a th:href="@{${baseUrl}(loaiSP=${loaiSP}, q=${keyword}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
+                   th:class="${selectedDanhMuc == null || selectedDanhMuc == 0} ? 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs' : 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all'">
+                    <span th:text="${loaiSP == 'Sach' ? 'Tất cả loại sách' : (loaiSP == 'VanPhongPham' ? 'Tất cả loại VPP' : 'Tất cả loại quà tặng')}">Tất cả loại</span>
+                </a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{${baseUrl}(loaiSP=${loaiSP}, danhMuc=${cat.maDanhMuc}, q=${keyword}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
+                   th:text="${cat.tenDanhMuc}"
+                   th:class="${selectedDanhMuc != null && selectedDanhMuc == cat.maDanhMuc} ? 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs' : 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all'">
+                    Văn học
+                </a>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <form id="filterForm" th:data-current-loai="${loaiSP}" method="get" th:action="${baseUrl}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-lg">
+                <div class="flex flex-col lg:flex-row flex-wrap gap-space-sm items-stretch lg:items-center">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 min-w-[220px]">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+                        <input type="text" name="q" th:value="${keyword}"
+                               class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
+                               placeholder="Tìm theo tên sản phẩm, tác giả, NXB, ISBN..."/>
+                    </div>
+                    <!-- Dropdown: Danh mục cấp 1 (khi ở trang /san-pham) -->
+                    <select th:if="${baseUrl == '/san-pham'}" name="loaiSP" id="filterLoaiSP" onchange="onCategoryGroupChange(this.value)"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[160px]">
+                        <option value="" th:selected="${loaiSP == null || loaiSP == '' || loaiSP == 'ALL'}">-- Tất cả danh mục --</option>
+                        <option value="Sach" th:selected="${loaiSP == 'Sach'}">Sách</option>
+                        <option value="VanPhongPham" th:selected="${loaiSP == 'VanPhongPham'}">Văn phòng phẩm</option>
+                        <option value="QuaTang" th:selected="${loaiSP == 'QuaTang'}">Quà tặng &amp; Trang trí</option>
+                    </select>
+
+                    <!-- Dropdown: Loại sản phẩm (Cấp 2) - Bắt buộc chọn Danh mục trước -->
+                    <select name="danhMuc" id="filterDanhMuc"
+                            th:disabled="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL')}"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[170px] disabled:opacity-50 disabled:cursor-not-allowed">
+                        <option value="0" id="defaultCatOption"
+                                th:text="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL') ? '-- Chọn danh mục trước --' : (loaiSP == 'Sach' ? 'Tất cả loại sách' : (loaiSP == 'VanPhongPham' ? 'Tất cả loại VPP' : (loaiSP == 'QuaTang' ? 'Tất cả loại quà tặng' : 'Tất cả loại')))}">
+                            -- Chọn danh mục trước --
+                        </option>
+                        <option th:each="cat : ${categoriesSach}"
+                                data-group="Sach"
+                                th:value="${cat.maDanhMuc}"
+                                th:text="${cat.tenDanhMuc}"
+                                th:selected="${selectedDanhMuc != null && selectedDanhMuc == cat.maDanhMuc}">
+                            Tiểu thuyết
+                        </option>
+                        <option th:each="cat : ${categoriesVpp}"
+                                data-group="VanPhongPham"
+                                th:value="${cat.maDanhMuc}"
+                                th:text="${cat.tenDanhMuc}"
+                                th:selected="${selectedDanhMuc != null && selectedDanhMuc == cat.maDanhMuc}">
+                            Bút
+                        </option>
+                        <option th:each="cat : ${categoriesQuaTang}"
+                                data-group="QuaTang"
+                                th:value="${cat.maDanhMuc}"
+                                th:text="${cat.tenDanhMuc}"
+                                th:selected="${selectedDanhMuc != null && selectedDanhMuc == cat.maDanhMuc}">
+                            Túi Tote
+                        </option>
+                    </select>
+
+                    <!-- Container Tác giả & NXB (Chỉ dành cho Sách) -->
+                    <div id="authorPublisherGroup" class="flex items-center gap-space-sm flex-wrap"
+                         th:classappend="${loaiSP != 'Sach'} ? ' hidden' : ''">
+                        <!-- Dropdown: Tác giả -->
+                        <select th:if="${authors != null && !#lists.isEmpty(authors)}" name="tacGia" id="filterTacGia"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[140px]">
+                            <option value="0" th:selected="${selectedTacGia == null || selectedTacGia == 0}">Tất cả tác giả</option>
+                            <option th:each="tg : ${authors}"
+                                    th:value="${tg.maTacGia}"
+                                    th:text="${tg.tenTacGia}"
+                                    th:selected="${selectedTacGia != null && selectedTacGia == tg.maTacGia}">Tác giả</option>
+                        </select>
+                        <!-- Dropdown: NXB -->
+                        <select th:if="${publishers != null && !#lists.isEmpty(publishers)}" name="nxb" id="filterNxb"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[140px]">
+                            <option value="0" th:selected="${selectedNxb == null || selectedNxb == 0}">Tất cả NXB</option>
+                            <option th:each="pub : ${publishers}"
+                                    th:value="${pub.maNXB}"
+                                    th:text="${pub.tenNXB}"
+                                    th:selected="${selectedNxb != null && selectedNxb == pub.maNXB}">NXB</option>
+                        </select>
+                    </div>
+
+                    <!-- Sắp xếp -->
+                    <select name="sort"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[130px]">
+                        <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                        <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Giá tăng dần</option>
+                        <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Giá giảm dần</option>
+                        <option value="name_asc" th:selected="${sortBy == 'name_asc'}">Tên A-Z</option>
+                    </select>
+
+                    <!-- Nút Lọc / Đặt lại -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="submit" class="bg-primary text-on-primary px-space-md py-2.5 rounded-xl text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm">
+                            <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                            <span>Lọc</span>
+                        </button>
+                        <a th:href="${baseUrl}" class="px-space-md py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-sm font-semibold transition-colors flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                            <span>Đặt lại</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Product Grid -->
+            <div th:if="${#lists.isEmpty(products)}" class="text-center py-16">
+                <span class="material-symbols-outlined text-[64px] text-on-surface-variant">search_off</span>
+                <h3 class="font-headline-lg text-lg font-bold text-on-surface mt-space-md mb-space-xs">Không tìm thấy sản phẩm</h3>
+                <p class="text-on-surface-variant text-sm">Thử từ khóa khác hoặc điều chỉnh lại bộ lọc</p>
+                <a th:href="@{/san-pham}" class="inline-block mt-space-md px-space-lg py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold hover:bg-primary-container transition-colors shadow-sm">Xem tất cả sản phẩm</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(products)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                <th:block th:each="book : ${products}">
+                    <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                </th:block>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="flex items-center justify-center gap-space-xs mt-space-xl flex-wrap">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${currentPage - 1})}"
+                   class="flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">chevron_left</span><span>Trước</span>
+                </a>
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${i})}"
+                       th:text="${i + 1}"
+                       th:class="${i == currentPage} ? 'px-3.5 py-2 rounded-xl bg-primary text-on-primary text-sm font-bold shadow-sm' : 'px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors'">1</a>
+                </th:block>
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${currentPage + 1})}"
+                   class="flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors">
+                    <span>Tiếp</span><span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <script>
+        function onCategoryGroupChange(group, isInit) {
+            const catSelect = document.getElementById('filterDanhMuc');
+            const defaultCatOpt = document.getElementById('defaultCatOption');
+            const authorPubGroup = document.getElementById('authorPublisherGroup');
+            const tacGiaSelect = document.getElementById('filterTacGia');
+            const nxbSelect = document.getElementById('filterNxb');
+
+            if (!catSelect || !defaultCatOpt) return;
+
+            const groupLabels = {
+                'Sach': 'Tất cả loại sách',
+                'VanPhongPham': 'Tất cả loại VPP',
+                'QuaTang': 'Tất cả loại quà tặng'
+            };
+
+            const hasGroup = group && group !== 'ALL' && group !== '';
+
+            if (!hasGroup) {
+                // 1. Chưa chọn danh mục cha -> Khóa dropdown loại sản phẩm
+                catSelect.disabled = true;
+                catSelect.value = '0';
+                defaultCatOpt.textContent = '-- Chọn danh mục trước --';
+                defaultCatOpt.selected = true;
+
+                // Ẩn toàn bộ options loại con
+                catSelect.querySelectorAll('option[data-group]').forEach(function (opt) {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                    opt.style.display = 'none';
+                    opt.selected = false;
+                });
+
+                // Ẩn nhóm tác giả & NXB
+                if (authorPubGroup) {
+                    authorPubGroup.classList.add('hidden');
+                }
+                if (tacGiaSelect) tacGiaSelect.value = '0';
+                if (nxbSelect) nxbSelect.value = '0';
+            } else {
+                // 2. Đã chọn danh mục -> Mở khóa dropdown loại sản phẩm và lọc options tương ứng
+                catSelect.disabled = false;
+                defaultCatOpt.textContent = groupLabels[group] || 'Tất cả loại';
+
+                let selectedStillValid = false;
+                catSelect.querySelectorAll('option[data-group]').forEach(function (opt) {
+                    const optGroup = opt.getAttribute('data-group');
+                    if (optGroup === group) {
+                        opt.hidden = false;
+                        opt.disabled = false;
+                        opt.style.display = '';
+                        if (opt.selected) {
+                            selectedStillValid = true;
+                        }
+                    } else {
+                        opt.hidden = true;
+                        opt.disabled = true;
+                        opt.style.display = 'none';
+                        if (opt.selected) {
+                            opt.selected = false;
+                        }
+                    }
+                });
+
+                // Nếu người dùng đổi danh mục và loại đang chọn không thuộc danh mục mới -> reset về 0
+                if (!isInit && !selectedStillValid) {
+                    catSelect.value = '0';
+                    defaultCatOpt.selected = true;
+                }
+
+                // 3. Tác giả & NXB chỉ hiển thị khi chọn Danh mục Sách
+                if (authorPubGroup) {
+                    if (group === 'Sach') {
+                        authorPubGroup.classList.remove('hidden');
+                    } else {
+                        authorPubGroup.classList.add('hidden');
+                        if (tacGiaSelect) tacGiaSelect.value = '0';
+                        if (nxbSelect) nxbSelect.value = '0';
+                    }
+                }
+            }
+        }
+
+        function initCategoryFilter() {
+            const loaiSPSelect = document.getElementById('filterLoaiSP');
+            const form = document.getElementById('filterForm');
+            if (loaiSPSelect) {
+                onCategoryGroupChange(loaiSPSelect.value, true);
+            } else if (form && form.dataset.currentLoai) {
+                onCategoryGroupChange(form.dataset.currentLoai, true);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initCategoryFilter);
+        window.addEventListener('pageshow', initCategoryFilter);
+    </script>
+
+</body>
+</html>

@@ -4,14 +4,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import vn.bookstore.the4bookstore.entity.DanhMuc;
 import vn.bookstore.the4bookstore.entity.KhachHang;
 import vn.bookstore.the4bookstore.entity.TaiKhoan;
+import vn.bookstore.the4bookstore.repository.DanhMucRepository;
 import vn.bookstore.the4bookstore.repository.KhachHangRepository;
+import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
 import vn.bookstore.the4bookstore.security.CustomOAuth2User;
 import vn.bookstore.the4bookstore.security.CustomOidcUser;
 import vn.bookstore.the4bookstore.security.CustomUserDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 @ControllerAdvice
@@ -20,10 +24,72 @@ public class GlobalControllerAdvice {
     private final KhachHangRepository khachHangRepository;
     private final TaiKhoanRepository taiKhoanRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private DanhMucRepository danhMucRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private SanPhamRepository sanPhamRepository;
+
     public GlobalControllerAdvice(KhachHangRepository khachHangRepository,
                                   TaiKhoanRepository taiKhoanRepository) {
         this.khachHangRepository = khachHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
+    }
+
+    @ModelAttribute("allActiveCategories")
+    public List<DanhMuc> getAllActiveCategories() {
+        if (danhMucRepository == null) return List.of();
+        return danhMucRepository.findAll().stream()
+                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
+                .toList();
+    }
+
+    @ModelAttribute("navbarCategoriesSach")
+    public List<DanhMuc> getNavbarCategoriesSach() {
+        if (sanPhamRepository == null || danhMucRepository == null) return List.of();
+        List<DanhMuc> distinctByProduct = sanPhamRepository.findDistinctDanhMucByLoaiSP("Sach");
+        return danhMucRepository.findAll().stream()
+                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
+                .filter(dm -> {
+                    String name = dm.getTenDanhMuc().toLowerCase();
+                    boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ") || name.contains("văn phòng phẩm");
+                    boolean isQuaTang = name.contains("túi") || name.contains("book nook") || name.contains("boardgame") || name.contains("quà tặng") || name.contains("nến");
+                    return (!isVpp && !isQuaTang) || distinctByProduct.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
+                })
+                .toList();
+    }
+
+    @ModelAttribute("navbarCategoriesVpp")
+    public List<DanhMuc> getNavbarCategoriesVpp() {
+        if (sanPhamRepository == null || danhMucRepository == null) return List.of();
+        List<DanhMuc> distinctByProduct = sanPhamRepository.findDistinctDanhMucByLoaiSP("VanPhongPham");
+        return danhMucRepository.findAll().stream()
+                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
+                .filter(dm -> {
+                    String name = dm.getTenDanhMuc().toLowerCase();
+                    boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ") || name.contains("văn phòng phẩm");
+                    return isVpp || distinctByProduct.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
+                })
+                .toList();
+    }
+
+    @ModelAttribute("navbarCategoriesQuaTang")
+    public List<DanhMuc> getNavbarCategoriesQuaTang() {
+        if (sanPhamRepository == null || danhMucRepository == null) return List.of();
+        List<DanhMuc> distinctByProduct = sanPhamRepository.findDistinctDanhMucByLoaiSP("QuaTang");
+        return danhMucRepository.findAll().stream()
+                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
+                .filter(dm -> {
+                    String name = dm.getTenDanhMuc().toLowerCase();
+                    boolean isQuaTang = name.contains("túi") || name.contains("book nook") || name.contains("boardgame") || name.contains("quà tặng") || name.contains("nến");
+                    return isQuaTang || distinctByProduct.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
+                })
+                .toList();
+    }
+
+    @ModelAttribute("navbarCategories")
+    public List<DanhMuc> getNavbarCategories() {
+        return getAllActiveCategories();
     }
 
     private String getCustomAvatar(Authentication authentication) {

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common/head :: common_head(${sanPham.tenSP + ' - The4BookStore'})}"></head>
+
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('products')}"></header>
+
+    <main class="w-full pt-28 bg-background flex-1">
+        <div class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+
+            <!-- Breadcrumb -->
+            <div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-xs uppercase tracking-wider mb-space-lg">
+                <a th:href="@{/}" class="hover:text-primary transition-colors">Trang Chủ</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <a th:href="@{/san-pham}" class="hover:text-primary transition-colors">Tất Cả Sản Phẩm</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-primary font-semibold truncate max-w-xs" th:text="${sanPham.tenSP}">Tên sản phẩm</span>
+            </div>
+
+            <!-- Main Product Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl mb-space-xl">
+
+                <!-- Product Cover (4 cols) -->
+                <div class="lg:col-span-4 flex justify-center">
+                    <div class="relative group w-full max-w-xs">
+                        <div class="absolute -inset-3 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl blur-xl opacity-70"></div>
+                        <div class="relative aspect-[3/4] w-full rounded-3xl overflow-hidden shadow-2xl bg-surface-container border border-surface-container-high">
+                            <img th:if="${sanPham.hinhAnh != null}"
+                                 th:src="${sanPham.hinhAnh}" th:alt="${sanPham.tenSP}"
+                                 class="w-full h-full object-cover"/>
+                            <img th:unless="${sanPham.hinhAnh != null}"
+                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y"
+                                 th:alt="${sanPham.tenSP}"
+                                 class="w-full h-full object-cover"/>
+                        </div>
+                        <!-- Stock badge -->
+                        <div th:if="${sanPham.soLuongTon != null && sanPham.soLuongTon > 0 && sanPham.soLuongTon <= 5}"
+                             class="absolute top-3 right-3 bg-secondary text-on-secondary text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                            Chỉ còn <span th:text="${sanPham.soLuongTon}"></span> sản phẩm!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info (8 cols) -->
+                <div class="lg:col-span-8 flex flex-col gap-space-md">
+                    <!-- Category Badge -->
+                    <div>
+                        <span th:if="${sanPham.danhMuc != null}"
+                              class="inline-flex items-center px-space-sm py-1 rounded-full bg-primary/10 text-primary text-xs font-bold"
+                              th:text="${sanPham.danhMuc.tenDanhMuc}">Văn học</span>
+                    </div>
+
+                    <!-- Title -->
+                    <h1 class="font-headline-xl text-2xl md:text-4xl font-bold text-on-surface tracking-tight leading-tight" th:text="${sanPham.tenSP}">Tên Sản Phẩm</h1>
+
+                    <!-- Authors & Publisher Badges / Links -->
+                    <div class="flex flex-wrap items-center gap-space-md text-sm text-on-surface-variant">
+                        <!-- Author -->
+                        <div th:if="${sanPham.danhSachTacGia != null and !sanPham.danhSachTacGia.isEmpty()}" class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px] text-primary">person_edit</span>
+                            <span>Tác giả: </span>
+                            <span class="font-bold text-primary" th:text="${sanPham.danhSachTacGia}">Matt Haig</span>
+                        </div>
+
+                        <!-- Publisher -->
+                        <div th:if="${sanPham.nhaXuatBan != null}" class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px] text-secondary">apartment</span>
+                            <span>NXB: </span>
+                            <a th:href="@{/san-pham/sach(nxb=${sanPham.nhaXuatBan.maNXB})}" class="font-semibold text-on-surface hover:text-primary hover:underline" th:text="${sanPham.nhaXuatBan.tenNXB}">NXB Hội Nhà Văn</a>
+                        </div>
+                    </div>
+
+                    <!-- ISBN -->
+                    <div th:if="${sanPham.ISBN != null}" class="flex items-center gap-space-xs text-on-surface-variant text-xs font-mono">
+                        <span class="material-symbols-outlined text-[16px]">qr_code</span>
+                        <span th:text="'Mã ISBN: ' + ${sanPham.ISBN}">ISBN: 978-xxx</span>
+                    </div>
+
+                    <!-- Price Block -->
+                    <div class="bg-surface-container-low rounded-2xl p-space-lg border border-surface-container">
+                        <p class="text-xs text-on-surface-variant mb-1">Giá niêm yết</p>
+                        <p class="font-mono font-extrabold text-3xl text-primary" th:text="${#numbers.formatDecimal(sanPham.giaBan, 0, 'POINT', 0, 'COMMA') + ' đ'}">189.000 đ</p>
+                    </div>
+
+                    <!-- Stock & Status -->
+                    <div class="flex items-center gap-space-md">
+                        <div th:if="${sanPham.trangThai != 'HetHang' && sanPham.soLuongTon != null && sanPham.soLuongTon > 0}"
+                             class="flex items-center gap-space-xs">
+                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                            <span class="text-sm font-semibold text-primary">Còn hàng</span>
+                            <span class="text-xs text-on-surface-variant" th:text="'(' + ${sanPham.soLuongTon} + ' sản phẩm)'"></span>
+                        </div>
+                        <div th:unless="${sanPham.trangThai != 'HetHang' && sanPham.soLuongTon != null && sanPham.soLuongTon > 0}"
+                             class="flex items-center gap-space-xs">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                            <span class="text-sm font-semibold text-rose-600">Hết hàng</span>
+                            <span class="text-xs text-on-surface-variant">(Sản phẩm tạm thời hết hàng)</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-space-sm pt-space-xs">
+                        <form th:action="@{/gio-hang/add}" method="post" class="flex-1">
+                            <input type="hidden" name="maSP" th:value="${sanPham.maSP}"/>
+                            <input type="hidden" name="soLuong" value="1"/>
+                            <button type="submit"
+                                    th:disabled="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0}"
+                                    class="w-full bg-primary text-on-primary py-3 px-space-xl rounded-xl font-bold text-sm hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-space-xs disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[20px]" th:text="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0 ? 'production_quantity_limits' : 'add_shopping_cart'}">add_shopping_cart</span>
+                                <span th:text="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0 ? 'Tạm Thời Hết Hàng' : 'Thêm Vào Giỏ Hàng'}">Thêm Vào Giỏ Hàng</span>
+                            </button>
+                        </form>
+                        <a th:href="@{/san-pham}" class="px-space-xl py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-sm transition-colors flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                            <span>Quay Lại</span>
+                        </a>
+                    </div>
+
+                    <!-- Meta Info Grid -->
+                    <div class="grid grid-cols-2 gap-space-sm mt-space-xs">
+                        <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60">
+                            <p class="text-xs text-on-surface-variant mb-0.5">Danh mục</p>
+                            <p class="text-sm font-semibold text-on-surface" th:text="${sanPham.loaiSP == 'Sach' ? 'Sách' : (sanPham.loaiSP == 'VanPhongPham' ? 'Văn Phòng Phẩm' : (sanPham.loaiSP == 'QuaTang' ? 'Quà Tặng & Trang Trí' : sanPham.loaiSP))}">Sách</p>
+                        </div>
+                        <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60" th:if="${sanPham.danhMuc != null}">
+                            <p class="text-xs text-on-surface-variant mb-0.5">Loại sản phẩm</p>
+                            <p class="text-sm font-semibold text-on-surface" th:text="${sanPham.danhMuc.tenDanhMuc}">Tiểu thuyết</p>
+                        </div>
+                        <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60" th:if="${sanPham.nhaXuatBan != null}">
+                            <p class="text-xs text-on-surface-variant mb-0.5">Nhà Xuất Bản</p>
+                            <p class="text-sm font-semibold text-on-surface" th:text="${sanPham.nhaXuatBan.tenNXB}">NXB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div th:if="${!#lists.isEmpty(relatedBooks)}" class="mt-space-xl">
+                <div class="flex items-center gap-space-sm mb-space-lg">
+                    <span class="material-symbols-outlined text-primary text-[24px]">recommend</span>
+                    <h2 class="font-headline-lg text-xl font-bold text-on-surface">Sản Phẩm Tương Tự</h2>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                    <th:block th:each="book : ${relatedBooks}">
+                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                    </th:block>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Nhà Xuất Bản')}">
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('publishers')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full">
+
+                <!-- Ambient Glow Behind Page Title -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Flash Message Alerts -->
+                    <div th:if="${successMessage}" class="mb-space-md p-space-md rounded-2xl bg-primary-fixed/30 border border-primary/20 text-on-primary-fixed flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-primary text-[22px]">check_circle</span>
+                            <span th:text="${successMessage}">Thực hiện thao tác thành công!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-primary/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <div th:if="${errorMessage}" class="mb-space-md p-space-md rounded-2xl bg-error-container border border-error/20 text-error flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-error text-[22px]">error</span>
+                            <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-error/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Page Title & Metrics Bento Strip -->
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+                        <div class="flex flex-col gap-space-xs">
+                            <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                                <span>VẬN HÀNH THE4BOOKSTORE</span>
+                                <span>/</span>
+                                <span class="text-primary font-semibold">QUẢN LÝ NHÀ XUẤT BẢN</span>
+                            </div>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Nhà Xuất Bản</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                                Quản lý thông tin nhà xuất bản đối tác, tra cứu các đầu sách thuộc nhà xuất bản và cập nhật thông tin liên hệ.
+                            </p>
+                        </div>
+
+                        <!-- Micro Metric Bento Strip -->
+                        <div class="flex items-center gap-space-sm flex-wrap">
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">apartment</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG NHÀ XUẤT BẢN</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${totalPublishers}">5</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">CÓ ĐẦU SÁCH</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-primary tabular-nums" th:text="${publishersWithBooks}">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Toolbar Surface -->
+                    <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm mb-space-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md border border-surface-container/60">
+                        <!-- Search Field -->
+                        <div class="relative flex-1 max-w-md">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+                            <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="publisherSearchInput" 
+                                   placeholder="Tìm theo tên NXB, địa chỉ, email, SĐT..." 
+                                   type="text"/>
+                        </div>
+
+                        <!-- Right Actions Group -->
+                        <div class="flex items-center gap-space-sm flex-wrap self-end sm:self-auto">
+                            <button class="bg-primary-container text-on-primary hover:bg-primary px-space-md py-2.5 rounded-xl font-label-md text-label-md font-bold flex items-center gap-space-xs shadow-sm transition-all transform active:scale-95" 
+                                    onclick="openPublisherDrawer('add')" 
+                                    type="button">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span>Thêm Nhà Xuất Bản Mới</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Publishers Table -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden mb-space-md border border-surface-container/60">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left" id="publishersTable">
+                                <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-space-md w-28" scope="col">MÃ NXB</th>
+                                        <th class="py-3 px-space-md" scope="col">TÊN NHÀ XUẤT BẢN</th>
+                                        <th class="py-3 px-space-md" scope="col">ĐỊA CHỈ</th>
+                                        <th class="py-3 px-space-md" scope="col">THÔNG TIN LIÊN HỆ</th>
+                                        <th class="py-3 px-space-md text-center w-44" scope="col">SỐ SÁCH XUẤT BẢN</th>
+                                        <th class="py-3 px-space-md text-center w-40" scope="col">THAO TÁC</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface" id="publisherTableBody">
+                                    <tr th:each="p : ${publishers}" 
+                                        class="hover:bg-surface-container-low/50 transition-colors publisher-row" 
+                                        th:attr="data-name=${p.tenNXB?.toLowerCase()}, data-address=${p.diaChi?.toLowerCase()}, data-contact=${(p.email + ' ' + p.soDienThoai)?.toLowerCase()}">
+                                        
+                                        <!-- ID -->
+                                        <td class="py-3 px-space-md font-mono text-on-surface-variant font-semibold" th:text="'#NXB-' + ${p.maNXB}">
+                                            #NXB-01
+                                        </td>
+
+                                        <!-- Name -->
+                                        <td class="py-3 px-space-md">
+                                            <div class="flex items-center gap-space-sm">
+                                                <div class="w-9 h-9 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                                                    <span class="material-symbols-outlined text-[18px]">apartment</span>
+                                                </div>
+                                                <span class="font-headline-sm text-headline-sm font-semibold text-on-surface" th:text="${p.tenNXB}">
+                                                    Nhà Xuất Bản Trẻ
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <!-- Address -->
+                                        <td class="py-3 px-space-md text-on-surface-variant text-body-sm max-w-xs">
+                                            <span th:text="${p.diaChi != null && !p.diaChi.isBlank() ? p.diaChi : 'Chưa cập nhật'}">TP.HCM</span>
+                                        </td>
+
+                                        <!-- Contact Info -->
+                                        <td class="py-3 px-space-md text-on-surface-variant text-body-sm font-mono">
+                                            <div class="flex flex-col gap-0.5">
+                                                <span th:if="${p.email != null && !p.email.isBlank()}" class="flex items-center gap-1 text-xs">
+                                                    <span class="material-symbols-outlined text-[14px]">mail</span>
+                                                    <span th:text="${p.email}">contact@nxb.com</span>
+                                                </span>
+                                                <span th:if="${p.soDienThoai != null && !p.soDienThoai.isBlank()}" class="flex items-center gap-1 text-xs text-outline">
+                                                    <span class="material-symbols-outlined text-[14px]">call</span>
+                                                    <span th:text="${p.soDienThoai}">028 1234 5678</span>
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <!-- Books Count Badge (Clickable) -->
+                                        <td class="py-3 px-space-md text-center">
+                                            <button th:data-id="${p.maNXB}"
+                                                    th:data-name="${p.tenNXB}"
+                                                    onclick="viewPublisherBooks(this.getAttribute('data-id'), this.getAttribute('data-name'))"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-label-sm font-semibold bg-secondary-fixed/30 hover:bg-secondary-fixed/60 text-secondary transition-colors cursor-pointer group"
+                                                    title="Xem danh sách sách của NXB này">
+                                                <span class="material-symbols-outlined text-[16px] group-hover:scale-110 transition-transform">menu_book</span>
+                                                <span th:text="(${bookCounts[p.maNXB]} ?: 0) + ' đầu sách'">3 đầu sách</span>
+                                            </button>
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="py-3 px-space-md text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <!-- View Books Button -->
+                                                <button th:data-id="${p.maNXB}"
+                                                        th:data-name="${p.tenNXB}"
+                                                        onclick="viewPublisherBooks(this.getAttribute('data-id'), this.getAttribute('data-name'))"
+                                                        class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" 
+                                                        title="Xem danh sách sách" 
+                                                        type="button">
+                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                </button>
+
+                                                <!-- Edit Button -->
+                                                <button th:data-manxb="${p.maNXB}" 
+                                                        th:data-tennxb="${p.tenNXB}" 
+                                                        th:data-diachi="${p.diaChi ?: ''}" 
+                                                        th:data-sdt="${p.soDienThoai ?: ''}" 
+                                                        th:data-email="${p.email ?: ''}" 
+                                                        onclick="editPublisher(this)" 
+                                                        class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" 
+                                                        title="Chỉnh sửa nhà xuất bản" 
+                                                        type="button">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </button>
+
+                                                <!-- Delete Button -->
+                                                <form th:action="@{'/admin/publishers/delete/' + ${p.maNXB}}" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhà xuất bản này?');">
+                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" 
+                                                            title="Xóa nhà xuất bản" 
+                                                            type="submit">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr th:if="${#lists.isEmpty(publishers)}">
+                                        <td colspan="6" class="py-12 text-center text-on-surface-variant">
+                                            <span class="material-symbols-outlined text-[48px] mb-2 text-outline">apartment</span>
+                                            <p class="font-medium">Chưa có nhà xuất bản nào trong hệ thống.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Slide-over Drawer for Add/Edit Publisher -->
+            <div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="publisherDrawer">
+                <div class="w-full max-w-lg bg-surface-container-lowest h-full shadow-2xl flex flex-col p-space-lg overflow-y-auto animate-in slide-in-from-right duration-200 rounded-l-3xl border-l border-surface-container">
+                    <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+                        <div class="flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-primary text-[24px]">apartment</span>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="publisherDrawerTitle">Thêm Nhà Xuất Bản Mới</h2>
+                        </div>
+                        <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closePublisherDrawer()" type="button">
+                            <span class="material-symbols-outlined text-[22px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Publisher Form -->
+                    <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/publishers/save}" method="post">
+                        <input type="hidden" name="maNXB" id="modalMaNXB"/>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalTenNXB">Tên Nhà Xuất Bản *</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="modalTenNXB" name="tenNXB" placeholder="Ví dụ: Nhà Xuất Bản Trẻ, Kim Đồng..." required="" type="text"/>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalDiaChi">Địa Chỉ Trụ Sở</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="modalDiaChi" name="diaChi" placeholder="Địa chỉ trụ sở NXB..." type="text"/>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-space-sm">
+                            <div class="flex flex-col gap-1">
+                                <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalSoDienThoai">Số Điện Thoại</label>
+                                <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" 
+                                       id="modalSoDienThoai" name="soDienThoai" placeholder="028 3833 3333" type="text"/>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalEmail">Email Liên Hệ</label>
+                                <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                       id="modalEmail" name="email" placeholder="contact@nxb.com" type="email"/>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-space-lg flex items-center justify-end gap-space-sm border-t border-surface-container">
+                            <button class="px-space-md py-2.5 rounded-xl font-label-md text-label-md font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" onclick="closePublisherDrawer()" type="button">
+                                Hủy bỏ
+                            </button>
+                            <button class="bg-primary text-on-primary hover:bg-primary-container px-space-lg py-2.5 rounded-xl font-label-md text-label-md font-bold shadow-sm transition-all" type="submit">
+                                Lưu Nhà Xuất Bản
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- View Books Modal for Publisher -->
+            <div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="viewBooksModal">
+                <div class="w-full max-w-3xl bg-surface-container-lowest rounded-3xl shadow-2xl p-space-lg border border-surface-container flex flex-col max-h-[85vh]">
+                    <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+                        <div class="flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-primary text-[24px]">menu_book</span>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="booksModalTitle">Danh Sách Sách</h2>
+                        </div>
+                        <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closeBooksModal()" type="button">
+                            <span class="material-symbols-outlined text-[22px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Books Container -->
+                    <div class="overflow-y-auto flex-1 py-space-md space-y-3" id="booksListContainer">
+                        <div class="text-center py-8 text-on-surface-variant">Đang tải danh sách sách...</div>
+                    </div>
+
+                    <div class="pt-space-md border-t border-surface-container flex justify-end">
+                        <button class="bg-surface-container hover:bg-surface-container-high text-on-surface px-space-md py-2 rounded-xl font-label-md text-label-md font-semibold transition-colors" onclick="closeBooksModal()" type="button">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Client-side Interactive Filter & Modals Script -->
+    <script>
+        const publisherSearchInput = document.getElementById('publisherSearchInput');
+        const publisherRows = document.querySelectorAll('.publisher-row');
+        const publisherDrawer = document.getElementById('publisherDrawer');
+        const publisherDrawerTitle = document.getElementById('publisherDrawerTitle');
+        const modalMaNXB = document.getElementById('modalMaNXB');
+        const modalTenNXB = document.getElementById('modalTenNXB');
+        const modalDiaChi = document.getElementById('modalDiaChi');
+        const modalSoDienThoai = document.getElementById('modalSoDienThoai');
+        const modalEmail = document.getElementById('modalEmail');
+        const viewBooksModal = document.getElementById('viewBooksModal');
+        const booksModalTitle = document.getElementById('booksModalTitle');
+        const booksListContainer = document.getElementById('booksListContainer');
+
+        if (publisherSearchInput) {
+            publisherSearchInput.addEventListener('input', function() {
+                const q = this.value.toLowerCase().trim();
+                publisherRows.forEach(row => {
+                    const name = row.getAttribute('data-name') || '';
+                    const addr = row.getAttribute('data-address') || '';
+                    const contact = row.getAttribute('data-contact') || '';
+                    if (q === '' || name.includes(q) || addr.includes(q) || contact.includes(q)) {
+                        row.classList.remove('hidden');
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        function openPublisherDrawer(mode) {
+            if (mode === 'add') {
+                publisherDrawerTitle.textContent = 'Thêm Nhà Xuất Bản Mới';
+                modalMaNXB.value = '';
+                modalTenNXB.value = '';
+                modalDiaChi.value = '';
+                modalSoDienThoai.value = '';
+                modalEmail.value = '';
+            }
+            publisherDrawer.classList.remove('hidden');
+        }
+
+        function editPublisher(btn) {
+            publisherDrawerTitle.textContent = 'Chỉnh Sửa NXB: ' + btn.getAttribute('data-tennxb');
+            modalMaNXB.value = btn.getAttribute('data-manxb') || '';
+            modalTenNXB.value = btn.getAttribute('data-tennxb') || '';
+            modalDiaChi.value = btn.getAttribute('data-diachi') || '';
+            modalSoDienThoai.value = btn.getAttribute('data-sdt') || '';
+            modalEmail.value = btn.getAttribute('data-email') || '';
+            publisherDrawer.classList.remove('hidden');
+        }
+
+        function closePublisherDrawer() {
+            publisherDrawer.classList.add('hidden');
+        }
+
+        function viewPublisherBooks(nxbId, nxbName) {
+            booksModalTitle.textContent = 'Các Đầu Sách Của NXB: ' + nxbName;
+            booksListContainer.innerHTML = '<div class="text-center py-8 text-on-surface-variant">Đang tải danh sách sách...</div>';
+            viewBooksModal.classList.remove('hidden');
+
+            fetch('/admin/publishers/' + nxbId + '/books')
+                .then(res => res.json())
+                .then(books => {
+                    if (!books || books.length === 0) {
+                        booksListContainer.innerHTML = `
+                            <div class="text-center py-8 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-[40px] text-outline mb-2">apartment</span>
+                                <p class="font-medium">Chưa có đầu sách nào thuộc nhà xuất bản này.</p>
+                                <a href="/admin/products?openModal=true" class="mt-2 inline-flex items-center gap-1 text-primary text-xs font-semibold hover:underline">
+                                    Thêm sách mới và gán NXB
+                                </a>
+                            </div>`;
+                        return;
+                    }
+
+                    let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+                    books.forEach(b => {
+                        const img = b.hinhAnh || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y';
+                        const price = (b.giaBan || 0).toLocaleString('vi-VN') + ' đ';
+                        html += `
+                            <div class="p-3 rounded-2xl bg-surface-container-low border border-surface-container flex items-center gap-3">
+                                <img src="${img}" alt="${b.tenSP}" class="w-14 h-18 object-cover rounded-xl shadow-xs shrink-0"/>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-headline-sm text-sm font-bold text-on-surface truncate">${b.tenSP}</h4>
+                                    <p class="text-xs text-on-surface-variant truncate">ISBN: ${b.isbn || 'Chưa có'}</p>
+                                    <p class="text-xs text-on-surface-variant truncate">Danh mục: ${b.danhMuc || 'Chưa gán'}</p>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <span class="font-mono font-bold text-xs text-primary">${price}</span>
+                                        <span class="text-[11px] px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-mono">Kho: ${b.soLuongTon}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    booksListContainer.innerHTML = html;
+                })
+                .catch(err => {
+                    booksListContainer.innerHTML = '<div class="text-center py-8 text-error">Lỗi khi tải danh sách sách: ' + err.message + '</div>';
+                });
+        }
+
+        function closeBooksModal() {
+            viewBooksModal.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

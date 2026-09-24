@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Danh Mục')}">
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('categories')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full">
+
+                <!-- Ambient Glow Behind Page Title -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Flash Message Alerts -->
+                    <div th:if="${successMessage}" class="mb-space-md p-space-md rounded-2xl bg-primary-fixed/30 border border-primary/20 text-on-primary-fixed flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-primary text-[22px]">check_circle</span>
+                            <span th:text="${successMessage}">Thực hiện thao tác thành công!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-primary/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <div th:if="${errorMessage}" class="mb-space-md p-space-md rounded-2xl bg-error-container border border-error/20 text-error flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-error text-[22px]">error</span>
+                            <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-error/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <div th:if="${warningMessage}" class="mb-space-md p-space-md rounded-2xl bg-secondary-fixed border border-secondary/20 text-secondary flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-secondary text-[22px]">warning</span>
+                            <span th:text="${warningMessage}">Cảnh báo!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-secondary/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Page Title & Metrics Bento Strip -->
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+                        <div class="flex flex-col gap-space-xs">
+                            <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                                <span>VẬN HÀNH THE4BOOKSTORE</span>
+                                <span>/</span>
+                                <span class="text-primary font-semibold">QUẢN LÝ DANH MỤC</span>
+                            </div>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Danh Mục Sản Phẩm</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                                Thiết lập phân loại danh mục, điều khiển trạng thái hiển thị trên menu điều hướng và gán liên kết sản phẩm.
+                            </p>
+                        </div>
+
+                        <!-- Micro Metric Bento Strip -->
+                        <div class="flex items-center gap-space-sm flex-wrap">
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">category</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG DANH MỤC</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${totalCategories}">12</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">ĐANG HOẠT ĐỘNG</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-primary tabular-nums" th:text="${activeCount}">10</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TẠM KHÓA</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface-variant tabular-nums" th:text="${inactiveCount}">2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Toolbar Surface -->
+                    <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm mb-space-md flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-space-md border border-surface-container/60">
+                        <!-- Left Filters Group -->
+                        <div class="flex flex-wrap items-center gap-space-sm flex-1">
+                            <!-- Live Search Field -->
+                            <div class="relative flex-1 min-w-[260px] max-w-md">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+                                <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="categorySearchInput" placeholder="Tìm theo tên danh mục, mô tả..." type="text"/>
+                            </div>
+                            <!-- Status Dropdown Filter -->
+                            <div class="relative">
+                                <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="statusFilter">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="active">Đang hoạt động</option>
+                                    <option value="inactive">Tạm khóa</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                            </div>
+                            <button class="text-on-surface-variant hover:text-primary px-3 py-2 rounded-xl hover:bg-surface-container transition-colors flex items-center gap-1 font-label-sm text-label-sm" onclick="resetCategoryFilters()" title="Đặt lại bộ lọc" type="button">
+                                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                                <span>Đặt lại</span>
+                            </button>
+                        </div>
+
+                        <!-- Right Actions Group -->
+                        <div class="flex items-center gap-space-sm flex-wrap self-end xl:self-auto">
+                            <button class="bg-primary-container text-on-primary hover:bg-primary px-space-md py-2.5 rounded-xl font-label-md text-label-md font-bold flex items-center gap-space-xs shadow-sm transition-all transform active:scale-95" onclick="openCategoryDrawer('add')" type="button">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span>Thêm Danh Mục Mới</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Categories Table -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden mb-space-md border border-surface-container/60">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left" id="categoriesTable">
+                                <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-space-md w-28" scope="col">MÃ DM</th>
+                                        <th class="py-3 px-space-md" scope="col">TÊN DANH MỤC</th>
+                                        <th class="py-3 px-space-md" scope="col">MÔ TẢ</th>
+                                        <th class="py-3 px-space-md text-center w-40" scope="col">SẢN PHẨM LIÊN KẾT</th>
+                                        <th class="py-3 px-space-md text-center w-36" scope="col">TRẠNG THÁI</th>
+                                        <th class="py-3 px-space-md text-center w-36" scope="col">THAO TÁC</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface" id="categoryTableBody">
+                                    
+                                    <!-- Fallback empty state -->
+                                    <tr th:if="${#lists.isEmpty(categories)}">
+                                        <td colspan="6" class="py-12 text-center text-on-surface-variant">
+                                            <span class="material-symbols-outlined text-[36px] text-on-surface-variant/50 mb-2 block">folder_off</span>
+                                            Chưa có danh mục nào trong hệ thống. Nhấp "Thêm Danh Mục Mới" để tạo.
+                                        </td>
+                                    </tr>
+
+                                    <!-- Category Rows -->
+                                    <tr th:each="cat : ${categories}"
+                                        class="hover:bg-surface-container-low/60 transition-colors group"
+                                        th:attr="data-name=${cat.tenDanhMuc?.toLowerCase()}, data-desc=${cat.moTa?.toLowerCase()}, data-status=${cat.trangThai ? 'active' : 'inactive'}">
+                                        
+                                        <td class="py-3 px-space-md font-label-sm text-label-sm font-bold text-on-surface-variant font-mono" th:text="'#DM-' + ${cat.maDanhMuc}">
+                                            #DM-1
+                                        </td>
+
+                                        <td class="py-3 px-space-md font-semibold text-on-surface">
+                                            <div class="flex items-center gap-space-xs">
+                                                <span class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-[18px]">folder</span>
+                                                </span>
+                                                <span class="font-headline-sm text-headline-sm" th:text="${cat.tenDanhMuc}">Tiểu thuyết &amp; Văn học</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-on-surface-variant max-w-xs truncate" th:text="${cat.moTa != null && !cat.moTa.isBlank() ? cat.moTa : 'Chưa có mô tả'}">
+                                            Sách văn học trong nước và kinh điển thế giới
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-center">
+                                            <a th:href="@{'/admin/products?danhMuc=' + ${cat.maDanhMuc}}" 
+                                               class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-bold bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors"
+                                               title="Xem các sản phẩm thuộc danh mục này">
+                                                <span class="material-symbols-outlined text-[15px] text-primary">inventory_2</span>
+                                                <span th:text="(${productCounts[cat.maDanhMuc]} ?: 0) + ' SP'">12 SP</span>
+                                            </a>
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-center">
+                                            <span th:if="${cat.trangThai}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-primary bg-primary-fixed/40 px-2.5 py-0.5 rounded-full">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                                Hoạt động
+                                            </span>
+                                            <span th:if="${!cat.trangThai}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                                                Tạm khóa
+                                            </span>
+                                        </td>
+
+                                        <td class="py-3 px-space-md text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <!-- Toggle status button -->
+                                                <form th:action="@{'/admin/categories/toggle/' + ${cat.maDanhMuc}}" method="post" class="inline">
+                                                    <button type="submit" 
+                                                            class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" 
+                                                            th:title="${cat.trangThai ? 'Tạm khóa danh mục này' : 'Kích hoạt danh mục này'}">
+                                                        <span class="material-symbols-outlined text-[18px]" th:text="${cat.trangThai ? 'toggle_on' : 'toggle_off'}">toggle_on</span>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Edit button -->
+                                                <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" 
+                                                        th:data-id="${cat.maDanhMuc}"
+                                                        th:data-name="${cat.tenDanhMuc}"
+                                                        th:data-desc="${cat.moTa ?: ''}"
+                                                        th:data-status="${cat.trangThai}"
+                                                        onclick="editCategoryFromData(this)" 
+                                                        title="Chỉnh sửa danh mục" 
+                                                        type="button">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </button>
+                                                
+                                                <!-- Delete button -->
+                                                <form th:action="@{'/admin/categories/delete/' + ${cat.maDanhMuc}}" 
+                                                      method="post" 
+                                                      class="inline" 
+                                                      th:attr="data-count=${productCounts[cat.maDanhMuc] ?: 0}"
+                                                      onsubmit="return confirmDeleteCategory(this);">
+                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Xóa danh mục" type="submit">
+                                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Slide-over Drawer / Modal for Category Details (Add / Edit) -->
+            <div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="categoryDrawerModal">
+                <div class="w-full max-w-lg bg-surface-container-lowest h-full shadow-2xl flex flex-col p-space-lg overflow-y-auto animate-in slide-in-from-right duration-200 rounded-l-3xl border-l border-surface-container">
+                    <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+                        <div class="flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-primary text-[24px]">category</span>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="categoryModalTitle">Thêm Danh Mục Mới</h2>
+                        </div>
+                        <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closeCategoryDrawer()" type="button">
+                            <span class="material-symbols-outlined text-[22px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Category Form -->
+                    <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/categories/save}" method="post">
+                        <input type="hidden" name="maDanhMuc" id="formMaDanhMuc"/>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formTenDanhMuc">Tên Danh Mục *</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="formTenDanhMuc" 
+                                   name="tenDanhMuc" 
+                                   placeholder="Ví dụ: Tiểu thuyết, Sổ tay, Bút bi..." 
+                                   required="" 
+                                   type="text"/>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formMoTa">Mô Tả Danh Mục</label>
+                            <textarea class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30 resize-none" 
+                                      id="formMoTa" 
+                                      name="moTa" 
+                                      rows="4" 
+                                      placeholder="Mô tả thông tin chi tiết về các sản phẩm thuộc danh mục này..."></textarea>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formTrangThai">Trạng Thái Hiển Thị *</label>
+                            <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                    id="formTrangThai" 
+                                    name="trangThai">
+                                <option value="true">Hoạt động (Hiển thị trên hệ thống và bộ lọc)</option>
+                                <option value="false">Tạm khóa (Ẩn khỏi menu cửa hàng)</option>
+                            </select>
+                        </div>
+
+                        <!-- Info Box inside drawer -->
+                        <div class="p-space-sm bg-primary-fixed/30 rounded-xl flex items-start gap-space-xs text-on-primary-fixed mt-2">
+                            <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">info</span>
+                            <span class="font-body-sm text-body-sm">
+                                Danh mục được lưu sẽ hiển thị ngay trong danh sách phân loại sản phẩm và menu bộ lọc tìm kiếm của người mua.
+                            </span>
+                        </div>
+
+                        <!-- Drawer Action Controls -->
+                        <div class="mt-auto pt-space-lg flex items-center justify-end gap-space-sm">
+                            <button class="px-space-md py-2.5 bg-surface-container rounded-xl font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors" onclick="closeCategoryDrawer()" type="button">
+                                Hủy
+                            </button>
+                            <button class="px-space-lg py-2.5 bg-primary-container text-on-primary rounded-xl font-label-md text-label-md font-bold hover:bg-primary transition-colors shadow-sm" type="submit">
+                                Lưu Danh Mục
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Client-side Interactive Filter & Drawer Script -->
+    <script>
+        const categorySearchInput = document.getElementById('categorySearchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const categoryRows = document.querySelectorAll('#categoryTableBody tr');
+        const categoryDrawerModal = document.getElementById('categoryDrawerModal');
+        const categoryModalTitle = document.getElementById('categoryModalTitle');
+        const formMaDanhMuc = document.getElementById('formMaDanhMuc');
+        const formTenDanhMuc = document.getElementById('formTenDanhMuc');
+        const formMoTa = document.getElementById('formMoTa');
+        const formTrangThai = document.getElementById('formTrangThai');
+
+        function filterCategories() {
+            const query = categorySearchInput.value.toLowerCase().trim();
+            const statusVal = statusFilter.value;
+
+            categoryRows.forEach(row => {
+                const name = row.getAttribute('data-name') || '';
+                const desc = row.getAttribute('data-desc') || '';
+                const rowStatus = row.getAttribute('data-status') || '';
+
+                const matchesSearch = query === '' || name.includes(query) || desc.includes(query);
+                const matchesStatus = statusVal === 'all' || rowStatus === statusVal;
+
+                if (matchesSearch && matchesStatus) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        if (categorySearchInput) categorySearchInput.addEventListener('input', filterCategories);
+        if (statusFilter) statusFilter.addEventListener('change', filterCategories);
+
+        function resetCategoryFilters() {
+            if (categorySearchInput) categorySearchInput.value = '';
+            if (statusFilter) statusFilter.value = 'all';
+            filterCategories();
+        }
+
+        function openCategoryDrawer(mode) {
+            if (mode === 'add') {
+                categoryModalTitle.textContent = 'Thêm Danh Mục Mới';
+                formMaDanhMuc.value = '';
+                formTenDanhMuc.value = '';
+                formMoTa.value = '';
+                formTrangThai.value = 'true';
+            }
+            categoryDrawerModal.classList.remove('hidden');
+        }
+
+        function editCategoryFromData(btn) {
+            const id = btn.getAttribute('data-id');
+            const name = btn.getAttribute('data-name');
+            const desc = btn.getAttribute('data-desc');
+            const status = btn.getAttribute('data-status');
+
+            categoryModalTitle.textContent = 'Chỉnh Sửa Danh Mục: ' + name;
+            formMaDanhMuc.value = id;
+            formTenDanhMuc.value = name;
+            formMoTa.value = desc;
+            formTrangThai.value = (status === 'true' || status === true) ? 'true' : 'false';
+
+            categoryDrawerModal.classList.remove('hidden');
+        }
+
+        function closeCategoryDrawer() {
+            categoryDrawerModal.classList.add('hidden');
+        }
+
+        function confirmDeleteCategory(form) {
+            const count = parseInt(form.getAttribute('data-count') || '0', 10);
+            if (count > 0) {
+                alert(`Không thể xóa danh mục này vì đang có ${count} sản phẩm liên kết! Vui lòng chuyển hoặc xóa các sản phẩm đó trước.`);
+                return false;
+            }
+            return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này?');
+        }
+    </script>
+</body>
+</html>

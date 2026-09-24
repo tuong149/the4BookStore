@@ -5,7 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "PHIEU_NHAP")
+@Table(name = "PHIEU_NHAP", indexes = {
+    @Index(name = "idx_pn_ngaynhap", columnList = "ngayNhap"),
+    @Index(name = "idx_pn_trangthai", columnList = "trangThai")
+})
 @Data @NoArgsConstructor @AllArgsConstructor
 public class PhieuNhap {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

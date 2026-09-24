@@ -2,6 +2,9 @@ package vn.bookstore.the4bookstore.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
 @Table(name = "NHA_XUAT_BAN")
 @Data @NoArgsConstructor @AllArgsConstructor
@@ -16,4 +19,9 @@ public class NhaXuatBan {
     private String soDienThoai;
     @Column(length = 100)
     private String email;
+
+    @OneToMany(mappedBy = "nhaXuatBan", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<SanPham> sanPhams = new ArrayList<>();
 }

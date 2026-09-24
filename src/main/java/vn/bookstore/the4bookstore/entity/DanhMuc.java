@@ -3,7 +3,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "DANH_MUC")
+@Table(name = "DANH_MUC", indexes = {
+    @Index(name = "idx_dm_trangthai", columnList = "trangThai")
+})
 @Data @NoArgsConstructor @AllArgsConstructor
 public class DanhMuc {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

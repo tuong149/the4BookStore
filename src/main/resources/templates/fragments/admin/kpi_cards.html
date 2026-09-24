@@ -34,14 +34,14 @@
             </div>
         </div>
 
-        <!-- Card 3: Tựa Sách Hoạt Động -->
+        <!-- Card 3: Sản Phẩm Hoạt Động -->
         <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container flex flex-col justify-between">
             <div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
-                <span class="font-medium">Tựa Sách Hoạt Động</span>
-                <span class="w-8 h-8 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center material-symbols-outlined text-[18px]">auto_stories</span>
+                <span class="font-medium">Sản Phẩm Hoạt Động</span>
+                <span class="w-8 h-8 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center material-symbols-outlined text-[18px]">inventory_2</span>
             </div>
             <div class="font-headline-lg text-xl font-extrabold text-on-surface font-mono">
-                <span th:text="${totalBooksCount ?: '6'}">6</span> tựa
+                <span th:text="${totalBooksCount ?: '6'}">6</span> sản phẩm
             </div>
             <div class="text-[11px] text-tertiary font-bold flex items-center gap-1 mt-2">
                 <span class="material-symbols-outlined text-[14px]">check_circle</span>
@@ -56,11 +56,11 @@
                 <span class="w-8 h-8 rounded-xl bg-error/10 text-error flex items-center justify-center material-symbols-outlined text-[18px]">warning</span>
             </div>
             <div class="font-headline-lg text-xl font-extrabold text-error font-mono">
-                <span th:text="${lowStockCount ?: '1'}">1</span> tựa
+                <span th:text="${lowStockCount ?: '1'}">1</span> sản phẩm
             </div>
             <div class="text-[11px] text-error font-bold flex items-center gap-1 mt-2">
                 <span class="material-symbols-outlined text-[14px]">notification_important</span>
-                <span>Mức tồn kho &lt; 5 cuốn</span>
+                <span>Mức tồn kho &lt; 5 sản phẩm</span>
             </div>
         </div>
     </div>

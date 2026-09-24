@@ -17,6 +17,8 @@ public class DataSeeder implements CommandLineRunner {
     private final NhaXuatBanRepository nhaXuatBanRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
     private final SanPhamRepository sanPhamRepository;
+    private final TacGiaRepository tacGiaRepository;
+    private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
     private final PasswordEncoder passwordEncoder;
     private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
@@ -29,6 +31,8 @@ public class DataSeeder implements CommandLineRunner {
                       NhaXuatBanRepository nhaXuatBanRepository,
                       NhaCungCapRepository nhaCungCapRepository,
                       SanPhamRepository sanPhamRepository,
+                      TacGiaRepository tacGiaRepository,
+                      SanPhamTacGiaRepository sanPhamTacGiaRepository,
                       PasswordEncoder passwordEncoder,
                       @org.springframework.beans.factory.annotation.Autowired(required = false) org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
         this.taiKhoanRepository = taiKhoanRepository;
@@ -37,6 +41,8 @@ public class DataSeeder implements CommandLineRunner {
         this.nhaXuatBanRepository = nhaXuatBanRepository;
         this.nhaCungCapRepository = nhaCungCapRepository;
         this.sanPhamRepository = sanPhamRepository;
+        this.tacGiaRepository = tacGiaRepository;
+        this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -71,6 +77,8 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         seedBookstoreData();
+        seedAuthorsPublishersAndLinks();
+        seedStationeryAndGifts();
     }
 
     private void createAccountIfNotFound(String username, String role, String password) {
@@ -171,5 +179,133 @@ public class DataSeeder implements CommandLineRunner {
         sp.setTrangThai(stock > 0 ? "DangBan" : "HetHang");
         sp.setNgayTao(LocalDateTime.now());
         sanPhamRepository.save(sp);
+    }
+
+    private void seedStationeryAndGifts() {
+        // Danh mục của Văn phòng phẩm
+        DanhMuc catSoTay = createCategoryIfNotFound("Sổ Tay", "Sổ tay da, sổ ghi chép, sổ kế hoạch");
+        DanhMuc catBut = createCategoryIfNotFound("Bút", "Các loại bút viết, bút máy, bút bi cao cấp");
+        DanhMuc catDungCu = createCategoryIfNotFound("Dụng Cụ Học Tập & Làm Việc", "Kẹp sách, đèn đọc sách, thước kẻ và phụ kiện");
+
+        // Danh mục của Quà tặng & Trang trí
+        DanhMuc catTuiTote = createCategoryIfNotFound("Túi Tote", "Túi vải canvas thời trang phong cách mọt sách");
+        DanhMuc catBookNook = createCategoryIfNotFound("Mô Hình Book Nook", "Mô hình gỗ 3D Book Nook trang trí giá sách");
+        DanhMuc catBoardgame = createCategoryIfNotFound("Boardgame & Quà Tặng", "Trò chơi boardgame trí tuệ và hộp quà tặng độc đáo");
+
+        NhaCungCap ncc = nhaCungCapRepository.findAll().stream().findFirst().orElseGet(() -> {
+            NhaCungCap n = new NhaCungCap();
+            n.setTenNCC("Công ty Sách Phương Nam");
+            n.setDiaChi("TP.HCM");
+            n.setSoDienThoai("0283833333");
+            n.setEmail("contact@phuongnam.com");
+            n.setTrangThai("HoatDong");
+            return nhaCungCapRepository.save(n);
+        });
+
+        createProductItem("Sổ Tay Bìa Da Vintage Classic", "VPP-001", "VanPhongPham", 85000, 40, catSoTay, ncc,
+                "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Bút Máy Thư Pháp Pilot Kakuno", "VPP-002", "VanPhongPham", 210000, 25, catBut, ncc,
+                "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Bộ Bookmark Kim Loại Mạ Vàng Cổ Điển", "VPP-003", "VanPhongPham", 45000, 60, catDungCu, ncc,
+                "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Đèn Kẹp Đọc Sách Bảo Vệ Mắt LED", "VPP-004", "VanPhongPham", 135000, 15, catDungCu, ncc,
+                "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80");
+
+        createProductItem("Túi Canvas The4BookStore Vintage Tote", "QT-001", "QuaTang", 120000, 35, catTuiTote, ncc,
+                "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Mô Hình Book Nook Gỗ 3D Hẻm Xéo", "QT-002", "QuaTang", 450000, 10, catBookNook, ncc,
+                "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Bộ Boardgame Catan Bản Tiếng Việt", "QT-003", "QuaTang", 590000, 8, catBoardgame, ncc,
+                "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=500&auto=format&fit=crop&q=80");
+        createProductItem("Hộp Quà Tặng Người Yêu Sách Reader Box", "QT-004", "QuaTang", 320000, 18, catBoardgame, ncc,
+                "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80");
+    }
+
+    private void createProductItem(String title, String isbn, String loaiSP, int price, int stock, DanhMuc category, NhaCungCap ncc, String coverUrl) {
+        if (sanPhamRepository.findAll().stream().anyMatch(p -> isbn.equalsIgnoreCase(p.getISBN()))) {
+            return;
+        }
+        SanPham sp = new SanPham();
+        sp.setTenSP(title);
+        sp.setISBN(isbn);
+        sp.setLoaiSP(loaiSP);
+        sp.setGiaBan(price);
+        sp.setSoLuongTon(stock);
+        sp.setMucTonToiThieu(5);
+        sp.setDanhMuc(category);
+        sp.setNhaCungCap(ncc);
+        sp.setMoTa(coverUrl);
+        sp.setTrangThai(stock > 0 ? "DangBan" : "HetHang");
+        sp.setNgayTao(LocalDateTime.now());
+        sanPhamRepository.save(sp);
+    }
+
+    private void seedAuthorsPublishersAndLinks() {
+        // 1. Seed Nhà Xuất Bản
+        NhaXuatBan nxbHoiNhaVan = createPublisherIfNotFound("Nhà Xuất Bản Hội Nhà Văn", "Hà Nội", "0243822222", "nxbhnv@gmail.com");
+        NhaXuatBan nxbTre = createPublisherIfNotFound("Nhà Xuất Bản Trẻ", "TP. Hồ Chí Minh", "02839316289", "hopthu@nxbtre.com.vn");
+        NhaXuatBan nxbKimDong = createPublisherIfNotFound("Nhà Xuất Bản Kim Đồng", "Hà Nội", "02439434730", "cskh_online@nxbkimdong.com.vn");
+        NhaXuatBan nxbTheGioi = createPublisherIfNotFound("Nhà Xuất Bản Thế Giới", "Hà Nội", "02438253841", "thegioi@hn.vnn.vn");
+        NhaXuatBan nxbPhuNu = createPublisherIfNotFound("Nhà Xuất Bản Phụ Nữ Việt Nam", "Hà Nội", "02439710723", "phunuvn@gmail.com");
+
+        // 2. Seed Tác Giả
+        TacGia tgMattHaig = createAuthorIfNotFound("Matt Haig", "Tiểu thuyết gia và nhà báo nổi tiếng người Anh, tác giả cuốn sách best-seller quốc tế The Midnight Library.");
+        TacGia tgJamesClear = createAuthorIfNotFound("James Clear", "Chuyên gia hàng đầu thế giới về hình thành thói quen và tối ưu hóa năng suất cá nhân, tác giả Atomic Habits.");
+        TacGia tgMorganHousel = createAuthorIfNotFound("Morgan Housel", "Đối tác tại The Collaborative Fund, cựu nhà phân tích tài chính tại The Motley Fool và The Wall Street Journal, tác giả Tâm Lý Học Về Tiền.");
+        TacGia tgYuval = createAuthorIfNotFound("Yuval Noah Harari", "Giáo sư khoa Lịch sử tại Đại học Hebrew Jerusalem, tác giả bộ sách Sapiens Lược sử loài người kinh điển.");
+        TacGia tgJose = createAuthorIfNotFound("José Mauro de Vasconcelos", "Nhà văn lỗi lạc người Brazil, tác giả kiệt tác văn học kinh điển Cây Cam Ngọt Của Tôi.");
+        TacGia tgFrank = createAuthorIfNotFound("Frank Herbert", "Đại văn hào người Mỹ, tác giả thiên sử thi khoa học viễn tưởng Dune (Xứ Cát).");
+        createAuthorIfNotFound("Nguyễn Nhật Ánh", "Nhà văn nổi tiếng của bao thế hệ độc giả Việt Nam với các tác phẩm như Cho Tôi Xin Một Vé Đi Tuổi Thơ, Mắt Biếc.");
+        createAuthorIfNotFound("Rosie Nguyễn", "Tác giả của cuốn sách bán chạy Tuổi Trẻ Đáng Giá Bao Nhiêu, blogger và người truyền cảm hứng sống.");
+
+        // 3. Liên kết Sách với Tác giả và NXB
+        linkBookAuthorAndPublisher("The Midnight Library", tgMattHaig, nxbHoiNhaVan);
+        linkBookAuthorAndPublisher("Atomic Habits - Thay Đổi Tí Hon", tgJamesClear, nxbTheGioi);
+        linkBookAuthorAndPublisher("Tâm Lý Học Về Tiền", tgMorganHousel, nxbTre);
+        linkBookAuthorAndPublisher("Sapiens: Lược Sử Loài Người", tgYuval, nxbTheGioi);
+        linkBookAuthorAndPublisher("Cây Cam Ngọt Của Tôi", tgJose, nxbHoiNhaVan);
+        linkBookAuthorAndPublisher("Dune - Xứ Cát", tgFrank, nxbHoiNhaVan);
+    }
+
+    private void linkBookAuthorAndPublisher(String bookTitle, TacGia author, NhaXuatBan publisher) {
+        sanPhamRepository.findAll().stream()
+                .filter(sp -> sp.getTenSP() != null && sp.getTenSP().equalsIgnoreCase(bookTitle))
+                .findFirst()
+                .ifPresent(sp -> {
+                    if (publisher != null && sp.getNhaXuatBan() == null) {
+                        sp.setNhaXuatBan(publisher);
+                        sanPhamRepository.save(sp);
+                    }
+                    if (author != null && sanPhamTacGiaRepository.findBySanPham_MaSP(sp.getMaSP()).isEmpty()) {
+                        SanPhamTacGia sptg = new SanPhamTacGia(sp, author, 1);
+                        sanPhamTacGiaRepository.save(sptg);
+                    }
+                });
+    }
+
+    private NhaXuatBan createPublisherIfNotFound(String name, String address, String phone, String email) {
+        return nhaXuatBanRepository.findAll().stream()
+                .filter(n -> n.getTenNXB().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    NhaXuatBan nxb = new NhaXuatBan();
+                    nxb.setTenNXB(name);
+                    nxb.setDiaChi(address);
+                    nxb.setSoDienThoai(phone);
+                    nxb.setEmail(email);
+                    return nhaXuatBanRepository.save(nxb);
+                });
+    }
+
+    private TacGia createAuthorIfNotFound(String name, String bio) {
+        return tacGiaRepository.findAll().stream()
+                .filter(t -> t.getTenTacGia().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    TacGia tg = new TacGia();
+                    tg.setTenTacGia(name);
+                    tg.setMoTa(bio);
+                    return tacGiaRepository.save(tg);
+                });
     }
 }

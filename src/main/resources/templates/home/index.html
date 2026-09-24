@@ -98,20 +98,22 @@
                     </div>
                     <div class="flex items-center gap-space-xs">
                         <span class="font-label-md text-xs text-on-surface-variant">Sắp xếp theo:</span>
-                        <select class="bg-surface-container-low border-0 rounded-xl px-space-sm py-1.5 font-label-md text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary">
-                            <option>Phổ biến nhất</option>
-                            <option>Mới phát hành</option>
-                            <option>Giá tăng dần</option>
-                            <option>Giá giảm dần</option>
+                        <select id="featuredSortSelect" onchange="sortFeaturedBooks(this.value)" class="bg-surface-container-low border-0 rounded-xl px-space-sm py-1.5 font-label-md text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary cursor-pointer">
+                            <option value="newest">Mới phát hành</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                            <option value="name_asc">Tên sách A-Z</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Book Cards Grid Using Reusable Component -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                    <th:block th:each="book : ${featuredBooks}">
+                <div id="featuredBooksGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
+                    <div th:each="book : ${featuredBooks}" 
+                         class="featured-card-wrapper h-full flex flex-col"
+                         th:attr="data-price=${book.giaBan}, data-name=${book.tenSP?.toLowerCase()}">
                         <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
-                    </th:block>
+                    </div>
                 </div>
             </section>
 
@@ -150,11 +152,76 @@
                 </div>
             </section>
 
+            <!-- 4. DANH MỤC THỂ LOẠI SECTION -->
+            <section id="categories" class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+                <!-- Section Header -->
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-lg gap-space-xs">
+                    <div>
+                        <div class="inline-flex items-center gap-1 text-primary font-label-sm text-xs font-bold mb-1">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            <span>Khám Phá Theo Sở Thích</span>
+                        </div>
+                        <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
+                            Danh Mục Thể Loại
+                        </h2>
+                    </div>
+                    <a th:href="@{/san-pham}" class="inline-flex items-center gap-1 text-primary font-label-md text-xs font-semibold hover:underline">
+                        <span>Xem tất cả sản phẩm</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Category Cards Grid -->
+                <div th:if="${!#lists.isEmpty(categories)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-space-md">
+                    <a th:each="cat : ${categories}"
+                       th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
+                       class="group bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center gap-space-sm cursor-pointer">
+                        <!-- Icon -->
+                        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shadow-xs">
+                            <span class="material-symbols-outlined text-[28px]">menu_book</span>
+                        </div>
+                        <!-- Name -->
+                        <h3 class="font-headline-sm text-sm font-bold text-on-surface group-hover:text-primary transition-colors leading-tight" th:text="${cat.tenDanhMuc}">Văn Học</h3>
+                        <!-- Description -->
+                        <p th:if="${cat.moTa != null}" class="font-body-sm text-[11px] text-on-surface-variant leading-relaxed line-clamp-2" th:text="${cat.moTa}">Mô tả danh mục</p>
+                        <!-- CTA -->
+                        <span class="inline-flex items-center gap-0.5 text-primary text-[11px] font-bold mt-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span>Xem sách</span>
+                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Empty state nếu chưa có danh mục -->
+                <div th:if="${#lists.isEmpty(categories)}" class="text-center py-12 bg-surface-container-lowest rounded-2xl border border-surface-container">
+                    <span class="material-symbols-outlined text-[48px] text-on-surface-variant">category</span>
+                    <p class="text-on-surface-variant text-sm mt-space-sm">Chưa có danh mục nào. Admin hãy thêm danh mục trong trang quản trị.</p>
+                </div>
+            </section>
+
         </div>
     </main>
 
     <!-- Storefront Common Footer Fragment -->
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
+    <script>
+        function sortFeaturedBooks(val) {
+            const grid = document.getElementById('featuredBooksGrid');
+            if (!grid) return;
+            const cards = Array.from(grid.querySelectorAll('.featured-card-wrapper'));
+            cards.sort((a, b) => {
+                if (val === 'price_asc') {
+                    return (parseInt(a.getAttribute('data-price')) || 0) - (parseInt(b.getAttribute('data-price')) || 0);
+                } else if (val === 'price_desc') {
+                    return (parseInt(b.getAttribute('data-price')) || 0) - (parseInt(a.getAttribute('data-price')) || 0);
+                } else if (val === 'name_asc') {
+                    return (a.getAttribute('data-name') || '').localeCompare(b.getAttribute('data-name') || '', 'vi');
+                }
+                return 0;
+            });
+            cards.forEach(card => grid.appendChild(card));
+        }
+    </script>
 </body>
 </html>

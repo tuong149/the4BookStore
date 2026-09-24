@@ -17,18 +17,140 @@
                     <img alt="The4BookStore Logo" class="h-9 w-auto object-contain" th:src="@{/images/logo.svg}"/>
                 </a>
 
-                <!-- Live Search Bar -->
-                <div class="flex-1 max-w-2xl mx-space-md hidden sm:flex items-center bg-surface-container-low rounded-2xl px-space-md py-1.5 shadow-inner">
-                    <button class="flex items-center gap-1 text-on-surface-variant font-label-md text-xs px-space-xs py-1 hover:text-on-surface transition-colors" type="button">
-                        <span class="material-symbols-outlined text-[18px]">category</span>
-                        <span>Thể loại</span>
-                        <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
-                    </button>
-                    <div class="h-4 w-[1px] bg-outline-variant mx-space-xs"></div>
-                    <div class="flex-1 flex items-center gap-space-xs px-space-xs">
-                        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-                        <input class="w-full bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant focus:outline-none font-body-md text-xs md:text-sm" placeholder="Tìm kiếm theo Tên sách, Tác giả hoặc mã ISBN..." type="text"/>
+                <!-- Live Search Bar with Category Mega Dropdown -->
+                <div class="flex-1 max-w-2xl mx-space-md hidden sm:flex items-center bg-surface-container-low rounded-2xl shadow-inner relative">
+
+                    <!-- Danh mục dropdown trigger -->
+                    <div class="relative" id="navCatWrapper">
+                        <button type="button" id="navCatBtn"
+                                onclick="toggleNavCat(event)"
+                                class="flex items-center gap-1.5 text-on-surface font-label-md text-xs px-space-sm py-2.5 hover:text-primary transition-colors whitespace-nowrap rounded-l-2xl hover:bg-surface-container-lowest/60 font-medium">
+                            <span class="material-symbols-outlined text-[18px] text-primary">category</span>
+                            <span id="navCatBtnText">Tất cả danh mục</span>
+                            <span class="material-symbols-outlined text-[16px] text-on-surface-variant" id="navCatChevron">arrow_drop_down</span>
+                        </button>
+
+                        <!-- Mega dropdown panel -->
+                        <div id="navCatPanel"
+                             class="hidden absolute top-full left-0 mt-1 w-[560px] bg-surface-container-lowest rounded-2xl shadow-2xl border border-surface-container z-[200] p-space-md">
+
+                            <!-- TẤT CẢ DANH MỤC / TẤT CẢ SẢN PHẨM HERO OPTION -->
+                            <div class="mb-space-sm pb-space-xs border-b border-surface-container">
+                                <a th:href="@{/san-pham}" onclick="closeNavCat()"
+                                   class="flex items-center justify-between p-3 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-on-primary transition-all group shadow-sm">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="material-symbols-outlined text-[22px]">apps</span>
+                                        <div class="flex flex-col text-left">
+                                            <span class="font-bold text-xs uppercase tracking-wider">Tất Cả Danh Mục</span>
+                                            <span class="text-[11px] opacity-80">Xem toàn bộ danh mục &amp; tất cả sản phẩm</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </a>
+                            </div>
+
+                            <!-- DANH MỤC 1: SÁCH -->
+                            <div class="mb-space-md">
+                                <div class="flex items-center justify-between mb-space-xs">
+                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[18px] text-primary">menu_book</span>
+                                        <span>Sách</span>
+                                    </p>
+                                    <a th:href="@{/san-pham/sach}" onclick="closeNavCat()"
+                                       class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                                        <span>Xem tất cả sách</span>
+                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                    </a>
+                                </div>
+                                <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                    <a th:each="cat : ${navbarCategoriesSach}"
+                                       th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
+                                       th:text="${cat.tenDanhMuc}"
+                                       onclick="closeNavCat()"
+                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                        Tiểu Thuyết &amp; Văn Học
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="h-px bg-surface-container my-space-sm"></div>
+
+                            <!-- DANH MỤC 2: VĂN PHÒNG PHẨM -->
+                            <div class="mb-space-md">
+                                <div class="flex items-center justify-between mb-space-xs">
+                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[18px] text-secondary">edit_note</span>
+                                        <span>Văn Phòng Phẩm</span>
+                                    </p>
+                                    <a th:href="@{/san-pham/van-phong-pham}" onclick="closeNavCat()"
+                                       class="text-xs text-secondary font-bold hover:underline flex items-center gap-0.5">
+                                        <span>Xem tất cả VPP</span>
+                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                    </a>
+                                </div>
+                                <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                    <a th:each="cat : ${navbarCategoriesVpp}"
+                                       th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
+                                       th:text="${cat.tenDanhMuc}"
+                                       onclick="closeNavCat()"
+                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                        Sổ Tay
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="h-px bg-surface-container my-space-sm"></div>
+
+                            <!-- DANH MỤC 3: QUÀ TẶNG & TRANG TRÍ -->
+                            <div>
+                                <div class="flex items-center justify-between mb-space-xs">
+                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[18px] text-tertiary">redeem</span>
+                                        <span>Quà Tặng &amp; Trang Trí</span>
+                                    </p>
+                                    <a th:href="@{/san-pham/qua-tang}" onclick="closeNavCat()"
+                                       class="text-xs text-tertiary font-bold hover:underline flex items-center gap-0.5">
+                                        <span>Xem tất cả Quà tặng</span>
+                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                    </a>
+                                </div>
+                                <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                    <a th:each="cat : ${navbarCategoriesQuaTang}"
+                                       th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}"
+                                       th:text="${cat.tenDanhMuc}"
+                                       onclick="closeNavCat()"
+                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                        Túi Tote
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Footer link -->
+                            <div class="mt-space-md pt-space-sm border-t border-surface-container flex items-center justify-between">
+                                <span class="text-[11px] text-on-surface-variant font-medium flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">apps</span>
+                                    <span>Toàn bộ danh mục sản phẩm The4BookStore</span>
+                                </span>
+                                <a th:href="@{/san-pham}" onclick="closeNavCat()"
+                                   class="text-xs text-primary font-bold hover:underline flex items-center gap-1">
+                                    <span>Tất Cả Sản Phẩm</span>
+                                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="h-4 w-[1px] bg-outline-variant mx-space-xs"></div>
+
+                    <!-- Search input — submit đến /san-pham -->
+                    <form method="get" th:action="@{/san-pham}" class="flex-1 flex items-center gap-space-xs px-space-xs">
+                        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+                        <input name="q"
+                               class="w-full bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant focus:outline-none font-body-md text-xs md:text-sm py-2"
+                               placeholder="Tìm kiếm theo Tên sách, Tác giả hoặc mã ISBN..."
+                               type="text"/>
+                        <button type="submit" class="hidden">Tìm</button>
+                    </form>
                 </div>
 
                 <!-- Right Actions: Admin Link, Cart, User Auth Status -->
@@ -103,30 +225,61 @@
             <!-- Bottom Row: Navigation Menu Links (Fixed 3 primary tabs only) -->
             <nav class="flex items-center gap-space-lg overflow-x-auto pb-1 font-label-md text-xs">
                 <a th:href="@{/}" th:class="${activePage == 'home'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Trang Chủ</a>
+                <a th:href="@{/san-pham}" th:class="${activePage == 'products'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Tất Cả Sản Phẩm</a>
                 <a th:href="@{/#bestsellers-grid}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Sách Bán Chạy</a>
                 <a th:href="@{/#categories}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Danh Mục Thể Loại</a>
             </nav>
         </div>
-    </header>
 
-    <script>
-        function toggleUserDropdown(event) {
-            if (event) event.stopPropagation();
-            const menu = document.getElementById('userDropdownMenu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-            }
-        }
-
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('userDropdownMenu');
-            const btn = document.getElementById('userDropdownButton');
-            if (menu && !menu.classList.contains('hidden')) {
-                if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add('hidden');
+        <!-- Scripts phải nằm trong <header> (th:fragment scope) để Thymeleaf nhúng vào trang -->
+        <script>
+            function toggleUserDropdown(event) {
+                if (event) event.stopPropagation();
+                const menu = document.getElementById('userDropdownMenu');
+                if (menu) {
+                    menu.classList.toggle('hidden');
                 }
             }
-        });
-    </script>
+
+            function toggleNavCat(event) {
+                if (event) event.stopPropagation();
+                const panel = document.getElementById('navCatPanel');
+                const chevron = document.getElementById('navCatChevron');
+                if (!panel) return;
+                const isHidden = panel.classList.contains('hidden');
+                panel.classList.toggle('hidden');
+                if (chevron) {
+                    chevron.textContent = isHidden ? 'arrow_drop_up' : 'arrow_drop_down';
+                }
+            }
+
+            function closeNavCat() {
+                const panel = document.getElementById('navCatPanel');
+                const chevron = document.getElementById('navCatChevron');
+                if (panel) panel.classList.add('hidden');
+                if (chevron) chevron.textContent = 'arrow_drop_down';
+            }
+
+            document.addEventListener('click', function(e) {
+                // Đóng user dropdown khi click ra ngoài
+                const menu = document.getElementById('userDropdownMenu');
+                const btn = document.getElementById('userDropdownButton');
+                if (menu && !menu.classList.contains('hidden')) {
+                    if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+                        menu.classList.add('hidden');
+                    }
+                }
+                // Đóng mega dropdown danh mục khi click ra ngoài
+                const catPanel = document.getElementById('navCatPanel');
+                const catWrapper = document.getElementById('navCatWrapper');
+                if (catPanel && !catPanel.classList.contains('hidden')) {
+                    if (catWrapper && !catWrapper.contains(e.target)) {
+                        closeNavCat();
+                    }
+                }
+            });
+        </script>
+    </header>
+
 </body>
 </html>
