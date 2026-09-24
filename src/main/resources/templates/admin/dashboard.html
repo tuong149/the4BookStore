@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Cổng Quản Trị Hệ Thống')}">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Bảng Điều Khiển Quản Trị')}">
 </head>
 
 <body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
@@ -15,330 +15,187 @@
         <!-- Main Content Area -->
         <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
             <div class="flex flex-col w-full">
-                
-                <!-- Page Header & Greeting Banner -->
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary-container to-tertiary text-on-primary p-space-lg shadow-md mb-space-lg">
-                    <div class="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-tertiary-fixed/10 blur-2xl pointer-events-none"></div>
-                    <div class="absolute right-40 -bottom-16 w-48 h-48 rounded-full bg-secondary-container/10 blur-xl pointer-events-none"></div>
-                    
-                    <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md">
-                        <div class="flex flex-col gap-1 max-w-2xl">
-                            <div class="flex items-center gap-space-xs text-on-primary-container font-label-sm text-label-sm uppercase tracking-wider">
-                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-tertiary-fixed animate-pulse"></span>
-                                <span>DỮ LIỆU VẬN HÀNH TRỰC TIẾP</span>
-                                <span class="text-on-primary-container/60">•</span>
-                                <span>TRUNG TÂM QUẢN TRỊ THE4BOOKSTORE</span>
+
+                <!-- Ambient Glow Background Decoration -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Page Title & Storefront Link -->
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
+                        <div class="flex flex-col gap-space-xs">
+                            <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                                <span>VẬN HÀNH THE4BOOKSTORE</span>
+                                <span>/</span>
+                                <span class="text-primary font-semibold">TỔNG QUAN HỆ THỐNG</span>
                             </div>
-                            <h1 class="font-headline-xl text-headline-xl font-bold tracking-tight text-on-primary">
-                                Chào mừng trở lại, <span sec:authentication="name">Quản trị viên</span>!
-                            </h1>
-                            <p class="font-body-md text-body-md text-on-primary/85 leading-relaxed">
-                                Dưới đây là tổng quan hiệu suất chuỗi cửa hàng sách hôm nay. Lượng khách ghé thăm và đặt hàng trực tuyến tăng 14.2% so với cùng kỳ tuần trước.
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Bảng Điều Khiển Quản Trị</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                                Giám sát doanh thu kinh doanh, biểu đồ tăng trưởng và cảnh báo hàng tồn kho theo thời gian thực.
                             </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-space-sm self-stretch lg:self-auto">
-                            <div class="flex items-center gap-space-xs bg-surface-container-lowest/15 backdrop-blur-md px-space-sm py-2 rounded-xl text-on-primary font-label-md text-label-md border border-white/10">
-                                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                <span th:text="${currentDate} ?: 'Hôm nay'">24 Th10, 2024</span>
-                            </div>
-                            <button class="flex items-center gap-space-xs bg-surface-container-lowest text-primary hover:bg-surface-container-low font-label-md text-label-md font-semibold px-space-md py-2 rounded-xl shadow-sm transition-colors" type="button">
-                                <span class="material-symbols-outlined text-[18px] text-primary">file_download</span>
-                                <span>Xuất Báo Cáo</span>
-                            </button>
+
+                        <!-- Top Actions: Return to Storefront -->
+                        <div class="flex items-center gap-space-sm flex-wrap">
+                            <a th:href="@{/}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-container hover:bg-primary-container/90 text-on-primary font-label-md font-semibold shadow-sm transition-all border border-surface-container/60">
+                                <span class="material-symbols-outlined text-[20px]">storefront</span>
+                                <span>Xem Cửa Hàng (Trang Chủ)</span>
+                            </a>
                         </div>
                     </div>
-                </div>
 
-                <!-- Metric Summary Cards Bento Grid Fragment -->
-                <div class="mb-space-lg" th:replace="~{fragments/admin/kpi_cards :: kpi_cards}"></div>
+                    <!-- Stat Bento Grid (4 Cards) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
 
-                <!-- Quick Action Command Bar -->
-                <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm mb-space-lg border border-surface-container/60">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm mb-space-sm">
-                        <div class="flex items-center gap-space-xs">
-                            <span class="material-symbols-outlined text-primary text-[20px]">bolt</span>
-                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Thao Tác Nhanh Quản Trị</h2>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
-                        <!-- Action 1: Add New Book -->
-                        <a th:href="@{/admin/books?openModal=true}" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-primary-container/15 flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-on-primary transition-colors shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">add_circle</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="font-label-md text-label-md font-bold text-on-surface">Thêm Sách Mới</span>
-                                <span class="font-body-sm text-body-sm text-on-surface-variant">Thêm tựa sách vào kho</span>
-                            </div>
-                        </a>
-
-                        <!-- Action 2: POS Order -->
-                        <a href="#" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-colors shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">point_of_sale</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="font-label-md text-label-md font-bold text-on-surface">Bán Tại Quầy (POS)</span>
-                                <span class="font-body-sm text-body-sm text-on-surface-variant">Tạo đơn trực tiếp</span>
-                            </div>
-                        </a>
-
-                        <!-- Action 3: New Voucher -->
-                        <a href="#" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-tertiary-container/15 flex items-center justify-center text-tertiary group-hover:bg-tertiary-container group-hover:text-on-tertiary transition-colors shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">loyalty</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="font-label-md text-label-md font-bold text-on-surface">Tạo Mã Giảm Giá</span>
-                                <span class="font-body-sm text-body-sm text-on-surface-variant">Chương trình khuyến mãi</span>
-                            </div>
-                        </a>
-
-                        <!-- Action 4: Import Goods -->
-                        <a href="#" class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors group">
-                            <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors shrink-0">
-                                <span class="material-symbols-outlined text-[20px]">input</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="font-label-md text-label-md font-bold text-on-surface">Lập Phiếu Nhập</span>
-                                <span class="font-body-sm text-body-sm text-on-surface-variant">Nhập sách từ NCC</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Main Layout Grid: Tables and Widgets -->
-                <div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
-                    
-                    <!-- Left Column: Recent Orders & Alerts (8 cols) -->
-                    <div class="xl:col-span-8 flex flex-col gap-space-lg">
-                        
-                        <!-- Recent Orders Surface -->
-                        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60">
-                            <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
-                                <div class="flex items-center gap-space-xs">
-                                    <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
-                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Đơn Hàng Gần Đây</h2>
+                        <!-- Card 1: Doanh thu tháng này -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Doanh Thu Tháng Này</span>
+                                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">payments</span>
                                 </div>
-                                <a href="#" class="font-label-sm text-label-sm font-semibold text-primary hover:text-primary-container flex items-center gap-1">
-                                    <span>Xem tất cả</span>
-                                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                                </a>
                             </div>
-
-                            <div class="overflow-x-auto rounded-xl">
-                                <table class="w-full text-left">
-                                    <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                                        <tr>
-                                            <th class="py-2.5 px-space-sm rounded-l-lg">MÃ ĐƠN</th>
-                                            <th class="py-2.5 px-space-md">KHÁCH HÀNG</th>
-                                            <th class="py-2.5 px-space-md">SỐ MÓN</th>
-                                            <th class="py-2.5 px-space-md text-right">TỔNG TIỀN</th>
-                                            <th class="py-2.5 px-space-md">TRẠNG THÁI</th>
-                                            <th class="py-2.5 px-space-sm text-center rounded-r-lg">THAO TÁC</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-surface-container font-body-md text-body-md">
-                                        <tr class="hover:bg-surface-container-low/50 transition-colors">
-                                            <td class="py-3 px-space-sm font-mono font-bold text-primary">#DH-8429</td>
-                                            <td class="py-3 px-space-md">
-                                                <div class="flex flex-col">
-                                                    <span class="font-semibold text-on-surface">Trần Minh Quân</span>
-                                                    <span class="text-body-sm text-on-surface-variant">0912 345 678</span>
-                                                </div>
-                                            </td>
-                                            <td class="py-3 px-space-md text-on-surface-variant">3 cuốn</td>
-                                            <td class="py-3 px-space-md text-right font-mono font-semibold text-on-surface">385.000đ</td>
-                                            <td class="py-3 px-space-md">
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-primary-fixed/30 text-primary font-semibold">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                                                    Đã giao hàng
-                                                </span>
-                                            </td>
-                                            <td class="py-3 px-space-sm text-center">
-                                                <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Xem chi tiết">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-surface-container-low/50 transition-colors">
-                                            <td class="py-3 px-space-sm font-mono font-bold text-primary">#DH-8428</td>
-                                            <td class="py-3 px-space-md">
-                                                <div class="flex flex-col">
-                                                    <span class="font-semibold text-on-surface">Nguyễn Thị Ánh</span>
-                                                    <span class="text-body-sm text-on-surface-variant">0987 654 321</span>
-                                                </div>
-                                            </td>
-                                            <td class="py-3 px-space-md text-on-surface-variant">1 cuốn</td>
-                                            <td class="py-3 px-space-md text-right font-mono font-semibold text-on-surface">199.000đ</td>
-                                            <td class="py-3 px-space-md">
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-secondary-fixed/50 text-secondary font-semibold">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                                    Đang đóng gói
-                                                </span>
-                                            </td>
-                                            <td class="py-3 px-space-sm text-center">
-                                                <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Xem chi tiết">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-surface-container-low/50 transition-colors">
-                                            <td class="py-3 px-space-sm font-mono font-bold text-primary">#DH-8427</td>
-                                            <td class="py-3 px-space-md">
-                                                <div class="flex flex-col">
-                                                    <span class="font-semibold text-on-surface">Lê Hoàng Nam</span>
-                                                    <span class="text-body-sm text-on-surface-variant">0903 112 233</span>
-                                                </div>
-                                            </td>
-                                            <td class="py-3 px-space-md text-on-surface-variant">5 cuốn</td>
-                                            <td class="py-3 px-space-md text-right font-mono font-semibold text-on-surface">620.000đ</td>
-                                            <td class="py-3 px-space-md">
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-high text-on-surface-variant font-semibold">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
-                                                    Chờ xác nhận
-                                                </span>
-                                            </td>
-                                            <td class="py-3 px-space-sm text-center">
-                                                <button class="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors" title="Xem chi tiết">
-                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div>
+                                <div class="font-headline-xl text-headline-xl font-bold text-on-surface tabular-nums"
+                                     th:text="${monthlyRevenue != null and !monthlyRevenue.isEmpty() ? #numbers.formatDecimal(monthlyRevenue[0].revenue, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">
+                                    0 ₫
+                                </div>
+                                <span class="text-xs text-on-surface-variant mt-1 block">Cập nhật theo đơn hoàn tất</span>
                             </div>
                         </div>
 
-                        <!-- Low Stock Items List Surface -->
-                        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60">
-                            <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
-                                <div class="flex items-center gap-space-xs">
-                                    <span class="material-symbols-outlined text-secondary text-[20px]">warning</span>
-                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Cảnh Báo Tồn Kho Cần Nhập Thêm</h2>
+                        <!-- Card 2: Đơn hàng hôm nay -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Đơn Hàng Hôm Nay</span>
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
                                 </div>
-                                <a th:href="@{/admin/books}" class="font-label-sm text-label-sm font-semibold text-primary hover:text-primary-container flex items-center gap-1">
-                                    <span>Quản lý kho</span>
-                                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                                </a>
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                                <div class="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between border border-surface-container/40">
-                                    <div class="flex items-center gap-space-sm">
-                                        <div class="w-11 h-16 bg-surface-container rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
-                                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y" alt="Cover"/>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="font-label-md text-label-md font-bold text-on-surface">The Midnight Library</span>
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">Matt Haig</span>
-                                            <span class="font-label-sm text-label-sm text-secondary font-semibold mt-1">Còn lại: 3 cuốn</span>
-                                        </div>
-                                    </div>
-                                    <a th:href="@{/admin/books}" class="px-space-sm py-1.5 bg-surface-container-lowest text-primary text-label-sm font-semibold rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm">
-                                        Nhập hàng
-                                    </a>
+                            <div>
+                                <div class="font-headline-xl text-headline-xl font-bold text-on-surface tabular-nums" th:text="${todayOrders != null ? todayOrders : 0}">
+                                    0
                                 </div>
+                                <span class="text-xs text-on-surface-variant mt-1 block">Đơn phát sinh trong 24h</span>
+                            </div>
+                        </div>
 
-                                <div class="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between border border-surface-container/40">
-                                    <div class="flex items-center gap-space-sm">
-                                        <div class="w-11 h-16 bg-surface-container rounded-lg overflow-hidden flex-shrink-0 shadow-sm">
-                                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0ZepDd_foKXu3i6ER1m8WWEdur0sxuw_PzY9MNfI4REnQ3rf6R_2Cm9EnfFAhXCPxQTTtVl4s2CrHSmtbVz08lHsAHDSiErKboS8Y4p5NQiHrun0Ek56kgIt1soK3hBbriVWEntfW_SHfXzkp7nmY2OyfVyfhAuJ50SpGyqZseN_277pw-RUdZgMOpRkN3ksmBAnBDCRnpGWTd3UWhZiP2GhZTpYd0mZ4A0F2WZ20z_Y2aCKwxl9w" alt="Cover"/>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="font-label-md text-label-md font-bold text-on-surface">Atomic Habits</span>
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">James Clear</span>
-                                            <span class="font-label-sm text-label-sm text-error font-semibold mt-1">Hết hàng: 0 cuốn</span>
-                                        </div>
-                                    </div>
-                                    <a th:href="@{/admin/books}" class="px-space-sm py-1.5 bg-surface-container-lowest text-error text-label-sm font-semibold rounded-lg hover:bg-error hover:text-on-error transition-colors shadow-sm">
-                                        Nhập ngay
-                                    </a>
+                        <!-- Card 3: Tổng sách đã bán -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Tổng Sách Đã Bán</span>
+                                <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">menu_book</span>
                                 </div>
+                            </div>
+                            <div>
+                                <div class="font-headline-xl text-headline-xl font-bold text-on-surface tabular-nums" th:text="${totalSold != null ? totalSold : 0}">
+                                    0
+                                </div>
+                                <span class="text-xs text-on-surface-variant mt-1 block">Tổng số cuốn đã xuất kho</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Sắp / Hết hàng -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Cảnh Báo Tồn Kho</span>
+                                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">warning</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-headline-xl text-headline-xl font-bold text-secondary tabular-nums"
+                                     th:text="${(lowStockCount != null ? lowStockCount : 0) + (outOfStockCount != null ? outOfStockCount : 0)}">
+                                    0
+                                </div>
+                                <span class="text-xs text-on-surface-variant mt-1 block">Đầu sách cần bổ sung gấp</span>
                             </div>
                         </div>
 
                     </div>
 
-                    <!-- Right Column: Top Selling & System Activity (4 cols) -->
-                    <div class="xl:col-span-4 flex flex-col gap-space-lg">
-                        
-                        <!-- Top Selling Books -->
-                        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60">
-                            <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
-                                <div class="flex items-center gap-space-xs">
-                                    <span class="material-symbols-outlined text-primary text-[20px]">trending_up</span>
-                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Bán Chạy Nhất</h2>
+                    <!-- Charts Grid (2 columns: Line Chart & Doughnut) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md mb-space-lg">
+
+                        <!-- Line Chart: Doanh thu theo tháng -->
+                        <div class="lg:col-span-2 bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col">
+                            <div class="flex items-center justify-between mb-space-md">
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Xu Hướng Doanh Thu</h2>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Tổng doanh thu theo các tháng gần nhất</p>
                                 </div>
-                                <span class="font-label-sm text-label-sm text-on-surface-variant">Tháng này</span>
                             </div>
-
-                            <div class="flex flex-col divide-y divide-surface-container">
-                                <div class="py-space-sm flex items-center justify-between gap-space-sm">
-                                    <div class="flex items-center gap-space-sm">
-                                        <span class="w-6 h-6 rounded-full bg-primary-container text-on-primary text-xs font-bold flex items-center justify-center shadow-sm">1</span>
-                                        <div class="flex flex-col">
-                                            <span class="font-label-md text-label-md font-semibold text-on-surface">Cây Cam Ngọt Của Tôi</span>
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">José Mauro</span>
-                                        </div>
-                                    </div>
-                                    <span class="font-label-md text-label-md font-bold text-primary font-mono">148 cuốn</span>
-                                </div>
-
-                                <div class="py-space-sm flex items-center justify-between gap-space-sm">
-                                    <div class="flex items-center gap-space-sm">
-                                        <span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface text-xs font-bold flex items-center justify-center">2</span>
-                                        <div class="flex flex-col">
-                                            <span class="font-label-md text-label-md font-semibold text-on-surface">Sapiens: Lược Sử Loài Người</span>
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">Yuval Noah Harari</span>
-                                        </div>
-                                    </div>
-                                    <span class="font-label-md text-label-md font-bold text-primary font-mono">112 cuốn</span>
-                                </div>
-
-                                <div class="py-space-sm flex items-center justify-between gap-space-sm">
-                                    <div class="flex items-center gap-space-sm">
-                                        <span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface text-xs font-bold flex items-center justify-center">3</span>
-                                        <div class="flex flex-col">
-                                            <span class="font-label-md text-label-md font-semibold text-on-surface">Tâm Lý Học Về Tiền</span>
-                                            <span class="font-body-sm text-body-sm text-on-surface-variant">Morgan Housel</span>
-                                        </div>
-                                    </div>
-                                    <span class="font-label-md text-label-md font-bold text-primary font-mono">95 cuốn</span>
-                                </div>
+                            <div class="relative h-[320px] w-full">
+                                <canvas id="revenueLineChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- System Activity Timeline -->
-                        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60">
-                            <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
-                                <div class="flex items-center gap-space-xs">
-                                    <span class="material-symbols-outlined text-primary text-[20px]">history</span>
-                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Nhật Ký Hoạt Động</h2>
+                        <!-- Doughnut Chart: Tỷ lệ Top Sách -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col">
+                            <div class="flex items-center justify-between mb-space-md">
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Top Sách Bán Chạy</h2>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Phân bố sản lượng tiêu thụ</p>
                                 </div>
                             </div>
-
-                            <div class="relative pl-6 space-y-space-md before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container">
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-primary ring-4 ring-surface-container-lowest shadow-sm"></div>
-                                    <p class="font-body-sm text-body-sm text-on-surface"><strong class="font-semibold">Đơn hàng #DH-8429</strong> đã được giao thành công cho khách hàng.</p>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">10 phút trước</span>
-                                </div>
-
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-secondary ring-4 ring-surface-container-lowest shadow-sm"></div>
-                                    <p class="font-body-sm text-body-sm text-on-surface"><strong class="font-semibold">Thủ kho</strong> đã cập nhật số lượng tồn kho tựa sách "Atomic Habits".</p>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">42 phút trước</span>
-                                </div>
-
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-tertiary ring-4 ring-surface-container-lowest shadow-sm"></div>
-                                    <p class="font-body-sm text-body-sm text-on-surface"><strong class="font-semibold">Khách hàng mới</strong> tranthanh@gmail.com vừa đăng ký tài khoản.</p>
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">2 giờ trước</span>
-                                </div>
+                            <div class="relative h-[320px] w-full flex items-center justify-center">
+                                <canvas id="topBooksDoughnutChart"></canvas>
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Top Selling Books Table -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-surface-container/60">
+                        <div class="p-space-md border-b border-surface-container/60 flex items-center justify-between">
+                            <div>
+                                <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Chi Tiết Sách Bán Chạy Nhất</h2>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">Danh sách các tác phẩm có số lượng bán cao nhất trên sàn</p>
+                            </div>
+                            <a th:href="@{/admin/books}" class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                                <span>Xem toàn bộ kho</span>
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-surface-container/60 bg-surface-container-low/40 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                        <th class="py-3 px-space-md">HẠNG</th>
+                                        <th class="py-3 px-space-md">TỰA SÁCH</th>
+                                        <th class="py-3 px-space-md text-right">ĐƠN GIÁ</th>
+                                        <th class="py-3 px-space-md text-right">ĐÃ BÁN</th>
+                                        <th class="py-3 px-space-md text-right">DOANH THU ĐÓNG GÓP</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container/40">
+                                    <tr th:if="${topBooks == null or #lists.isEmpty(topBooks)}">
+                                        <td colspan="5" class="py-8 text-center text-on-surface-variant">
+                                            Chưa ghi nhận dữ liệu sách bán ra.
+                                        </td>
+                                    </tr>
+                                    <tr th:each="book, stat : ${topBooks}" class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="py-3.5 px-space-md font-mono font-bold" th:text="'#' + ${stat.count}">#1</td>
+                                        <td class="py-3.5 px-space-md">
+                                            <span class="font-semibold text-on-surface" th:text="${book.tenSach}">Tên sách</span>
+                                        </td>
+                                        <td class="py-3.5 px-space-md text-right tabular-nums text-on-surface-variant"
+                                            th:text="${book.giaBan != null ? #numbers.formatDecimal(book.giaBan, 0, 'POINT', 0, 'COMMA') + ' ₫' : '---'}">
+                                            100.000 ₫
+                                        </td>
+                                        <td class="py-3.5 px-space-md text-right font-bold text-primary tabular-nums" th:text="${book.soLuongBan}">
+                                            50
+                                        </td>
+                                        <td class="py-3.5 px-space-md text-right font-semibold text-on-surface tabular-nums"
+                                            th:text="${book.giaBan != null ? #numbers.formatDecimal(book.giaBan * book.soLuongBan, 0, 'POINT', 0, 'COMMA') + ' ₫' : '---'}">
+                                            5.000.000 ₫
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                 </div>
@@ -347,5 +204,135 @@
         </main>
     </div>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 1. Process Data from Thymeleaf
+            const rawRevenueData = /*[[${monthlyRevenue}]]*/ [];
+            const rawTopBooks = /*[[${topBooks}]]*/ [];
+
+            const revenueChronological = rawRevenueData && rawRevenueData.length > 0 ? [...rawRevenueData].reverse() : [];
+            const revenueLabels = revenueChronological.map(item => item.month);
+            const revenueValues = revenueChronological.map(item => item.revenue);
+
+            const booksLimited = rawTopBooks && rawTopBooks.length > 0 ? rawTopBooks.slice(0, 5) : [];
+            const bookLabels = booksLimited.map(b => b.tenSach.length > 20 ? b.tenSach.substring(0, 20) + '...' : b.tenSach);
+            const bookValues = booksLimited.map(b => b.soLuongBan);
+
+            Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            Chart.defaults.color = '#707a6f';
+
+            // 2. Line Chart Engine
+            const ctxLine = document.getElementById('revenueLineChart');
+            if (ctxLine) {
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: revenueLabels.length > 0 ? revenueLabels : ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
+                        datasets: [{
+                            label: 'Doanh Thu (VND)',
+                            data: revenueValues.length > 0 ? revenueValues : [0, 0, 0, 0, 0],
+                            borderColor: '#004c22',
+                            backgroundColor: 'rgba(0, 76, 34, 0.08)',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#004c22',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.35
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#141b2b',
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        let value = context.raw || 0;
+                                        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#e9edff' },
+                                ticks: {
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000) + 'M';
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Doughnut Chart Engine
+            const ctxDoughnut = document.getElementById('topBooksDoughnutChart');
+            if (ctxDoughnut) {
+                new Chart(ctxDoughnut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: bookLabels.length > 0 ? bookLabels : ['Chưa có dữ liệu'],
+                        datasets: [{
+                            data: bookValues.length > 0 ? bookValues : [1],
+                            backgroundColor: [
+                                '#004c22',
+                                '#166534',
+                                '#904d00',
+                                '#006545',
+                                '#ba1a1a'
+                            ].slice(0, Math.max(1, bookValues.length)),
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 16,
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#141b2b',
+                                padding: 10,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` Đã bán: ${context.raw} cuốn`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
 </body>
 </html>
