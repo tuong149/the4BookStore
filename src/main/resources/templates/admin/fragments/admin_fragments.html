@@ -146,7 +146,7 @@
 
             <!-- Public Storefront Jump Link -->
             <div class="px-space-md py-space-sm">
-                <a th:href="@{/}" target="_blank" class="w-full flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors">
+                <a th:href="@{/}" class="w-full flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors">
                     <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
                     <span>Xem Cửa Hàng</span>
                 </a>
@@ -174,11 +174,38 @@
 
                 <!-- Orders (Mock / Upcoming) -->
                 <a th:href="@{/admin/orders}"
-                   th:class="${activePage == 'orders'} ? 
-                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                   th:class="${activePage == 'orders'} ?
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' :
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
                     <span class="material-symbols-outlined text-[20px]">receipt_long</span>
                     <span>Đơn Hàng</span>
+                </a>
+
+                <!-- Kho Hàng -->
+                <a th:href="@{/admin/kho}"
+                   th:class="${activePage == 'kho'} ?
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' :
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">warehouse</span>
+                    <span>Kho Hàng</span>
+                </a>
+
+                <!-- Phiếu Nhập -->
+                <a th:href="@{/admin/kho/phieu-nhap}"
+                   th:class="${activePage == 'phieu-nhap'} ?
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[18px]">input</span>
+                    <span>Phiếu Nhập</span>
+                </a>
+
+                <!-- Phiếu Kiểm Kê -->
+                <a th:href="@{/admin/kho/phieu-ke}"
+                   th:class="${activePage == 'phieu-ke'} ?
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
+                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[18px]">fact_check</span>
+                    <span>Phiếu Kiểm Kê</span>
                 </a>
 
                 <!-- Vouchers & Promotions -->
@@ -214,9 +241,9 @@
         <div class="p-space-md border-t border-surface-container">
             <div class="flex items-center justify-between p-space-xs rounded-xl hover:bg-surface-container transition-colors">
                 <div class="flex items-center gap-space-xs">
-                    <img alt="Ảnh đại diện quản trị viên" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" th:src="@{/images/manager-avatar.png}"/>
+                    <img alt="Ảnh đại diện quản trị viên" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" th:src="${userAvatar}"/>
                     <div class="flex flex-col">
-                        <span class="font-label-md text-label-md text-on-surface font-bold" sec:authentication="name">Quản Trị Viên</span>
+                        <span class="font-label-md text-label-md text-on-surface font-bold" th:text="${userDisplayName != null ? userDisplayName : 'Quản Trị Viên'}">Quản Trị Viên</span>
                         <span class="font-label-sm text-label-sm text-on-surface-variant" sec:authorize="hasRole('ADMIN')">Cấp Quản Trị Hệ Thống</span>
                         <span class="font-label-sm text-label-sm text-on-surface-variant" sec:authorize="!hasRole('ADMIN')">Quản Lý Cửa Hàng</span>
                     </div>
@@ -250,9 +277,9 @@
             <div class="h-5 w-[1px] bg-surface-container"></div>
 
             <div class="flex items-center gap-space-sm pl-space-xs">
-                <img alt="Ảnh đại diện" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20 shadow-sm" th:src="@{/images/manager-avatar.png}"/>
+                <img alt="Ảnh đại diện" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20 shadow-sm" th:src="${userAvatar}"/>
                 <div class="hidden md:flex flex-col text-left">
-                    <span class="font-label-md text-label-md text-on-surface font-semibold" sec:authentication="name">Quản trị viên</span>
+                    <span class="font-label-md text-label-md text-on-surface font-semibold" th:text="${userDisplayName != null ? userDisplayName : 'Quản trị viên'}">Quản trị viên</span>
                     <span class="font-label-sm text-label-sm text-on-surface-variant">The4BookStore Operations</span>
                 </div>
             </div>

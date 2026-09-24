@@ -48,6 +48,11 @@
                 <span>Đăng ký thành công! Vui lòng đăng nhập.</span>
             </div>
 
+            <div th:if="${param.resetSuccess}" class="mb-4 px-4 py-3 rounded-2xl bg-white/95 border-2 border-primary/50 text-primary text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-md animate-in fade-in duration-300">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                <span>Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.</span>
+            </div>
+
             <!-- Login Form -->
             <form th:action="@{/process-login}" method="post" class="space-y-4">
                 <!-- Username Input -->
@@ -79,9 +84,9 @@
                                class="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-primary text-primary focus:ring-primary/30 cursor-pointer accent-primary" />
                         <span class="font-bold text-slate-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">Ghi nhớ đăng nhập</span>
                     </label>
-                    <a href="javascript:alert('Vui lòng liên hệ Admin qua email hỗ trợ để thiết lập lại mật khẩu.')"
+                    <a th:href="@{/forgot-password}"
                        class="font-bold text-slate-900 hover:text-primary transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
-                        Quên mật khẩu
+                        Quên mật khẩu?
                     </a>
                 </div>
 
@@ -98,9 +103,8 @@
             </div>
 
             <!-- Google OAuth Button -->
-            <button type="button"
-                    onclick="alert('Chức năng Đăng nhập bằng Google đang được tích hợp qua cổng OAuth2.')"
-                    class="w-full py-3 sm:py-3.5 border-2 border-primary bg-white hover:bg-slate-50 text-primary font-headline-sm text-xs sm:text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer shadow-md active:scale-[0.99]">
+            <a th:href="@{/oauth2/authorization/google}"
+               class="w-full py-3 sm:py-3.5 border-2 border-primary bg-white hover:bg-slate-50 text-primary font-headline-sm text-xs sm:text-sm font-bold rounded-full transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer shadow-md active:scale-[0.99]">
                 <!-- Google "G" Icon -->
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -108,8 +112,8 @@
                     <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                 </svg>
-                <span>Đăng nhập với tài khoản Google</span>
-            </button>
+                <span>Tiếp tục với tài khoản Google</span>
+            </a>
 
             <!-- Register Footer Link -->
             <div class="text-center text-xs sm:text-sm text-slate-900 pt-4 font-semibold drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">

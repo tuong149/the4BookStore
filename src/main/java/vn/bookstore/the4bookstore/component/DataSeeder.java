@@ -18,6 +18,10 @@ public class DataSeeder implements CommandLineRunner {
     private final NhaCungCapRepository nhaCungCapRepository;
     private final SanPhamRepository sanPhamRepository;
     private final PasswordEncoder passwordEncoder;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username:}")
+    private String mailUsername;
 
     public DataSeeder(TaiKhoanRepository taiKhoanRepository, 
                       KhachHangRepository khachHangRepository,
@@ -25,7 +29,8 @@ public class DataSeeder implements CommandLineRunner {
                       NhaXuatBanRepository nhaXuatBanRepository,
                       NhaCungCapRepository nhaCungCapRepository,
                       SanPhamRepository sanPhamRepository,
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder,
+                      @org.springframework.beans.factory.annotation.Autowired(required = false) org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
         this.taiKhoanRepository = taiKhoanRepository;
         this.khachHangRepository = khachHangRepository;
         this.danhMucRepository = danhMucRepository;
@@ -33,10 +38,17 @@ public class DataSeeder implements CommandLineRunner {
         this.nhaCungCapRepository = nhaCungCapRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        if (jdbcTemplate != null) {
+            try {
+                jdbcTemplate.execute("ALTER TABLE khach_hang MODIFY so_dien_thoai VARCHAR(20) NULL");
+            } catch (Exception ignored) {}
+        }
+
         String defaultPassword = passwordEncoder.encode("123456");
 
         createAccountIfNotFound("khachhang", "KHACHHANG", defaultPassword);
@@ -44,6 +56,19 @@ public class DataSeeder implements CommandLineRunner {
         createAccountIfNotFound("thukho", "NHANVIENKHO", defaultPassword);
         createAccountIfNotFound("admin", "ADMIN", defaultPassword);
         createAccountIfNotFound("quanly", "QUANLY", defaultPassword);
+
+        // Khởi tạo tài khoản kiểm thử cho email SMTP nếu được cấu hình trong .env
+        String configuredEmail = (mailUsername != null && !mailUsername.isBlank()) ? mailUsername.trim() : System.getenv("MAIL_USERNAME");
+        if (configuredEmail != null && !configuredEmail.isBlank() && taiKhoanRepository.findByEmail(configuredEmail.trim()).isEmpty()) {
+            TaiKhoan tkMail = new TaiKhoan();
+            tkMail.setTenDangNhap("the4bookstore_user");
+            tkMail.setEmail(configuredEmail.trim());
+            tkMail.setMatKhauHash(defaultPassword);
+            tkMail.setVaiTro("KHACHHANG");
+            tkMail.setTrangThai("HoatDong");
+            tkMail.setAuthProvider("LOCAL");
+            taiKhoanRepository.save(tkMail);
+        }
 
         seedBookstoreData();
     }

@@ -4,13 +4,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
+    private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
+
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
+                          CustomOidcUserService customOidcUserService,
+                          OAuth2LoginSuccessHandler oauth2LoginSuccessHandler,
+                          JwtAuthenticationFilter jwtAuthenticationFilter,
+                          JwtLogoutSuccessHandler jwtLogoutSuccessHandler) {
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.customOidcUserService = customOidcUserService;
+        this.oauth2LoginSuccessHandler = oauth2LoginSuccessHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtLogoutSuccessHandler = jwtLogoutSuccessHandler;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -25,21 +45,35 @@ public class SecurityConfig {
                 .requestMatchers("/kho/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENKHO")
                 .requestMatchers("/ban-hang/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENBANHANG")
                 .requestMatchers("/khach-hang/**", "/thanh-toan/**").hasAnyRole("KHACHHANG")
-                .requestMatchers("/gio-hang/**").permitAll()
+                .requestMatchers("/profile", "/profile/**").authenticated()
+                .requestMatchers("/gio-hang", "/gio-hang/**").permitAll()
+                .requestMatchers("/forgot-password", "/forgot-password/**", "/reset-password", "/reset-password/**", "/resend-otp").permitAll()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/process-login")
-                .defaultSuccessUrl("/", true)
+                .successHandler(oauth2LoginSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                    .oidcUserService(customOidcUserService)
+                )
+                .successHandler(oauth2LoginSuccessHandler)
+            )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessHandler(jwtLogoutSuccessHandler)
                 .permitAll()
-            );
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
