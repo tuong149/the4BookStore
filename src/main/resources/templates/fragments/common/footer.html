@@ -53,6 +53,86 @@
                 <span>Giao hàng 24h</span>
             </div>
         </div>
+
+        <!-- Global Toast Notification -->
+        <div id="globalCartToast" class="fixed bottom-6 right-6 z-[999] hidden items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-4 border text-xs sm:text-sm font-semibold max-w-sm">
+            <span id="globalCartToastIcon" class="material-symbols-outlined text-[22px]">check_circle</span>
+            <span id="globalCartToastMsg">Đã thêm vào giỏ hàng!</span>
+        </div>
+
+        <!-- Global Quick Add to Cart Script -->
+        <script>
+            function showGlobalToast(message, isSuccess = true) {
+                const toast = document.getElementById('globalCartToast');
+                const icon = document.getElementById('globalCartToastIcon');
+                const text = document.getElementById('globalCartToastMsg');
+                if (!toast) return;
+
+                text.textContent = message;
+                if (isSuccess) {
+                    toast.className = 'fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-0 border text-xs sm:text-sm font-semibold max-w-sm bg-primary text-on-primary border-primary-container';
+                    icon.textContent = 'check_circle';
+                } else {
+                    toast.className = 'fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-0 border text-xs sm:text-sm font-semibold max-w-sm bg-error text-on-primary border-error';
+                    icon.textContent = 'error';
+                }
+
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3500);
+            }
+
+            function quickAddToCart(maSP, soLuong = 1, event = null) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const formData = new FormData();
+                formData.append('maSP', maSP);
+                formData.append('soLuong', soLuong);
+
+                fetch('/api/gio-hang/them', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => {
+                    if (res.redirected) {
+                        window.location.href = res.url;
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    if (data.requireLogin) {
+                        showGlobalToast('Vui lòng đăng nhập để thêm vào giỏ hàng!', false);
+                        setTimeout(() => { window.location.href = '/login'; }, 1200);
+                        return;
+                    }
+
+                    if (data.success) {
+                        showGlobalToast(data.message || 'Đã thêm sách vào giỏ hàng!', true);
+                        const badge = document.getElementById('global-cart-badge');
+                        if (badge && data.cartCount !== undefined) {
+                            badge.textContent = data.cartCount;
+                            badge.classList.add('scale-125');
+                            setTimeout(() => badge.classList.remove('scale-125'), 300);
+                        }
+                    } else {
+                        showGlobalToast(data.message || 'Không thể thêm vào giỏ hàng', false);
+                    }
+                })
+                .catch(err => {
+                    console.error('Cart add error:', err);
+                    showGlobalToast('Lỗi kết nối khi thêm vào giỏ hàng', false);
+                });
+            }
+        </script>
     </footer>
 
 </body>

@@ -101,16 +101,15 @@
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-space-sm pt-space-xs">
-                        <form th:action="@{/gio-hang/add}" method="post" class="flex-1">
-                            <input type="hidden" name="maSP" th:value="${sanPham.maSP}"/>
-                            <input type="hidden" name="soLuong" value="1"/>
-                            <button type="submit"
+                        <div class="flex-1">
+                            <button type="button"
+                                    th:onclick="'quickAddToCart(' + ${sanPham.maSP} + ', 1, event)'"
                                     th:disabled="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0}"
-                                    class="w-full bg-primary text-on-primary py-3 px-space-xl rounded-xl font-bold text-sm hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-space-xs disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="w-full bg-primary text-on-primary py-3 px-space-xl rounded-xl font-bold text-sm hover:bg-primary-container transition-all shadow-md flex items-center justify-center gap-space-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.99]">
                                 <span class="material-symbols-outlined text-[20px]" th:text="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0 ? 'production_quantity_limits' : 'add_shopping_cart'}">add_shopping_cart</span>
                                 <span th:text="${sanPham.trangThai == 'HetHang' || sanPham.soLuongTon == null || sanPham.soLuongTon <= 0 ? 'Tạm Thời Hết Hàng' : 'Thêm Vào Giỏ Hàng'}">Thêm Vào Giỏ Hàng</span>
                             </button>
-                        </form>
+                        </div>
                         <a th:href="@{/san-pham}" class="px-space-xl py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-sm transition-colors flex items-center gap-space-xs">
                             <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                             <span>Quay Lại</span>

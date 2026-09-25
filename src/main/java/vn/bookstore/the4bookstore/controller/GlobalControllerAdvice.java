@@ -30,10 +30,47 @@ public class GlobalControllerAdvice {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private SanPhamRepository sanPhamRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private vn.bookstore.the4bookstore.service.GioHangService gioHangService;
+
     public GlobalControllerAdvice(KhachHangRepository khachHangRepository,
                                   TaiKhoanRepository taiKhoanRepository) {
         this.khachHangRepository = khachHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
+    }
+
+    @ModelAttribute("cartItemCount")
+    public int getCartItemCount(Authentication authentication, jakarta.servlet.http.HttpSession session) {
+        if (gioHangService == null) return 0;
+        KhachHang kh = getKhachHangFromAuth(authentication);
+        if (kh != null) {
+            return gioHangService.getCartItemCount(kh);
+        }
+        return gioHangService.getSessionCartItemCount(session);
+    }
+
+    private KhachHang getKhachHangFromAuth(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails && userDetails.getTaiKhoan() != null) {
+            return khachHangRepository.findByTaiKhoan(userDetails.getTaiKhoan()).orElse(null);
+        }
+        if (principal instanceof CustomOAuth2User oAuth2User && oAuth2User.getTaiKhoan() != null) {
+            return khachHangRepository.findByTaiKhoan(oAuth2User.getTaiKhoan()).orElse(null);
+        }
+        if (principal instanceof CustomOidcUser oidcUser && oidcUser.getTaiKhoan() != null) {
+            return khachHangRepository.findByTaiKhoan(oidcUser.getTaiKhoan()).orElse(null);
+        }
+        String name = authentication.getName();
+        if (name != null) {
+            Optional<TaiKhoan> tkOpt = taiKhoanRepository.findByEmail(name).or(() -> taiKhoanRepository.findByTenDangNhap(name));
+            if (tkOpt.isPresent()) {
+                return khachHangRepository.findByTaiKhoan(tkOpt.get()).orElse(null);
+            }
+        }
+        return null;
     }
 
     @ModelAttribute("allActiveCategories")
