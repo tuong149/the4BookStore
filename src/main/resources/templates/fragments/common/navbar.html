@@ -9,9 +9,9 @@
             <span>✨ Ưu đãi đặc biệt: Miễn phí vận chuyển hỏa tốc toàn quốc cho đơn hàng từ 350.000 đ!</span>
         </div>
 
-        <div class="h-24 max-w-7xl mx-auto px-space-md md:px-margin-desktop flex flex-col justify-between py-space-xs">
+        <div class="h-16 max-w-7xl mx-auto px-space-md md:px-margin-desktop flex items-center justify-between py-2">
             <!-- Top Row: Logo, Live Search, Right Actions -->
-            <div class="flex items-center justify-between gap-space-md pt-space-xs">
+            <div class="flex items-center justify-between gap-space-md w-full">
                 <!-- Brand Logo -->
                 <a class="flex items-center gap-space-sm shrink-0" th:href="@{/}">
                     <img alt="The4BookStore Logo" class="h-9 w-auto object-contain" th:src="@{/images/logo.svg}"/>
@@ -219,16 +219,7 @@
                             </div>
                         </div>
                     </th:block>
-                </div>
             </div>
-
-            <!-- Bottom Row: Navigation Menu Links (Fixed 3 primary tabs only) -->
-            <nav class="flex items-center gap-space-lg overflow-x-auto pb-1 font-label-md text-xs">
-                <a th:href="@{/}" th:class="${activePage == 'home'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Trang Chủ</a>
-                <a th:href="@{/san-pham}" th:class="${activePage == 'products'} ? 'text-primary font-bold border-b-2 border-primary py-1 transition-colors' : 'text-on-surface-variant hover:text-on-surface py-1 transition-colors'">Tất Cả Sản Phẩm</a>
-                <a th:href="@{/#bestsellers-grid}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Sách Bán Chạy</a>
-                <a th:href="@{/#categories}" class="text-on-surface-variant hover:text-on-surface py-1 transition-colors">Danh Mục Thể Loại</a>
-            </nav>
         </div>
 
         <!-- Scripts phải nằm trong <header> (th:fragment scope) để Thymeleaf nhúng vào trang -->
