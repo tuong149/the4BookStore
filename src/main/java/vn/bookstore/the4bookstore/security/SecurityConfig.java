@@ -40,12 +40,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "QUANLY")
                 .requestMatchers("/kho/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENKHO")
                 .requestMatchers("/ban-hang/**").hasAnyRole("ADMIN", "QUANLY", "NHANVIENBANHANG")
                 .requestMatchers("/khach-hang/**", "/thanh-toan/**").hasAnyRole("KHACHHANG")
                 .requestMatchers("/profile", "/profile/**").authenticated()
+                .requestMatchers("/don-hang", "/don-hang/**").authenticated()
+                .requestMatchers("/gio-hang/dat-hang").authenticated()
+                .requestMatchers("/api/gio-hang/**").permitAll()
                 .requestMatchers("/gio-hang", "/gio-hang/**").permitAll()
                 .requestMatchers("/forgot-password", "/forgot-password/**", "/reset-password", "/reset-password/**", "/resend-otp").permitAll()
                 .anyRequest().permitAll()
@@ -71,7 +75,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
