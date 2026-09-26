@@ -4,6 +4,27 @@
 
 <body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
+    <style>
+        .horizontal-scroll-category {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar {
+            height: 6px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 9999px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 9999px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    </style>
+
     <!-- Storefront Common Header Navigation Fragment -->
     <header th:replace="~{fragments/common/navbar :: common_navbar('home')}"></header>
 
@@ -98,24 +119,246 @@
                     </div>
                     <div class="flex items-center gap-space-xs">
                         <span class="font-label-md text-xs text-on-surface-variant">Sắp xếp theo:</span>
-                        <select class="bg-surface-container-low border-0 rounded-xl px-space-sm py-1.5 font-label-md text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary">
-                            <option>Phổ biến nhất</option>
-                            <option>Mới phát hành</option>
-                            <option>Giá tăng dần</option>
-                            <option>Giá giảm dần</option>
+                        <select id="featuredSortSelect" onchange="sortFeaturedBooks(this.value)" class="bg-surface-container-low border-0 rounded-xl px-space-sm py-1.5 font-label-md text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary cursor-pointer">
+                            <option value="newest">Mới phát hành</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                            <option value="name_asc">Tên sách A-Z</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Book Cards Grid Using Reusable Component -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                    <th:block th:each="book : ${featuredBooks}">
+                <div id="featuredBooksGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
+                    <div th:each="book : ${featuredBooks}" 
+                          class="featured-card-wrapper h-full flex flex-col"
+                          th:attr="data-price=${book.giaBan}, data-name=${book.tenSP?.toLowerCase()}">
                         <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
-                    </th:block>
+                    </div>
                 </div>
             </section>
 
-            <!-- 3. INDEPENDENT BOOKSTORE BENEFITS -->
+            <!-- 3. TẤT CẢ SẢN PHẨM SECTION -->
+            <section class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg" id="all-products">
+                <!-- Section Header -->
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-md gap-space-xs">
+                    <div>
+                        <div class="inline-flex items-center gap-1 text-primary font-label-sm text-xs font-bold mb-1">
+                            <span class="material-symbols-outlined text-[16px]">apps</span>
+                            <span>Khám Phá Toàn Diện</span>
+                        </div>
+                        <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
+                            Tất Cả Sản Phẩm
+                        </h2>
+                        <p class="text-on-surface-variant text-sm mt-1">Toàn bộ danh mục sản phẩm chọn lọc tại The4BookStore</p>
+                    </div>
+                    <a th:href="@{/san-pham}" class="inline-flex items-center gap-1 text-primary font-label-md text-xs font-semibold hover:underline">
+                        <span>Mở trang sản phẩm đầy đủ</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Filter & Search Toolbar -->
+                <form method="get" th:action="@{/san-pham}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
+                    <div class="flex flex-col lg:flex-row gap-space-sm items-stretch lg:items-center">
+                        <!-- Search Input -->
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+                            <input type="text" name="q"
+                                   class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
+                                   placeholder="Tìm theo tên sản phẩm, tác giả, ISBN..."/>
+                        </div>
+                        <!-- Dropdown: Danh mục (Phân loại chính) -->
+                        <select name="loaiSP" id="homeLoaiSPFilter"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
+                            <option value="">Tất cả danh mục</option>
+                            <option value="Sach">Sách</option>
+                            <option value="VanPhongPham">Văn phòng phẩm</option>
+                            <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                        </select>
+                        <!-- Dropdown: Loại sản phẩm -->
+                        <select name="danhMuc" id="homeDanhMucFilter"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
+                            <option value="0">Tất cả loại sản phẩm</option>
+                            <option th:each="cat : ${categoriesSach}" th:value="${cat.maDanhMuc}" data-group="Sach" th:text="${cat.tenDanhMuc}">Loại</option>
+                            <option th:each="cat : ${categoriesVpp}" th:value="${cat.maDanhMuc}" data-group="VanPhongPham" th:text="${cat.tenDanhMuc}">Loại</option>
+                            <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
+                        </select>
+                        <!-- Dropdown Sắp xếp -->
+                        <select name="sort"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[150px]">
+                            <option value="newest">Mới nhất</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                            <option value="name_asc">Tên A-Z</option>
+                        </select>
+                        <!-- Nút Lọc / Tìm kiếm -->
+                        <button type="submit" class="bg-primary text-on-primary px-space-lg py-2.5 rounded-xl text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm shrink-0">
+                            <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                            <span>Tìm &amp; Lọc</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ===== PHÂN MỤC 1: SÁCH ===== -->
+                <div class="mb-space-xl">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                        <div class="flex items-center gap-space-sm">
+                            <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                                <span class="material-symbols-outlined text-[24px]">menu_book</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Sách</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Tiểu thuyết, văn học, kỹ năng sống, kinh tế, khoa học và lịch sử</p>
+                            </div>
+                        </div>
+                        <a th:href="@{/san-pham/sach}"
+                           class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm self-start md:self-auto">
+                            <span>Xem tất cả sách</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <!-- Các loại sách (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                    <div th:if="${!#lists.isEmpty(categoriesSach)}" class="mb-space-md">
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                            <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                                <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
+                                <span>Loại sách:</span>
+                            </span>
+                            <a th:href="@{/san-pham/sach}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">apps</span>
+                                <span>Tất cả sách</span>
+                            </a>
+                            <a th:each="cat : ${categoriesSach}"
+                               th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
+                               th:text="${cat.tenDanhMuc}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                                Tiểu Thuyết &amp; Văn Học
+                            </a>
+                        </div>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(sachPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                        <th:block th:each="book : ${sachPreview}">
+                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        </th:block>
+                    </div>
+                    <div th:if="${#lists.isEmpty(sachPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">menu_book</span>
+                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sách nào.</p>
+                    </div>
+                </div>
+
+                <div class="h-px bg-surface-container my-space-xl"></div>
+
+                <!-- ===== PHÂN MỤC 2: VĂN PHÒNG PHẨM ===== -->
+                <div class="mb-space-xl">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                        <div class="flex items-center gap-space-sm">
+                            <div class="w-11 h-11 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shadow-xs">
+                                <span class="material-symbols-outlined text-[24px]">edit_note</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Văn Phòng Phẩm</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Bút viết, sổ tay cao cấp, dụng cụ đọc sách và làm việc</p>
+                            </div>
+                        </div>
+                        <a th:href="@{/san-pham/van-phong-pham}"
+                           class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
+                            <span>Xem tất cả VPP</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <!-- Các loại VPP (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                    <div th:if="${!#lists.isEmpty(categoriesVpp)}" class="mb-space-md">
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                            <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                                <span class="material-symbols-outlined text-[16px] text-secondary">sell</span>
+                                <span>Loại VPP:</span>
+                            </span>
+                            <a th:href="@{/san-pham/van-phong-pham}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-secondary text-on-secondary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">apps</span>
+                                <span>Tất cả VPP</span>
+                            </a>
+                            <a th:each="cat : ${categoriesVpp}"
+                               th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
+                               th:text="${cat.tenDanhMuc}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                                Sổ Tay
+                            </a>
+                        </div>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(vppPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                        <th:block th:each="book : ${vppPreview}">
+                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        </th:block>
+                    </div>
+                    <div th:if="${#lists.isEmpty(vppPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">edit_note</span>
+                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm văn phòng phẩm nào.</p>
+                    </div>
+                </div>
+
+                <div class="h-px bg-surface-container my-space-xl"></div>
+
+                <!-- ===== PHÂN MỤC 3: QUÀ TẶNG & TRANG TRÍ ===== -->
+                <div class="mb-space-lg">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                        <div class="flex items-center gap-space-sm">
+                            <div class="w-11 h-11 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center shadow-xs">
+                                <span class="material-symbols-outlined text-[24px]">redeem</span>
+                            </div>
+                            <div>
+                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Quà Tặng &amp; Trang Trí</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Túi tote canvas, mô hình Book Nook, trò chơi boardgame và quà tặng độc đáo</p>
+                            </div>
+                        </div>
+                        <a th:href="@{/san-pham/qua-tang}"
+                           class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-tertiary text-on-tertiary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
+                            <span>Xem tất cả Quà tặng</span>
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <!-- Các loại Quà tặng & Trang trí (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                    <div th:if="${!#lists.isEmpty(categoriesQuaTang)}" class="mb-space-md">
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                            <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                                <span class="material-symbols-outlined text-[16px] text-tertiary">sell</span>
+                                <span>Loại quà tặng:</span>
+                            </span>
+                            <a th:href="@{/san-pham/qua-tang}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-tertiary text-on-tertiary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">apps</span>
+                                <span>Tất cả Quà tặng</span>
+                            </a>
+                            <a th:each="cat : ${categoriesQuaTang}"
+                               th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}"
+                               th:text="${cat.tenDanhMuc}"
+                               class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                                Túi Tote
+                            </a>
+                        </div>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(quaTangPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                        <th:block th:each="book : ${quaTangPreview}">
+                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        </th:block>
+                    </div>
+                    <div th:if="${#lists.isEmpty(quaTangPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">redeem</span>
+                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm quà tặng nào.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. INDEPENDENT BOOKSTORE BENEFITS -->
             <section class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
                     <div class="bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm flex items-start gap-space-md">
@@ -150,11 +393,207 @@
                 </div>
             </section>
 
+            <!-- 4. CÁC DANH MỤC SECTION -->
+            <section id="categories" class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+                <!-- Section Header -->
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-space-lg gap-space-xs">
+                    <div>
+                        <div class="inline-flex items-center gap-1 text-primary font-label-sm text-xs font-bold mb-1">
+                            <span class="material-symbols-outlined text-[16px]">category</span>
+                            <span>Khám Phá Theo Sở Thích</span>
+                        </div>
+                        <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
+                            Các danh mục
+                        </h2>
+                    </div>
+                    <a th:href="@{/san-pham}" class="inline-flex items-center gap-1 text-primary font-label-md text-xs font-semibold hover:underline">
+                        <span>Xem tất cả sản phẩm</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Category Cards Grid (10 mục / trang) -->
+                <div th:if="${!#lists.isEmpty(allCategories)}" id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-space-md">
+                    <a th:each="cat, stat : ${allCategories}"
+                       th:href="@{${cat.targetUrl}}"
+                       th:attr="data-cat-page=${stat.index / 10}"
+                       th:style="${stat.index / 10 == catCurrentPage ? '' : 'display: none;'}"
+                       class="cat-card-item group bg-surface-container-lowest rounded-2xl p-space-lg border border-surface-container shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center gap-space-sm cursor-pointer">
+                        <!-- Icon -->
+                        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shadow-xs">
+                            <span class="material-symbols-outlined text-[28px]" th:text="${cat.icon}">menu_book</span>
+                        </div>
+                        <!-- Name -->
+                        <h3 class="font-headline-sm text-sm font-bold text-on-surface group-hover:text-primary transition-colors leading-tight" th:text="${cat.tenDanhMuc}">Văn Học</h3>
+                        <!-- Description -->
+                        <p th:if="${cat.moTa != null}" class="font-body-sm text-[11px] text-on-surface-variant leading-relaxed line-clamp-2" th:text="${cat.moTa}">Mô tả danh mục</p>
+                        <!-- CTA -->
+                        <span class="inline-flex items-center gap-0.5 text-primary text-[11px] font-bold mt-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span>Xem sản phẩm</span>
+                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Category Pagination (1 trang 10 mục) -->
+                <div th:if="${catTotalPages > 1}" id="categoryPagination" class="flex items-center justify-center gap-space-xs mt-space-xl flex-wrap">
+                    <a id="catPrevBtn"
+                       th:href="@{/(catPage=${catCurrentPage > 0 ? catCurrentPage - 1 : 0})} + '#categories'"
+                       th:attr="data-page=${catCurrentPage - 1}"
+                       th:class="${catCurrentPage > 0 ? 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors' : 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low text-on-surface/40 text-sm font-semibold pointer-events-none opacity-50'}">
+                        <span class="material-symbols-outlined text-[18px]">chevron_left</span><span>Trước</span>
+                    </a>
+                    <th:block th:each="i : ${#numbers.sequence(0, catTotalPages - 1)}">
+                        <a th:href="@{/(catPage=${i})} + '#categories'"
+                           th:text="${i + 1}"
+                           th:attr="data-page=${i}"
+                           class="cat-page-btn"
+                           th:classappend="${i == catCurrentPage} ? ' px-3.5 py-2 rounded-xl bg-primary text-on-primary text-sm font-bold shadow-sm active' : ' px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors'">1</a>
+                    </th:block>
+                    <a id="catNextBtn"
+                       th:href="@{/(catPage=${catCurrentPage < catTotalPages - 1 ? catCurrentPage + 1 : catTotalPages - 1})} + '#categories'"
+                       th:attr="data-page=${catCurrentPage + 1}"
+                       th:class="${catCurrentPage < catTotalPages - 1 ? 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors' : 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low text-on-surface/40 text-sm font-semibold pointer-events-none opacity-50'}">
+                        <span>Tiếp</span><span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                    </a>
+                </div>
+
+                <!-- Empty state nếu chưa có danh mục -->
+                <div th:if="${#lists.isEmpty(allCategories)}" class="text-center py-12 bg-surface-container-lowest rounded-2xl border border-surface-container">
+                    <span class="material-symbols-outlined text-[48px] text-on-surface-variant">category</span>
+                    <p class="text-on-surface-variant text-sm mt-space-sm">Chưa có danh mục nào. Admin hãy thêm danh mục trong trang quản trị.</p>
+                </div>
+            </section>
+
         </div>
     </main>
 
     <!-- Storefront Common Footer Fragment -->
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
+    <script>
+        function sortFeaturedBooks(val) {
+            const grid = document.getElementById('featuredBooksGrid');
+            if (!grid) return;
+            const cards = Array.from(grid.querySelectorAll('.featured-card-wrapper'));
+            cards.sort((a, b) => {
+                if (val === 'price_asc') {
+                    return (parseInt(a.getAttribute('data-price')) || 0) - (parseInt(b.getAttribute('data-price')) || 0);
+                } else if (val === 'price_desc') {
+                    return (parseInt(b.getAttribute('data-price')) || 0) - (parseInt(a.getAttribute('data-price')) || 0);
+                } else if (val === 'name_asc') {
+                    return (a.getAttribute('data-name') || '').localeCompare(b.getAttribute('data-name') || '', 'vi');
+                }
+                return 0;
+            });
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        // Category Pagination (1 trang 10 mục)
+        (function initCategoryPagination() {
+            const catContainer = document.getElementById('categoriesGrid');
+            const paginationContainer = document.getElementById('categoryPagination');
+            if (!catContainer || !paginationContainer) return;
+
+            const pageBtns = Array.from(paginationContainer.querySelectorAll('.cat-page-btn'));
+            const totalPages = pageBtns.length;
+            if (totalPages <= 1) return;
+
+            function goToPage(targetPage) {
+                if (targetPage < 0 || targetPage >= totalPages) return;
+
+                // Toggle category items
+                const items = catContainer.querySelectorAll('.cat-card-item');
+                items.forEach(item => {
+                    const page = parseInt(item.getAttribute('data-cat-page'));
+                    item.style.display = (page === targetPage) ? '' : 'none';
+                });
+
+                // Update page number buttons
+                pageBtns.forEach(btn => {
+                    const p = parseInt(btn.getAttribute('data-page'));
+                    if (p === targetPage) {
+                        btn.className = 'cat-page-btn px-3.5 py-2 rounded-xl bg-primary text-on-primary text-sm font-bold shadow-sm active';
+                    } else {
+                        btn.className = 'cat-page-btn px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors';
+                    }
+                });
+
+                // Update Prev button
+                const prevBtn = document.getElementById('catPrevBtn');
+                if (prevBtn) {
+                    prevBtn.setAttribute('data-page', targetPage - 1);
+                    prevBtn.href = '/?catPage=' + (targetPage - 1) + '#categories';
+                    if (targetPage > 0) {
+                        prevBtn.className = 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors';
+                    } else {
+                        prevBtn.className = 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low text-on-surface/40 text-sm font-semibold pointer-events-none opacity-50';
+                    }
+                }
+
+                // Update Next button
+                const nextBtn = document.getElementById('catNextBtn');
+                if (nextBtn) {
+                    nextBtn.setAttribute('data-page', targetPage + 1);
+                    nextBtn.href = '/?catPage=' + (targetPage + 1) + '#categories';
+                    if (targetPage < totalPages - 1) {
+                        nextBtn.className = 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors';
+                    } else {
+                        nextBtn.className = 'flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low text-on-surface/40 text-sm font-semibold pointer-events-none opacity-50';
+                    }
+                }
+
+                // Update URL history without page reload
+                const url = new URL(window.location.href);
+                url.searchParams.set('catPage', targetPage);
+                url.hash = 'categories';
+                window.history.pushState({ catPage: targetPage }, '', url.toString());
+            }
+
+            paginationContainer.addEventListener('click', function(e) {
+                const btn = e.target.closest('a');
+                if (!btn || btn.classList.contains('pointer-events-none')) return;
+                const pageAttr = btn.getAttribute('data-page');
+                if (pageAttr !== null && pageAttr !== '') {
+                    e.preventDefault();
+                    goToPage(parseInt(pageAttr));
+                    const section = document.getElementById('categories');
+                    if (section) {
+                        const rect = section.getBoundingClientRect();
+                        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                            section.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                }
+            });
+
+            window.addEventListener('popstate', function() {
+                const params = new URLSearchParams(window.location.search);
+                const p = parseInt(params.get('catPage')) || 0;
+                goToPage(p);
+            });
+        })();
+
+        // Dynamic category dropdown filter based on selected loaiSP
+        (function initHomeCategoryToolbar() {
+            const loaiSPSelect = document.getElementById('homeLoaiSPFilter');
+            const dmSelect = document.getElementById('homeDanhMucFilter');
+            if (!loaiSPSelect || !dmSelect) return;
+
+            const allDmOptions = Array.from(dmSelect.querySelectorAll('option[data-group]'));
+            loaiSPSelect.addEventListener('change', function() {
+                const val = this.value;
+                allDmOptions.forEach(opt => {
+                    const group = opt.getAttribute('data-group');
+                    if (!val || val === 'ALL' || group === val) {
+                        opt.style.display = '';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+                dmSelect.value = '0';
+            });
+        })();
+    </script>
 </body>
 </html>

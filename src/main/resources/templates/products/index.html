@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common/head :: common_head('The4BookStore - Tất Cả Sản Phẩm')}"></head>
+
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <style>
+        .horizontal-scroll-category {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar {
+            height: 6px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 9999px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 9999px;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    </style>
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('products')}"></header>
+
+    <main class="w-full pt-28 bg-background flex-1">
+        <div class="max-w-7xl mx-auto w-full px-margin md:px-margin-desktop py-space-lg">
+
+            <!-- Breadcrumb -->
+            <div class="mb-space-lg">
+                <div class="flex items-center gap-1 text-on-surface-variant text-xs uppercase tracking-wider mb-space-xs">
+                    <a th:href="@{/}" class="hover:text-primary transition-colors">Trang Chủ</a>
+                    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                    <span class="text-primary font-semibold">Tất Cả Sản Phẩm</span>
+                </div>
+                <h1 class="font-headline-xl text-3xl font-bold text-on-surface tracking-tight">Tất Cả Sản Phẩm</h1>
+                <p class="text-on-surface-variant text-sm mt-1">Toàn bộ danh mục sản phẩm chọn lọc tại The4BookStore</p>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <form method="get" th:action="@{/san-pham}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
+                <div class="flex flex-col lg:flex-row gap-space-sm items-stretch lg:items-center">
+                    <!-- Search Input -->
+                    <div class="relative flex-1">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+                        <input type="text" name="q"
+                               class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
+                               placeholder="Tìm theo tên sản phẩm, tác giả, ISBN..."/>
+                    </div>
+                    <!-- Dropdown: Danh mục (Phân loại chính) -->
+                    <select name="loaiSP"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
+                        <option value="">Tất cả danh mục</option>
+                        <option value="Sach">Sách</option>
+                        <option value="VanPhongPham">Văn phòng phẩm</option>
+                        <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                    </select>
+                    <!-- Dropdown: Loại sản phẩm -->
+                    <select name="danhMuc"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
+                        <option value="0">Tất cả loại sản phẩm</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.maDanhMuc}"
+                                th:text="${cat.tenDanhMuc}">Loại</option>
+                    </select>
+                    <!-- Dropdown Sắp xếp -->
+                    <select name="sort"
+                            class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[150px]">
+                        <option value="newest">Mới nhất</option>
+                        <option value="price_asc">Giá tăng dần</option>
+                        <option value="price_desc">Giá giảm dần</option>
+                        <option value="name_asc">Tên A-Z</option>
+                    </select>
+                    <!-- Nút Lọc / Tìm kiếm -->
+                    <button type="submit" class="bg-primary text-on-primary px-space-lg py-2.5 rounded-xl text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                        <span>Tìm &amp; Lọc</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- ===== DANH MỤC 1: SÁCH ===== -->
+            <section class="mb-space-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                    <div class="flex items-center gap-space-sm">
+                        <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                            <span class="material-symbols-outlined text-[24px]">menu_book</span>
+                        </div>
+                        <div>
+                            <h2 class="font-headline-lg text-xl font-bold text-on-surface">Sách</h2>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Tiểu thuyết, văn học, kỹ năng sống, kinh tế, khoa học và lịch sử</p>
+                        </div>
+                    </div>
+                    <a th:href="@{/san-pham/sach}"
+                       class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm self-start md:self-auto">
+                        <span>Xem tất cả sách</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Các loại sách (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                <div th:if="${!#lists.isEmpty(categoriesSach)}" class="mb-space-md">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                        <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                            <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
+                            <span>Loại sách:</span>
+                        </span>
+                        
+                        <a th:href="@{/san-pham/sach}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">apps</span>
+                            <span>Tất cả sách</span>
+                        </a>
+
+                        <a th:each="cat : ${categoriesSach}"
+                           th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
+                           th:text="${cat.tenDanhMuc}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                            Tiểu Thuyết &amp; Văn Học
+                        </a>
+                    </div>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(sachPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                    <th:block th:each="book : ${sachPreview}">
+                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                    </th:block>
+                </div>
+                <div th:if="${#lists.isEmpty(sachPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                    <span class="material-symbols-outlined text-[40px] text-on-surface-variant">menu_book</span>
+                    <p class="text-sm text-on-surface-variant mt-2">Chưa có sách nào.</p>
+                </div>
+            </section>
+
+            <div class="h-px bg-surface-container my-space-xl"></div>
+
+            <!-- ===== DANH MỤC 2: VĂN PHÒNG PHẨM ===== -->
+            <section class="mb-space-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                    <div class="flex items-center gap-space-sm">
+                        <div class="w-11 h-11 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shadow-xs">
+                            <span class="material-symbols-outlined text-[24px]">edit_note</span>
+                        </div>
+                        <div>
+                            <h2 class="font-headline-lg text-xl font-bold text-on-surface">Văn Phòng Phẩm</h2>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Bút viết, sổ tay cao cấp, dụng cụ đọc sách và làm việc</p>
+                        </div>
+                    </div>
+                    <a th:href="@{/san-pham/van-phong-pham}"
+                       class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
+                        <span>Xem tất cả VPP</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Các loại VPP (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                <div th:if="${!#lists.isEmpty(categoriesVpp)}" class="mb-space-md">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                        <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                            <span class="material-symbols-outlined text-[16px] text-secondary">sell</span>
+                            <span>Loại VPP:</span>
+                        </span>
+                        
+                        <a th:href="@{/san-pham/van-phong-pham}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-secondary text-on-secondary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">apps</span>
+                            <span>Tất cả VPP</span>
+                        </a>
+
+                        <a th:each="cat : ${categoriesVpp}"
+                           th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
+                           th:text="${cat.tenDanhMuc}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                            Sổ Tay
+                        </a>
+                    </div>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(vppPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                    <th:block th:each="book : ${vppPreview}">
+                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                    </th:block>
+                </div>
+                <div th:if="${#lists.isEmpty(vppPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                    <span class="material-symbols-outlined text-[40px] text-on-surface-variant">edit_note</span>
+                    <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm văn phòng phẩm nào.</p>
+                </div>
+            </section>
+
+            <div class="h-px bg-surface-container my-space-xl"></div>
+
+            <!-- ===== DANH MỤC 3: QUÀ TẶNG & TRANG TRÍ ===== -->
+            <section class="mb-space-lg">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                    <div class="flex items-center gap-space-sm">
+                        <div class="w-11 h-11 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center shadow-xs">
+                            <span class="material-symbols-outlined text-[24px]">redeem</span>
+                        </div>
+                        <div>
+                            <h2 class="font-headline-lg text-xl font-bold text-on-surface">Quà Tặng &amp; Trang Trí</h2>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Túi tote canvas, mô hình Book Nook, trò chơi boardgame và quà tặng độc đáo</p>
+                        </div>
+                    </div>
+                    <a th:href="@{/san-pham/qua-tang}"
+                       class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-tertiary text-on-tertiary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
+                        <span>Xem tất cả Quà tặng</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </a>
+                </div>
+
+                <!-- Các loại Quà tặng & Trang trí (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                <div th:if="${!#lists.isEmpty(categoriesQuaTang)}" class="mb-space-md">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                        <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                            <span class="material-symbols-outlined text-[16px] text-tertiary">sell</span>
+                            <span>Loại quà tặng:</span>
+                        </span>
+                        
+                        <a th:href="@{/san-pham/qua-tang}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-tertiary text-on-tertiary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">apps</span>
+                            <span>Tất cả Quà tặng</span>
+                        </a>
+
+                        <a th:each="cat : ${categoriesQuaTang}"
+                           th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}"
+                           th:text="${cat.tenDanhMuc}"
+                           class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                            Túi Tote
+                        </a>
+                    </div>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(quaTangPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                    <th:block th:each="book : ${quaTangPreview}">
+                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                    </th:block>
+                </div>
+                <div th:if="${#lists.isEmpty(quaTangPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                    <span class="material-symbols-outlined text-[40px] text-on-surface-variant">redeem</span>
+                    <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm quà tặng nào.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+</body>
+</html>

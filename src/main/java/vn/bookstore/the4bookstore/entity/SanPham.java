@@ -5,7 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "SAN_PHAM")
+@Table(name = "SAN_PHAM", indexes = {
+    @Index(name = "idx_sp_loaisp_trangthai", columnList = "loaiSP, trangThai"),
+    @Index(name = "idx_sp_danhmuc_trangthai", columnList = "maDanhMuc, trangThai"),
+    @Index(name = "idx_sp_tensp", columnList = "tenSP"),
+    @Index(name = "idx_sp_ngaytao", columnList = "ngayTao"),
+    @Index(name = "idx_sp_giaban", columnList = "giaBan")
+})
 @Data @NoArgsConstructor @AllArgsConstructor
 public class SanPham {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +47,25 @@ public class SanPham {
     private String trangThai = "DangBan";
     @Column(nullable = false)
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "sanPham", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<SanPhamTacGia> sanPhamTacGias = new java.util.ArrayList<>();
+
+    public String getDanhSachTacGia() {
+        if (sanPhamTacGias == null || sanPhamTacGias.isEmpty()) {
+            return "";
+        }
+        return sanPhamTacGias.stream()
+                .filter(sptg -> sptg.getTacGia() != null)
+                .map(sptg -> sptg.getTacGia().getTenTacGia())
+                .collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    public String getTenNhaXuatBan() {
+        return nhaXuatBan != null ? nhaXuatBan.getTenNXB() : "";
+    }
 
     public String getHinhAnh() {
         if (moTa != null && moTa.startsWith("http")) {

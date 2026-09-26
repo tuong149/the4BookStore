@@ -68,7 +68,7 @@
                                     <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-1">1</span>
                                     <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-1', 1)">+</button>
                                 </div>
-                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-1')" title="Xóa cuốn này">
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-1')" title="Xóa sản phẩm này">
                                     <span class="material-symbols-outlined text-[20px]">delete_outline</span>
                                 </button>
                             </div>
@@ -96,7 +96,7 @@
                                     <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-2">1</span>
                                     <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-2', 1)">+</button>
                                 </div>
-                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-2')" title="Xóa cuốn này">
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-2')" title="Xóa sản phẩm này">
                                     <span class="material-symbols-outlined text-[20px]">delete_outline</span>
                                 </button>
                             </div>
@@ -124,7 +124,7 @@
                                     <span class="px-3 py-1 font-mono font-bold text-on-surface" id="qty-item-3">1</span>
                                     <button class="px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-bold" onclick="updateQty('item-3', 1)">+</button>
                                 </div>
-                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-3')" title="Xóa cuốn này">
+                                <button class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container-low transition-colors" onclick="removeItem('cart-item-3')" title="Xóa sản phẩm này">
                                     <span class="material-symbols-outlined text-[20px]">delete_outline</span>
                                 </button>
                             </div>
@@ -349,7 +349,7 @@
             const proceedBtn = document.getElementById('btnProceedCheckout');
 
             if (subtotalEl) subtotalEl.textContent = formatVND(calc.subtotal);
-            if (itemCountEl) itemCountEl.textContent = `Tạm tính (${calc.totalQty} cuốn)`;
+            if (itemCountEl) itemCountEl.textContent = `Tạm tính (${calc.totalQty} sản phẩm)`;
             if (discountEl) discountEl.textContent = calc.discount > 0 ? `-${formatVND(calc.discount)}` : '0 đ';
             if (discountLabelEl) {
                 discountLabelEl.textContent = cartState.voucher ? `Giảm giá voucher (${Math.round(cartState.voucher.discountPercent * 100)}%)` : 'Giảm giá voucher';
@@ -389,9 +389,9 @@
                         <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
                             <span class="material-symbols-outlined text-[64px] text-outline-variant">remove_shopping_cart</span>
                             <div class="text-base font-bold text-on-surface">Giỏ hàng của bạn đang trống</div>
-                            <p class="text-xs text-on-surface-variant max-w-sm">Hãy khám phá hàng ngàn tựa sách hay chọn lọc tại The4BookStore để tiếp tục mua sắm nhé!</p>
-                            <a href="/" class="mt-2 px-6 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all shadow-sm">
-                                Khám Phá Sách Ngay
+                            <p class="text-xs text-on-surface-variant max-w-sm">Hãy khám phá hàng ngàn sản phẩm chọn lọc tại The4BookStore để tiếp tục mua sắm nhé!</p>
+                            <a href="/san-pham" class="mt-2 px-6 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all shadow-sm">
+                                Khám Phá Sản Phẩm Ngay
                             </a>
                         </div>
                     `;

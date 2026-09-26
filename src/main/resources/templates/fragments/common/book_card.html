@@ -7,14 +7,16 @@
     <article th:fragment="book_card(book)"
         class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-1">
         <!-- Book Cover Image Wrapper -->
-        <div class="aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container relative mb-space-sm shadow-xs">
+        <a th:href="@{/san-pham/{id}(id=${book.maSP})}" class="aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container relative mb-space-sm shadow-xs block">
             <img th:if="${book.hinhAnh != null and !book.hinhAnh.isEmpty()}" 
                  th:src="${book.hinhAnh}"
                  th:alt="${book.tenSP}"
+                 th:classappend="${book.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0} ? 'opacity-75' : ''"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             <img th:unless="${book.hinhAnh != null and !book.hinhAnh.isEmpty()}"
                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y"
                  th:alt="${book.tenSP}"
+                 th:classappend="${book.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0} ? 'opacity-75' : ''"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
 
             <!-- Category Badge overlay -->
@@ -24,22 +26,34 @@
             </span>
 
             <!-- Stock status indicator -->
-            <span th:if="${book.soLuongTon != null and book.soLuongTon <= 5 and book.soLuongTon > 0}"
+            <span th:if="${book.trangThai != 'HetHang' and book.soLuongTon != null and book.soLuongTon <= 5 and book.soLuongTon > 0}"
                 class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold shadow-xs">
-                Chỉ còn <span th:text="${book.soLuongTon}"></span> cuốn
+                Chỉ còn <span th:text="${book.soLuongTon}"></span> sản phẩm
             </span>
-        </div>
+            <span th:if="${book.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0}"
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-xs">
+                Hết hàng
+            </span>
+        </a>
 
         <!-- Book Meta -->
         <div class="flex-1 flex flex-col justify-between">
             <div>
-                <h3 th:text="${book.tenSP}"
-                    class="font-headline-sm text-sm font-bold text-on-surface line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-                    Tên Sách Tuyển Chọn
-                </h3>
-                <p class="text-xs text-on-surface-variant mt-1 line-clamp-1">
-                    <span th:if="${book.nhaXuatBan != null}" th:text="${book.nhaXuatBan.tenNXB}">Nhà Xuất Bản</span>
-                    <span th:unless="${book.nhaXuatBan != null}">Tác giả tuyển chọn</span>
+                <a th:href="@{/san-pham/{id}(id=${book.maSP})}">
+                    <h3 th:text="${book.tenSP}"
+                        class="font-headline-sm text-sm font-bold text-on-surface line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                        Tên Sản Phẩm
+                    </h3>
+                </a>
+                <p class="text-xs text-on-surface-variant mt-1 line-clamp-1 flex items-center gap-1 flex-wrap">
+                    <span th:if="${book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty()}" 
+                          class="font-medium text-primary"
+                          th:text="${book.danhSachTacGia}">Tác giả</span>
+                    <span th:if="${book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty() and book.nhaXuatBan != null}" class="text-outline text-[10px]">•</span>
+                    <span th:if="${book.nhaXuatBan != null}" 
+                          th:text="${book.nhaXuatBan.tenNXB}" 
+                          class="text-on-surface-variant/80">Nhà Xuất Bản</span>
+                    <span th:if="${(book.danhSachTacGia == null or book.danhSachTacGia.isEmpty()) and book.nhaXuatBan == null}">The4BookStore Tuyển Chọn</span>
                 </p>
             </div>
 
@@ -52,10 +66,10 @@
                         189.000 đ
                     </span>
                 </div>
-                <a th:href="@{/gio-hang}"
+                <a th:href="@{/san-pham/{id}(id=${book.maSP})}"
                     class="p-2 rounded-xl bg-surface-container text-primary hover:bg-primary hover:text-on-primary transition-all shadow-xs flex items-center justify-center"
-                    title="Thêm vào giỏ hàng">
-                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                    title="Xem chi tiết sản phẩm">
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
                 </a>
             </div>
         </div>

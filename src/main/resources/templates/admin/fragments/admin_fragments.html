@@ -163,13 +163,40 @@
                     <span>Bảng Điều Khiển</span>
                 </a>
 
-                <!-- Books & Inventory -->
-                <a th:href="@{/admin/books}"
-                   th:class="${activePage == 'inventory'} ? 
+                <!-- Products & Inventory -->
+                <a th:href="@{/admin/products}"
+                   th:class="${activePage == 'inventory' || activePage == 'products'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                    <span>Quản Lý Sản Phẩm</span>
+                </a>
+
+                <!-- Categories -->
+                <a th:href="@{/admin/categories}"
+                   th:class="${activePage == 'categories'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">category</span>
+                    <span>Quản Lý Danh Mục</span>
+                </a>
+
+                <!-- Authors -->
+                <a th:href="@{/admin/authors}"
+                   th:class="${activePage == 'authors'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">person_edit</span>
+                    <span>Quản Lý Tác Giả</span>
+                </a>
+
+                <!-- Publishers -->
+                <a th:href="@{/admin/publishers}"
+                   th:class="${activePage == 'publishers'} ? 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
                     <span class="material-symbols-outlined text-[20px]">menu_book</span>
-                    <span>Quản Lý Sách</span>
+                    <span>Quản Lý NXB</span>
                 </a>
 
                 <!-- Orders (Mock / Upcoming) -->
