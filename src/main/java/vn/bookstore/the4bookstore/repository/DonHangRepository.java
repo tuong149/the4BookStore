@@ -49,5 +49,37 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
 
     @Query(value = "SELECT fn_TinhDoanhThuKhuyenMai(:#{#km.maKM})", nativeQuery = true)
     Long sumTongTienByKhuyenMai(@Param("km") KhuyenMai km);
+
+    // --- MARKETPLACE VENDOR QUERIES ---
+    Page<DonHang> findByShop_MaShopOrderByNgayDatDesc(Integer maShop, Pageable pageable);
+
+    Page<DonHang> findByShop_MaShopAndTrangThaiOrderByNgayDatDesc(Integer maShop, String trangThai, Pageable pageable);
+
+    Page<DonHang> findByShop_MaShopAndTrangThaiInOrderByNgayDatDesc(Integer maShop, List<String> trangThaiList, Pageable pageable);
+
+    Long countByShop_MaShopAndTrangThai(Integer maShop, String trangThai);
+
+    Long countByShop_MaShopAndTrangThaiIn(Integer maShop, List<String> trangThaiList);
+
+    Long countByShop_MaShop(Integer maShop);
+
+    @Query("SELECT COALESCE(SUM(d.tienThucNhanShop), 0) FROM DonHang d WHERE d.shop.maShop = :maShop AND (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat')")
+    Long getShopRevenue(@Param("maShop") Integer maShop);
+
+    @Query("SELECT COALESCE(SUM(d.tienPhiSan), 0) FROM DonHang d WHERE d.shop.maShop = :maShop AND (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat')")
+    Long getShopPlatformFeePaid(@Param("maShop") Integer maShop);
+
+    // --- MARKETPLACE ADMIN / MANAGER QUERIES ---
+    @Query("SELECT COALESCE(SUM(d.tienPhiSan), 0) FROM DonHang d WHERE (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat')")
+    Long getTotalPlatformCommissionRevenue();
+
+    Page<DonHang> findByTrangThaiIn(List<String> trangThais, Pageable pageable);
+
+    @Query(value = "SELECT fn_TinhPhiSan(:tongTien, :maShop)", nativeQuery = true)
+    Integer calculatePlatformFee(@Param("tongTien") Integer tongTien, @Param("maShop") Integer maShop);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE DonHang d SET d.shop = null WHERE d.shop.maShop = :maShop")
+    void detachShopFromOrders(@Param("maShop") Integer maShop);
 }
 

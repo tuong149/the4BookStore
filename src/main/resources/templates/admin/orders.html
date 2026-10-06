@@ -94,6 +94,11 @@
                             Chờ xác nhận
                             <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${pendingCount}">—</span>
                         </a>
+                        <a th:href="@{/admin/orders(status='confirmed')}" th:attr="aria-current=${currentStatus == 'confirmed' ? 'page' : null}"
+                           th:class="${currentStatus == 'confirmed'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Đã xác nhận
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${confirmedCount}">—</span>
+                        </a>
                         <a th:href="@{/admin/orders(status='DangGiao')}" th:attr="aria-current=${currentStatus == 'DangGiao' ? 'page' : null}"
                            th:class="${currentStatus == 'DangGiao'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
                             Đang vận chuyển
@@ -101,8 +106,13 @@
                         </a>
                         <a th:href="@{/admin/orders(status='DaGiao')}" th:attr="aria-current=${currentStatus == 'DaGiao' ? 'page' : null}"
                            th:class="${currentStatus == 'DaGiao'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
-                            Đã giao thành công
+                            Đã giao / Hoàn tất
                             <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${successCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='dispute')}" th:attr="aria-current=${currentStatus == 'dispute' ? 'page' : null}"
+                           th:class="${currentStatus == 'dispute'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-amber-600 text-white transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-amber-700 hover:bg-amber-50 transition whitespace-nowrap'">
+                            Tranh chấp / Trả hàng
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${disputeCount}">—</span>
                         </a>
                         <a th:href="@{/admin/orders(status='cancelled')}" th:attr="aria-current=${currentStatus == 'cancelled' ? 'page' : null}"
                            th:class="${currentStatus == 'cancelled'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">

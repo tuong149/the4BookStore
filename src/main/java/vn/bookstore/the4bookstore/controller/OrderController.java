@@ -30,17 +30,20 @@ public class OrderController {
     private final TaiKhoanRepository taiKhoanRepository;
     private final DonHangRepository donHangRepository;
     private final ThanhToanRepository thanhToanRepository;
+    private final vn.bookstore.the4bookstore.service.VNPayService vnPayService;
 
     public OrderController(DonHangService donHangService,
                            KhachHangRepository khachHangRepository,
                            TaiKhoanRepository taiKhoanRepository,
                            DonHangRepository donHangRepository,
-                           ThanhToanRepository thanhToanRepository) {
+                           ThanhToanRepository thanhToanRepository,
+                           vn.bookstore.the4bookstore.service.VNPayService vnPayService) {
         this.donHangService = donHangService;
         this.khachHangRepository = khachHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
         this.donHangRepository = donHangRepository;
         this.thanhToanRepository = thanhToanRepository;
+        this.vnPayService = vnPayService;
     }
 
     // ==================== Helper: Lấy TaiKhoan từ Authentication ====================
@@ -113,20 +116,53 @@ public class OrderController {
     // ==================== Lịch sử đơn hàng ====================
 
     @GetMapping
-    public String orderHistory(Authentication authentication, Model model) {
+    public String orderHistory(@RequestParam(value = "trangThai", required = false) String trangThai,
+                               Authentication authentication, Model model) {
         KhachHang kh = getCurrentKhachHang(authentication);
         if (kh == null) {
             return "redirect:/login";
         }
 
-        List<DonHang> donHangs = donHangService.getOrdersByKhachHang(kh);
-        long totalOrders = donHangRepository.countByKhachHang(kh);
-        Long completedOrders = donHangRepository.countByKhachHangAndTrangThai(kh, "DaGiao");
+        List<DonHang> allOrders = donHangService.getOrdersByKhachHang(kh);
+        List<DonHang> donHangs = allOrders;
+
+        if (trangThai != null && !trangThai.isBlank() && !"ALL".equalsIgnoreCase(trangThai)) {
+            donHangs = allOrders.stream().filter(dh -> {
+                String st = dh.getTrangThai();
+                if (st == null) return false;
+                if ("ChoXuLy".equalsIgnoreCase(trangThai) || "DonHangMoi".equalsIgnoreCase(trangThai)) {
+                    return "ChoXuLy".equalsIgnoreCase(st) || "DonHangMoi".equalsIgnoreCase(st);
+                }
+                if ("DaXacNhan".equalsIgnoreCase(trangThai)) {
+                    return "DaXacNhan".equalsIgnoreCase(st) || "YeuCauHuy".equalsIgnoreCase(st);
+                }
+                if ("DangGiao".equalsIgnoreCase(trangThai)) {
+                    return "DangGiao".equalsIgnoreCase(st) || "DaLayHang".equalsIgnoreCase(st);
+                }
+                if ("DaGiao".equalsIgnoreCase(trangThai)) {
+                    return "DaGiao".equalsIgnoreCase(st);
+                }
+                if ("HoanTat".equalsIgnoreCase(trangThai)) {
+                    return "HoanTat".equalsIgnoreCase(st);
+                }
+                if ("DaHuy".equalsIgnoreCase(trangThai)) {
+                    return "DaHuy".equalsIgnoreCase(st) || "Huy".equalsIgnoreCase(st);
+                }
+                if ("TraHangHoanTien".equalsIgnoreCase(trangThai)) {
+                    return "TraHangHoanTien".equalsIgnoreCase(st) || "TranhChap".equalsIgnoreCase(st);
+                }
+                return st.equalsIgnoreCase(trangThai);
+            }).toList();
+        }
+
+        long totalOrders = allOrders.size();
+        Long completedOrders = allOrders.stream().filter(dh -> "DaGiao".equalsIgnoreCase(dh.getTrangThai()) || "HoanTat".equalsIgnoreCase(dh.getTrangThai())).count();
 
         model.addAttribute("donHangs", donHangs);
         model.addAttribute("totalOrders", totalOrders);
-        model.addAttribute("completedOrders", completedOrders != null ? completedOrders : 0L);
+        model.addAttribute("completedOrders", completedOrders);
         model.addAttribute("khachHang", kh);
+        model.addAttribute("currentTab", (trangThai != null && !trangThai.isBlank()) ? trangThai : "ALL");
 
         return "order/history";
     }
@@ -145,8 +181,13 @@ public class OrderController {
         try {
             DonHang donHang = donHangService.getOrderById(id);
 
-            // Kiểm tra quyền sở hữu
-            if (!donHang.getKhachHang().getMaKH().equals(kh.getMaKH())) {
+            // Kiểm tra quyền sở hữu (hoặc tài khoản quản trị viên / nhân viên)
+            boolean isStaff = authentication != null && authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                            || a.getAuthority().equals("ROLE_MANAGER")
+                            || a.getAuthority().equals("ROLE_QUANLY"));
+
+            if (!isStaff && (donHang.getKhachHang() == null || !donHang.getKhachHang().getMaKH().equals(kh.getMaKH()))) {
                 return "redirect:/don-hang";
             }
 
@@ -156,11 +197,12 @@ public class OrderController {
 
             return "order/detail";
         } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(OrderController.class).error("Lỗi khi xem chi tiết đơn hàng #{}: {}", id, e.getMessage());
             return "redirect:/don-hang";
         }
     }
 
-    // ==================== Hủy đơn hàng ====================
+    // ==================== Hủy đơn hàng & Yêu cầu hủy ====================
 
     @PostMapping("/{id}/huy")
     public String cancelOrder(@PathVariable("id") Integer id,
@@ -173,13 +215,154 @@ public class OrderController {
         }
 
         try {
-            donHangService.cancelOrder(id, kh, lyDoHuy);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #TB-" + id + " thành công!");
+            DonHang dh = donHangService.getOrderById(id);
+            if (!dh.getKhachHang().getMaKH().equals(kh.getMaKH())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền can thiệp vào đơn hàng này!");
+                return "redirect:/don-hang";
+            }
+
+            if ("DaXacNhan".equalsIgnoreCase(dh.getTrangThai())) {
+                // Đơn đã xác nhận: Không thể tự hủy trực tiếp -> Chuyển thành Yêu Cầu Hủy gửi shop
+                dh.setTrangThai("YeuCauHuy");
+                dh.setLyDoHuy(lyDoHuy != null && !lyDoHuy.isBlank() ? lyDoHuy.trim() : "Khách hàng gửi yêu cầu hủy đơn");
+                donHangRepository.save(dh);
+                redirectAttributes.addFlashAttribute("successMessage", "Đơn hàng đã được xác nhận. Yêu cầu hủy đã được chuyển đến Shop để xem xét và xử lý!");
+            } else if ("ChoXuLy".equalsIgnoreCase(dh.getTrangThai()) || "DonHangMoi".equalsIgnoreCase(dh.getTrangThai())) {
+                // Đơn mới: Tự động hủy và nhả lại tồn kho
+                donHangService.cancelOrder(id, kh, lyDoHuy);
+                redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #TB-" + id + " thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể hủy đơn hàng ở trạng thái hiện tại (" + dh.getTrangThai() + ")!");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/don-hang/" + id;
+    }
+
+    // ==================== Khách xác nhận "Đã nhận được hàng" (Hoàn Tất) ====================
+    @PostMapping("/{id}/da-nhan-hang")
+    public String confirmReceived(@PathVariable("id") Integer id,
+                                  Authentication authentication,
+                                  RedirectAttributes redirectAttributes) {
+        KhachHang kh = getCurrentKhachHang(authentication);
+        if (kh == null) return "redirect:/login";
+
+        DonHang dh = donHangService.getOrderById(id);
+        if (!dh.getKhachHang().getMaKH().equals(kh.getMaKH())) return "redirect:/don-hang";
+
+        if (!"DaGiao".equalsIgnoreCase(dh.getTrangThai())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có thể xác nhận đã nhận hàng khi đơn hàng ở trạng thái 'Đã giao'!");
+            return "redirect:/don-hang/" + id;
+        }
+
+        dh.setTrangThai("HoanTat");
+        dh.setNgayHoanThanh(LocalDateTime.now());
+        dh.setTrangThaiThanhToan("DaThanhToan");
+
+        // Quyết toán tiền về ví Shop = Tổng tiền - Phí sàn (% Commission)
+        java.math.BigDecimal feeRate = (dh.getShop() != null && dh.getShop().getChietKhauPhanTram() != null)
+                ? dh.getShop().getChietKhauPhanTram()
+                : new java.math.BigDecimal("5.00");
+        int tongTien = dh.getTongTien() != null ? dh.getTongTien() : 0;
+        int feeAmount = feeRate.multiply(new java.math.BigDecimal(tongTien)).divide(new java.math.BigDecimal(100), java.math.RoundingMode.HALF_UP).intValue();
+
+        dh.setChietKhauAppPhanTram(feeRate);
+        dh.setTienPhiSan(feeAmount);
+        dh.setTienThucNhanShop(Math.max(0, tongTien - feeAmount));
+
+        donHangRepository.save(dh);
+        redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn đã xác nhận nhận hàng! Đơn hàng đã hoàn tất thành công. Bạn có thể để lại đánh giá cho sản phẩm ngay bây giờ.");
+        return "redirect:/don-hang/" + id;
+    }
+
+    // ==================== Yêu cầu Trả hàng - Hoàn tiền ====================
+    @PostMapping("/{id}/yeu-cau-tra-hang")
+    public String returnOrder(@PathVariable("id") Integer id,
+                              @RequestParam("lyDoTraHang") String lyDoTraHang,
+                              Authentication authentication,
+                              RedirectAttributes redirectAttributes) {
+        KhachHang kh = getCurrentKhachHang(authentication);
+        if (kh == null) return "redirect:/login";
+
+        DonHang dh = donHangService.getOrderById(id);
+        if (!dh.getKhachHang().getMaKH().equals(kh.getMaKH())) return "redirect:/don-hang";
+
+        if (!"DaGiao".equalsIgnoreCase(dh.getTrangThai())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có thể yêu cầu Trả hàng - Hoàn tiền với đơn hàng đã giao thành công!");
+            return "redirect:/don-hang/" + id;
+        }
+
+        dh.setTrangThai("TraHangHoanTien");
+        dh.setLyDoTraHang(lyDoTraHang != null ? lyDoTraHang.trim() : "Khách hàng yêu cầu đổi trả");
+        donHangRepository.save(dh);
+        redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu Trả hàng - Hoàn tiền đã gửi đến Shop thành công!");
+        return "redirect:/don-hang/" + id;
+    }
+
+    // ==================== Khiếu nại lên Quản lý sàn (Tranh Chấp) ====================
+    @PostMapping("/{id}/khieu-nai")
+    public String disputeOrder(@PathVariable("id") Integer id,
+                               @RequestParam(value = "ghiChuTranhChap", required = false) String ghiChuTranhChap,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        KhachHang kh = getCurrentKhachHang(authentication);
+        if (kh == null) return "redirect:/login";
+
+        DonHang dh = donHangService.getOrderById(id);
+        if (!dh.getKhachHang().getMaKH().equals(kh.getMaKH())) return "redirect:/don-hang";
+
+        dh.setTrangThai("TranhChap");
+        if (ghiChuTranhChap != null && !ghiChuTranhChap.isBlank()) {
+            dh.setLyDoTraHang((dh.getLyDoTraHang() != null ? dh.getLyDoTraHang() + " | Khiếu nại khách: " : "") + ghiChuTranhChap);
+        }
+        donHangRepository.save(dh);
+        redirectAttributes.addFlashAttribute("successMessage", "Đã khiếu nại lên Ban Quản Lý (Manager) sàn để giải quyết phân xử!");
+        return "redirect:/don-hang/" + id;
+    }
+
+    // ==================== Callback VNPay Return ====================
+    @GetMapping("/vnpay-return")
+    public String vnpayReturn(jakarta.servlet.http.HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        Map<String, String> fields = new HashMap<>();
+        for (java.util.Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
+            String fieldName = params.nextElement();
+            String fieldValue = request.getParameter(fieldName);
+            if ((fieldValue != null) && (!fieldValue.isEmpty())) {
+                fields.put(fieldName, fieldValue);
+            }
+        }
+
+        String orderIdStr = fields.get("vnp_TxnRef");
+        String responseCode = fields.get("vnp_ResponseCode");
+        boolean checkSignature = vnPayService.verifyCallback(fields);
+
+        if (orderIdStr != null) {
+            try {
+                int maDH = Integer.parseInt(orderIdStr);
+                DonHang dh = donHangService.getOrderById(maDH);
+
+                if (checkSignature && "00".equals(responseCode)) {
+                    dh.setTrangThaiThanhToan("DaThanhToan");
+                    ThanhToan tt = thanhToanRepository.findFirstByDonHangOrderByMaThanhToanDesc(dh).orElse(null);
+                    if (tt != null) {
+                        tt.setTrangThai("ThanhCong");
+                        thanhToanRepository.save(tt);
+                    }
+                    donHangRepository.save(dh);
+                    redirectAttributes.addFlashAttribute("successMessage", "Thanh toán trực tuyến VNPay thành công cho đơn hàng #TB-" + maDH + "!");
+                } else {
+                    dh.setTrangThaiThanhToan("ThatBai");
+                    donHangRepository.save(dh);
+                    redirectAttributes.addFlashAttribute("errorMessage", "Giao dịch VNPay không thành công hoặc đã bị hủy (Mã phản hồi: " + responseCode + ")!");
+                }
+                return "redirect:/don-hang/" + maDH;
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xử lý kết quả VNPay: " + e.getMessage());
+            }
+        }
+        return "redirect:/don-hang";
     }
 
     // ==================== API Lấy thông báo của người dùng ====================

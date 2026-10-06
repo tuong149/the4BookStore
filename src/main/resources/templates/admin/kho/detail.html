@@ -126,7 +126,7 @@
                                                 <img th:if="${kh.sanPham.hinhAnh != null}" th:src="${kh.sanPham.hinhAnh}" class="w-full h-full object-cover">
                                             </div>
                                             <div class="flex flex-col">
-                                                <a th:href="@{/chi-tiet-san-pham/{id}(id=${kh.sanPham.maSP})}" target="_blank" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${kh.sanPham.tenSP}" th:text="${kh.sanPham.tenSP}">Tên Sách</a>
+                                                <a th:href="@{/chi-tiet-san-pham/{id}(id=${kh.sanPham.maSP})}" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${kh.sanPham.tenSP}" th:text="${kh.sanPham.tenSP}">Tên Sách</a>
                                                 <span class="text-xs text-on-surface-variant">ISBN: [[${kh.sanPham.ISBN != null ? kh.sanPham.ISBN : 'N/A'}]]</span>
                                             </div>
                                         </div>
