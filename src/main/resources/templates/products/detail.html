@@ -385,10 +385,10 @@
                             <!-- Media Attachments -->
                             <div th:if="${rv.mediaList != null and !rv.mediaList.isEmpty()}" class="flex items-center gap-2 pl-10 pt-2 flex-wrap">
                                 <div th:each="m : ${rv.mediaList}">
-                                    <a th:if="${m.loaiMedia == 'IMAGE'}" th:href="${m.url}" target="_blank" class="block w-16 h-16 rounded-xl overflow-hidden border border-surface-container shadow-xs hover:scale-105 transition-transform">
+                                    <a th:if="${m.loaiMedia == 'IMAGE'}" th:href="${m.url}" class="block w-16 h-16 rounded-xl overflow-hidden border border-surface-container shadow-xs hover:scale-105 transition-transform">
                                         <img th:src="${m.url}" class="w-full h-full object-cover" alt="Ảnh đánh giá"/>
                                     </a>
-                                    <a th:if="${m.loaiMedia == 'VIDEO'}" th:href="${m.url}" target="_blank" class="flex items-center justify-center w-16 h-16 rounded-xl bg-surface-container border border-surface-container text-primary hover:scale-105 transition-transform">
+                                    <a th:if="${m.loaiMedia == 'VIDEO'}" th:href="${m.url}" class="flex items-center justify-center w-16 h-16 rounded-xl bg-surface-container border border-surface-container text-primary hover:scale-105 transition-transform">
                                         <span class="material-symbols-outlined text-[24px]">smart_display</span>
                                     </a>
                                 </div>

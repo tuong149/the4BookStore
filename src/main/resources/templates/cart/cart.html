@@ -32,7 +32,7 @@
             </div>
 
             <!-- Order Success Banner -->
-            <div th:if="${param.datHangThanhCong}" class="mb-6 p-6 rounded-2xl bg-primary/5 border-2 border-primary/30 text-center">
+            <div th:if="${(datHangThanhCong != null and datHangThanhCong) or (orderSuccess != null and orderSuccess)}" class="mb-6 p-6 rounded-2xl bg-primary/5 border-2 border-primary/30 text-center">
                 <div class="w-16 h-16 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-[36px]">check_circle</span>
                 </div>
@@ -41,9 +41,9 @@
                     Cảm ơn bạn đã tin tưởng mua sắm tại <strong>The4BookStore</strong>. Đơn hàng của bạn đã được ghi nhận.
                 </p>
                 <div class="bg-surface-container-lowest rounded-2xl p-4 text-xs space-y-2 border border-surface-container max-w-sm mx-auto mb-4 text-left">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between" th:if="${maDH != null}">
                         <span class="text-on-surface-variant">Mã đơn hàng:</span>
-                        <strong class="font-mono text-primary" th:text="'#TB-' + ${param.maDH}">#TB-1</strong>
+                        <strong class="font-mono text-primary" th:text="'#TB-' + ${maDH}">#TB-1</strong>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-on-surface-variant">Thời gian giao dự kiến:</span>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
-                    <a th:if="${param.maDH}" th:href="@{'/don-hang/' + ${param.maDH}}" class="px-6 py-2.5 bg-primary text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-primary-container transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <a th:if="${maDH != null}" th:href="@{/don-hang/{id}(id=${maDH})}" class="px-6 py-2.5 bg-primary text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-primary-container transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">receipt_long</span>
                         <span>Xem Chi Tiết Đơn Hàng</span>
                     </a>
@@ -67,7 +67,7 @@
             </div>
 
             <!-- Main Cart Layout Grid (12 cols) -->
-            <div th:unless="${param.datHangThanhCong}" class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+            <div th:unless="${datHangThanhCong or orderSuccess}" class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
                 
                 <!-- LEFT COLUMN: Cart Items & Shipping Bar (8 cols) -->
                 <section class="lg:col-span-8 flex flex-col gap-space-md">
@@ -83,7 +83,7 @@
                             <span th:if="${cartCount != null and cartCount > 0}" class="bg-surface-container px-2.5 py-0.5 rounded-full font-label-sm text-[11px] font-semibold text-on-surface-variant" id="cart-count-badge"
                                   th:text="${cartCount} + ' cuốn trong giỏ'">1 cuốn</span>
                         </div>
-                        <form th:if="${cartCount > 0}" th:action="@{/gio-hang/xoa-tat-ca}" method="post" class="inline">
+                        <form th:if="${cartCount != null and cartCount > 0}" th:action="@{/gio-hang/xoa-tat-ca}" method="post" class="inline">
                             <button class="text-error hover:text-on-error-container font-label-md text-xs font-medium transition-colors flex items-center gap-1 px-2.5 py-1 rounded-xl hover:bg-error/10 cursor-pointer" type="submit">
                                 <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
                                 <span>Xóa tất cả</span>
@@ -293,18 +293,18 @@
                         </div>
 
                         <!-- Checkout CTA Button (No lock icon, text only) -->
-                        <button th:if="${isAuthenticated and cartCount > 0}" 
+                        <button th:if="${isAuthenticated != null and isAuthenticated and cartCount != null and cartCount > 0}" 
                                 class="w-full mt-space-sm py-3.5 bg-secondary text-on-secondary font-headline-sm text-sm font-bold rounded-xl hover:bg-amber-700 transition-all shadow-md flex items-center justify-center cursor-pointer active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed" 
                                 onclick="openCheckoutModal()" type="button" id="btnProceedCheckout" disabled>
                             <span id="btnProceedText">Vui Lòng Chọn Sản Phẩm</span>
                         </button>
 
-                        <a th:if="${!isAuthenticated}" th:href="@{/login}"
+                        <a th:if="${isAuthenticated == null or !isAuthenticated}" th:href="@{/login}"
                            class="w-full mt-space-sm py-3.5 bg-primary text-on-primary font-headline-sm text-sm font-bold rounded-xl hover:bg-primary-container transition-all shadow-md flex items-center justify-center">
                             <span>Đăng Nhập Để Đặt Hàng</span>
                         </a>
 
-                        <div th:if="${isAuthenticated and cartCount == 0}"
+                        <div th:if="${isAuthenticated != null and isAuthenticated and (cartCount == null or cartCount == 0)}"
                              class="w-full mt-space-sm py-3.5 bg-surface-container text-on-surface-variant font-headline-sm text-sm font-bold rounded-xl flex items-center justify-center opacity-50 cursor-not-allowed">
                             <span>Giỏ hàng trống</span>
                         </div>
@@ -357,7 +357,7 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <label class="block font-label-md text-xs font-semibold text-on-surface">Địa chỉ giao hàng <span class="text-error">*</span></label>
-                            <a th:href="@{/profile/addresses}" target="_blank" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                            <a th:href="@{/profile/addresses}" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
                                 <span class="material-symbols-outlined text-[14px]">edit_location_alt</span>
                                 <span>Quản lý sổ địa chỉ</span>
                             </a>

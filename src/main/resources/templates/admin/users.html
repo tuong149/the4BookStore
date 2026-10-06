@@ -106,7 +106,7 @@
                                     </div>
                                     <!-- Gian hàng (Shop) nếu là VENDOR -->
                                     <div th:if="${shopProfiles[u.maTaiKhoan] != null}" class="mt-1">
-                                        <a th:href="@{'/shop/' + ${shopProfiles[u.maTaiKhoan].slug}}" target="_blank"
+                                        <a th:href="@{'/shop/' + ${shopProfiles[u.maTaiKhoan].slug}}"
                                            class="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline">
                                             <span class="material-symbols-outlined text-[13px]">storefront</span>
                                             <span th:text="${shopProfiles[u.maTaiKhoan].tenShop}">Tên Shop</span>
@@ -147,13 +147,20 @@
                                 </td>
                                 <td class="p-4 text-on-surface-variant text-[11px]" th:text="${#temporals.format(u.ngayTao, 'dd/MM/yyyy HH:mm')}">Ngày tạo</td>
                                 <td class="p-4 text-right">
-                                    <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
+                                    <!-- Nếu là tài khoản ADMIN và người đăng nhập không phải ADMIN (tức là Manager) -->
+                                    <div sec:authorize="!hasRole('ADMIN')" th:if="${u.vaiTro == 'ADMIN'}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-on-surface-variant font-bold text-xs border border-surface-container shadow-2xs">
+                                        <span class="material-symbols-outlined text-[15px] text-amber-600">shield</span>
+                                        <span>Quản trị tối cao (Admin)</span>
+                                    </div>
+
+                                    <!-- Admin toàn quyền hoặc Manager quản lý tài khoản thông thường -->
+                                    <div th:unless="${!#authorization.expression('hasRole(''ADMIN'')') and u.vaiTro == 'ADMIN'}" class="inline-flex items-center gap-1.5 flex-wrap justify-end">
                                         <!-- Khóa / Mở khóa -->
                                         <form th:action="@{'/admin/users/' + ${u.maTaiKhoan} + '/toggle-lock'}" method="post">
                                             <button type="submit"
                                                     th:data-user="${u.tenDangNhap}"
                                                     th:data-action="${u.trangThai == 'HoatDong' ? 'KHÓA' : 'MỞ KHÓA'}"
-                                                    onclick="return confirm('Bạn có chắc chắn muốn ' + this.dataset.action + ' tài khoản @' + this.dataset.user + '?');"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn ' + this.dataset.action + ' tài khoản @' + this.dataset.user + '? Thao tác khóa sẽ tự động hủy mọi phiên đăng nhập của tài khoản này.');"
                                                     th:class="${u.trangThai == 'HoatDong'} ? 'px-2.5 py-1 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs hover:bg-rose-100 transition-all flex items-center gap-1' : 'px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs hover:bg-emerald-100 transition-all flex items-center gap-1'">
                                                 <span class="material-symbols-outlined text-xs" th:text="${u.trangThai == 'HoatDong' ? 'lock' : 'lock_open'}">lock</span>
                                                 <span th:text="${u.trangThai == 'HoatDong' ? 'Khóa' : 'Mở'}">Khóa</span>
@@ -212,7 +219,7 @@
                         <option value="VENDOR">VENDOR - Người bán / Chủ shop</option>
                         <option value="MANAGER">MANAGER - Quản lý vận hành sàn</option>
                         <option value="NHANVIENKHO">NHANVIENKHO - Nhân viên thủ kho</option>
-                        <option value="ADMIN">ADMIN - Super Admin toàn quyền</option>
+                        <option sec:authorize="hasRole('ADMIN')" value="ADMIN">ADMIN - Super Admin toàn quyền</option>
                     </select>
                 </div>
                 <div class="flex items-center justify-end gap-2">

@@ -253,6 +253,13 @@ public class ProfileController {
         } catch (Exception ignored) {
         }
 
+        List<KhuyenMai> platformVouchers = availableVouchers.stream()
+                .filter(km -> km.getShop() == null || "TOAN_SAN".equalsIgnoreCase(km.getPhamVi()))
+                .toList();
+        List<KhuyenMai> shopVouchers = availableVouchers.stream()
+                .filter(km -> km.getShop() != null && !"TOAN_SAN".equalsIgnoreCase(km.getPhamVi()))
+                .toList();
+
         model.addAttribute("taiKhoan", tk);
         model.addAttribute("khachHang", kh);
         model.addAttribute("donHangs", donHangs);
@@ -260,6 +267,10 @@ public class ProfileController {
         model.addAttribute("completedOrders", completedOrders);
         model.addAttribute("availableVouchers", availableVouchers);
         model.addAttribute("totalVouchers", availableVouchers.size());
+        model.addAttribute("platformVouchers", platformVouchers);
+        model.addAttribute("shopVouchers", shopVouchers);
+        model.addAttribute("totalPlatformVouchers", platformVouchers.size());
+        model.addAttribute("totalShopVouchers", shopVouchers.size());
         model.addAttribute("expiringSoonCount", expiringSoonCount);
         model.addAttribute("activePage", "profile");
 

@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <a th:if="${shop.trangThai == 'HoatDong'}" th:href="@{'/shop/' + ${shop.slug}}" target="_blank" class="px-4 py-2 text-xs font-bold border border-primary text-primary hover:bg-primary hover:text-white rounded-xl transition-all flex items-center gap-1.5">
+                <a th:if="${shop.trangThai == 'HoatDong'}" th:href="@{'/shop/' + ${shop.slug}}" class="px-4 py-2 text-xs font-bold border border-primary text-primary hover:bg-primary hover:text-white rounded-xl transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px]">visibility</span>
                     <span>Xem Trang Gian Hàng</span>
                 </a>
@@ -91,7 +91,7 @@
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-base font-bold text-on-surface flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">local_shipping</span>
-                    <span>Quy Trình Quản Lý Đơn Hàng (7 Trạng Thái)</span>
+                    <span>Tiến Trình Quản Lý Đơn Hàng Của Shop</span>
                 </h2>
                 <a th:href="@{/vendor/orders}" class="text-xs font-bold text-primary hover:underline flex items-center gap-0.5">
                     <span>Xem tất cả</span>
@@ -99,34 +99,46 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                <a th:href="@{/vendor/orders(status='DonHangMoi')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-primary" th:text="${stats.newOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đơn Mới</div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+                <a th:href="@{/vendor/orders(status='DonHangMoi')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-blue-600" th:text="${stats.newOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đơn Mới</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='DaXacNhan')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-blue-600" th:text="${stats.confirmedOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đã Xác Nhận</div>
+                <a th:href="@{/vendor/orders(status='DaXacNhan')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-indigo-600" th:text="${stats.confirmedOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đã Xác Nhận</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='DaLayHang')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-indigo-600" th:text="${stats.pickedUpOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đã Lấy Hàng</div>
+                <a th:href="@{/vendor/orders(status='DaLayHang')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-purple-600" th:text="${stats.pickedUpOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đã Lấy Hàng</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='DangGiao')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-amber-600" th:text="${stats.shippingOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đang Giao</div>
+                <a th:href="@{/vendor/orders(status='DangGiao')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-amber-600" th:text="${stats.shippingOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đang Giao</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='DaGiao')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-emerald-600" th:text="${stats.completedOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đã Giao</div>
+                <a th:href="@{/vendor/orders(status='DaGiao')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-teal-600" th:text="${stats.deliveredOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đã Giao</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='DaHuy')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-rose-600" th:text="${stats.cancelledOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Đã Hủy</div>
+                <a th:href="@{/vendor/orders(status='HoanTat')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-emerald-600" th:text="${stats.completedOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Hoàn Tất</div>
                 </a>
-                <a th:href="@{/vendor/orders(status='TraHangHoanTien')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
-                    <div class="text-xl font-bold text-purple-600" th:text="${stats.returnRefundOrders}">0</div>
-                    <div class="text-xs text-on-surface-variant font-medium mt-1">Trả Hàng</div>
+                <a th:href="@{/vendor/orders(status='YeuCauHuy')}" class="p-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100 transition-all text-center group border border-rose-200">
+                    <div class="text-lg font-bold text-rose-600" th:text="${stats.cancelRequests}">0</div>
+                    <div class="text-[11px] text-rose-700 font-medium mt-1">Yêu Cầu Hủy</div>
+                </a>
+                <a th:href="@{/vendor/orders(status='TraHangHoanTien')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-purple-600" th:text="${stats.returnRefundOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Trả Hàng</div>
+                </a>
+                <a th:href="@{/vendor/orders(status='TranhChap')}" class="p-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 transition-all text-center group border border-amber-200">
+                    <div class="text-lg font-bold text-amber-600" th:text="${stats.disputeOrders}">0</div>
+                    <div class="text-[11px] text-amber-700 font-medium mt-1">Tranh Chấp</div>
+                </a>
+                <a th:href="@{/vendor/orders(status='DaHuy')}" class="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container transition-all text-center group border border-surface-container">
+                    <div class="text-lg font-bold text-gray-600" th:text="${stats.cancelledOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đã Hủy</div>
                 </a>
             </div>
         </div>

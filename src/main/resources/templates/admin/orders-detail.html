@@ -197,7 +197,7 @@
                                             </td>
                                             <td class="py-3 px-space-md">
                                                 <div class="flex flex-col">
-                                                    <a th:href="@{/chi-tiet-san-pham/{id}(id=${ct.sanPham.maSP})}" target="_blank" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${ct.sanPham.tenSP}" th:text="${ct.sanPham.tenSP}">Tên Sách</a>
+                                                    <a th:href="@{/chi-tiet-san-pham/{id}(id=${ct.sanPham.maSP})}" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${ct.sanPham.tenSP}" th:text="${ct.sanPham.tenSP}">Tên Sách</a>
                                                     <span class="text-xs text-on-surface-variant mt-0.5">
                                                         Mã SP: [[${ct.sanPham.maSP}]]
                                                         <span th:if="${ct.sanPham.ISBN != null}"> • ISBN: [[${ct.sanPham.ISBN}]]</span>

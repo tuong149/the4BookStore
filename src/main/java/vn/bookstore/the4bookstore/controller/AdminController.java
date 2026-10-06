@@ -125,10 +125,22 @@ public class AdminController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, pageSize);
         org.springframework.data.domain.Page<DonHang> orderPage;
         
-        if ("pending".equals(status)) {
+        if ("pending".equalsIgnoreCase(status) || "ChoXuLy".equalsIgnoreCase(status)) {
             orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
-                    java.util.List.of("ChoXuLy", "ChoDuyet"), pageable);
-        } else if ("cancelled".equals(status)) {
+                    java.util.List.of("ChoXuLy", "ChoDuyet", "DonHangMoi"), pageable);
+        } else if ("confirmed".equalsIgnoreCase(status) || "DaXacNhan".equalsIgnoreCase(status)) {
+            orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
+                    java.util.List.of("DaXacNhan", "YeuCauHuy"), pageable);
+        } else if ("shipping".equalsIgnoreCase(status) || "DangGiao".equalsIgnoreCase(status)) {
+            orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
+                    java.util.List.of("DangGiao", "DaLayHang"), pageable);
+        } else if ("success".equalsIgnoreCase(status) || "DaGiao".equalsIgnoreCase(status) || "HoanTat".equalsIgnoreCase(status)) {
+            orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
+                    java.util.List.of("DaGiao", "HoanTat"), pageable);
+        } else if ("dispute".equalsIgnoreCase(status) || "TranhChap".equalsIgnoreCase(status) || "TraHangHoanTien".equalsIgnoreCase(status)) {
+            orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
+                    java.util.List.of("TranhChap", "TraHangHoanTien"), pageable);
+        } else if ("cancelled".equalsIgnoreCase(status) || "DaHuy".equalsIgnoreCase(status)) {
             orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
                     java.util.List.of("DaHuy", "Huy"), pageable);
         } else if (status != null && !status.isEmpty() && !"all".equalsIgnoreCase(status)) {
@@ -138,9 +150,11 @@ public class AdminController {
         }
 
         long allOrdersCount = donHangRepository.count();
-        long pendingCount = donHangRepository.countByTrangThaiIn(java.util.List.of("ChoXuLy", "ChoDuyet"));
-        long shippingCount = donHangRepository.countByTrangThai("DangGiao");
-        long successCount = donHangRepository.countByTrangThai("DaGiao");
+        long pendingCount = donHangRepository.countByTrangThaiIn(java.util.List.of("ChoXuLy", "ChoDuyet", "DonHangMoi"));
+        long confirmedCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaXacNhan", "YeuCauHuy"));
+        long shippingCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DangGiao", "DaLayHang"));
+        long successCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaGiao", "HoanTat"));
+        long disputeCount = donHangRepository.countByTrangThaiIn(java.util.List.of("TranhChap", "TraHangHoanTien"));
         long cancelledCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaHuy", "Huy"));
         
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -162,8 +176,10 @@ public class AdminController {
 
         model.addAttribute("allOrdersCount", allOrdersCount);
         model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("confirmedCount", confirmedCount);
         model.addAttribute("shippingCount", shippingCount);
         model.addAttribute("successCount", successCount);
+        model.addAttribute("disputeCount", disputeCount);
         model.addAttribute("cancelledCount", cancelledCount);
         model.addAttribute("monthlyOrders", monthlyOrders);
         model.addAttribute("monthlyRevenue", monthlyRevenue);
@@ -227,124 +243,24 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ==================== QUẢN LÝ SẢN PHẨM & KHO HÀNG (FULL CRUD) ====================
+    // ==================== PHÂN QUYỀN SẢN PHẨM THEO GIAN HÀNG ====================
+    // Admin & Manager không CRUD sản phẩm trực tiếp, chuyển hướng đến Quản lý gian hàng
     @GetMapping({"/products", "/books", "/inventory"})
-    public String inventory(Model model) {
-        List<SanPham> books = sanPhamRepository.findAllActiveOrderByMaSPDesc();
-        List<DanhMuc> categories = danhMucRepository.findAll();
-        List<TacGia> authors = tacGiaRepository.findAll();
-        List<NhaXuatBan> publishers = nhaXuatBanRepository.findAll();
-
-        long lowStock = books.stream().filter(b -> b.getSoLuongTon() != null && b.getSoLuongTon() > 0 && b.getSoLuongTon() <= 5).count();
-        long outOfStock = books.stream().filter(b -> b.getSoLuongTon() == null || b.getSoLuongTon() == 0).count();
-
-        model.addAttribute("books", books);
-        model.addAttribute("categories", categories);
-        model.addAttribute("authors", authors);
-        model.addAttribute("publishers", publishers);
-        model.addAttribute("lowStockCount", lowStock);
-        model.addAttribute("outOfStockCount", outOfStock);
-        model.addAttribute("totalBooks", books.size());
-
-        return "admin/inventory";
+    public String inventory(RedirectAttributes ra) {
+        ra.addFlashAttribute("infoMessage", "Sản phẩm được quản trị phân cấp theo từng Gian hàng. Vui lòng chọn gian hàng để theo dõi danh sách sản phẩm.");
+        return "redirect:/admin/shops";
     }
 
     @PostMapping({"/products/save", "/books/save"})
-    public String saveProduct(@RequestParam(value = "maSP", required = false) Integer maSP,
-                              @RequestParam("tenSP") String tenSP,
-                              @RequestParam(value = "loaiSP", defaultValue = "Sach") String loaiSP,
-                              @RequestParam(value = "ISBN", required = false) String isbn,
-                              @RequestParam("maDanhMuc") Integer maDanhMuc,
-                              @RequestParam(value = "maTacGia", required = false) Integer maTacGia,
-                              @RequestParam(value = "maNXB", required = false) Integer maNXB,
-                              @RequestParam("soLuongTon") Integer soLuongTon,
-                              @RequestParam("giaBan") Integer giaBan,
-                              @RequestParam(value = "trangThai", defaultValue = "DangBan") String trangThai,
-                              @RequestParam(value = "moTa", required = false) String moTa,
-                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                              RedirectAttributes ra) {
-        try {
-            SanPham book;
-            if (maSP != null && maSP > 0) {
-                book = sanPhamRepository.findById(maSP).orElse(new SanPham());
-                ra.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công!");
-            } else {
-                book = new SanPham();
-                ra.addFlashAttribute("successMessage", "Thêm sản phẩm mới thành công!");
-                if (shopRepository != null) {
-                    shopRepository.findById(1).ifPresent(book::setShop);
-                }
-            }
-
-            book.setTenSP(tenSP.trim());
-            book.setLoaiSP(loaiSP);
-
-            if (isbn == null || isbn.trim().isEmpty()) {
-                if (book.getISBN() == null || book.getISBN().trim().isEmpty()) {
-                    book.setISBN("BK-" + (System.currentTimeMillis() % 100000000));
-                }
-            } else {
-                book.setISBN(isbn.trim());
-            }
-
-            // Tải ảnh bìa lên Cloudinary nếu có file
-            if (imageFile != null && !imageFile.isEmpty() && cloudinaryService != null) {
-                String uploadedImg = cloudinaryService.uploadImage(imageFile, "books");
-                if (uploadedImg != null && !uploadedImg.isBlank()) {
-                    book.setHinhAnh(uploadedImg);
-                }
-            } else if (moTa != null && moTa.trim().startsWith("http")) {
-                book.setHinhAnh(moTa.trim());
-            }
-
-            danhMucRepository.findById(maDanhMuc).ifPresent(book::setDanhMuc);
-            if (maNXB != null && maNXB > 0) {
-                nhaXuatBanRepository.findById(maNXB).ifPresent(book::setNhaXuatBan);
-            }
-            book.setSoLuongTon(soLuongTon != null ? soLuongTon : 0);
-            book.setGiaBan(giaBan != null ? giaBan : 0);
-            book.setTrangThai(trangThai);
-            book.setMoTa(moTa != null ? moTa.trim() : "");
-            if (book.getMucTonToiThieu() == null) book.setMucTonToiThieu(0);
-            if (book.getSoLuongDaBan() == null) book.setSoLuongDaBan(0);
-            if (book.getTrangThaiKhoa() == null) book.setTrangThaiKhoa("BinhThuong");
-
-            SanPham saved = sanPhamRepository.save(book);
-
-            if (maTacGia != null && maTacGia > 0) {
-                sanPhamTacGiaRepository.deleteBySanPhamId(saved.getMaSP());
-                tacGiaRepository.findById(maTacGia).ifPresent(tg -> {
-                    SanPhamTacGia sptg = new SanPhamTacGia();
-                    sptg.setSanPham(saved);
-                    sptg.setTacGia(tg);
-                    sptg.setThuTuTacGia(1);
-                    sanPhamTacGiaRepository.save(sptg);
-                });
-            }
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi lưu sản phẩm: " + e.getMessage());
-        }
-        return "redirect:/admin/products";
+    public String saveProduct(RedirectAttributes ra) {
+        ra.addFlashAttribute("errorMessage", "Quản trị viên và Quản lý không có quyền thêm hoặc sửa sản phẩm trực tiếp. Mỗi gian hàng tự đăng bán và quản trị sản phẩm của mình qua Kênh Người Bán.");
+        return "redirect:/admin/shops";
     }
 
     @PostMapping({"/products/delete/{id}", "/books/delete/{id}"})
-    public String deleteProduct(@PathVariable("id") Integer id,
-                                @RequestParam(value = "returnUrl", required = false) String returnUrl,
-                                RedirectAttributes ra) {
-        try {
-            if (sanPhamService != null) {
-                sanPhamService.deleteProduct(id);
-            } else {
-                sanPhamRepository.deleteById(id);
-            }
-            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm thành công!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "Không thể xóa sản phẩm: " + e.getMessage());
-        }
-        if (returnUrl != null && !returnUrl.isBlank()) {
-            return "redirect:" + returnUrl;
-        }
-        return "redirect:/admin/products";
+    public String deleteProduct(@PathVariable("id") Integer id, RedirectAttributes ra) {
+        ra.addFlashAttribute("errorMessage", "Quản trị viên và Quản lý không có quyền xóa sản phẩm của gian hàng. Để xử lý vi phạm, vui lòng sử dụng chức năng 'Khóa Sản Phẩm' trong danh sách sản phẩm gian hàng.");
+        return "redirect:/admin/shops";
     }
 
     @GetMapping("/products/{id}/json")

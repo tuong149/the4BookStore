@@ -42,6 +42,9 @@ public class DonHang {
     private String lyDoHuy;
     private LocalDateTime ngayXacNhan;
     private LocalDateTime ngayHoanThanh;
+
+    @Column(name = "ma_van_don", length = 50)
+    private String maVanDon;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ma_shop")

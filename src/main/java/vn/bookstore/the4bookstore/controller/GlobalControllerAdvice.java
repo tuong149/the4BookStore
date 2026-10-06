@@ -214,8 +214,7 @@ public class GlobalControllerAdvice {
         if (customAvatar != null) {
             return customAvatar;
         }
-        String displayName = getUserDisplayName(authentication);
-        return vn.bookstore.the4bookstore.util.AvatarUtils.generateInitialAvatarSvg(displayName);
+        return vn.bookstore.the4bookstore.util.AvatarUtils.generateDefaultAvatarSvg();
     }
 
     @ModelAttribute("userInitial")

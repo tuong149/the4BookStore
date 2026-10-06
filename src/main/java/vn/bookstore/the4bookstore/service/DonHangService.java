@@ -286,6 +286,9 @@ public class DonHangService {
                     .message("Có đơn hàng mới #" + donHang.getMaDH() + " từ " + (khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng"))
                     .build();
             messagingTemplate.convertAndSend("/topic/admin/orders", noti);
+            if (shop != null && shop.getMaShop() != null) {
+                messagingTemplate.convertAndSend("/topic/vendor/" + shop.getMaShop() + "/orders", noti);
+            }
         } catch (Exception ignored) {
             // Không làm gián đoạn transaction đặt hàng nếu WebSocket gặp sự cố
         }
@@ -309,8 +312,8 @@ public class DonHangService {
     }
 
     /**
-     * Hủy đơn hàng (chỉ khi trạng thái là ChoXuLy).
-     * Hoàn lại số lượng tồn kho.
+     * Hủy đơn hàng (khi trạng thái là ChoXuLy / DonHangMoi).
+     * Hoàn lại số lượng tồn kho và kích hoạt hoàn tiền nếu đã thanh toán trực tuyến.
      */
     @Transactional
     public void cancelOrder(Integer maDH, KhachHang khachHang, String lyDoHuy) {
@@ -322,9 +325,9 @@ public class DonHangService {
             throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
         }
 
-        // Chỉ cho phép hủy khi trạng thái là ChoXuLy
-        if (!"ChoXuLy".equals(donHang.getTrangThai())) {
-            throw new RuntimeException("Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xử lý'!");
+        // Cho phép hủy khi trạng thái là ChoXuLy hoặc DonHangMoi
+        if (!"ChoXuLy".equalsIgnoreCase(donHang.getTrangThai()) && !"DonHangMoi".equalsIgnoreCase(donHang.getTrangThai())) {
+            throw new RuntimeException("Chỉ có thể hủy trực tiếp đơn hàng ở trạng thái 'Đơn mới / Chờ xử lý'!");
         }
 
         // Hoàn lại tồn kho và số lượng đã bán
@@ -342,6 +345,9 @@ public class DonHangService {
         }
 
         donHang.setTrangThai("DaHuy");
+        if ("DaThanhToan".equalsIgnoreCase(donHang.getTrangThaiThanhToan())) {
+            donHang.setTrangThaiThanhToan("DaHoanTien");
+        }
         donHang.setLyDoHuy(lyDoHuy != null && !lyDoHuy.isBlank() ? lyDoHuy : "Khách hàng tự hủy");
         donHangRepository.save(donHang);
     }

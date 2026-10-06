@@ -118,9 +118,19 @@ public class CartController {
     // ==================== Trang Giỏ Hàng ====================
 
     @GetMapping("/gio-hang")
-    public String viewCart(Authentication authentication,
+    public String viewCart(@RequestParam(value = "datHangThanhCong", required = false) Boolean datHangThanhCong,
+                           @RequestParam(value = "maDH", required = false) Integer maDH,
+                           Authentication authentication,
                            jakarta.servlet.http.HttpSession session,
                            Model model) {
+        model.addAttribute("datHangThanhCong", Boolean.TRUE.equals(datHangThanhCong));
+        if (!model.containsAttribute("orderSuccess")) {
+            model.addAttribute("orderSuccess", false);
+        }
+        if (maDH != null) {
+            model.addAttribute("maDH", maDH);
+        }
+
         KhachHang kh = getCurrentKhachHang(authentication);
 
         if (kh != null) {

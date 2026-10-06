@@ -74,7 +74,7 @@
                                     <div class="flex items-center gap-3">
                                         <img th:src="${s.logo != null ? s.logo : '/images/default-shop.png'}" class="w-10 h-10 rounded-xl object-cover ring-1 ring-surface-container"/>
                                         <div>
-                                            <a th:href="@{'/shop/' + ${s.slug}}" target="_blank" class="font-bold text-on-surface hover:text-primary transition-colors flex items-center gap-1">
+                                            <a th:href="@{'/shop/' + ${s.slug}}" class="font-bold text-on-surface hover:text-primary transition-colors flex items-center gap-1">
                                                 <span th:text="${s.tenShop}">Tên Shop</span>
                                                 <span class="material-symbols-outlined text-xs">open_in_new</span>
                                             </a>
@@ -88,14 +88,14 @@
                                     <div class="text-[11px]" th:text="${s.emailShop}">Email</div>
                                 </td>
                                 <td class="p-4 font-bold text-primary">
-                                    <form sec:authorize="hasRole('ADMIN')" th:action="@{'/admin/shops/' + ${s.maShop} + '/commission'}" method="post" class="inline-flex items-center gap-1">
+                                    <form sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'QUANLY')" th:action="@{'/admin/shops/' + ${s.maShop} + '/commission'}" method="post" class="inline-flex items-center gap-1">
                                         <input type="number" step="0.1" name="commissionRate" th:value="${s.chietKhauPhanTram != null ? s.chietKhauPhanTram : 5.0}" class="w-16 px-2 py-1 rounded border text-xs font-bold"/>
                                         <span>%</span>
-                                        <button type="submit" class="p-1 rounded bg-surface-container hover:bg-surface-container-high" title="Cập nhật chiết khấu">
-                                            <span class="material-symbols-outlined text-xs">save</span>
+                                        <button type="submit" class="p-1 rounded bg-surface-container hover:bg-surface-container-high cursor-pointer" title="Cập nhật chiết khấu">
+                                            <span class="material-symbols-outlined text-xs text-primary">save</span>
                                         </button>
                                     </form>
-                                    <span sec:authorize="!hasRole('ADMIN')" th:text="(${s.chietKhauPhanTram != null ? s.chietKhauPhanTram : '5.0'}) + '%'">5.0%</span>
+                                    <span sec:authorize="!hasAnyRole('ADMIN', 'MANAGER', 'QUANLY')" th:text="(${s.chietKhauPhanTram != null ? s.chietKhauPhanTram : '5.0'}) + '%'">5.0%</span>
                                 </td>
                                 <td class="p-4">
                                     <a th:href="@{'/admin/shops/' + ${s.maShop} + '/products'}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all shadow-xs" title="Xem danh sách sản phẩm của gian hàng này">

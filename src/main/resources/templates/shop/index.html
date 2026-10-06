@@ -80,9 +80,18 @@
                         </div>
                         <div class="text-[11px] text-on-surface-variant mt-1" th:text="'Đơn tối thiểu: ' + ${#numbers.formatDecimal(v.donToiThieu != null ? v.donToiThieu : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'"></div>
                     </div>
-                    <button type="button" th:data-code="${v.maCode}" onclick="navigator.clipboard.writeText(this.dataset.code); alert('Đã sao chép mã ' + this.dataset.code + '!');"
-                            class="px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all cursor-pointer">
-                        Lưu Mã
+                    <div th:if="${savedIds != null and savedIds.contains(v.maKM)}" class="flex items-center gap-1 text-primary text-xs font-bold px-3 py-1.5 bg-primary/10 rounded-xl">
+                        <span class="material-symbols-outlined text-[16px]">bookmark_added</span>
+                        <span>Đã lưu</span>
+                    </div>
+                    <button th:unless="${savedIds != null and savedIds.contains(v.maKM)}"
+                            type="button"
+                            th:data-makm="${v.maKM}"
+                            th:data-code="${v.maCode}"
+                            onclick="saveShopVoucher(this)"
+                            class="px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all cursor-pointer flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-[15px]">bookmark_add</span>
+                        <span>Lưu Mã</span>
                     </button>
                 </div>
             </div>
@@ -133,5 +142,72 @@
     </main>
 
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <!-- Toast notification -->
+    <div id="shopVoucherToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div class="px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-primary" id="shopToastInner">
+            <span class="material-symbols-outlined text-[20px] text-primary" id="shopToastIcon">check_circle</span>
+            <span id="shopToastText">Đã lưu mã giảm giá thành công!</span>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('shopVoucherToast');
+            const inner = document.getElementById('shopToastInner');
+            const icon = document.getElementById('shopToastIcon');
+            const text = document.getElementById('shopToastText');
+            if (!toast) return;
+
+            text.textContent = message;
+            if (isSuccess) {
+                inner.className = 'px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-primary';
+                icon.className = 'material-symbols-outlined text-[20px] text-primary';
+                icon.textContent = 'check_circle';
+            } else {
+                inner.className = 'px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-error';
+                icon.className = 'material-symbols-outlined text-[20px] text-error';
+                icon.textContent = 'error';
+            }
+
+            toast.classList.remove('hidden');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function saveShopVoucher(btn) {
+            const maKM = btn.getAttribute('data-makm');
+            btn.disabled = true;
+            fetch('/api/voucher/luu?maKM=' + maKM, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.requireLogin) {
+                    if (confirm(data.message + '\nBạn có muốn chuyển đến trang Đăng nhập không?')) {
+                        window.location.href = '/login';
+                    }
+                    btn.disabled = false;
+                    return;
+                }
+                if (data.success || data.alreadySaved) {
+                    btn.outerHTML = '<div class="flex items-center gap-1 text-primary text-xs font-bold px-3 py-1.5 bg-primary/10 rounded-xl"><span class="material-symbols-outlined text-[16px]">bookmark_added</span><span>Đã lưu</span></div>';
+                    showToast(data.message || 'Đã lưu mã giảm giá vào Ví Voucher của bạn!', true);
+                } else {
+                    showToast(data.message, false);
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                showToast('Lỗi kết nối khi lưu mã voucher!', false);
+                btn.disabled = false;
+            });
+        }
+    </script>
 </body>
 </html>

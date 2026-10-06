@@ -122,26 +122,52 @@ public class ManagerDisputeController {
     @GetMapping("/shops/{id}/products")
     public String shopProducts(@PathVariable Integer id,
                                @RequestParam(required = false) String keyword,
+                               @RequestParam(required = false, defaultValue = "all") String moderationStatus,
                                @RequestParam(defaultValue = "0") int page,
                                Model model) {
         Shop shop = shopService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gian hàng: " + id));
 
-        Page<SanPham> productPage;
-        if (keyword != null && !keyword.isBlank()) {
-            productPage = sanPhamRepository.findByShop_MaShopAndTenSPContainingIgnoreCase(id, keyword.trim(), PageRequest.of(page, 10));
-        } else {
-            productPage = sanPhamRepository.findByShop_MaShop(id, PageRequest.of(page, 10));
-        }
+        String modStatus = (moderationStatus != null && !moderationStatus.isBlank() && !"all".equalsIgnoreCase(moderationStatus)) ? moderationStatus.trim() : null;
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+
+        Page<SanPham> productPage = sanPhamRepository.findShopProductsForAdmin(id, kw, modStatus, PageRequest.of(page, 10));
+
+        long countAll = sanPhamRepository.countByShop_MaShop(id);
+        long countPending = sanPhamRepository.countByShop_MaShopAndTrangThaiKhoa(id, "ChoDuyet");
+        long countActive = sanPhamRepository.countByShop_MaShopAndTrangThaiKhoa(id, "BinhThuong");
+        long countLocked = sanPhamRepository.countByShop_MaShopAndTrangThaiKhoa(id, "BiKhoaBoiAdmin");
 
         model.addAttribute("shop", shop);
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("page", productPage);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("keyword", keyword != null ? keyword : "");
+        model.addAttribute("moderationStatus", moderationStatus != null ? moderationStatus : "all");
+        model.addAttribute("countAll", countAll);
+        model.addAttribute("countPending", countPending);
+        model.addAttribute("countActive", countActive);
+        model.addAttribute("countLocked", countLocked);
         return "admin/shop_products";
     }
 
     // --- KIỂM DUYỆT & KHÓA SẢN PHẨM VI PHẠM ---
+    @PostMapping("/products/{id}/approve")
+    public String approveProduct(@PathVariable Integer id,
+                                 @RequestParam(required = false) String returnUrl,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            disputeService.duyetSanPham(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã DUYỆT thành công sản phẩm #" + id + ", sản phẩm đã được phép bày bán trên sàn!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        if (returnUrl != null && !returnUrl.isBlank()) return "redirect:" + returnUrl;
+        return sanPhamRepository.findById(id)
+                .filter(sp -> sp.getShop() != null)
+                .map(sp -> "redirect:/admin/shops/" + sp.getShop().getMaShop() + "/products")
+                .orElse("redirect:/admin/shops");
+    }
+
     @PostMapping("/products/{id}/lock")
     public String lockProduct(@PathVariable Integer id,
                               @RequestParam(required = false) String returnUrl,

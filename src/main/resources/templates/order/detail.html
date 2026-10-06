@@ -48,15 +48,21 @@
                         </div>
                     </div>
                     <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold"
-                         th:classappend="${donHang.trangThai == 'DaGiao'} ? 'bg-primary/10 text-primary' : (${donHang.trangThai == 'DaHuy'} ? 'bg-error/10 text-error' : (${donHang.trangThai == 'DangGiao'} ? 'bg-secondary/10 text-secondary' : 'bg-surface-container text-on-surface-variant'))">
+                         th:classappend="${donHang.trangThai == 'HoanTat'} ? 'bg-emerald-100 text-emerald-800' : (${donHang.trangThai == 'DaGiao'} ? 'bg-teal-100 text-teal-800' : (${donHang.trangThai == 'DaHuy' or donHang.trangThai == 'Huy'} ? 'bg-error/10 text-error' : (${donHang.trangThai == 'DangGiao' or donHang.trangThai == 'DaLayHang'} ? 'bg-secondary/10 text-secondary' : (${donHang.trangThai == 'YeuCauHuy'} ? 'bg-rose-100 text-rose-700' : 'bg-surface-container text-on-surface-variant'))))">
                         <span class="w-2 h-2 rounded-full"
-                              th:classappend="${donHang.trangThai == 'DaGiao'} ? 'bg-primary' : (${donHang.trangThai == 'DaHuy'} ? 'bg-error' : (${donHang.trangThai == 'DangGiao'} ? 'bg-secondary animate-pulse' : 'bg-on-surface-variant'))"></span>
+                              th:classappend="${donHang.trangThai == 'HoanTat'} ? 'bg-emerald-600' : (${donHang.trangThai == 'DaGiao'} ? 'bg-teal-600' : (${donHang.trangThai == 'DaHuy'} ? 'bg-error' : (${donHang.trangThai == 'DangGiao'} ? 'bg-secondary animate-pulse' : (${donHang.trangThai == 'YeuCauHuy'} ? 'bg-rose-600 animate-pulse' : 'bg-on-surface-variant'))))"></span>
                         <span th:switch="${donHang.trangThai}">
-                            <span th:case="'ChoXuLy'">Chờ xử lý</span>
+                            <span th:case="'ChoXuLy'">Đơn hàng mới</span>
+                            <span th:case="'DonHangMoi'">Đơn hàng mới</span>
                             <span th:case="'DaXacNhan'">Đã xác nhận</span>
+                            <span th:case="'DaLayHang'">Đã lấy hàng / Đang đóng gói</span>
                             <span th:case="'DangGiao'">Đang giao hàng</span>
-                            <span th:case="'DaGiao'">Đã giao hàng</span>
+                            <span th:case="'DaGiao'">Đã giao hàng (Chờ xác nhận)</span>
+                            <span th:case="'HoanTat'">Hoàn tất thành công</span>
+                            <span th:case="'YeuCauHuy'">Chờ duyệt hủy đơn</span>
                             <span th:case="'DaHuy'">Đã hủy</span>
+                            <span th:case="'TraHangHoanTien'">Trả hàng - Hoàn tiền</span>
+                            <span th:case="'TranhChap'">Khiếu nại tranh chấp</span>
                             <span th:case="*" th:text="${donHang.trangThai}">Trạng thái</span>
                         </span>
                     </div>
@@ -113,12 +119,56 @@
                         </div>
                     </div>
 
+                    <!-- Tracking Code (Mã Vận Đơn) & Carrier Banner -->
+                    <div th:if="${donHang.maVanDon != null}" class="mt-4 p-4 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+                            </span>
+                            <div>
+                                <span class="text-xs text-on-surface-variant block">Mã vận đơn tra cứu:</span>
+                                <strong class="font-mono text-primary text-base font-bold tracking-wide" th:text="${donHang.maVanDon}">GHN-12345</strong>
+                            </div>
+                        </div>
+                        <div class="text-xs text-on-surface-variant bg-white px-3.5 py-2 rounded-xl border border-primary/10">
+                            Đơn vị vận chuyển: <strong class="text-on-surface" th:text="${donHang.nhaVanChuyen != null ? donHang.nhaVanChuyen.tenNvc : 'Giao Hàng Tiêu Chuẩn'}">GHN</strong>
+                        </div>
+                    </div>
+
                     <!-- Cancellation reason -->
                     <div th:if="${(donHang.trangThai == 'DaHuy' or donHang.trangThai == 'Huy') and donHang.lyDoHuy != null}" class="mt-3 p-3 rounded-xl bg-error/5 border border-error/20 text-xs text-error flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">error</span>
                         <div>
                             <span class="font-bold">Lý do hủy đơn:</span>
                             <span th:text="${donHang.lyDoHuy}">Lý do</span>
+                        </div>
+                    </div>
+
+                    <!-- Cancel Request Pending Banner -->
+                    <div th:if="${donHang.trangThai == 'YeuCauHuy'}" class="mt-3 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2.5 shadow-xs">
+                        <span class="material-symbols-outlined text-[22px] text-rose-600 shrink-0">hourglass_top</span>
+                        <div>
+                            <p class="font-bold text-sm text-rose-950">Yêu cầu hủy đơn hàng đang chờ Shop duyệt</p>
+                            <p class="mt-0.5" th:text="'Lý do bạn gửi: ' + ${donHang.lyDoHuy}"></p>
+                            <p class="text-[11px] text-rose-700 mt-1">Vì đơn hàng đã được shop xác nhận trước đó, Shop sẽ kiểm tra tình trạng đóng gói để chấp nhận hoặc phản hồi lại bạn.</p>
+                        </div>
+                    </div>
+
+                    <!-- Escrow Holding Banner for DaGiao orders -->
+                    <div th:if="${donHang.trangThai == 'DaGiao'}" class="mt-3 p-4 rounded-2xl bg-teal-50 border border-teal-200 text-xs text-teal-900 flex items-start gap-2.5 shadow-xs">
+                        <span class="material-symbols-outlined text-[22px] text-teal-600 shrink-0">verified_user</span>
+                        <div>
+                            <p class="font-bold text-sm text-teal-950">Kiện hàng đã được giao thành công</p>
+                            <p class="mt-0.5">Tiền mua hàng đang được sàn tạm giữ bảo đảm an toàn (Escrow) trong thời gian chờ khiếu nại (3 - 7 ngày). Hãy kiểm tra sách và bấm <strong>"Đã nhận được hàng"</strong> bên dưới để hoàn tất, hoặc gửi yêu cầu đổi trả nếu có vấn đề.</p>
+                        </div>
+                    </div>
+
+                    <!-- Completed Order Banner -->
+                    <div th:if="${donHang.trangThai == 'HoanTat'}" class="mt-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 shadow-xs">
+                        <span class="material-symbols-outlined text-[22px] text-emerald-600 shrink-0">task_alt</span>
+                        <div>
+                            <p class="font-bold text-sm text-emerald-950">Đơn hàng đã hoàn tất thành công!</p>
+                            <p class="mt-0.5">Cảm ơn bạn đã mua sách tại The4BookStore. Đừng quên để lại đánh giá và nhận xét cho các cuốn sách bạn yêu thích nhé!</p>
                         </div>
                     </div>
 
@@ -209,11 +259,12 @@
                         </div>
                     </div>
                 <!-- Actions Footer -->
-                <div class="p-space-lg flex items-center justify-end gap-space-sm bg-surface-container-low/40">
+                <div class="p-space-lg flex items-center justify-end gap-space-sm bg-surface-container-low/40 flex-wrap">
                     <a th:href="@{/don-hang}" class="px-space-md py-2.5 rounded-xl bg-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                         <span>Về danh sách đơn</span>
                     </a>
+
                     <!-- Return/Refund button for DaGiao orders -->
                     <div th:if="${donHang.trangThai == 'DaGiao'}">
                         <button type="button" onclick="document.getElementById('returnModal').classList.remove('hidden'); document.getElementById('returnModal').classList.add('flex');"
@@ -223,8 +274,18 @@
                         </button>
                     </div>
 
-                    <!-- Review button for DaGiao orders -->
-                    <div th:if="${donHang.trangThai == 'DaGiao' and donHang.chiTietDonHangs != null and !donHang.chiTietDonHangs.isEmpty()}">
+                    <!-- Confirm Received button for DaGiao orders (Hoàn tất) -->
+                    <div th:if="${donHang.trangThai == 'DaGiao'}">
+                        <form th:action="@{'/don-hang/' + ${donHang.maDH} + '/da-nhan-hang'}" method="post" onsubmit="return confirm('Bạn xác nhận đã nhận được sách và hài lòng với đơn hàng? Đơn hàng sẽ được hoàn tất.');">
+                            <button type="submit" class="px-space-md py-2.5 rounded-xl bg-emerald-600 text-white font-label-md text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1 shadow-sm cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">task_alt</span>
+                                <span>Đã nhận được hàng</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Review button for HoanTat or DaGiao orders -->
+                    <div th:if="${(donHang.trangThai == 'HoanTat' or donHang.trangThai == 'DaGiao') and donHang.chiTietDonHangs != null and !donHang.chiTietDonHangs.isEmpty()}">
                         <a th:href="@{'/san-pham/' + ${donHang.chiTietDonHangs[0].sanPham.maSP} + '#reviews-section'}"
                            class="px-space-md py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm">
                             <span class="material-symbols-outlined text-[16px]">rate_review</span>
@@ -232,12 +293,21 @@
                         </a>
                     </div>
 
-                    <!-- Cancel button only for ChoXuLy orders -->
+                    <!-- Cancel button only for ChoXuLy orders (Trực tiếp) -->
                     <div th:if="${donHang.trangThai == 'ChoXuLy' or donHang.trangThai == 'DonHangMoi'}">
-                        <button type="button" onclick="document.getElementById('cancelModal').classList.remove('hidden'); document.getElementById('cancelModal').classList.add('flex');"
+                        <button type="button" onclick="document.getElementById('cancelModalTitle').innerText='Xác nhận hủy đơn hàng'; document.getElementById('cancelModalDesc').innerText='Đơn hàng đang chờ xử lý, bạn có thể tự hủy và giải phóng tồn kho ngay.'; document.getElementById('cancelSubmitBtn').innerText='Xác nhận hủy đơn'; document.getElementById('cancelModal').classList.remove('hidden'); document.getElementById('cancelModal').classList.add('flex');"
                                 class="px-space-md py-2.5 rounded-xl bg-error/10 text-error font-label-md text-xs font-semibold hover:bg-error/20 transition-colors flex items-center gap-1 cursor-pointer">
                             <span class="material-symbols-outlined text-[16px]">cancel</span>
                             <span>Hủy đơn hàng</span>
+                        </button>
+                    </div>
+
+                    <!-- Cancel request button for DaXacNhan orders (Gửi shop duyệt) -->
+                    <div th:if="${donHang.trangThai == 'DaXacNhan'}">
+                        <button type="button" onclick="document.getElementById('cancelModalTitle').innerText='Yêu cầu hủy đơn hàng'; document.getElementById('cancelModalDesc').innerText='Đơn hàng đã được xác nhận. Yêu cầu hủy sẽ được gửi đến Shop để xem xét và duyệt.'; document.getElementById('cancelSubmitBtn').innerText='Gửi yêu cầu hủy'; document.getElementById('cancelModal').classList.remove('hidden'); document.getElementById('cancelModal').classList.add('flex');"
+                                class="px-space-md py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-label-md text-xs font-semibold hover:bg-rose-100 transition-colors flex items-center gap-1 cursor-pointer">
+                            <span class="material-symbols-outlined text-[16px]">cancel</span>
+                            <span>Yêu cầu hủy đơn</span>
                         </button>
                     </div>
                 </div>
@@ -320,8 +390,8 @@
                     <span class="material-symbols-outlined text-[24px]">warning</span>
                 </div>
                 <div>
-                    <h3 class="font-headline-md text-base font-bold text-on-surface">Xác nhận hủy đơn hàng</h3>
-                    <p class="text-xs text-on-surface-variant">Hành động này không thể hoàn tác</p>
+                    <h3 id="cancelModalTitle" class="font-headline-md text-base font-bold text-on-surface">Xác nhận hủy đơn hàng</h3>
+                    <p id="cancelModalDesc" class="text-xs text-on-surface-variant">Hành động này không thể hoàn tác</p>
                 </div>
             </div>
             <form th:action="@{'/don-hang/' + ${donHang.maDH} + '/huy'}" method="post" class="space-y-4">
@@ -336,7 +406,7 @@
                             class="px-5 py-2.5 rounded-xl border border-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container transition-colors cursor-pointer">
                         Đóng
                     </button>
-                    <button type="submit" class="px-6 py-2.5 bg-error text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-error/80 transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <button id="cancelSubmitBtn" type="submit" class="px-6 py-2.5 bg-error text-on-primary font-headline-sm text-xs font-bold rounded-xl hover:bg-error/80 transition-all shadow-md flex items-center gap-1.5 cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">cancel</span>
                         <span>Xác nhận hủy</span>
                     </button>

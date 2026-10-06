@@ -55,6 +55,19 @@ public final class AvatarUtils {
     }
 
     /**
+     * Tự động sinh chuỗi Data URI chứa hình vector SVG icon người đơn giản
+     * khi tài khoản chưa có avatar cá nhân.
+     */
+    public static String generateDefaultAvatarSvg() {
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='100%' height='100%'>"
+                + "<rect width='100' height='100' rx='50' fill='#E2E8F0'/>"
+                + "<circle cx='50' cy='36' r='18' fill='#64748B'/>"
+                + "<path d='M20 84 C20 66, 34 58, 50 58 C66 58, 80 66, 80 84 Z' fill='#64748B'/>"
+                + "</svg>";
+        return "data:image/svg+xml;utf8," + URLEncoder.encode(svg, StandardCharsets.UTF_8).replace("+", "%20");
+    }
+
+    /**
      * Tự động sinh chuỗi Data URI chứa hình ảnh vector SVG với chữ cái đầu và nền gradient sang trọng.
      */
     public static String generateInitialAvatarSvg(String displayName) {

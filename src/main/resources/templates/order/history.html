@@ -76,6 +76,12 @@
                     <span class="material-symbols-outlined text-[16px]">task_alt</span>
                     <span>Đã giao</span>
                 </a>
+                <a th:href="@{/don-hang(trangThai='HoanTat')}" 
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5"
+                   th:classappend="${currentTab == 'HoanTat'} ? 'bg-emerald-600 text-white shadow-xs' : 'bg-surface-container-low text-on-surface hover:bg-surface-container'">
+                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                    <span>Hoàn tất</span>
+                </a>
                 <a th:href="@{/don-hang(trangThai='DaHuy')}" 
                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5"
                    th:classappend="${currentTab == 'DaHuy'} ? 'bg-primary text-on-primary shadow-xs' : 'bg-surface-container-low text-on-surface hover:bg-surface-container'">
@@ -114,9 +120,9 @@
                             <span class="text-on-surface-variant text-xs" th:text="'Ngày đặt: ' + ${#temporals.format(dh.ngayDat, 'dd/MM/yyyy HH:mm')}">Ngày đặt</span>
                         </div>
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                             th:classappend="${dh.trangThai == 'DaGiao'} ? 'bg-primary/10 text-primary' : (${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'} ? 'bg-error/10 text-error' : (${dh.trangThai == 'DangGiao' or dh.trangThai == 'DaLayHang'} ? 'bg-secondary/10 text-secondary' : (${dh.trangThai == 'TraHangHoanTien' or dh.trangThai == 'TranhChap'} ? 'bg-purple-100 text-purple-800' : 'bg-surface-container text-on-surface-variant')))">
+                             th:classappend="${dh.trangThai == 'HoanTat'} ? 'bg-emerald-100 text-emerald-800' : (${dh.trangThai == 'DaGiao'} ? 'bg-teal-100 text-teal-800' : (${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'} ? 'bg-error/10 text-error' : (${dh.trangThai == 'DangGiao' or dh.trangThai == 'DaLayHang'} ? 'bg-secondary/10 text-secondary' : (${dh.trangThai == 'YeuCauHuy'} ? 'bg-rose-100 text-rose-700' : (${dh.trangThai == 'TraHangHoanTien' or dh.trangThai == 'TranhChap'} ? 'bg-purple-100 text-purple-800' : 'bg-surface-container text-on-surface-variant')))))">
                             <span class="w-2 h-2 rounded-full"
-                                  th:classappend="${dh.trangThai == 'DaGiao'} ? 'bg-primary' : (${dh.trangThai == 'DaHuy'} ? 'bg-error' : (${dh.trangThai == 'DangGiao'} ? 'bg-secondary animate-pulse' : (${dh.trangThai == 'TraHangHoanTien' or dh.trangThai == 'TranhChap'} ? 'bg-purple-600' : 'bg-on-surface-variant')))"></span>
+                                  th:classappend="${dh.trangThai == 'HoanTat'} ? 'bg-emerald-600' : (${dh.trangThai == 'DaGiao'} ? 'bg-teal-600' : (${dh.trangThai == 'DaHuy'} ? 'bg-error' : (${dh.trangThai == 'DangGiao'} ? 'bg-secondary animate-pulse' : (${dh.trangThai == 'YeuCauHuy'} ? 'bg-rose-600 animate-pulse' : (${dh.trangThai == 'TraHangHoanTien' or dh.trangThai == 'TranhChap'} ? 'bg-purple-600' : 'bg-on-surface-variant')))))"></span>
                             <span th:switch="${dh.trangThai}">
                                 <span th:case="'ChoXuLy'">Đơn hàng mới</span>
                                 <span th:case="'DonHangMoi'">Đơn hàng mới</span>
@@ -124,6 +130,8 @@
                                 <span th:case="'DaLayHang'">Đã lấy hàng</span>
                                 <span th:case="'DangGiao'">Đang giao hàng</span>
                                 <span th:case="'DaGiao'">Đã giao hàng</span>
+                                <span th:case="'HoanTat'">Hoàn tất thành công</span>
+                                <span th:case="'YeuCauHuy'">Chờ duyệt hủy</span>
                                 <span th:case="'DaHuy'">Đã hủy</span>
                                 <span th:case="'Huy'">Đã hủy</span>
                                 <span th:case="'TraHangHoanTien'">Trả hàng - Hoàn tiền</span>

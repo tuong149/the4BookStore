@@ -51,15 +51,25 @@ public class VendorController {
         Object p = auth.getPrincipal();
         if (p instanceof CustomUserDetails ud && ud.getTaiKhoan() != null && ud.getTaiKhoan().getMaTaiKhoan() != null) {
             tk = taiKhoanRepository.findById(ud.getTaiKhoan().getMaTaiKhoan()).orElse(ud.getTaiKhoan());
+        } else if (p instanceof CustomOAuth2User o && o.getTaiKhoan() != null && o.getTaiKhoan().getMaTaiKhoan() != null) {
+            tk = taiKhoanRepository.findById(o.getTaiKhoan().getMaTaiKhoan()).orElse(o.getTaiKhoan());
+        } else if (p instanceof CustomOidcUser o && o.getTaiKhoan() != null && o.getTaiKhoan().getMaTaiKhoan() != null) {
+            tk = taiKhoanRepository.findById(o.getTaiKhoan().getMaTaiKhoan()).orElse(o.getTaiKhoan());
         } else if (p instanceof CustomOAuth2User o && o.getEmail() != null) {
             tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
         } else if (p instanceof CustomOidcUser o && o.getEmail() != null) {
             tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
-        } else if (p instanceof OidcUser o && o.getEmail() != null) {
-            tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
+        } else if (p instanceof OidcUser o) {
+            String sub = o.getSubject();
+            if (sub != null) tk = taiKhoanRepository.findByProviderId(sub).orElse(null);
+            if (tk == null && o.getEmail() != null) tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
         } else if (p instanceof OAuth2User o) {
-            Object em = o.getAttribute("email");
-            if (em != null) tk = taiKhoanRepository.findByEmail(em.toString()).orElse(null);
+            Object sub = o.getAttribute("sub");
+            if (sub != null) tk = taiKhoanRepository.findByProviderId(sub.toString()).orElse(null);
+            if (tk == null) {
+                Object em = o.getAttribute("email");
+                if (em != null) tk = taiKhoanRepository.findByEmail(em.toString()).orElse(null);
+            }
         }
         if (tk == null && auth.getName() != null) {
             tk = taiKhoanRepository.findByEmail(auth.getName())
@@ -74,8 +84,11 @@ public class VendorController {
         if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/pending";
         }
-        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai()) || "DaXoa".equalsIgnoreCase(shop.getTrangThai())) {
+        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/blocked";
+        }
+        if ("DaXoa".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/register";
         }
         return null;
     }
@@ -91,7 +104,15 @@ public class VendorController {
     private Shop getCurrentShop(Authentication auth) {
         TaiKhoan user = getCurrentUser(auth);
         if (user == null) return null;
-        return shopService.findByTaiKhoan(user).orElse(null);
+        Optional<Shop> userShop = shopService.findByTaiKhoan(user);
+        if (userShop.isPresent()) {
+            return userShop.get();
+        }
+        // Nếu user có vai trò ADMIN, MANAGER hoặc QUANLY mà chưa có shop riêng, tự động liên kết với Shop 1 (The4BookStore Official)
+        if ("ADMIN".equalsIgnoreCase(user.getVaiTro()) || "MANAGER".equalsIgnoreCase(user.getVaiTro()) || "QUANLY".equalsIgnoreCase(user.getVaiTro())) {
+            return shopService.findById(1).orElse(null);
+        }
+        return null;
     }
 
     // --- TRẠNG THÁI HỒ SƠ CHỜ DUYỆT ---
@@ -102,7 +123,7 @@ public class VendorController {
         if ("HoatDong".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/dashboard";
         }
-        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai()) || "DaXoa".equalsIgnoreCase(shop.getTrangThai())) {
+        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/blocked";
         }
         model.addAttribute("shop", shop);
@@ -134,8 +155,10 @@ public class VendorController {
         if (existing.isPresent()) {
             Shop s = existing.get();
             if ("ChoDuyet".equalsIgnoreCase(s.getTrangThai())) return "redirect:/vendor/pending";
-            if ("BiKhoa".equalsIgnoreCase(s.getTrangThai()) || "DaXoa".equalsIgnoreCase(s.getTrangThai())) return "redirect:/vendor/blocked";
-            return "redirect:/vendor/dashboard";
+            if ("BiKhoa".equalsIgnoreCase(s.getTrangThai())) return "redirect:/vendor/blocked";
+            if (!"DaXoa".equalsIgnoreCase(s.getTrangThai())) {
+                return "redirect:/vendor/dashboard";
+            }
         }
         return "vendor/register";
     }
@@ -376,14 +399,28 @@ public class VendorController {
         return "redirect:/vendor/orders";
     }
 
-    @PostMapping("/orders/{id}/complete")
-    public String completeOrder(Authentication auth, @PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    @PostMapping({"/orders/{id}/delivered", "/orders/{id}/complete"})
+    public String deliveredOrder(Authentication auth, @PathVariable Integer id, RedirectAttributes redirectAttributes) {
         Shop shop = getCurrentShop(auth);
         String redirect = checkShopAccess(shop);
         if (redirect != null) return redirect;
         try {
             vendorService.daGiaoHang(id, shop.getMaShop());
-            redirectAttributes.addFlashAttribute("successMessage", "Đơn hàng #" + id + " đã giao thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Đơn hàng #" + id + " đã giao thành công! Kích hoạt thời gian chờ khiếu nại (tiền trong Escrow).");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vendor/orders";
+    }
+
+    @PostMapping("/orders/{id}/finalize")
+    public String finalizeOrder(Authentication auth, @PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+        try {
+            vendorService.hoanTatDonHang(id, shop.getMaShop());
+            redirectAttributes.addFlashAttribute("successMessage", "Đã quyết toán và hoàn tất đơn hàng #" + id + "! Doanh thu đã được cộng vào số dư shop.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -396,8 +433,36 @@ public class VendorController {
         String redirect = checkShopAccess(shop);
         if (redirect != null) return redirect;
         try {
-            vendorService.huyDonHang(id, shop.getMaShop(), lyDo != null ? lyDo : "Shop hết hàng");
-            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #" + id);
+            vendorService.huyDonHang(id, shop.getMaShop(), lyDo != null ? lyDo : "Shop hết hàng đột xuất");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #" + id + " và hoàn trả lại số lượng tồn kho.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vendor/orders";
+    }
+
+    @PostMapping("/orders/{id}/accept-cancel")
+    public String acceptCancelOrder(Authentication auth, @PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+        try {
+            vendorService.chapNhanHuyDon(id, shop.getMaShop());
+            redirectAttributes.addFlashAttribute("successMessage", "Đã đồng ý yêu cầu hủy đơn hàng #" + id + ". Tồn kho đã được hoàn trả!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vendor/orders";
+    }
+
+    @PostMapping("/orders/{id}/reject-cancel")
+    public String rejectCancelOrder(Authentication auth, @PathVariable Integer id, @RequestParam(required = false) String lyDo, RedirectAttributes redirectAttributes) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+        try {
+            vendorService.tuChoiHuyDon(id, shop.getMaShop(), lyDo);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối yêu cầu hủy cho đơn #" + id + ". Đơn hàng tiếp tục trong quy trình giao!");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -411,7 +476,7 @@ public class VendorController {
         if (redirect != null) return redirect;
         try {
             vendorService.dongYTraHang(id, shop.getMaShop());
-            redirectAttributes.addFlashAttribute("successMessage", "Đã đồng ý trả hàng - hoàn tiền cho đơn #" + id);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã nhận lại sách & hoàn tiền cho đơn #" + id + ". Tồn kho sách đã được cập nhật lại.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

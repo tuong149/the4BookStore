@@ -35,13 +35,24 @@ public class OrderService {
         String oldStatus = dh.getTrangThai();
         dh.setTrangThai(status);
 
-        if ("DaGiao".equals(status)) {
+        if ("DaGiao".equals(status) || "HoanTat".equals(status)) {
             if (dh.getNgayHoanThanh() == null) {
                 dh.setNgayHoanThanh(LocalDateTime.now());
             }
         } else if ("DaXacNhan".equals(status)) {
             if (dh.getNgayXacNhan() == null) {
                 dh.setNgayXacNhan(LocalDateTime.now());
+            }
+            if (dh.getMaVanDon() == null || dh.getMaVanDon().isBlank()) {
+                String prefix = "GHN";
+                if (dh.getNhaVanChuyen() != null && dh.getNhaVanChuyen().getTenNvc() != null) {
+                    String ten = dh.getNhaVanChuyen().getTenNvc().toUpperCase();
+                    if (ten.contains("GHTK")) prefix = "GHTK";
+                    else if (ten.contains("VIETTEL")) prefix = "VTPOST";
+                    else if (ten.contains("VNPOST")) prefix = "VNPOST";
+                    else prefix = "GHN";
+                }
+                dh.setMaVanDon(prefix + "-" + dh.getMaDH() + "-" + (System.currentTimeMillis() % 100000));
             }
         } else if ("DaHuy".equals(status) || "Huy".equals(status)) {
             if (reason != null && !reason.isBlank()) {
@@ -62,8 +73,10 @@ public class OrderService {
         try {
             String statusText = switch (status) {
                 case "DaXacNhan" -> "Đã được xác nhận";
+                case "DaLayHang" -> "Đã bàn giao cho đơn vị vận chuyển";
                 case "DangGiao" -> "Đang được giao đến bạn";
-                case "DaGiao" -> "Đã giao hàng thành công";
+                case "DaGiao" -> "Đã giao hàng thành công (chờ xác nhận)";
+                case "HoanTat" -> "Đã hoàn tất thành công";
                 case "DaHuy", "Huy" -> "Đã bị hủy";
                 default -> status;
             };

@@ -104,6 +104,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (optionalTaiKhoan.isPresent()) {
             tk = optionalTaiKhoan.get();
+            if ("BiKhoa".equalsIgnoreCase(tk.getTrangThai())) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("account_locked"),
+                        "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ nhasachthe4bookstore@gmail.com để được hỗ trợ mở khóa.");
+            }
             boolean needUpdateTk = false;
 
             if (tk.getProviderId() == null && safeSub != null) {

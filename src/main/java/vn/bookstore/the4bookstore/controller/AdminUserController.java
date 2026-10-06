@@ -18,6 +18,12 @@ import vn.bookstore.the4bookstore.repository.NhanVienRepository;
 import vn.bookstore.the4bookstore.repository.ShopRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
 
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
+import vn.bookstore.the4bookstore.security.CustomOAuth2User;
+import vn.bookstore.the4bookstore.security.CustomUserDetails;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +38,36 @@ public class AdminUserController {
     private final NhanVienRepository nhanVienRepository;
     private final ShopRepository shopRepository;
     private final PasswordEncoder passwordEncoder;
+    private final org.springframework.security.core.session.SessionRegistry sessionRegistry;
+
+    private boolean isSuperAdmin(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return false;
+        return auth.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()));
+    }
+
+    private void invalidateUserSessions(TaiKhoan tk) {
+        if (sessionRegistry == null || tk == null) return;
+        try {
+            for (Object principal : sessionRegistry.getAllPrincipals()) {
+                boolean match = false;
+                if (principal instanceof CustomUserDetails ud && ud.getTaiKhoan() != null) {
+                    if (ud.getTaiKhoan().getMaTaiKhoan().equals(tk.getMaTaiKhoan())) match = true;
+                } else if (principal instanceof CustomOAuth2User o && o.getTaiKhoan() != null) {
+                    if (o.getTaiKhoan().getMaTaiKhoan().equals(tk.getMaTaiKhoan())) match = true;
+                } else if (principal instanceof UserDetails ud) {
+                    if (ud.getUsername().equalsIgnoreCase(tk.getTenDangNhap()) || ud.getUsername().equalsIgnoreCase(tk.getEmail())) {
+                        match = true;
+                    }
+                }
+                if (match) {
+                    for (SessionInformation sessionInfo : sessionRegistry.getAllSessions(principal, false)) {
+                        sessionInfo.expireNow();
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
 
     @GetMapping
     public String listUsers(
@@ -91,11 +127,21 @@ public class AdminUserController {
             return "redirect:/admin/users";
         }
 
+        // Quyền Manager thấp hơn Admin: không cho phép Manager can thiệp/khóa tài khoản Admin
+        if (!isSuperAdmin(auth) && "ADMIN".equalsIgnoreCase(tk.getVaiTro())) {
+            ra.addFlashAttribute("errorMessage", "Quản lý (Manager) không có quyền khóa hoặc can thiệp tài khoản Quản trị viên cấp cao (Admin)!");
+            return "redirect:/admin/users";
+        }
+
         boolean willLock = !"BiKhoa".equalsIgnoreCase(tk.getTrangThai());
         tk.setTrangThai(willLock ? "BiKhoa" : "HoatDong");
         taiKhoanRepository.save(tk);
 
-        String msg = willLock ? "Đã KHÓA tài khoản @" + tk.getTenDangNhap() + " thành công!" : "Đã MỞ KHÓA tài khoản @" + tk.getTenDangNhap() + " thành công!";
+        if (willLock) {
+            invalidateUserSessions(tk);
+        }
+
+        String msg = willLock ? "Đã KHÓA tài khoản @" + tk.getTenDangNhap() + " thành công (đã hủy phiên đăng nhập nếu có)!" : "Đã MỞ KHÓA tài khoản @" + tk.getTenDangNhap() + " thành công!";
         ra.addFlashAttribute("successMessage", msg);
         return "redirect:/admin/users";
     }
@@ -122,6 +168,12 @@ public class AdminUserController {
             }
         }
 
+        // Quyền Manager thấp hơn Admin: không cho phép Manager sửa vai trò Admin hoặc tự nâng quyền lên Admin
+        if (!isSuperAdmin(auth) && ("ADMIN".equalsIgnoreCase(tk.getVaiTro()) || "ADMIN".equalsIgnoreCase(newRole))) {
+            ra.addFlashAttribute("errorMessage", "Quản lý (Manager) không có quyền thay đổi vai trò của Admin hoặc nâng cấp tài khoản lên Admin!");
+            return "redirect:/admin/users";
+        }
+
         tk.setVaiTro(newRole.trim().toUpperCase());
         taiKhoanRepository.save(tk);
 
@@ -133,6 +185,7 @@ public class AdminUserController {
     public String resetPassword(
             @PathVariable Integer id,
             @RequestParam String newPassword,
+            Authentication auth,
             RedirectAttributes ra) {
         if (newPassword == null || newPassword.trim().length() < 6) {
             ra.addFlashAttribute("errorMessage", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
@@ -146,8 +199,18 @@ public class AdminUserController {
         }
 
         TaiKhoan tk = opt.get();
+
+        // Quyền Manager thấp hơn Admin: không cho phép đặt lại mật khẩu cho Admin
+        if (!isSuperAdmin(auth) && "ADMIN".equalsIgnoreCase(tk.getVaiTro())) {
+            ra.addFlashAttribute("errorMessage", "Quản lý (Manager) không có quyền đặt lại mật khẩu cho tài khoản Quản trị viên cấp cao (Admin)!");
+            return "redirect:/admin/users";
+        }
+
         tk.setMatKhauHash(passwordEncoder.encode(newPassword.trim()));
         taiKhoanRepository.save(tk);
+
+        // Hủy phiên đăng nhập cũ để buộc đăng nhập lại bằng mật khẩu mới
+        invalidateUserSessions(tk);
 
         ra.addFlashAttribute("successMessage", "Đã đặt lại mật khẩu mới cho tài khoản @" + tk.getTenDangNhap() + " thành công!");
         return "redirect:/admin/users";

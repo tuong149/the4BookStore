@@ -33,6 +33,13 @@ public class ManagerDisputeService {
     }
 
     // --- KIỂM DUYỆT & KHÓA SẢN PHẨM CỦA SHOP ---
+    public void duyetSanPham(Integer maSP) {
+        SanPham sp = sanPhamRepository.findById(maSP)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
+        sp.setTrangThaiKhoa("BinhThuong");
+        sanPhamRepository.save(sp);
+    }
+
     public void khoaSanPham(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
@@ -67,9 +74,25 @@ public class ManagerDisputeService {
         if (chapNhanHoanTien) {
             dh.setTrangThai("TraHangHoanTien");
             dh.setTrangThaiThanhToan("DaHoanTien");
+
+            // Hoàn lại tồn kho cho sản phẩm khi hoàn tiền cho khách
+            if (dh.getChiTietDonHangs() != null) {
+                for (ChiTietDonHang ct : dh.getChiTietDonHangs()) {
+                    if (ct.getSanPham() != null && ct.getSoLuong() != null) {
+                        sanPhamRepository.increaseStock(ct.getSanPham().getMaSP(), ct.getSoLuong());
+                        SanPham sp = sanPhamRepository.findById(ct.getSanPham().getMaSP()).orElse(null);
+                        if (sp != null && sp.getSoLuongDaBan() != null) {
+                            sp.setSoLuongDaBan(Math.max(0, sp.getSoLuongDaBan() - ct.getSoLuong()));
+                            sanPhamRepository.save(sp);
+                        }
+                    }
+                }
+            }
         } else {
-            // Giữ nguyên hoàn tất đơn cho shop
-            dh.setTrangThai("DaGiao");
+            // Ủng hộ Shop: Đóng khiếu nại, chuyển sang Hoàn Tất và quyết toán ví shop
+            dh.setTrangThai("HoanTat");
+            dh.setNgayHoanThanh(java.time.LocalDateTime.now());
+            dh.setTrangThaiThanhToan("DaThanhToan");
         }
 
         return donHangRepository.save(dh);

@@ -52,6 +52,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (tkOpt.isPresent()) {
                 TaiKhoan taiKhoan = tkOpt.get();
+                if ("BiKhoa".equalsIgnoreCase(taiKhoan.getTrangThai())) {
+                    org.springframework.http.ResponseCookie cleanCookie = jwtService.cleanJwtCookie();
+                    response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cleanCookie.toString());
+                    SecurityContextHolder.clearContext();
+                    if (request.getSession(false) != null) {
+                        try {
+                            request.getSession(false).invalidate();
+                        } catch (Exception ignored) {}
+                    }
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 CustomUserDetails userDetails = new CustomUserDetails(taiKhoan);
 
                 org.springframework.security.core.Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();

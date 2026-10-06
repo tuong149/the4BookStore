@@ -1,3 +1,13 @@
+﻿-- ====================================================================
+-- THE4BOOKSTORE - FULL DATABASE DUMP (SCHEMA + DATA + ROUTINES)
+-- Database: QL_NhaSach
+-- Encoding: UTF-8 (utf8mb4)
+-- Date: 2026-10-06
+-- Compatible with MySQL 8.0+
+-- ====================================================================
+
+/*!50003 SET @OLD_LOG_BIN_TRUST_FUNCTION_CREATORS=@@log_bin_trust_function_creators */;
+/*!50003 SET GLOBAL log_bin_trust_function_creators=1 */;
 -- MySQL dump 10.13  Distrib 8.0.45, for Win64 (x86_64)
 --
 -- Host: localhost    Database: ql_nhasach
@@ -16,12 +26,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `ql_nhasach`
+-- Current Database: `QL_NhaSach`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `ql_nhasach` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `QL_NhaSach` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
 
-USE `ql_nhasach`;
+USE `QL_NhaSach`;
 
 --
 -- Table structure for table `cau_hinh_he_thong`
@@ -73,7 +83,7 @@ CREATE TABLE `chi_tiet_don_hang` (
 
 LOCK TABLES `chi_tiet_don_hang` WRITE;
 /*!40000 ALTER TABLE `chi_tiet_don_hang` DISABLE KEYS */;
-INSERT INTO `chi_tiet_don_hang` VALUES (1,1,189000,1),(1,3,150000,1),(1,6,245000,1),(1,7,80000,1),(2,7,80000,1);
+INSERT INTO `chi_tiet_don_hang` VALUES (1,1,189000,1),(1,3,150000,1),(1,6,245000,1),(1,7,80000,1),(2,7,80000,1),(3,7,80000,1),(3,14,590000,1),(4,22,87000,1),(5,5,108000,1),(5,22,87000,1);
 /*!40000 ALTER TABLE `chi_tiet_don_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,7 +111,7 @@ CREATE TABLE `chi_tiet_gio_hang` (
 
 LOCK TABLES `chi_tiet_gio_hang` WRITE;
 /*!40000 ALTER TABLE `chi_tiet_gio_hang` DISABLE KEYS */;
-INSERT INTO `chi_tiet_gio_hang` VALUES (1,7,1),(4,14,1);
+INSERT INTO `chi_tiet_gio_hang` VALUES (4,14,1);
 /*!40000 ALTER TABLE `chi_tiet_gio_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -276,7 +286,7 @@ CREATE TABLE `danh_muc` (
 
 LOCK TABLES `danh_muc` WRITE;
 /*!40000 ALTER TABLE `danh_muc` DISABLE KEYS */;
-INSERT INTO `danh_muc` VALUES (1,'Tác phẩm tiểu thuyết trong và ngoài nước','Tiểu Thuyết & Văn Học',_binary ''),(2,'Kỹ năng sống, tư duy và phát triển cá nhân','Phát Triển Bản Thân',_binary ''),(3,'Kinh doanh, đầu tư và tâm lý tài chính','Kinh Tế & Tài Chính',_binary ''),(4,'Lịch sử nhân loại, vũ trụ và khoa học thường thức','Khoa Học & Lịch Sử',_binary ''),(5,'Tiểu thuyết viễn tưởng kinh điển và hiện đại','Khoa Học Viễn Tưởng',_binary ''),(8,'Sổ tay da, sổ ghi chép, sổ kế hoạch','Sổ Tay',_binary ''),(9,'Các loại bút viết, bút máy, bút bi cao cấp','Bút',_binary ''),(10,'Kẹp sách, đèn đọc sách, thước kẻ và phụ kiện','Dụng Cụ Học Tập & Làm Việc',_binary ''),(11,'Túi vải canvas thời trang phong cách mọt sách','Túi Tote',_binary ''),(12,'Mô hình gỗ 3D Book Nook trang trí giá sách','Mô Hình Book Nook',_binary ''),(13,'Trò chơi boardgame trí tuệ và hộp quà tặng độc đáo','Boardgame & Quà Tặng',_binary '');
+INSERT INTO `danh_muc` VALUES (1,'Tác phẩm tiểu thuyết trong và ngoài nước','Tiểu Thuyết & Văn Học',0x01),(2,'Kỹ năng sống, tư duy và phát triển cá nhân','Phát Triển Bản Thân',0x01),(3,'Kinh doanh, đầu tư và tâm lý tài chính','Kinh Tế & Tài Chính',0x01),(4,'Lịch sử nhân loại, vũ trụ và khoa học thường thức','Khoa Học & Lịch Sử',0x01),(5,'Tiểu thuyết viễn tưởng kinh điển và hiện đại','Khoa Học Viễn Tưởng',0x01),(8,'Sổ tay da, sổ ghi chép, sổ kế hoạch','Sổ Tay',0x01),(9,'Các loại bút viết, bút máy, bút bi cao cấp','Bút',0x01),(10,'Kẹp sách, đèn đọc sách, thước kẻ và phụ kiện','Dụng Cụ Học Tập & Làm Việc',0x01),(11,'Túi vải canvas thời trang phong cách mọt sách','Túi Tote',0x01),(12,'Mô hình gỗ 3D Book Nook trang trí giá sách','Mô Hình Book Nook',0x01),(13,'Trò chơi boardgame trí tuệ và hộp quà tặng độc đáo','Boardgame & Quà Tặng',0x01);
 /*!40000 ALTER TABLE `danh_muc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -345,6 +355,7 @@ CREATE TABLE `don_hang` (
   `ly_do_tra_hang` text COLLATE utf8mb4_unicode_ci,
   `phan_quyet_tranh_chap` text COLLATE utf8mb4_unicode_ci,
   `nguoi_xu_ly_tranh_chap` int DEFAULT NULL,
+  `ma_van_don` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`madh`),
   KEY `FKiy9wbkgc3iv3ome6new025n9o` (`makh`),
   KEY `FKmailjslygm19yf3a0vxln8tx6` (`makm`),
@@ -359,7 +370,7 @@ CREATE TABLE `don_hang` (
   CONSTRAINT `fk_dh_shop` FOREIGN KEY (`ma_shop`) REFERENCES `shop` (`ma_shop`),
   CONSTRAINT `FKiy9wbkgc3iv3ome6new025n9o` FOREIGN KEY (`makh`) REFERENCES `khach_hang` (`makh`),
   CONSTRAINT `FKmailjslygm19yf3a0vxln8tx6` FOREIGN KEY (`makm`) REFERENCES `khuyen_mai` (`makm`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -368,7 +379,7 @@ CREATE TABLE `don_hang` (
 
 LOCK TABLES `don_hang` WRITE;
 /*!40000 ALTER TABLE `don_hang` DISABLE KEYS */;
-INSERT INTO `don_hang` VALUES (1,'462 nguyễn tri phương dĩ an bình dương',NULL,NULL,'2026-09-25 16:51:51.573846','2026-09-26 09:09:40.443940',NULL,'0903943105',0,664000,'DaGiao',7,NULL,1,1,0,5.00,33200,630800,'COD','ChuaThanhToan',NULL,NULL,NULL),(2,'55/4N đường 42',NULL,NULL,'2026-09-26 01:39:17.042475','2026-09-28 00:54:19.446468','2026-09-27 00:14:33.242588','0999999999',0,80000,'DaHuy',3,NULL,1,1,0,5.00,4000,76000,'COD','ChuaThanhToan',NULL,NULL,NULL);
+INSERT INTO `don_hang` VALUES (1,'462 nguyễn tri phương dĩ an bình dương',NULL,NULL,'2026-09-25 16:51:51.573846','2026-09-26 09:09:40.443940',NULL,'0903943105',0,664000,'DaGiao',7,NULL,1,1,0,5.00,33200,630800,'COD','ChuaThanhToan',NULL,NULL,NULL,NULL),(2,'55/4N đường 42',NULL,NULL,'2026-09-26 01:39:17.042475','2026-09-28 00:54:19.446468','2026-09-27 00:14:33.242588','0999999999',0,80000,'DaHuy',3,NULL,1,1,0,5.00,4000,76000,'COD','ChuaThanhToan',NULL,NULL,NULL,NULL),(3,'790 Phú Giáo',NULL,NULL,'2026-10-05 13:17:02.437440',NULL,NULL,'0901234567',50000,620000,'ChoXuLy',7,7,1,4,45000,5.00,33500,586500,'VNPAY','ChuaThanhToan',NULL,NULL,NULL,NULL),(4,'Chưa cung cấp địa chỉ',NULL,NULL,'2026-10-06 11:38:13.986938','2026-10-06 12:24:15.670580','2026-10-06 12:17:18.993513','0900000000',0,87000,'HoanTat',7,NULL,3,1,25000,5.00,4350,82650,'COD','DaThanhToan',NULL,NULL,NULL,'GHN-4-38994'),(5,'Chưa cung cấp địa chỉ',NULL,NULL,'2026-10-06 12:33:57.214277',NULL,'2026-10-06 12:51:36.766707','0900000000',0,195000,'TraHangHoanTien',7,NULL,3,1,25000,5.00,9750,185250,'COD','DaThanhToan','nát',NULL,NULL,'GHN-5-96767');
 /*!40000 ALTER TABLE `don_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -396,7 +407,7 @@ CREATE TABLE `gio_hang` (
 
 LOCK TABLES `gio_hang` WRITE;
 /*!40000 ALTER TABLE `gio_hang` DISABLE KEYS */;
-INSERT INTO `gio_hang` VALUES (1,'2026-09-26 00:55:51.970082','2026-09-25 15:28:14.102613',7),(2,'2026-09-26 01:39:18.757457','2026-09-26 01:19:01.728064',3),(3,'2026-10-05 08:46:59.974413','2026-09-26 03:28:03.804571',8),(4,'2026-10-05 08:13:51.771602','2026-10-05 08:13:51.747607',6);
+INSERT INTO `gio_hang` VALUES (1,'2026-10-06 12:33:57.250778','2026-09-25 15:28:14.102613',7),(2,'2026-09-26 01:39:18.757457','2026-09-26 01:19:01.728064',3),(3,'2026-10-05 08:46:59.974413','2026-09-26 03:28:03.804571',8),(4,'2026-10-05 08:13:51.771602','2026-10-05 08:13:51.747607',6);
 /*!40000 ALTER TABLE `gio_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -460,7 +471,7 @@ CREATE TABLE `khach_hang` (
 
 LOCK TABLES `khach_hang` WRITE;
 /*!40000 ALTER TABLE `khach_hang` DISABLE KEYS */;
-INSERT INTO `khach_hang` VALUES (3,NULL,'khachhang@gmail.com','khachhang','2026-09-23 14:14:58.897340','0999999999',1,NULL),(6,NULL,'thangphatnekea21333@gmail.com','Phat Thanh','2026-09-24 07:49:20.483861','0960083842',16,'https://lh3.googleusercontent.com/a/ACg8ocKSeYPIRBzeR0Bf5Xd8GpYHen1ZwkCbACw6psb1cSGC4ockK2Y=s96-c'),(7,'123 Võ V?n Ngân, TP. Th? ??c, TP.HCM','user@the4bookstore.vn','Ng??i Dùng Test','2026-09-25 14:59:02.906244','0901234567',17,'https://lh3.googleusercontent.com/a/ACg8ocJDaIAqcV6CJeOAwiGReqZcrPiCifrMs8pK3_3qsLwyWDemdA=s96-c'),(8,NULL,'admin@gmail.com','admin','2026-09-26 01:18:02.028991',NULL,4,NULL);
+INSERT INTO `khach_hang` VALUES (3,NULL,'khachhang@gmail.com','khachhang','2026-09-23 14:14:58.897340','0999999999',1,NULL),(6,NULL,'thangphatnekea21333@gmail.com','Phat Thanh','2026-09-24 07:49:20.483861','0960083842',16,'https://lh3.googleusercontent.com/a/ACg8ocKSeYPIRBzeR0Bf5Xd8GpYHen1ZwkCbACw6psb1cSGC4ockK2Y=s96-c'),(7,NULL,'user@the4bookstore.vn','Người Dùng Test','2026-09-25 14:59:02.906244','0901234567',17,'/uploads/avatars/avatar_17_9636c60c.jpg'),(8,NULL,'admin@gmail.com','admin','2026-09-26 01:18:02.028991',NULL,4,NULL);
 /*!40000 ALTER TABLE `khach_hang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -560,7 +571,7 @@ CREATE TABLE `khuyen_mai` (
   UNIQUE KEY `UKq8resr8h2u6wfhtgxq4itxssf` (`ma_code`),
   KEY `fk_km_shop` (`ma_shop`),
   CONSTRAINT `fk_km_shop` FOREIGN KEY (`ma_shop`) REFERENCES `shop` (`ma_shop`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -569,7 +580,7 @@ CREATE TABLE `khuyen_mai` (
 
 LOCK TABLES `khuyen_mai` WRITE;
 /*!40000 ALTER TABLE `khuyen_mai` DISABLE KEYS */;
-INSERT INTO `khuyen_mai` VALUES (7,NULL,20,50000,'PhanTram','KM-UGW9SZ2G','2026-10-02 07:19:00.000000','2026-11-02 07:19:00.000000',0,NULL,'Khai Trương','HoatDong','ALL',NULL,NULL,'ALL',1,_binary '',NULL,NULL,'GIAM_GIA_SAN_PHAM','TOAN_SAN',NULL);
+INSERT INTO `khuyen_mai` VALUES (7,NULL,20,50000,'PhanTram','KM-UGW9SZ2G','2026-10-02 07:19:00.000000','2026-11-02 07:19:00.000000',1,NULL,'Khai Trương','HoatDong','ALL',NULL,NULL,'ALL',1,0x01,NULL,NULL,'GIAM_GIA_SAN_PHAM','TOAN_SAN',NULL),(20,0,20000,NULL,'TienCoDinh','THEFOUR','2026-10-06 11:26:00.000000','2026-10-13 11:26:00.000000',0,100,'BLACKFRIDAY','HoatDong','ALL',NULL,NULL,'ALL',1,0x01,NULL,NULL,'GIAM_GIA_SAN_PHAM','SHOP',3);
 /*!40000 ALTER TABLE `khuyen_mai` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -847,7 +858,7 @@ CREATE TABLE `san_pham` (
   `ma_danh_muc` int NOT NULL,
   `mancc` int DEFAULT NULL,
   `manxb` int DEFAULT NULL,
-  `ma_shop` int NOT NULL DEFAULT '1',
+  `ma_shop` int DEFAULT NULL,
   `trang_thai_khoa` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'BinhThuong',
   `so_luong_da_ban` int NOT NULL DEFAULT '0',
   `hinh_anh` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -866,7 +877,7 @@ CREATE TABLE `san_pham` (
   CONSTRAINT `FKa0fvb13fnkejnd3vtmyicq5x7` FOREIGN KEY (`manxb`) REFERENCES `nha_xuat_ban` (`manxb`),
   CONSTRAINT `FKhp2k7qqhwp3hb66f900uc5gg1` FOREIGN KEY (`mancc`) REFERENCES `nha_cung_cap` (`mancc`),
   CONSTRAINT `FKqss6n6gtx6lhb7flcka9un18t` FOREIGN KEY (`ma_danh_muc`) REFERENCES `danh_muc` (`ma_danh_muc`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -875,7 +886,7 @@ CREATE TABLE `san_pham` (
 
 LOCK TABLES `san_pham` WRITE;
 /*!40000 ALTER TABLE `san_pham` DISABLE KEYS */;
-INSERT INTO `san_pham` VALUES (1,'978-0525559474',189000,'Sach','https://cdn.penguin.co.in/wp-content/uploads/2023/06/9781786892720-scaled.jpg',5,'2026-09-22 08:25:29.489818',24,'The Midnight Library','DangBan',1,1,1,1,'BinhThuong',35,NULL),(2,'978-0735211292',220000,'Sach','https://cdn.hstatic.net/products/200001055148/thay-doi-ti-hon-hieu-qua-bat-ngo-tb-2026_05f680cdf929490fa3727819b130b408.jpg',5,'2026-09-22 08:25:29.500201',0,'Atomic Habits - Thay Đổi Tí Hon','HetHang',2,1,1,1,'BinhThuong',11,NULL),(3,'978-0857197689',150000,'Sach','https://cdn1.fahasa.com/media/catalog/product/i/m/image_220008_1.jpg',5,'2026-09-22 08:25:29.507098',2,'Tâm Lý Học Về Tiền','DangBan',3,1,1,1,'BinhThuong',24,NULL),(4,'978-0062316097',265000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuCG70bn_Qqg9AKCp8J9XwZoQ0H8otME2a1VxaIQ9mbLAQk60DgJssT5k7D_fsGf6ttO0j-TROb1NzE4QR1_sbRLD856RV8UIFgynUd7SujhVFdhLBJkAPHxPynAmPFKFoKuLSY2tyJX9T_1SDen13Mk4MN2urDBWhtknhDsTK8-O2oLxA8yjhXNZy0YUWK2U5gHXvRhAIj2d-YivtCOD_hFsb8Qu8Z00zBpmbfcRC4at7Dd35UbsRB0',5,'2026-09-22 08:25:29.512098',38,'Sapiens: Lược Sử Loài Người','DangBan',4,1,1,1,'BinhThuong',0,NULL),(5,'978-6047781234',108000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y',5,'2026-09-22 08:25:29.516615',45,'Cây Cam Ngọt Của Tôi','DangBan',1,1,1,3,'BinhThuong',0,NULL),(6,'978-0441013593',245000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuCG70bn_Qqg9AKCp8J9XwZoQ0H8otME2a1VxaIQ9mbLAQk60DgJssT5k7D_fsGf6ttO0j-TROb1NzE4QR1_sbRLD856RV8UIFgynUd7SujhVFdhLBJkAPHxPynAmPFKFoKuLSY2tyJX9T_1SDen13Mk4MN2urDBWhtknhDsTK8-O2oLxA8yjhXNZy0YUWK2U5gHXvRhAIj2d-YivtCOD_hFsb8Qu8Z00zBpmbfcRC4at7Dd35UbsRB0',5,'2026-09-22 08:25:29.521417',17,'Dune - Xứ Cát','DangBan',5,1,1,1,'BinhThuong',18,NULL),(7,'978-604-1-19841-8',80000,'Sach','https://www.nxbtre.com.vn/Images/Book/nxbtre_full_09422022_034212.jpg',0,'2026-09-23 14:00:30.844593',24,'Cho tôi xin một vé đi tuổi thơ','DangBan',1,1,1,1,'BinhThuong',12,NULL),(8,'VPP-001',85000,'VanPhongPham','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:26.717083',40,'Sổ Tay Bìa Da Vintage Classic','DangBan',8,1,NULL,1,'BinhThuong',0,NULL),(9,'VPP-002',210000,'VanPhongPham','https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:27.808937',25,'Bút Máy Thư Pháp Pilot Kakuno','DangBan',9,1,NULL,1,'BinhThuong',0,NULL),(10,'VPP-003',45000,'VanPhongPham','https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:29.036350',60,'Bộ Bookmark Kim Loại Mạ Vàng Cổ Điển','DangBan',10,1,NULL,1,'BinhThuong',0,NULL),(11,'VPP-004',135000,'VanPhongPham','https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:30.057715',15,'Đèn Kẹp Đọc Sách Bảo Vệ Mắt LED','DangBan',10,1,NULL,1,'BinhThuong',0,NULL),(12,'QT-001',120000,'QuaTang','https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:31.364502',35,'Túi Canvas The4BookStore Vintage Tote','DangBan',11,1,NULL,1,'BinhThuong',0,NULL),(13,'QT-002',450000,'QuaTang','https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:32.400093',10,'Mô Hình Book Nook Gỗ 3D Hẻm Xéo','DangBan',12,1,NULL,1,'BinhThuong',0,NULL),(14,'QT-003',590000,'QuaTang','https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:33.463374',8,'Bộ Boardgame Catan Bản Tiếng Việt','DangBan',13,1,NULL,1,'BinhThuong',0,NULL),(15,'QT-004',320000,'QuaTang','https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:34.887879',18,'Hộp Quà Tặng Người Yêu Sách Reader Box','DangBan',13,1,NULL,1,'BinhThuong',0,NULL);
+INSERT INTO `san_pham` VALUES (1,'978-0525559474',189000,'Sach','https://cdn.penguin.co.in/wp-content/uploads/2023/06/9781786892720-scaled.jpg',5,'2026-09-22 08:25:29.489818',24,'The Midnight Library','DangBan',1,1,1,1,'BinhThuong',35,NULL),(2,'978-0735211292',220000,'Sach','https://cdn.hstatic.net/products/200001055148/thay-doi-ti-hon-hieu-qua-bat-ngo-tb-2026_05f680cdf929490fa3727819b130b408.jpg',5,'2026-09-22 08:25:29.500201',0,'Atomic Habits - Thay Đổi Tí Hon','HetHang',2,1,1,1,'BinhThuong',11,NULL),(3,'978-0857197689',150000,'Sach','https://cdn1.fahasa.com/media/catalog/product/i/m/image_220008_1.jpg',5,'2026-09-22 08:25:29.507098',2,'Tâm Lý Học Về Tiền','DangBan',3,1,1,1,'BinhThuong',24,NULL),(4,'978-0062316097',265000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuCG70bn_Qqg9AKCp8J9XwZoQ0H8otME2a1VxaIQ9mbLAQk60DgJssT5k7D_fsGf6ttO0j-TROb1NzE4QR1_sbRLD856RV8UIFgynUd7SujhVFdhLBJkAPHxPynAmPFKFoKuLSY2tyJX9T_1SDen13Mk4MN2urDBWhtknhDsTK8-O2oLxA8yjhXNZy0YUWK2U5gHXvRhAIj2d-YivtCOD_hFsb8Qu8Z00zBpmbfcRC4at7Dd35UbsRB0',5,'2026-09-22 08:25:29.512098',38,'Sapiens: Lược Sử Loài Người','DangBan',4,1,1,1,'BinhThuong',0,NULL),(5,'978-6047781234',108000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y',5,'2026-09-22 08:25:29.516615',44,'Cây Cam Ngọt Của Tôi','DangBan',1,1,1,3,'BinhThuong',1,NULL),(6,'978-0441013593',245000,'Sach','https://lh3.googleusercontent.com/aida-public/AB6AXuCG70bn_Qqg9AKCp8J9XwZoQ0H8otME2a1VxaIQ9mbLAQk60DgJssT5k7D_fsGf6ttO0j-TROb1NzE4QR1_sbRLD856RV8UIFgynUd7SujhVFdhLBJkAPHxPynAmPFKFoKuLSY2tyJX9T_1SDen13Mk4MN2urDBWhtknhDsTK8-O2oLxA8yjhXNZy0YUWK2U5gHXvRhAIj2d-YivtCOD_hFsb8Qu8Z00zBpmbfcRC4at7Dd35UbsRB0',5,'2026-09-22 08:25:29.521417',17,'Dune - Xứ Cát','DangBan',5,1,1,1,'BinhThuong',18,NULL),(7,'978-604-1-19841-8',80000,'Sach','https://www.nxbtre.com.vn/Images/Book/nxbtre_full_09422022_034212.jpg',0,'2026-09-23 14:00:30.844593',23,'Cho tôi xin một vé đi tuổi thơ','DangBan',1,1,1,1,'BinhThuong',13,NULL),(8,'VPP-001',85000,'VanPhongPham','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:26.717083',40,'Sổ Tay Bìa Da Vintage Classic','DangBan',8,1,NULL,1,'BinhThuong',0,NULL),(9,'VPP-002',210000,'VanPhongPham','https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:27.808937',25,'Bút Máy Thư Pháp Pilot Kakuno','DangBan',9,1,NULL,1,'BinhThuong',0,NULL),(10,'VPP-003',45000,'VanPhongPham','https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:29.036350',60,'Bộ Bookmark Kim Loại Mạ Vàng Cổ Điển','DangBan',10,1,NULL,1,'BinhThuong',0,NULL),(11,'VPP-004',135000,'VanPhongPham','https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:30.057715',15,'Đèn Kẹp Đọc Sách Bảo Vệ Mắt LED','DangBan',10,1,NULL,1,'BinhThuong',0,NULL),(12,'QT-001',120000,'QuaTang','https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:31.364502',35,'Túi Canvas The4BookStore Vintage Tote','DangBan',11,1,NULL,1,'BinhThuong',0,NULL),(13,'QT-002',450000,'QuaTang','https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:32.400093',10,'Mô Hình Book Nook Gỗ 3D Hẻm Xéo','DangBan',12,1,NULL,1,'BinhThuong',0,NULL),(14,'QT-003',590000,'QuaTang','https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:33.463374',7,'Bộ Boardgame Catan Bản Tiếng Việt','DangBan',13,1,NULL,1,'BinhThuong',1,NULL),(15,'QT-004',320000,'QuaTang','https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=80',5,'2026-09-24 12:23:34.887879',18,'Hộp Quà Tặng Người Yêu Sách Reader Box','DangBan',13,1,NULL,1,'BinhThuong',0,NULL),(21,'BK-17233278',185000,'sach',NULL,0,'2026-10-05 16:20:33.278569',25,'Sách Test Ảnh Cloudinary Thật','DangBan',1,NULL,NULL,1,'BinhThuong',0,'https://res.cloudinary.com/vkqtqiha/image/upload/v1791217232/the4bookstore/books/wqfgfnpkibjhi1vheb1n.png'),(22,'BK-86263982',87000,'sach','Mắt biếc là một tác phẩm được nhiều người bình chọn là hay nhất của nhà văn Nguyễn Nhật Ánh. Tác phẩm này cũng đã được dịch giả Kato Sakae dịch sang tiếng Nhật để giới thiệu với độc giả Nhật Bản',0,'2026-10-06 11:31:03.983465',38,'Sách Mắt Biếc (Tái Bản 2019)','DangBan',1,NULL,5,3,'BinhThuong',2,'https://res.cloudinary.com/vkqtqiha/image/upload/v1791286263/the4bookstore/books/gfftswirhcg74elv4ivt.webp');
 /*!40000 ALTER TABLE `san_pham` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -903,7 +914,7 @@ CREATE TABLE `san_pham_da_xem` (
 
 LOCK TABLES `san_pham_da_xem` WRITE;
 /*!40000 ALTER TABLE `san_pham_da_xem` DISABLE KEYS */;
-INSERT INTO `san_pham_da_xem` VALUES (6,14,'2026-10-05 08:34:00'),(8,15,'2026-10-05 08:12:19');
+INSERT INTO `san_pham_da_xem` VALUES (6,14,'2026-10-05 08:34:00'),(7,5,'2026-10-06 12:33:47'),(7,14,'2026-10-05 13:15:58'),(8,15,'2026-10-05 08:12:19');
 /*!40000 ALTER TABLE `san_pham_da_xem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -959,6 +970,7 @@ CREATE TABLE `san_pham_yeu_thich` (
 
 LOCK TABLES `san_pham_yeu_thich` WRITE;
 /*!40000 ALTER TABLE `san_pham_yeu_thich` DISABLE KEYS */;
+INSERT INTO `san_pham_yeu_thich` VALUES (7,14,'2026-10-05 13:15:39');
 /*!40000 ALTER TABLE `san_pham_yeu_thich` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -989,7 +1001,7 @@ CREATE TABLE `shop` (
   UNIQUE KEY `ten_shop` (`ten_shop`),
   UNIQUE KEY `slug` (`slug`),
   CONSTRAINT `fk_shop_taikhoan` FOREIGN KEY (`ma_tai_khoan`) REFERENCES `tai_khoan` (`ma_tai_khoan`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -998,7 +1010,7 @@ CREATE TABLE `shop` (
 
 LOCK TABLES `shop` WRITE;
 /*!40000 ALTER TABLE `shop` DISABLE KEYS */;
-INSERT INTO `shop` VALUES (1,4,'The4BookStore Official','the4bookstore-official','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','Gian hàng chính thức của hệ thống The4BookStore.','Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh','0903943105','official@the4bookstore.vn',5.00,'HoatDong','2026-10-05 13:11:19','2026-10-05 12:58:50'),(2,22,'Nhà Sách Trí Tuệ','nha-sach-tri-tue','https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=150','https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200','Chuyên cung cấp sách kỹ năng sống và sách kinh tế chọn lọc.','123 Cầu Giấy, Hà Nội','0912345678','trituebook@gmail.com',5.00,'HoatDong','2026-10-05 13:11:31',NULL),(3,16,'FAHASA','fahasa','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','Thử nghiệm','462/18 Nguyễn Tri Phương','0967238940','thangphatnekea21333@gmail.com',5.00,'HoatDong','2026-10-05 06:59:49','2026-10-05 11:36:48'),(5,1,'Hieu Sach Hoa Sen','hieu-sach-hoa-sen','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1507842229451-7f01be45c06b?w=1200','Gian hang thu nghiem cho duyet','123 Duong Sach, Q.1','0987654321','hoasen@test.com',5.00,'HoatDong','2026-10-05 07:21:01','2026-10-05 07:21:02');
+INSERT INTO `shop` VALUES (1,4,'The4BookStore Official','the4bookstore-official','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','Gian hàng chính thức của hệ thống The4BookStore.','Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh','0903943105','official@the4bookstore.vn',5.00,'HoatDong','2026-10-05 13:11:19','2026-10-06 12:50:45'),(2,22,'Nhà Sách Trí Tuệ','nha-sach-tri-tue','https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=150','https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200','Chuyên cung cấp sách kỹ năng sống và sách kinh tế chọn lọc.','123 Cầu Giấy, Hà Nội','0912345678','trituebook@gmail.com',5.00,'HoatDong','2026-10-05 13:11:31',NULL),(3,16,'Fahasa','fahasa','https://res.cloudinary.com/vkqtqiha/image/upload/v1791285599/the4bookstore/shops/ctfyiqvsd4hv3q5p1ybo.jpg','https://res.cloudinary.com/vkqtqiha/image/upload/v1791285601/the4bookstore/shops/xxtxxcrurkw32ohxznar.jpg','Thử nghiệm','462/18 Nguyễn Tri Phương, TPHCM','0967238941','thangphatnekea21333@gmail.com',5.00,'HoatDong','2026-10-05 06:59:49','2026-10-06 11:34:16'),(5,1,'Hieu Sach Hoa Sen','hieu-sach-hoa-sen','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1507842229451-7f01be45c06b?w=1200','Gian hang thu nghiem cho duyet','123 Duong Sach, Q.1','0987654321','hoasen@test.com',5.00,'HoatDong','2026-10-05 07:21:01','2026-10-05 07:21:02'),(8,17,'Cỏ','co','https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150','https://images.unsplash.com/photo-1507842229451-7f01be45c06b?w=1200','Nhà sách nhí','Số 1 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh','0967238940','thanhphat.wqe@gmail.com',5.00,'HoatDong','2026-10-05 13:50:36','2026-10-05 13:51:00');
 /*!40000 ALTER TABLE `shop` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1057,7 +1069,7 @@ CREATE TABLE `tai_khoan` (
 
 LOCK TABLES `tai_khoan` WRITE;
 /*!40000 ALTER TABLE `tai_khoan` DISABLE KEYS */;
-INSERT INTO `tai_khoan` VALUES (1,'hoasen@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-09-21 17:59:56.441901','vendor_hoasen','HoatDong','VENDOR',NULL,NULL),(4,'admin@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-09-21 17:59:56.500059','admin','HoatDong','ADMIN',NULL,NULL),(5,'manager@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-09-21 17:59:56.503747','manager','HoatDong','MANAGER',NULL,NULL),(16,'fahasa@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-09-24 07:49:19.934471','vendor_fahasa','HoatDong','VENDOR','GOOGLE','107848872169038249996'),(17,'user@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-09-25 14:59:02.302868','user','HoatDong','USER','GOOGLE','114426590934798871845'),(22,'vendor@the4bookstore.vn','$2a$10$QurYuGywR9fGOvn1lOVJxOPO/TC3KXmuWll.T8mcxFYphvqASkiAC','2026-10-05 13:11:31.000000','vendor_demo','HoatDong','VENDOR','LOCAL',NULL);
+INSERT INTO `tai_khoan` VALUES (1,'hoasen@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-09-21 17:59:56.441901','vendor_hoasen','HoatDong','VENDOR',NULL,NULL),(4,'admin@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-09-21 17:59:56.500059','admin','HoatDong','ADMIN',NULL,NULL),(5,'manager@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-09-21 17:59:56.503747','manager','HoatDong','MANAGER',NULL,NULL),(16,'fahasa@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-09-24 07:49:19.934471','vendor_fahasa','HoatDong','VENDOR','GOOGLE','107848872169038249996'),(17,'user@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-09-25 14:59:02.302868','user','HoatDong','USER','GOOGLE','114426590934798871845'),(22,'vendor@the4bookstore.vn','$2a$10$zy.Yv/2Zg1BC7QQLdoWnQeJXy41ezIntm35/DOymvhDpVpqhTHGci','2026-10-05 13:11:31.000000','vendor_demo','HoatDong','VENDOR','LOCAL',NULL);
 /*!40000 ALTER TABLE `tai_khoan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1080,7 +1092,7 @@ CREATE TABLE `thanh_toan` (
   PRIMARY KEY (`ma_thanh_toan`),
   KEY `FKfo8a50ev7l24cccqm3v0hfwbv` (`madh`),
   CONSTRAINT `FKfo8a50ev7l24cccqm3v0hfwbv` FOREIGN KEY (`madh`) REFERENCES `don_hang` (`madh`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1089,7 +1101,7 @@ CREATE TABLE `thanh_toan` (
 
 LOCK TABLES `thanh_toan` WRITE;
 /*!40000 ALTER TABLE `thanh_toan` DISABLE KEYS */;
-INSERT INTO `thanh_toan` VALUES (1,NULL,NULL,'Thanh toán đơn hàng #1','ChuyenKhoan',664000,'ChoThanhToan',1),(2,NULL,NULL,'Thanh toán đơn hàng #2','ChuyenKhoan',80000,'ChoThanhToan',2);
+INSERT INTO `thanh_toan` VALUES (1,NULL,NULL,'Thanh toán đơn hàng #1','ChuyenKhoan',664000,'ChoThanhToan',1),(2,NULL,NULL,'Thanh toán đơn hàng #2','ChuyenKhoan',80000,'ChoThanhToan',2),(3,NULL,NULL,'Thanh toán đơn hàng #3','VNPAY',620000,'ChoThanhToan',3),(4,NULL,NULL,'Thanh toán đơn hàng #4','COD',87000,'ChoThanhToan',4),(5,NULL,NULL,'Thanh toán đơn hàng #5','COD',195000,'ChoThanhToan',5);
 /*!40000 ALTER TABLE `thanh_toan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1121,12 +1133,12 @@ CREATE TABLE `voucher_da_luu` (
 
 LOCK TABLES `voucher_da_luu` WRITE;
 /*!40000 ALTER TABLE `voucher_da_luu` DISABLE KEYS */;
-INSERT INTO `voucher_da_luu` VALUES (2,'2026-10-02 10:49:10.450496',NULL,'ChuaDung',7,7);
+INSERT INTO `voucher_da_luu` VALUES (2,'2026-10-02 10:49:10.450496','2026-10-05 13:17:02.459704','DaDung',7,7);
 /*!40000 ALTER TABLE `voucher_da_luu` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Dumping routines for database 'ql_nhasach'
+-- Dumping routines for database 'QL_NhaSach'
 --
 /*!50003 DROP FUNCTION IF EXISTS `fn_DemDonHang` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1138,7 +1150,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemDonHang`(startDate DATETIME, endDate DATETIME) RETURNS bigint
+CREATE FUNCTION `fn_DemDonHang`(startDate DATETIME, endDate DATETIME) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE cnt BIGINT DEFAULT 0;
@@ -1163,7 +1175,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemSachCuaShop`(p_ma_shop INT) RETURNS int
+CREATE FUNCTION `fn_DemSachCuaShop`(p_ma_shop INT) RETURNS int
     READS SQL DATA
 BEGIN
     DECLARE v_count INT DEFAULT 0;
@@ -1190,7 +1202,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemSachTheoNXB`(p_manxb INT) RETURNS bigint
+CREATE FUNCTION `fn_DemSachTheoNXB`(p_manxb INT) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE cnt BIGINT DEFAULT 0;
@@ -1215,7 +1227,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemSachTheoTacGia`(p_matacgia INT) RETURNS bigint
+CREATE FUNCTION `fn_DemSachTheoTacGia`(p_matacgia INT) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE cnt BIGINT DEFAULT 0;
@@ -1240,7 +1252,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemSanPhamHetHang`() RETURNS bigint
+CREATE FUNCTION `fn_DemSanPhamHetHang`() RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE cnt BIGINT DEFAULT 0;
@@ -1265,7 +1277,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_DemSanPhamSapHet`() RETURNS bigint
+CREATE FUNCTION `fn_DemSanPhamSapHet`() RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE cnt BIGINT DEFAULT 0;
@@ -1290,7 +1302,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_KiemTraOTPConHieuLuc`(p_email VARCHAR(255)) RETURNS tinyint
+CREATE FUNCTION `fn_KiemTraOTPConHieuLuc`(p_email VARCHAR(255)) RETURNS tinyint
     READS SQL DATA
 BEGIN
     DECLARE is_valid TINYINT DEFAULT 0;
@@ -1316,7 +1328,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TinhDiemDanhGiaSanPham`(p_masp INT) RETURNS decimal(2,1)
+CREATE FUNCTION `fn_TinhDiemDanhGiaSanPham`(p_masp INT) RETURNS decimal(2,1)
     READS SQL DATA
 BEGIN
     DECLARE v_diem DECIMAL(2,1) DEFAULT 5.0;
@@ -1342,7 +1354,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TinhDoanhThu`(startDate DATETIME, endDate DATETIME) RETURNS bigint
+CREATE FUNCTION `fn_TinhDoanhThu`(startDate DATETIME, endDate DATETIME) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE total BIGINT DEFAULT 0;
@@ -1369,7 +1381,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TinhDoanhThuKhuyenMai`(p_makm VARCHAR(50)) RETURNS bigint
+CREATE FUNCTION `fn_TinhDoanhThuKhuyenMai`(p_makm VARCHAR(50)) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE total BIGINT DEFAULT 0;
@@ -1394,7 +1406,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TinhPhiSan`(p_tong_tien INT, p_ma_shop INT) RETURNS int
+CREATE FUNCTION `fn_TinhPhiSan`(p_tong_tien INT, p_ma_shop INT) RETURNS int
     READS SQL DATA
     DETERMINISTIC
 BEGIN
@@ -1426,7 +1438,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TinhTienGiamKhuyenMai`(p_makm VARCHAR(50)) RETURNS bigint
+CREATE FUNCTION `fn_TinhTienGiamKhuyenMai`(p_makm VARCHAR(50)) RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE total_discount BIGINT DEFAULT 0;
@@ -1450,7 +1462,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_TongSachDaBan`() RETURNS bigint
+CREATE FUNCTION `fn_TongSachDaBan`() RETURNS bigint
     READS SQL DATA
 BEGIN
     DECLARE total BIGINT DEFAULT 0;
@@ -1476,7 +1488,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateIdxIfNotExists`(
+CREATE PROCEDURE `CreateIdxIfNotExists`(
     IN p_idx_name VARCHAR(255),
     IN p_tbl_name VARCHAR(255),
     IN p_sql VARCHAR(1000)
@@ -1511,7 +1523,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_CapNhatGioHang`(IN p_makh INT, IN p_masp INT, IN p_soluongmoi INT)
+CREATE PROCEDURE `sp_CapNhatGioHang`(IN p_makh INT, IN p_masp INT, IN p_soluongmoi INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
@@ -1549,7 +1561,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_CapNhatTrangThaiDonHang`(
+CREATE PROCEDURE `sp_CapNhatTrangThaiDonHang`(
     IN p_madh INT,
     IN p_trangthaimoi VARCHAR(50),
     IN p_lydo VARCHAR(255)
@@ -1594,7 +1606,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_DoanhThuShopTheoThang`(IN p_ma_shop INT)
+CREATE PROCEDURE `sp_DoanhThuShopTheoThang`(IN p_ma_shop INT)
 BEGIN
     SELECT 
         YEAR(dh.ngay_dat) AS nam,
@@ -1624,7 +1636,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_DoanhThuTheoThang`()
+CREATE PROCEDURE `sp_DoanhThuTheoThang`()
 BEGIN
     
     SELECT YEAR(dh.ngay_hoan_thanh) as nam, 
@@ -1652,7 +1664,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_HuyDonHang`(
+CREATE PROCEDURE `sp_HuyDonHang`(
     IN p_madh INT,
     IN p_makh INT,
     IN p_lydohuy VARCHAR(255)
@@ -1720,7 +1732,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_KhoaShopVaSanPham`(
+CREATE PROCEDURE `sp_KhoaShopVaSanPham`(
     IN p_ma_shop INT,
     IN p_ly_do TEXT,
     OUT p_so_luong_khoa INT
@@ -1764,7 +1776,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_LayDanhMucTheoLoaiSP`(IN p_loaisp INT)
+CREATE PROCEDURE `sp_LayDanhMucTheoLoaiSP`(IN p_loaisp INT)
 BEGIN
     
     SELECT madanhmuc, tendanhmuc, loaisp
@@ -1786,7 +1798,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ResetPassword`(IN p_email VARCHAR(100), IN p_otp VARCHAR(10), IN p_newpasshash VARCHAR(255))
+CREATE PROCEDURE `sp_ResetPassword`(IN p_email VARCHAR(100), IN p_otp VARCHAR(10), IN p_newpasshash VARCHAR(255))
 BEGIN
     DECLARE v_valid INT DEFAULT 0;
     
@@ -1839,7 +1851,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_TaoTokenResetPassword`(IN p_email VARCHAR(100), OUT p_otp VARCHAR(10))
+CREATE PROCEDURE `sp_TaoTokenResetPassword`(IN p_email VARCHAR(100), OUT p_otp VARCHAR(10))
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
@@ -1878,7 +1890,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ThemVaoGioHang`(
+CREATE PROCEDURE `sp_ThemVaoGioHang`(
     IN p_makh INT,
     IN p_masp INT,
     IN p_soluong INT
@@ -1927,7 +1939,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_TimKiemKhuyenMai`(IN p_keyword VARCHAR(255), IN p_loaigiam VARCHAR(50))
+CREATE PROCEDURE `sp_TimKiemKhuyenMai`(IN p_keyword VARCHAR(255), IN p_loaigiam VARCHAR(50))
 BEGIN
     
     SELECT makm, tenkm, loai_giam, gia_tri_giam, ngay_bat_dau, ngay_ket_thuc, trang_thai
@@ -1950,7 +1962,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_TopSachBanChay`(IN p_limit INT)
+CREATE PROCEDURE `sp_TopSachBanChay`(IN p_limit INT)
 BEGIN
     
     SELECT s.masp, s.tensp, SUM(ct.so_luong) as tong_da_ban, s.gia_ban, SUM(ct.so_luong * ct.don_gia) as doanh_thu_dong_gop
@@ -1977,7 +1989,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_VendorXacNhanDonHang`(
+CREATE PROCEDURE `sp_VendorXacNhanDonHang`(
     IN p_madh INT,
     IN p_ma_shop INT,
     OUT p_status VARCHAR(20),
@@ -2085,7 +2097,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_XacNhanPhieuKiemKe`(IN p_mapk INT)
+CREATE PROCEDURE `sp_XacNhanPhieuKiemKe`(IN p_mapk INT)
 BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE v_masp INT;
@@ -2149,7 +2161,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_XacNhanPhieuNhap`(IN p_mapn INT)
+CREATE PROCEDURE `sp_XacNhanPhieuNhap`(IN p_mapn INT)
 BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE v_masp INT;
@@ -2211,7 +2223,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_XoaKhoiGioHang`(
+CREATE PROCEDURE `sp_XoaKhoiGioHang`(
     IN p_makh INT,
     IN p_masp INT
 )
@@ -2244,7 +2256,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_XoaPhieuNhap`(
+CREATE PROCEDURE `sp_XoaPhieuNhap`(
     IN p_mapn INT
 )
 BEGIN
@@ -2279,7 +2291,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_XoaToanBoGioHang`(IN p_makh INT)
+CREATE PROCEDURE `sp_XoaToanBoGioHang`(IN p_makh INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
@@ -2310,4 +2322,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-05 20:09:16
+-- Dump completed on 2026-10-06 20:41:32

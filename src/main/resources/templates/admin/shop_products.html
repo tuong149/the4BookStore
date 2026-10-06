@@ -43,7 +43,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a th:href="@{'/shop/' + ${shop.slug}}" target="_blank" class="px-4 py-2 rounded-xl border border-primary text-primary hover:bg-primary hover:text-white font-bold text-xs transition-all flex items-center gap-1.5">
+                        <a th:href="@{'/shop/' + ${shop.slug}}" class="px-4 py-2 rounded-xl border border-primary text-primary hover:bg-primary hover:text-white font-bold text-xs transition-all flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px]">storefront</span>
                             <span>Xem Trang Gian Hàng</span>
                         </a>
@@ -56,7 +56,7 @@
                     <div>
                         <p class="font-bold text-sm">Quản trị &amp; Kiểm duyệt sản phẩm của gian hàng</p>
                         <p class="text-xs text-amber-900/90 mt-0.5">
-                            Quản trị viên có toàn quyền kiểm tra thông tin chi tiết, <strong>Khóa sản phẩm vi phạm</strong> hoặc <strong>Xóa sản phẩm</strong> nếu phát hiện sai phạm hoặc nội dung không hợp lệ.
+                            Quản trị viên và Quản lý có quyền xem chi tiết và <strong>Khóa / Mở khóa sản phẩm</strong> nếu phát hiện sai phạm. Quản trị viên/Quản lý không can thiệp thêm/sửa/xóa trực tiếp sản phẩm của gian hàng.
                         </p>
                     </div>
                 </div>
@@ -71,9 +71,10 @@
                     <span th:text="${errorMessage}"></span>
                 </div>
 
-                <!-- Search within Shop Products -->
-                <div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container mb-6 shadow-sm">
+                <!-- Search & Moderation Filter within Shop Products -->
+                <div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container mb-6 shadow-sm space-y-3">
                     <form th:action="@{'/admin/shops/' + ${shop.maShop} + '/products'}" method="get" class="flex items-center gap-3">
+                        <input type="hidden" name="moderationStatus" th:value="${moderationStatus}"/>
                         <div class="relative flex-1">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
                             <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm sản phẩm theo tên sách, tên văn phòng phẩm..."
@@ -82,10 +83,30 @@
                         <button type="submit" class="px-5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all">
                             Tìm kiếm
                         </button>
-                        <a th:if="${keyword != null and !keyword.isBlank()}" th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'}" class="px-4 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all">
+                        <a th:if="${(keyword != null and !keyword.isBlank()) or (moderationStatus != null and moderationStatus != 'all')}" th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'}" class="px-4 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all">
                             Xóa lọc
                         </a>
                     </form>
+
+                    <!-- Filter pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs pt-1 border-t border-surface-container">
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='all', keyword=${keyword})}"
+                           th:class="${moderationStatus == 'all' or moderationStatus == null or moderationStatus == ''} ? 'px-3 py-1.5 rounded-xl font-bold bg-primary text-on-primary shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-surface-container text-on-surface hover:bg-surface-container-high'">
+                            Tất cả (<span th:text="${countAll}">0</span>)
+                        </a>
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='ChoDuyet', keyword=${keyword})}"
+                           th:class="${moderationStatus == 'ChoDuyet'} ? 'px-3 py-1.5 rounded-xl font-bold bg-amber-500 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'">
+                            Chờ kiểm duyệt (<span th:text="${countPending}">0</span>)
+                        </a>
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BinhThuong', keyword=${keyword})}"
+                           th:class="${moderationStatus == 'BinhThuong'} ? 'px-3 py-1.5 rounded-xl font-bold bg-emerald-600 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'">
+                            Đã duyệt (<span th:text="${countActive}">0</span>)
+                        </a>
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BiKhoaBoiAdmin', keyword=${keyword})}"
+                           th:class="${moderationStatus == 'BiKhoaBoiAdmin'} ? 'px-3 py-1.5 rounded-xl font-bold bg-rose-600 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'">
+                            Bị khóa (<span th:text="${countLocked}">0</span>)
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Products Table -->
@@ -160,19 +181,23 @@
                                     </span>
                                 </td>
 
-                                <!-- Platform Moderation Lock Status -->
+                                <!-- Platform Moderation Status -->
                                 <td class="p-4">
-                                    <span th:if="${p.trangThaiKhoa == 'Khoa'}" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-600 text-white flex items-center gap-1 w-fit">
+                                    <span th:if="${p.trangThaiKhoa == 'ChoDuyet'}" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white flex items-center gap-1 w-fit">
+                                        <span class="material-symbols-outlined text-[12px]">hourglass_top</span>
+                                        <span>Chờ duyệt</span>
+                                    </span>
+                                    <span th:if="${p.trangThaiKhoa == 'BiKhoaBoiAdmin' or p.trangThaiKhoa == 'Khoa'}" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-600 text-white flex items-center gap-1 w-fit">
                                         <span class="material-symbols-outlined text-[12px]">lock</span>
                                         <span>Bị Khóa</span>
                                     </span>
-                                    <span th:unless="${p.trangThaiKhoa == 'Khoa'}" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
-                                        <span class="material-symbols-outlined text-[12px]">check</span>
-                                        <span>Bình thường</span>
+                                    <span th:if="${p.trangThaiKhoa == 'BinhThuong' or p.trangThaiKhoa == null}" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
+                                        <span class="material-symbols-outlined text-[12px]">check_circle</span>
+                                        <span>Đã duyệt</span>
                                     </span>
                                 </td>
 
-                                <!-- Actions (Read-Only Detail + Moderation Lock) -->
+                                <!-- Actions (Read-Only Detail + Moderation Lock/Approve) -->
                                 <td class="p-4 text-right">
                                     <div class="inline-flex items-center gap-1.5">
                                         <!-- Xem chi tiết sản phẩm (Modal chỉ đọc) -->
@@ -183,33 +208,34 @@
                                             <span>Chi tiết</span>
                                         </button>
 
-                                        <!-- Khóa vi phạm / Mở khóa -->
-                                        <form th:if="${p.trangThaiKhoa != 'Khoa'}" th:action="@{'/admin/products/' + ${p.maSP} + '/lock'}" method="post"
-                                              onsubmit="return confirm('Bạn có chắc muốn KHÓA sản phẩm này do vi phạm quy định sàn?');">
-                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'}"/>
-                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs transition-all flex items-center gap-1"
-                                                    title="Khóa sản phẩm vi phạm">
-                                                <span class="material-symbols-outlined text-[15px]">gavel</span>
-                                                <span>Khóa</span>
+                                        <!-- Duyệt sản phẩm (khi đang Chờ duyệt) -->
+                                        <form th:if="${p.trangThaiKhoa == 'ChoDuyet'}" th:action="@{'/admin/products/' + ${p.maSP} + '/approve'}" method="post">
+                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus=${moderationStatus},keyword=${keyword})}"/>
+                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-xs transition-all flex items-center gap-1 shadow-2xs"
+                                                    title="Phê duyệt sản phẩm lên sàn">
+                                                <span class="material-symbols-outlined text-[15px]">check</span>
+                                                <span>Duyệt SP</span>
                                             </button>
                                         </form>
 
-                                        <form th:if="${p.trangThaiKhoa == 'Khoa'}" th:action="@{'/admin/products/' + ${p.maSP} + '/unlock'}" method="post">
-                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'}"/>
+                                        <!-- Khóa vi phạm / Từ chối (khi Chưa bị khóa) -->
+                                        <form th:if="${p.trangThaiKhoa != 'BiKhoaBoiAdmin' and p.trangThaiKhoa != 'Khoa'}" th:action="@{'/admin/products/' + ${p.maSP} + '/lock'}" method="post"
+                                              onsubmit="return confirm('Bạn có chắc muốn KHÓA / TỪ CHỐI sản phẩm này do vi phạm quy định sàn?');">
+                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus=${moderationStatus},keyword=${keyword})}"/>
+                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold text-xs transition-all flex items-center gap-1"
+                                                    th:title="${p.trangThaiKhoa == 'ChoDuyet' ? 'Từ chối kiểm duyệt' : 'Khóa sản phẩm vi phạm'}">
+                                                <span class="material-symbols-outlined text-[15px]">gavel</span>
+                                                <span th:text="${p.trangThaiKhoa == 'ChoDuyet' ? 'Từ chối' : 'Khóa'}">Khóa</span>
+                                            </button>
+                                        </form>
+
+                                        <!-- Mở khóa (khi Bị khóa) -->
+                                        <form th:if="${p.trangThaiKhoa == 'BiKhoaBoiAdmin' or p.trangThaiKhoa == 'Khoa'}" th:action="@{'/admin/products/' + ${p.maSP} + '/unlock'}" method="post">
+                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus=${moderationStatus},keyword=${keyword})}"/>
                                             <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold text-xs transition-all flex items-center gap-1"
                                                     title="Mở khóa sản phẩm">
                                                 <span class="material-symbols-outlined text-[15px]">lock_open</span>
                                                 <span>Mở</span>
-                                            </button>
-                                        </form>
-
-                                        <!-- Xóa sản phẩm -->
-                                        <form th:action="@{'/admin/products/delete/' + ${p.maSP}}" method="post"
-                                              onsubmit="return confirm('Bạn có chắc muốn XÓA vĩnh viễn sản phẩm này?');">
-                                            <input type="hidden" name="returnUrl" th:value="@{'/admin/shops/' + ${shop.maShop} + '/products'}"/>
-                                            <button type="submit" class="p-1.5 rounded-xl bg-surface-container text-rose-600 hover:bg-rose-600 hover:text-white transition-all cursor-pointer"
-                                                    title="Xóa sản phẩm">
-                                                <span class="material-symbols-outlined text-[15px]">delete</span>
                                             </button>
                                         </form>
                                     </div>
@@ -234,10 +260,10 @@
                         </div>
                         <div class="flex items-center gap-1">
                             <a th:if="${page.hasPrevious()}" 
-                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number - 1}, keyword=${keyword})}"
+                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number - 1}, keyword=${keyword}, moderationStatus=${moderationStatus})}"
                                class="px-3 py-1.5 rounded-xl border border-surface-container text-xs font-bold hover:bg-surface-container transition-all">Trước</a>
                             <a th:if="${page.hasNext()}" 
-                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number + 1}, keyword=${keyword})}"
+                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number + 1}, keyword=${keyword}, moderationStatus=${moderationStatus})}"
                                class="px-3 py-1.5 rounded-xl border border-surface-container text-xs font-bold hover:bg-surface-container transition-all">Sau</a>
                         </div>
                     </div>

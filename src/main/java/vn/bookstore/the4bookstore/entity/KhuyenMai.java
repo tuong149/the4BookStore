@@ -99,7 +99,8 @@ public class KhuyenMai {
         if (ngayKetThuc != null && now.isAfter(ngayKetThuc)) {
             return "HetHan";
         }
-        if (soLuongToiDa != null && soLuongDaDung != null && soLuongDaDung >= soLuongToiDa) {
+        int maxUsage = (soLuongToiDa != null && soLuongToiDa > 0) ? soLuongToiDa : 100;
+        if (soLuongDaDung != null && soLuongDaDung >= maxUsage) {
             return "HetHan";
         }
         return "DangDienRa";

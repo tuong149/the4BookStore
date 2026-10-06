@@ -9,13 +9,9 @@
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <span>✨ Ưu đãi đặc biệt: Miễn phí vận chuyển hỏa tốc toàn quốc cho đơn hàng từ 350.000 đ!</span>
                 <div class="flex items-center gap-4 text-[11px]">
-                    <a sec:authorize="hasAnyRole('VENDOR', 'ADMIN')" th:href="@{/vendor/dashboard}" class="hover:underline flex items-center gap-1 font-bold">
+                    <a th:href="@{/vendor}" class="hover:underline flex items-center gap-1 font-bold">
                         <span class="material-symbols-outlined text-[14px]">storefront</span>
                         <span>Kênh Người Bán</span>
-                    </a>
-                    <a sec:authorize="!hasRole('VENDOR') and !hasRole('ADMIN')" th:href="@{/vendor/register}" class="hover:underline flex items-center gap-1 font-bold">
-                        <span class="material-symbols-outlined text-[14px]">store</span>
-                        <span>Kênh Người Bán / Mở Shop</span>
                     </a>
                 </div>
             </div>
@@ -278,13 +274,9 @@
                                     <div class="h-[1px] bg-surface-container my-1"></div>
 
                                     <!-- Kênh người bán / Đăng ký shop -->
-                                    <a sec:authorize="hasAnyRole('VENDOR', 'ADMIN')" th:href="@{/vendor/dashboard}" class="flex items-center gap-2.5 px-4 py-2 font-label-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                                    <a th:href="@{/vendor}" class="flex items-center gap-2.5 px-4 py-2 font-label-md text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
                                         <span class="material-symbols-outlined text-[18px] text-emerald-600">storefront</span>
                                         <span>Kênh Người Bán</span>
-                                    </a>
-                                    <a sec:authorize="!hasRole('VENDOR') and !hasRole('ADMIN')" th:href="@{/vendor/register}" class="flex items-center gap-2.5 px-4 py-2 font-label-md text-xs text-emerald-600 hover:bg-emerald-50 transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-emerald-600">store</span>
-                                        <span>Đăng Ký Mở Shop</span>
                                     </a>
 
                                     <!-- Quản trị sàn -->
@@ -300,7 +292,7 @@
                                         <span class="material-symbols-outlined text-[18px] text-amber-600">gavel</span>
                                         <span>Xử Lý Tranh Chấp</span>
                                     </a>
-                                    <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/platform-fees}" class="flex items-center gap-2.5 px-4 py-2 font-label-md text-xs text-on-surface hover:bg-surface-container-low transition-colors">
+                                    <a sec:authorize="hasAnyRole('ADMIN', 'QUANLY', 'MANAGER')" th:href="@{/admin/platform-fees}" class="flex items-center gap-2.5 px-4 py-2 font-label-md text-xs text-on-surface hover:bg-surface-container-low transition-colors">
                                         <span class="material-symbols-outlined text-[18px] text-primary">percent</span>
                                         <span>Cấu Hình Chiết Khấu Sàn</span>
                                     </a>

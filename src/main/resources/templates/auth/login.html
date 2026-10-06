@@ -33,6 +33,22 @@
             </h1>
 
             <!-- Feedback Alerts -->
+            <div th:if="${param.locked}" class="mb-4 p-4 rounded-2xl bg-rose-50 border-2 border-rose-500/60 text-rose-950 text-xs sm:text-sm font-semibold flex flex-col gap-2 shadow-md animate-in fade-in duration-300">
+                <div class="flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-[24px] text-rose-600 shrink-0 mt-0.5">lock_person</span>
+                    <div class="space-y-1">
+                        <div class="font-bold text-rose-700 text-sm">Tài khoản của bạn đã bị khóa!</div>
+                        <p class="text-xs text-rose-900 leading-relaxed font-normal">
+                            Tài khoản này hiện đang bị tạm khóa theo quyết định của ban quản lý. Để gửi phản hồi khiếu nại và được hỗ trợ mở khóa, vui lòng liên hệ trực tiếp qua email:
+                        </p>
+                        <div class="pt-1 flex items-center gap-1.5 font-bold text-primary font-mono text-xs">
+                            <span class="material-symbols-outlined text-[16px]">mail</span>
+                            <a href="mailto:nhasachthe4bookstore@gmail.com" class="hover:underline">nhasachthe4bookstore@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div th:if="${param.adminDenied}" class="mb-4 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-500/60 text-amber-950 text-xs sm:text-sm font-semibold flex flex-col gap-2 shadow-md animate-in fade-in duration-300">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px] text-amber-600 shrink-0">lock</span>
