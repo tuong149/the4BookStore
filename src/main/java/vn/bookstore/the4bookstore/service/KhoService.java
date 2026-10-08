@@ -12,6 +12,7 @@ import vn.bookstore.the4bookstore.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -26,6 +27,63 @@ public class KhoService {
     @Autowired private ChiTietPhieuNhapRepository chiTietPhieuNhapRepository;
     @Autowired private ChiTietKiemKeRepository chiTietKiemKeRepository;
     @Autowired private NhanVienRepository nhanVienRepository;
+    @Autowired private TaiKhoanRepository taiKhoanRepository;
+    @Autowired private KhachHangRepository khachHangRepository;
+
+    public List<NhanVien> getDanhSachNhanVienHoatDong() {
+        // Tự động đồng bộ các tài khoản nhân viên kho (NHANVIENKHO) chưa có bản ghi NhanVien
+        List<TaiKhoan> warehouseAccounts = taiKhoanRepository.findAll().stream()
+                .filter(t -> "NHANVIENKHO".equalsIgnoreCase(t.getVaiTro()))
+                .toList();
+
+        for (TaiKhoan tk : warehouseAccounts) {
+            Optional<NhanVien> optNv = nhanVienRepository.findByTaiKhoan(tk);
+            if (optNv.isEmpty()) {
+                NhanVien nv = new NhanVien();
+                nv.setTaiKhoan(tk);
+                nv.setNgayVaoLam(java.time.LocalDate.now());
+                nv.setTrangThai("DangLam");
+                nv.setChucVu("Nhân viên kho");
+                nv.setEmail(tk.getEmail());
+
+                khachHangRepository.findByTaiKhoan(tk).ifPresentOrElse(kh -> {
+                    nv.setHoTen(kh.getHoTen() != null && !kh.getHoTen().isBlank() ? kh.getHoTen() : tk.getTenDangNhap());
+                    nv.setSoDienThoai(kh.getSoDienThoai() != null && !kh.getSoDienThoai().isBlank() ? kh.getSoDienThoai() : "09" + String.format("%08d", tk.getMaTaiKhoan()));
+                    nv.setDiaChi(kh.getDiaChi());
+                }, () -> {
+                    nv.setHoTen(tk.getTenDangNhap());
+                    nv.setSoDienThoai("09" + String.format("%08d", tk.getMaTaiKhoan()));
+                });
+
+                nhanVienRepository.save(nv);
+            } else {
+                NhanVien nv = optNv.get();
+                if (!"DangLam".equalsIgnoreCase(nv.getTrangThai())) {
+                    nv.setTrangThai("DangLam");
+                    nv.setChucVu("Nhân viên kho");
+                    nhanVienRepository.save(nv);
+                }
+            }
+        }
+
+        // Cập nhật trạng thái 'DaNghi' cho các nhân viên không còn là NHANVIENKHO (ví dụ: đã chuyển thành ADMIN, MANAGER, USER...)
+        List<NhanVien> allNvs = nhanVienRepository.findAll();
+        for (NhanVien nv : allNvs) {
+            if (nv.getTaiKhoan() != null && !"NHANVIENKHO".equalsIgnoreCase(nv.getTaiKhoan().getVaiTro())) {
+                if ("DangLam".equalsIgnoreCase(nv.getTrangThai())) {
+                    nv.setTrangThai("DaNghi");
+                    nhanVienRepository.save(nv);
+                }
+            }
+        }
+
+        // Chỉ trả về nhân viên kho đang làm việc và có vai trò NHANVIENKHO
+        return nhanVienRepository.findAll().stream()
+                .filter(nv -> "DangLam".equalsIgnoreCase(nv.getTrangThai()) 
+                        && nv.getTaiKhoan() != null 
+                        && "NHANVIENKHO".equalsIgnoreCase(nv.getTaiKhoan().getVaiTro()))
+                .toList();
+    }
 
     // ===== KHO =====
 
@@ -203,6 +261,26 @@ public class KhoService {
 
         pk.setTrangThai("DaDuyet");
         return phieuKiemKeRepository.save(pk);
+    }
+
+    public PhieuNhap getPhieuNhapById(Integer id) {
+        return phieuNhapRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu nhập với mã: " + id));
+    }
+
+    public List<ChiTietPhieuNhap> getChiTietPhieuNhap(Integer phieuNhapId) {
+        PhieuNhap pn = getPhieuNhapById(phieuNhapId);
+        return chiTietPhieuNhapRepository.findByPhieuNhap(pn);
+    }
+
+    public PhieuKiemKe getPhieuKeById(Integer id) {
+        return phieuKiemKeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu kiểm kê với mã: " + id));
+    }
+
+    public List<ChiTietKiemKe> getChiTietPhieuKe(Integer phieuKeId) {
+        PhieuKiemKe pk = getPhieuKeById(phieuKeId);
+        return chiTietKiemKeRepository.findByPhieuKiemKe(pk);
     }
 
     public List<PhieuKiemKe> getAllPhieuKe() {

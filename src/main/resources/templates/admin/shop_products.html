@@ -73,36 +73,54 @@
 
                 <!-- Search & Moderation Filter within Shop Products -->
                 <div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container mb-6 shadow-sm space-y-3">
-                    <form th:action="@{'/admin/shops/' + ${shop.maShop} + '/products'}" method="get" class="flex items-center gap-3">
+                    <form th:action="@{'/admin/shops/' + ${shop.maShop} + '/products'}" method="get" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <input type="hidden" name="moderationStatus" th:value="${moderationStatus}"/>
+                        
+                        <!-- Dropdown tiêu chí tìm kiếm sản phẩm -->
+                        <div class="relative min-w-[200px]">
+                            <select name="searchType" id="prodSearchTypeSelect" onchange="updateProductPlaceholder()"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold text-on-surface focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+                                <option value="all" th:selected="${searchType == 'all' or searchType == null}">🔍 Tất cả tiêu chí</option>
+                                <option value="name" th:selected="${searchType == 'name'}">📚 Tên sản phẩm</option>
+                                <option value="isbn" th:selected="${searchType == 'isbn'}">🏷️ Mã ISBN</option>
+                                <option value="author" th:selected="${searchType == 'author'}">✍️ Tên tác giả</option>
+                                <option value="category" th:selected="${searchType == 'category'}">📂 Danh mục</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
+                        </div>
+
                         <div class="relative flex-1">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
-                            <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm sản phẩm theo tên sách, tên văn phòng phẩm..."
-                                   class="w-full pl-9 pr-4 py-2 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:ring-2 focus:ring-primary"/>
+                            <input type="text" name="keyword" id="prodKeywordInput" th:value="${keyword}" placeholder="Tìm kiếm sản phẩm theo tên sách, ISBN, tác giả..."
+                                   class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:ring-2 focus:ring-primary"/>
                         </div>
-                        <button type="submit" class="px-5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all">
-                            Tìm kiếm
-                        </button>
-                        <a th:if="${(keyword != null and !keyword.isBlank()) or (moderationStatus != null and moderationStatus != 'all')}" th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'}" class="px-4 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all">
-                            Xóa lọc
-                        </a>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-xs">
+                                <span class="material-symbols-outlined text-[16px]">search</span>
+                                <span>Tìm kiếm</span>
+                            </button>
+                            <a th:if="${(keyword != null and !keyword.isBlank()) or (moderationStatus != null and moderationStatus != 'all') or (searchType != null and searchType != 'all')}" th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'}" class="px-4 py-2.5 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
+                                <span>Xóa lọc</span>
+                            </a>
+                        </div>
                     </form>
 
                     <!-- Filter pills -->
                     <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs pt-1 border-t border-surface-container">
-                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='all', keyword=${keyword})}"
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='all', keyword=${keyword}, searchType=${searchType})}"
                            th:class="${moderationStatus == 'all' or moderationStatus == null or moderationStatus == ''} ? 'px-3 py-1.5 rounded-xl font-bold bg-primary text-on-primary shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-surface-container text-on-surface hover:bg-surface-container-high'">
                             Tất cả (<span th:text="${countAll}">0</span>)
                         </a>
-                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='ChoDuyet', keyword=${keyword})}"
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='ChoDuyet', keyword=${keyword}, searchType=${searchType})}"
                            th:class="${moderationStatus == 'ChoDuyet'} ? 'px-3 py-1.5 rounded-xl font-bold bg-amber-500 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'">
                             Chờ kiểm duyệt (<span th:text="${countPending}">0</span>)
                         </a>
-                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BinhThuong', keyword=${keyword})}"
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BinhThuong', keyword=${keyword}, searchType=${searchType})}"
                            th:class="${moderationStatus == 'BinhThuong'} ? 'px-3 py-1.5 rounded-xl font-bold bg-emerald-600 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'">
                             Đã duyệt (<span th:text="${countActive}">0</span>)
                         </a>
-                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BiKhoaBoiAdmin', keyword=${keyword})}"
+                        <a th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(moderationStatus='BiKhoaBoiAdmin', keyword=${keyword}, searchType=${searchType})}"
                            th:class="${moderationStatus == 'BiKhoaBoiAdmin'} ? 'px-3 py-1.5 rounded-xl font-bold bg-rose-600 text-white shadow-xs' : 'px-3 py-1.5 rounded-xl font-bold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100'">
                             Bị khóa (<span th:text="${countLocked}">0</span>)
                         </a>
@@ -254,16 +272,16 @@
                     </table>
 
                     <!-- Pagination -->
-                    <div th:if="${page.totalPages > 1}" class="p-4 border-t border-surface-container flex items-center justify-between">
-                        <div class="text-xs text-on-surface-variant">
-                            Trang <span class="font-bold text-on-surface" th:text="${page.number + 1}">1</span> / <span th:text="${page.totalPages}">1</span>
+                    <div th:if="${page.totalPages > 1}" class="p-4 border-t border-surface-container flex items-center justify-between text-xs">
+                        <div class="text-on-surface-variant">
+                            Hiển thị trang <span class="font-bold text-on-surface" th:text="${page.number + 1}">1</span> / <span th:text="${page.totalPages}">1</span> (Tổng <span th:text="${page.totalElements}">0</span> sản phẩm)
                         </div>
                         <div class="flex items-center gap-1">
                             <a th:if="${page.hasPrevious()}" 
-                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number - 1}, keyword=${keyword}, moderationStatus=${moderationStatus})}"
+                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number - 1}, keyword=${keyword}, searchType=${searchType}, moderationStatus=${moderationStatus})}"
                                class="px-3 py-1.5 rounded-xl border border-surface-container text-xs font-bold hover:bg-surface-container transition-all">Trước</a>
                             <a th:if="${page.hasNext()}" 
-                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number + 1}, keyword=${keyword}, moderationStatus=${moderationStatus})}"
+                               th:href="@{'/admin/shops/' + ${shop.maShop} + '/products'(page=${page.number + 1}, keyword=${keyword}, searchType=${searchType}, moderationStatus=${moderationStatus})}"
                                class="px-3 py-1.5 rounded-xl border border-surface-container text-xs font-bold hover:bg-surface-container transition-all">Sau</a>
                         </div>
                     </div>
@@ -398,6 +416,25 @@
                 closeViewDetailModal();
             }
         });
+
+        function updateProductPlaceholder() {
+            const select = document.getElementById('prodSearchTypeSelect');
+            const input = document.getElementById('prodKeywordInput');
+            if (!select || !input) return;
+            const val = select.value;
+            if (val === 'name') {
+                input.placeholder = 'Nhập tên sản phẩm (sách, dụng cụ học tập...)...';
+            } else if (val === 'isbn') {
+                input.placeholder = 'Nhập mã ISBN hoặc mã vạch sản phẩm...';
+            } else if (val === 'author') {
+                input.placeholder = 'Nhập tên tác giả...';
+            } else if (val === 'category') {
+                input.placeholder = 'Nhập tên danh mục (Văn học, Kinh tế, Thiếu nhi...)...';
+            } else {
+                input.placeholder = 'Tìm kiếm theo tên sách, ISBN, tác giả, danh mục...';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateProductPlaceholder);
     </script>
 </body>
 </html>

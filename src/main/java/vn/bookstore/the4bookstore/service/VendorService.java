@@ -296,8 +296,16 @@ public class VendorService {
     // Ngoại lệ B1: Shop đồng ý yêu cầu trả hàng / hoàn tiền -> Nhận lại sách, nhả tồn kho, hoàn tiền
     public DonHang dongYTraHang(Integer maDH, Integer maShop) {
         DonHang dh = checkAndGetShopOrder(maDH, maShop);
-        dh.setTrangThai("TraHangHoanTien");
-        dh.setTrangThaiThanhToan("DaHoanTien");
+        if ("ChoXuLy".equalsIgnoreCase(dh.getTrangThai()) || "DonHangMoi".equalsIgnoreCase(dh.getTrangThai())) {
+            throw new IllegalStateException("Đơn hàng chưa được xác nhận, không thể hoàn hàng!");
+        }
+
+        dh.setTrangThai("DaHoan");
+        if ("DaThanhToan".equalsIgnoreCase(dh.getTrangThaiThanhToan()) || "HoanTat".equalsIgnoreCase(dh.getTrangThai())) {
+            dh.setTrangThaiThanhToan("DaHoanTien");
+            dh.setTienThucNhanShop(0);
+            dh.setTienPhiSan(0);
+        }
 
         // Nhận lại sách và nhả tồn kho
         releaseOrderStock(dh);

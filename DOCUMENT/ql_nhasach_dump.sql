@@ -1,4 +1,4 @@
-﻿-- ====================================================================
+-- ====================================================================
 -- THE4BOOKSTORE - FULL DATABASE DUMP (SCHEMA + DATA + ROUTINES)
 -- Database: QL_NhaSach
 -- Encoding: UTF-8 (utf8mb4)
@@ -1138,6 +1138,79 @@ INSERT INTO `voucher_da_luu` VALUES (2,'2026-10-02 10:49:10.450496','2026-10-05 
 UNLOCK TABLES;
 
 --
+-- Table structure for table `lich_su_sao_luu`
+--
+
+DROP TABLE IF EXISTS `lich_su_sao_luu`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lich_su_sao_luu` (
+  `ma_sao_luu` int NOT NULL AUTO_INCREMENT,
+  `ten_file` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duong_dan` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `loai_sao_luu` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'FULL' COMMENT 'FULL, DIFFERENTIAL, INCREMENTAL, SCHEMA_ONLY',
+  `dung_luong_bytes` bigint DEFAULT '0',
+  `so_bang_sao_luu` int DEFAULT '0',
+  `trang_thai` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DANG_XU_LY' COMMENT 'THANH_CONG, THAT_BAI, DANG_XU_LY',
+  `nguoi_thuc_hien` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'SYSTEM',
+  `thoi_gian_bat_dau` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `thoi_gian_ket_thuc` datetime DEFAULT NULL,
+  `ma_bam_checksum` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ghi_chu` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`ma_sao_luu`),
+  KEY `idx_sao_luu_thoi_gian` (`thoi_gian_bat_dau`),
+  KEY `idx_sao_luu_trang_thai` (`trang_thai`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `lich_su_phuc_hoi`
+--
+
+DROP TABLE IF EXISTS `lich_su_phuc_hoi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lich_su_phuc_hoi` (
+  `ma_phuc_hoi` int NOT NULL AUTO_INCREMENT,
+  `ma_sao_luu` int DEFAULT NULL,
+  `ten_file` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nguoi_phuc_hoi` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ADMIN',
+  `trang_thai` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DANG_XU_LY' COMMENT 'THANH_CONG, THAT_BAI, DANG_XU_LY',
+  `thoi_gian_bat_dau` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `thoi_gian_ket_thuc` datetime DEFAULT NULL,
+  `tong_so_bang_phuc_hoi` int DEFAULT '0',
+  `ket_qua_kiem_tra_toan_ven` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'CHUA_KIEM_TRA' COMMENT 'HOP_LE, LOI_TOAN_VEN, CHUA_KIEM_TRA',
+  `ghi_chu` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`ma_phuc_hoi`),
+  KEY `idx_phuc_hoi_thoi_gian` (`thoi_gian_bat_dau`),
+  KEY `FK_phuc_hoi_sao_luu` (`ma_sao_luu`),
+  CONSTRAINT `FK_phuc_hoi_sao_luu` FOREIGN KEY (`ma_sao_luu`) REFERENCES `lich_su_sao_luu` (`ma_sao_luu`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `nhat_ky_thay_doi_du_lieu`
+--
+
+DROP TABLE IF EXISTS `nhat_ky_thay_doi_du_lieu`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `nhat_ky_thay_doi_du_lieu` (
+  `ma_nhat_ky` bigint NOT NULL AUTO_INCREMENT,
+  `ten_bang` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hanh_dong` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'INSERT, UPDATE, DELETE',
+  `khoa_chinh` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `du_lieu_cu` json DEFAULT NULL,
+  `du_lieu_moi` json DEFAULT NULL,
+  `nguoi_thuc_hien` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'SYSTEM',
+  `thoi_gian` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ma_nhat_ky`),
+  KEY `idx_audit_bang_thoi_gian` (`ten_bang`,`thoi_gian`),
+  KEY `idx_audit_khoa_chinh` (`ten_bang`,`khoa_chinh`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping routines for database 'QL_NhaSach'
 --
 /*!50003 DROP FUNCTION IF EXISTS `fn_DemDonHang` */;
@@ -1361,7 +1434,7 @@ BEGIN
     
     SELECT COALESCE(SUM(tong_tien), 0) INTO total
     FROM don_hang
-    WHERE trang_thai = 'DaGiao' 
+    WHERE trang_thai IN ('DaGiao', 'HoanTat') 
       AND ngay_hoan_thanh >= startDate 
       AND ngay_hoan_thanh <= endDate;
     RETURN total;
@@ -1388,7 +1461,7 @@ BEGIN
     
     SELECT COALESCE(SUM(tong_tien), 0) INTO total
     FROM don_hang
-    WHERE makm = p_makm AND trang_thai = 'DaGiao';
+    WHERE makm = p_makm AND trang_thai IN ('DaGiao', 'HoanTat');
     RETURN total;
 END ;;
 DELIMITER ;
@@ -1444,7 +1517,7 @@ BEGIN
     DECLARE total_discount BIGINT DEFAULT 0;
     SELECT COALESCE(SUM(tien_giam), 0) INTO total_discount
     FROM don_hang
-    WHERE makm = p_makm AND trang_thai = 'DaGiao';
+    WHERE makm = p_makm AND trang_thai IN ('DaGiao', 'HoanTat');
     RETURN total_discount;
 END ;;
 DELIMITER ;
@@ -1470,7 +1543,7 @@ BEGIN
     SELECT COALESCE(SUM(ct.so_luong), 0) INTO total
     FROM chi_tiet_don_hang ct
     JOIN don_hang dh ON ct.madh = dh.madh
-    WHERE dh.trang_thai = 'DaGiao';
+    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat');
     RETURN total;
 END ;;
 DELIMITER ;
@@ -1563,10 +1636,14 @@ DELIMITER ;
 DELIMITER ;;
 CREATE PROCEDURE `sp_CapNhatTrangThaiDonHang`(
     IN p_madh INT,
+    IN p_ma_shop INT,
     IN p_trangthaimoi VARCHAR(50),
     IN p_lydo VARCHAR(255)
 )
 BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE v_current_status VARCHAR(50);
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -1575,19 +1652,120 @@ BEGIN
 
     START TRANSACTION;
 
-    IF p_trangthaimoi = 'TU_CHOI' THEN
+    -- Kiểm tra đơn hàng thuộc quyền quản lý của gian hàng
+    SELECT COUNT(*), trang_thai INTO v_count, v_current_status
+    FROM don_hang 
+    WHERE madh = p_madh AND (ma_shop = p_ma_shop OR p_ma_shop IS NULL)
+    GROUP BY trang_thai
+    LIMIT 1;
+
+    IF v_count = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng không tồn tại hoặc không thuộc quyền quản lý của Gian Hàng này!';
+    END IF;
+
+    IF p_trangthaimoi = 'TU_CHOI' OR p_trangthaimoi = 'TuChoi' THEN
         UPDATE don_hang 
         SET trang_thai = p_trangthaimoi, ly_do_tu_choi = p_lydo 
         WHERE madh = p_madh;
-    ELSEIF p_trangthaimoi = 'DA_HUY' THEN
+    ELSEIF p_trangthaimoi = 'DA_HUY' OR p_trangthaimoi = 'DaHuy' THEN
+        IF v_current_status IN ('DaGiao', 'HoanTat') THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng đã giao/hoàn tất không thể hủy, chỉ có thể thực hiện Hoàn hàng!';
+        END IF;
         UPDATE don_hang 
         SET trang_thai = p_trangthaimoi, ly_do_huy = p_lydo 
+        WHERE madh = p_madh;
+    ELSEIF p_trangthaimoi = 'DaGiao' THEN
+        UPDATE don_hang 
+        SET trang_thai = p_trangthaimoi, trang_thai_thanh_toan = 'DaThanhToan' 
+        WHERE madh = p_madh;
+    ELSEIF p_trangthaimoi = 'HoanTat' THEN
+        UPDATE don_hang 
+        SET trang_thai = p_trangthaimoi, ngay_hoan_thanh = NOW(), trang_thai_thanh_toan = 'DaThanhToan' 
         WHERE madh = p_madh;
     ELSE
         UPDATE don_hang 
         SET trang_thai = p_trangthaimoi 
         WHERE madh = p_madh;
     END IF;
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_VendorXuLyHoanHang` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_VendorXuLyHoanHang`(
+    IN p_madh INT,
+    IN p_ma_shop INT,
+    IN p_lydo VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE v_current_status VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_masp INT;
+    DECLARE v_so_luong INT;
+
+    DECLARE cur_ct CURSOR FOR 
+        SELECT masp, so_luong FROM chi_tiet_don_hang WHERE madh = p_madh;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    SELECT COUNT(*), trang_thai INTO v_count, v_current_status
+    FROM don_hang
+    WHERE madh = p_madh AND (ma_shop = p_ma_shop OR p_ma_shop IS NULL)
+    GROUP BY trang_thai
+    LIMIT 1;
+
+    IF v_count = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng không tồn tại hoặc không thuộc quyền quản lý của Gian Hàng này!';
+    END IF;
+
+    IF v_current_status IN ('ChoXuLy', 'DonHangMoi', 'ChoXacNhan') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng chưa xác nhận, không thể hoàn hàng (chỉ có thể hủy)!';
+    END IF;
+
+    -- Hoàn trả số lượng tồn kho và giảm số lượng đã bán của sản phẩm gian hàng
+    OPEN cur_ct;
+    return_stock_loop: LOOP
+        FETCH cur_ct INTO v_masp, v_so_luong;
+        IF done = 1 THEN
+            LEAVE return_stock_loop;
+        END IF;
+
+        UPDATE san_pham 
+        SET so_luong_ton = so_luong_ton + v_so_luong,
+            so_luong_da_ban = GREATEST(0, so_luong_da_ban - v_so_luong)
+        WHERE masp = v_masp;
+    END LOOP;
+    CLOSE cur_ct;
+
+    -- Trừ thu nhập nếu đã từng ghi nhận doanh thu và cập nhật trạng thái đã hoàn
+    UPDATE don_hang
+    SET trang_thai = 'DaHoan',
+        ly_do_tra_hang = p_lydo,
+        trang_thai_thanh_toan = 'DaHoanTien',
+        tien_thuc_nhan_shop = 0,
+        tien_phi_san = 0
+    WHERE madh = p_madh;
 
     COMMIT;
 END ;;
@@ -1617,7 +1795,7 @@ BEGIN
         COALESCE(SUM(dh.tien_thuc_nhan_shop), 0) AS thuc_nhan_shop
     FROM don_hang dh
     WHERE dh.ma_shop = p_ma_shop
-      AND dh.trang_thai IN ('DaGiao', 'DA_GIAO')
+      AND dh.trang_thai IN ('DaGiao', 'DA_GIAO', 'HoanTat')
     GROUP BY YEAR(dh.ngay_dat), MONTH(dh.ngay_dat)
     ORDER BY nam DESC, thang DESC;
 END ;;
@@ -1643,11 +1821,11 @@ BEGIN
            MONTH(dh.ngay_hoan_thanh) as thang, 
            SUM(dh.tong_tien) as doanh_thu 
     FROM don_hang dh 
-    WHERE dh.trang_thai = 'DaGiao' 
+    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat') 
       AND dh.ngay_hoan_thanh IS NOT NULL 
+      AND YEAR(dh.ngay_hoan_thanh) = YEAR(CURDATE())
     GROUP BY YEAR(dh.ngay_hoan_thanh), MONTH(dh.ngay_hoan_thanh) 
-    ORDER BY nam DESC, thang DESC 
-    LIMIT 12;
+    ORDER BY nam DESC, thang DESC;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1694,7 +1872,7 @@ BEGIN
     WHERE madh = p_madh AND makh = p_makh 
     FOR UPDATE;
     
-    IF v_trangthai != 'DA_HUY' AND v_trangthai != 'DA_GIAO' THEN
+    IF v_trangthai != 'DA_HUY' AND v_trangthai != 'DA_GIAO' AND v_trangthai != 'DaGiao' AND v_trangthai != 'HoanTat' THEN
         
         OPEN cur_ctdh;
         read_loop: LOOP
@@ -1714,6 +1892,81 @@ BEGIN
         SET trang_thai = 'DA_HUY', ly_do_huy = p_lydohuy 
         WHERE madh = p_madh AND makh = p_makh;
     END IF;
+
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_VendorHuyDonHang` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_VendorHuyDonHang`(
+    IN p_madh INT,
+    IN p_ma_shop INT,
+    IN p_lydohuy VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE v_current_status VARCHAR(50);
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_masp INT;
+    DECLARE v_so_luong INT;
+
+    DECLARE cur_ct CURSOR FOR 
+        SELECT masp, so_luong FROM chi_tiet_don_hang WHERE madh = p_madh;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    SELECT COUNT(*), trang_thai INTO v_count, v_current_status
+    FROM don_hang
+    WHERE madh = p_madh AND (ma_shop = p_ma_shop OR p_ma_shop IS NULL)
+    GROUP BY trang_thai
+    LIMIT 1;
+
+    IF v_count = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng không tồn tại hoặc không thuộc quyền quản lý của Gian Hàng này!';
+    END IF;
+
+    IF v_current_status IN ('DaGiao', 'HoanTat') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Lỗi: Đơn hàng đã giao thành công không thể hủy, chỉ có thể thực hiện Hoàn hàng!';
+    END IF;
+
+    -- Hoàn lại số lượng tồn kho
+    OPEN cur_ct;
+    cancel_stock_loop: LOOP
+        FETCH cur_ct INTO v_masp, v_so_luong;
+        IF done = 1 THEN
+            LEAVE cancel_stock_loop;
+        END IF;
+
+        UPDATE san_pham 
+        SET so_luong_ton = so_luong_ton + v_so_luong
+        WHERE masp = v_masp;
+    END LOOP;
+    CLOSE cur_ct;
+
+    UPDATE don_hang
+    SET trang_thai = 'DaHuy',
+        ly_do_huy = p_lydohuy,
+        trang_thai_thanh_toan = IF(trang_thai_thanh_toan = 'DaThanhToan', 'DaHoanTien', trang_thai_thanh_toan)
+    WHERE madh = p_madh;
 
     COMMIT;
 END ;;
@@ -1969,7 +2222,7 @@ BEGIN
       FROM san_pham s
       JOIN chi_tiet_don_hang ct ON s.masp = ct.masp
     JOIN don_hang dh ON ct.madh = dh.madh
-    WHERE dh.trang_thai = 'DaGiao'
+    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat')
     GROUP BY s.masp, s.tensp, s.gia_ban
     ORDER BY tong_da_ban DESC
     LIMIT p_limit;
@@ -2306,6 +2559,183 @@ BEGIN
     WHERE khach_hang_id = p_makh;
     
     COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_TaoLichSuSaoLuu` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_TaoLichSuSaoLuu`(
+    IN p_ten_file VARCHAR(255),
+    IN p_duong_dan VARCHAR(500),
+    IN p_loai_sao_luu VARCHAR(50),
+    IN p_nguoi_thuc_hien VARCHAR(100),
+    OUT p_ma_sao_luu INT
+)
+BEGIN
+    INSERT INTO lich_su_sao_luu(ten_file, duong_dan, loai_sao_luu, trang_thai, nguoi_thuc_hien, thoi_gian_bat_dau)
+    VALUES (p_ten_file, p_duong_dan, IFNULL(p_loai_sao_luu, 'FULL'), IFNULL(p_nguoi_thuc_hien, 'SYSTEM'), 'DANG_XU_LY', NOW());
+    
+    SET p_ma_sao_luu = LAST_INSERT_ID();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_HoanTatSaoLuu` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_HoanTatSaoLuu`(
+    IN p_ma_sao_luu INT,
+    IN p_dung_luong_bytes BIGINT,
+    IN p_so_bang INT,
+    IN p_trang_thai VARCHAR(50),
+    IN p_checksum VARCHAR(128),
+    IN p_ghi_chu TEXT
+)
+BEGIN
+    UPDATE lich_su_sao_luu
+    SET dung_luong_bytes = p_dung_luong_bytes,
+        so_bang_sao_luu = p_so_bang,
+        trang_thai = IFNULL(p_trang_thai, 'THANH_CONG'),
+        ma_bam_checksum = p_checksum,
+        ghi_chu = p_ghi_chu,
+        thoi_gian_ket_thuc = NOW()
+    WHERE ma_sao_luu = p_ma_sao_luu;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_GhiNhanPhucHoi` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_GhiNhanPhucHoi`(
+    IN p_ma_sao_luu INT,
+    IN p_ten_file VARCHAR(255),
+    IN p_nguoi_phuc_hoi VARCHAR(100),
+    IN p_trang_thai VARCHAR(50),
+    IN p_ket_qua_toan_ven VARCHAR(50),
+    IN p_ghi_chu TEXT,
+    OUT p_ma_phuc_hoi INT
+)
+BEGIN
+    INSERT INTO lich_su_phuc_hoi(ma_sao_luu, ten_file, nguoi_phuc_hoi, trang_thai, thoi_gian_bat_dau, thoi_gian_ket_thuc, ket_qua_kiem_tra_toan_ven, ghi_chu)
+    VALUES (p_ma_sao_luu, p_ten_file, IFNULL(p_nguoi_phuc_hoi, 'ADMIN'), IFNULL(p_trang_thai, 'THANH_CONG'), NOW(), NOW(), IFNULL(p_ket_qua_toan_ven, 'HOP_LE'), p_ghi_chu);
+    
+    SET p_ma_phuc_hoi = LAST_INSERT_ID();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_KiemTraToanVenDuLieu` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_KiemTraToanVenDuLieu`(OUT p_so_loi INT, OUT p_thong_diep TEXT)
+BEGIN
+    DECLARE v_orphan_order_items INT DEFAULT 0;
+    DECLARE v_orphan_cart_items INT DEFAULT 0;
+    DECLARE v_negative_stock INT DEFAULT 0;
+    DECLARE v_missing_shop INT DEFAULT 0;
+    
+    SET p_so_loi = 0;
+    SET p_thong_diep = '';
+
+    -- 1. Kiem tra chi tiet don hang mo coi (khong ton tai don hang)
+    SELECT COUNT(*) INTO v_orphan_order_items
+    FROM chi_tiet_don_hang ct
+    LEFT JOIN don_hang dh ON ct.madh = dh.madh
+    WHERE dh.madh IS NULL;
+
+    -- 2. Kiem tra chi tiet gio hang mo coi
+    SELECT COUNT(*) INTO v_orphan_cart_items
+    FROM chi_tiet_gio_hang ct
+    LEFT JOIN gio_hang gh ON ct.ma_gio_hang = gh.ma_gio_hang
+    WHERE gh.ma_gio_hang IS NULL;
+
+    -- 3. Kiem tra san pham co ton kho am
+    SELECT COUNT(*) INTO v_negative_stock
+    FROM san_pham
+    WHERE so_luong_ton < 0;
+
+    -- 4. Kiem tra don hang khong lien ket shop
+    SELECT COUNT(*) INTO v_missing_shop
+    FROM don_hang
+    WHERE ma_shop IS NULL;
+
+    SET p_so_loi = v_orphan_order_items + v_orphan_cart_items + v_negative_stock;
+
+    IF p_so_loi = 0 THEN
+        SET p_thong_diep = 'Tat ca cac bang va rang buoc khoa ngoai (Foreign Keys) toan ven 100%. San sang hoat dong.';
+    ELSE
+        SET p_thong_diep = CONCAT('Phat hien bat thuong: ', 
+            IF(v_orphan_order_items > 0, CONCAT(v_orphan_order_items, ' chi tiet don hang mo coi; '), ''),
+            IF(v_orphan_cart_items > 0, CONCAT(v_orphan_cart_items, ' chi tiet gio hang mo coi; '), ''),
+            IF(v_negative_stock > 0, CONCAT(v_negative_stock, ' san pham ton kho am; '), ''),
+            IF(v_missing_shop > 0, CONCAT(v_missing_shop, ' don hang khong co shop; '), '')
+        );
+    END IF;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_DonDepLichSuSaoLuu` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE PROCEDURE `sp_DonDepLichSuSaoLuu`(IN p_so_ngay INT)
+BEGIN
+    DECLARE v_ngay_gioi_han DATETIME;
+    SET v_ngay_gioi_han = DATE_SUB(NOW(), INTERVAL IFNULL(p_so_ngay, 30) DAY);
+
+    DELETE FROM lich_su_sao_luu 
+    WHERE thoi_gian_bat_dau < v_ngay_gioi_han;
+
+    DELETE FROM nhat_ky_thay_doi_du_lieu
+    WHERE thoi_gian < v_ngay_gioi_han;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;

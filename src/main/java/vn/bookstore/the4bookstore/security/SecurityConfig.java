@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .requestMatchers("/vendor", "/vendor/**").authenticated()
                 .requestMatchers("/admin/platform-fees", "/admin/platform-fees/**").hasAnyRole("ADMIN", "QUANLY", "MANAGER")
                 .requestMatchers("/admin/system/**", "/admin/managers/**").hasRole("ADMIN")
+                .requestMatchers("/admin/users", "/admin/users/**").hasAnyRole("ADMIN", "QUANLY", "MANAGER")
                 .requestMatchers("/admin/kho", "/admin/kho/**", "/kho/**").hasAnyRole("ADMIN", "QUANLY", "MANAGER", "NHANVIENKHO")
                 .requestMatchers("/admin/orders", "/admin/orders/**").hasAnyRole("ADMIN", "QUANLY", "MANAGER", "NHANVIENBANHANG")
                 .requestMatchers("/admin", "/admin/**", "/manager", "/manager/**").hasAnyRole("ADMIN", "QUANLY", "MANAGER")

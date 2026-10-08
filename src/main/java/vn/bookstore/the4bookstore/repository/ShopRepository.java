@@ -26,4 +26,31 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
 
     @org.springframework.data.jpa.repository.Query(value = "SELECT fn_DemSachCuaShop(:maShop)", nativeQuery = true)
     Integer countActiveBooksByShop(@org.springframework.data.repository.query.Param("maShop") Integer maShop);
+
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT DISTINCT s FROM Shop s
+        LEFT JOIN s.taiKhoan tk
+        LEFT JOIN SanPham sp ON sp.shop = s AND sp.trangThai != 'DaXoa'
+        WHERE s.trangThai != 'DaXoa'
+          AND (
+            (:searchType = 'all' AND (
+                LOWER(s.tenShop) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(tk.tenDangNhap) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(tk.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(s.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(s.emailShop) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(sp.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            ))
+            OR (:searchType = 'shopName' AND LOWER(s.tenShop) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            OR (:searchType = 'productName' AND LOWER(sp.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            OR (:searchType = 'owner' AND (LOWER(tk.tenDangNhap) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(tk.email) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            OR (:searchType = 'phone' AND LOWER(s.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            OR (:searchType = 'email' AND LOWER(s.emailShop) LIKE LOWER(CONCAT('%', :keyword, '%')))
+          )
+    """)
+    Page<Shop> searchShopsByCriteria(
+            @org.springframework.data.repository.query.Param("keyword") String keyword,
+            @org.springframework.data.repository.query.Param("searchType") String searchType,
+            Pageable pageable
+    );
 }

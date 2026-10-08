@@ -221,6 +221,11 @@ public class OrderController {
                 return "redirect:/don-hang";
             }
 
+            if ("DaGiao".equalsIgnoreCase(dh.getTrangThai()) || "HoanTat".equalsIgnoreCase(dh.getTrangThai())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Đơn hàng đã giao thành công không thể hủy. Vui lòng chọn 'Yêu cầu Trả hàng - Hoàn tiền' nếu bạn muốn hoàn hàng!");
+                return "redirect:/don-hang/" + id;
+            }
+
             if ("DaXacNhan".equalsIgnoreCase(dh.getTrangThai())) {
                 // Đơn đã xác nhận: Không thể tự hủy trực tiếp -> Chuyển thành Yêu Cầu Hủy gửi shop
                 dh.setTrangThai("YeuCauHuy");
@@ -289,15 +294,20 @@ public class OrderController {
         DonHang dh = donHangService.getOrderById(id);
         if (!dh.getKhachHang().getMaKH().equals(kh.getMaKH())) return "redirect:/don-hang";
 
-        if (!"DaGiao".equalsIgnoreCase(dh.getTrangThai())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có thể yêu cầu Trả hàng - Hoàn tiền với đơn hàng đã giao thành công!");
+        if ("ChoXuLy".equalsIgnoreCase(dh.getTrangThai()) || "DonHangMoi".equalsIgnoreCase(dh.getTrangThai()) || "ChoDuyet".equalsIgnoreCase(dh.getTrangThai())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đơn hàng chưa được xác nhận, vui lòng sử dụng chức năng Hủy đơn thay vì Yêu cầu Hoàn hàng!");
+            return "redirect:/don-hang/" + id;
+        }
+
+        if ("DaHuy".equalsIgnoreCase(dh.getTrangThai()) || "Huy".equalsIgnoreCase(dh.getTrangThai()) || "DaHoan".equalsIgnoreCase(dh.getTrangThai())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đơn hàng đã kết thúc không thể yêu cầu hoàn hàng!");
             return "redirect:/don-hang/" + id;
         }
 
         dh.setTrangThai("TraHangHoanTien");
         dh.setLyDoTraHang(lyDoTraHang != null ? lyDoTraHang.trim() : "Khách hàng yêu cầu đổi trả");
         donHangRepository.save(dh);
-        redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu Trả hàng - Hoàn tiền đã gửi đến Shop thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu Trả hàng - Hoàn tiền đã gửi đến hệ thống xử lý thành công!");
         return "redirect:/don-hang/" + id;
     }
 

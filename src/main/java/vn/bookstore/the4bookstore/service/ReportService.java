@@ -45,18 +45,36 @@ public class ReportService {
         return revenue != null ? new BigDecimal(revenue) : BigDecimal.ZERO;
     }
 
+    public BigDecimal getThisMonthRevenue() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime nextMonth = startOfMonth.plusMonths(1);
+
+        Long revenue = donHangRepository.getRevenueByDateRange(startOfMonth, nextMonth);
+        return revenue != null ? new BigDecimal(revenue) : BigDecimal.ZERO;
+    }
+
     public List<MonthlyRevenueDTO> getRevenueByMonth() {
         String sql = "CALL sp_DoanhThuTheoThang()";
 
         Query query = entityManager.createNativeQuery(sql);
+        @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
 
-        List<MonthlyRevenueDTO> dtos = new ArrayList<>();
+        Map<String, BigDecimal> dbMap = new HashMap<>();
         for (Object[] row : results) {
             Integer year = ((Number) row[0]).intValue();
             Integer month = ((Number) row[1]).intValue();
             BigDecimal revenue = new BigDecimal(((Number) row[2]).longValue());
             String monthStr = String.format("%04d-%02d", year, month);
+            dbMap.put(monthStr, revenue);
+        }
+
+        List<MonthlyRevenueDTO> dtos = new ArrayList<>();
+        int currentYear = LocalDate.now().getYear();
+        int currentMonth = LocalDate.now().getMonthValue();
+        for (int m = currentMonth; m >= 1; m--) {
+            String monthStr = String.format("%04d-%02d", currentYear, m);
+            BigDecimal revenue = dbMap.getOrDefault(monthStr, BigDecimal.ZERO);
             dtos.add(new MonthlyRevenueDTO(monthStr, revenue));
         }
         return dtos;

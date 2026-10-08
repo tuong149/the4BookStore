@@ -209,10 +209,16 @@ public class ShopService {
 
     @Transactional(readOnly = true)
     public Page<Shop> searchShops(String keyword, Pageable pageable) {
+        return searchShopsByCriteria(keyword, "all", pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Shop> searchShopsByCriteria(String keyword, String searchType, Pageable pageable) {
         if (keyword == null || keyword.isBlank()) {
             return getAllShops(pageable);
         }
-        return shopRepository.findByTenShopContainingIgnoreCaseAndTrangThaiNot(keyword.trim(), "DaXoa", pageable);
+        String type = (searchType != null && !searchType.isBlank()) ? searchType.trim() : "all";
+        return shopRepository.searchShopsByCriteria(keyword.trim(), type, pageable);
     }
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");

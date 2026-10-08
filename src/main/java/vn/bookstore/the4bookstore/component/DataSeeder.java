@@ -57,39 +57,12 @@ public class DataSeeder implements CommandLineRunner {
 
         String defaultPassword = passwordEncoder.encode("123456");
 
-        // 1. Tạo hoặc đảm bảo 3 tài khoản nòng cốt: ADMIN, MANAGER, USER
+        // 1. Tạo tài khoản mẫu nếu chưa tồn tại trong cơ sở dữ liệu
         createAccountIfNotFound("admin", "ADMIN", defaultPassword, "admin@the4bookstore.vn");
         createAccountIfNotFound("manager", "MANAGER", defaultPassword, "manager@the4bookstore.vn");
         createAccountIfNotFound("user", "USER", defaultPassword, "user@the4bookstore.vn");
-
-        // Luôn đảm bảo mật khẩu 123456 và trạng thái HoatDong
-        taiKhoanRepository.findByTenDangNhap("admin").ifPresent(tk -> {
-            tk.setMatKhauHash(defaultPassword);
-            tk.setVaiTro("ADMIN");
-            tk.setTrangThai("HoatDong");
-            taiKhoanRepository.save(tk);
-        });
-        taiKhoanRepository.findByTenDangNhap("manager").ifPresent(tk -> {
-            tk.setMatKhauHash(defaultPassword);
-            tk.setVaiTro("MANAGER");
-            tk.setTrangThai("HoatDong");
-            taiKhoanRepository.save(tk);
-        });
-        taiKhoanRepository.findByTenDangNhap("user").ifPresent(tk -> {
-            tk.setMatKhauHash(defaultPassword);
-            tk.setVaiTro("USER");
-            tk.setTrangThai("HoatDong");
-            taiKhoanRepository.save(tk);
-        });
-
-        // Đảm bảo mật khẩu 123456 cho các tài khoản Shop (Vendor)
         for (String vendorUser : java.util.List.of("vendor_demo", "vendor_fahasa", "vendor_hoasen")) {
-            taiKhoanRepository.findByTenDangNhap(vendorUser).ifPresent(tk -> {
-                tk.setMatKhauHash(defaultPassword);
-                tk.setVaiTro("VENDOR");
-                tk.setTrangThai("HoatDong");
-                taiKhoanRepository.save(tk);
-            });
+            createAccountIfNotFound(vendorUser, "VENDOR", defaultPassword, vendorUser + "@the4bookstore.vn");
         }
 
         seedBookstoreData();

@@ -16,4 +16,7 @@ public interface KhoHangRepository extends JpaRepository<KhoHang, Integer> {
 
     @Query("SELECT kh FROM KhoHang kh WHERE kh.soLuongTon < kh.mucToiThieu")
     List<KhoHang> findLowStockItems();
+
+    @Query("SELECT kh FROM KhoHang kh JOIN FETCH kh.sanPham sp WHERE kh.kho.maKho = :maKho AND sp.trangThai != 'DaXoa'")
+    List<KhoHang> findByKhoIdWithSanPham(@org.springframework.data.repository.query.Param("maKho") Integer maKho);
 }
