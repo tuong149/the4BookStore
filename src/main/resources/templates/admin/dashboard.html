@@ -50,7 +50,7 @@
                             </div>
                             <div>
                                 <div class="font-headline-xl text-headline-xl font-bold text-on-surface tabular-nums"
-                                     th:text="${monthlyRevenue != null and not #lists.isEmpty(monthlyRevenue) ? #numbers.formatDecimal(monthlyRevenue[0].revenue, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">
+                                     th:text="${thisMonthRevenue != null ? #numbers.formatDecimal(thisMonthRevenue, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">
                                     0 ₫
                                 </div>
                                 <span class="text-xs text-on-surface-variant mt-1 block">Cập nhật theo đơn hoàn tất</span>

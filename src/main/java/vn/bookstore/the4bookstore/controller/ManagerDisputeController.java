@@ -43,10 +43,11 @@ public class ManagerDisputeController {
     // --- QUẢN LÝ CỬA HÀNG (SHOPS MANAGEMENT) ---
     @GetMapping("/shops")
     public String shopsList(@RequestParam(required = false) String keyword,
+                            @RequestParam(required = false, defaultValue = "all") String searchType,
                             @RequestParam(defaultValue = "0") int page,
                             Model model) {
         Page<Shop> shopPage = (keyword != null && !keyword.isBlank())
-                ? shopService.searchShops(keyword, PageRequest.of(page, 10))
+                ? shopService.searchShopsByCriteria(keyword, searchType, PageRequest.of(page, 10))
                 : shopService.getAllShops(PageRequest.of(page, 10));
 
         Map<Integer, Long> productCounts = new HashMap<>();
@@ -57,7 +58,9 @@ public class ManagerDisputeController {
         model.addAttribute("shops", shopPage.getContent());
         model.addAttribute("productCounts", productCounts);
         model.addAttribute("page", shopPage);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("keyword", keyword != null ? keyword : "");
+        model.addAttribute("searchType", searchType != null ? searchType : "all");
+        model.addAttribute("pendingShopCount", shopService.getPendingShops().size());
         return "admin/shops";
     }
 
@@ -122,6 +125,7 @@ public class ManagerDisputeController {
     @GetMapping("/shops/{id}/products")
     public String shopProducts(@PathVariable Integer id,
                                @RequestParam(required = false) String keyword,
+                               @RequestParam(required = false, defaultValue = "all") String searchType,
                                @RequestParam(required = false, defaultValue = "all") String moderationStatus,
                                @RequestParam(defaultValue = "0") int page,
                                Model model) {
@@ -130,8 +134,9 @@ public class ManagerDisputeController {
 
         String modStatus = (moderationStatus != null && !moderationStatus.isBlank() && !"all".equalsIgnoreCase(moderationStatus)) ? moderationStatus.trim() : null;
         String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        String sType = (searchType != null && !searchType.isBlank()) ? searchType.trim() : "all";
 
-        Page<SanPham> productPage = sanPhamRepository.findShopProductsForAdmin(id, kw, modStatus, PageRequest.of(page, 10));
+        Page<SanPham> productPage = sanPhamRepository.findShopProductsForAdmin(id, kw, sType, modStatus, PageRequest.of(page, 10));
 
         long countAll = sanPhamRepository.countByShop_MaShop(id);
         long countPending = sanPhamRepository.countByShop_MaShopAndTrangThaiKhoa(id, "ChoDuyet");
@@ -142,6 +147,7 @@ public class ManagerDisputeController {
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("page", productPage);
         model.addAttribute("keyword", keyword != null ? keyword : "");
+        model.addAttribute("searchType", sType);
         model.addAttribute("moderationStatus", moderationStatus != null ? moderationStatus : "all");
         model.addAttribute("countAll", countAll);
         model.addAttribute("countPending", countPending);

@@ -174,8 +174,46 @@ public class AdminUserController {
             return "redirect:/admin/users";
         }
 
-        tk.setVaiTro(newRole.trim().toUpperCase());
+        String upperRole = newRole.trim().toUpperCase();
+        tk.setVaiTro(upperRole);
         taiKhoanRepository.save(tk);
+
+        // Tự động đồng bộ / tạo hồ sơ Nhân viên (NhanVien) chỉ khi là vai trò nhân viên kho
+        if ("NHANVIENKHO".equals(upperRole)) {
+            Optional<NhanVien> optNv = nhanVienRepository.findByTaiKhoan(tk);
+            NhanVien nv;
+            if (optNv.isPresent()) {
+                nv = optNv.get();
+                nv.setTrangThai("DangLam");
+                nv.setChucVu("Nhân viên kho");
+            } else {
+                nv = new NhanVien();
+                nv.setTaiKhoan(tk);
+                nv.setNgayVaoLam(java.time.LocalDate.now());
+                nv.setTrangThai("DangLam");
+                nv.setChucVu("Nhân viên kho");
+                nv.setEmail(tk.getEmail());
+
+                Optional<KhachHang> optKh = khachHangRepository.findByTaiKhoan(tk);
+                String hoTen = optKh.map(KhachHang::getHoTen).filter(s -> s != null && !s.isBlank()).orElse(tk.getTenDangNhap());
+                String sdt = optKh.map(KhachHang::getSoDienThoai).filter(s -> s != null && !s.isBlank()).orElse("09" + String.format("%08d", tk.getMaTaiKhoan()));
+                String diaChi = optKh.map(KhachHang::getDiaChi).orElse(null);
+
+                nv.setHoTen(hoTen);
+                nv.setSoDienThoai(sdt);
+                nv.setDiaChi(diaChi);
+            }
+            nhanVienRepository.save(nv);
+        } else {
+            // Không phải vai trò nhân viên kho (ADMIN, MANAGER, USER, VENDOR) -> đánh dấu Đã Nghỉ
+            nhanVienRepository.findByTaiKhoan(tk).ifPresent(nv -> {
+                nv.setTrangThai("DaNghi");
+                nhanVienRepository.save(nv);
+            });
+        }
+
+        // Hủy phiên đăng nhập cũ để người dùng nhận vai trò mới khi truy cập lại
+        invalidateUserSessions(tk);
 
         ra.addFlashAttribute("successMessage", "Đã cập nhật vai trò tài khoản @" + tk.getTenDangNhap() + " thành [" + newRole + "] thành công!");
         return "redirect:/admin/users";

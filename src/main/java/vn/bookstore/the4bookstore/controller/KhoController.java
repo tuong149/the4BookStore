@@ -11,6 +11,8 @@ import vn.bookstore.the4bookstore.repository.NhaCungCapRepository;
 import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 import vn.bookstore.the4bookstore.service.KhoService;
 
+import org.springframework.security.core.Authentication;
+
 import java.util.Map;
 
 @Controller
@@ -21,7 +23,6 @@ public class KhoController {
     private final SanPhamRepository sachRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
     private final vn.bookstore.the4bookstore.repository.NhanVienRepository nhanVienRepository;
-
     private final vn.bookstore.the4bookstore.repository.KhoHangRepository khoHangRepository;
 
     public KhoController(KhoService khoService,
@@ -34,6 +35,14 @@ public class KhoController {
         this.nhaCungCapRepository = nhaCungCapRepository;
         this.nhanVienRepository = nhanVienRepository;
         this.khoHangRepository = khoHangRepository;
+    }
+
+    private boolean isManagerOrAdmin(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return false;
+        return auth.getAuthorities().stream().anyMatch(a -> {
+            String role = a.getAuthority().toUpperCase();
+            return role.equals("ROLE_ADMIN") || role.equals("ROLE_MANAGER") || role.equals("ROLE_QUANLY");
+        });
     }
 
     @GetMapping
@@ -83,12 +92,20 @@ public class KhoController {
         return "admin/kho/phieu-nhap";
     }
 
+    @GetMapping("/phieu-nhap/{id}")
+    public String phieuNhapDetail(@PathVariable Integer id, Model model) {
+        vn.bookstore.the4bookstore.entity.PhieuNhap pn = khoService.getPhieuNhapById(id);
+        model.addAttribute("phieuNhap", pn);
+        model.addAttribute("chiTiets", khoService.getChiTietPhieuNhap(id));
+        return "admin/kho/phieu-nhap-detail";
+    }
+
     @GetMapping("/phieu-nhap/create")
     public String createPhieuNhapForm(Model model) {
         model.addAttribute("khos", khoService.getAllKho());
         model.addAttribute("nhaCungCaps", nhaCungCapRepository.findAll());
         model.addAttribute("sachs", sachRepository.findAll());
-        model.addAttribute("nhanViens", nhanVienRepository.findAll());
+        model.addAttribute("nhanViens", khoService.getDanhSachNhanVienHoatDong());
         return "admin/kho/phieu-nhap-form";
     }
 
@@ -105,7 +122,10 @@ public class KhoController {
 
     @PostMapping("/phieu-nhap/{id}/confirm")
     @ResponseBody
-    public ResponseEntity<?> confirmPhieuNhap(@PathVariable Long id) {
+    public ResponseEntity<?> confirmPhieuNhap(@PathVariable Long id, Authentication auth) {
+        if (!isManagerOrAdmin(auth)) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "error", "Chỉ Quản trị viên (Admin) hoặc Quản lý (Manager) mới có quyền duyệt phiếu nhập kho!"));
+        }
         try {
             khoService.confirmPhieuNhap(id.intValue());
             return ResponseEntity.ok(Map.of("success", true));
@@ -120,11 +140,19 @@ public class KhoController {
         return "admin/kho/phieu-ke";
     }
 
+    @GetMapping("/phieu-ke/{id}")
+    public String phieuKeDetail(@PathVariable Integer id, Model model) {
+        vn.bookstore.the4bookstore.entity.PhieuKiemKe pk = khoService.getPhieuKeById(id);
+        model.addAttribute("phieuKe", pk);
+        model.addAttribute("chiTiets", khoService.getChiTietPhieuKe(id));
+        return "admin/kho/phieu-ke-detail";
+    }
+
     @GetMapping("/phieu-ke/create")
     public String createPhieuKeForm(Model model) {
         model.addAttribute("khos", khoService.getAllKho());
         model.addAttribute("sachs", sachRepository.findAll());
-        model.addAttribute("nhanViens", nhanVienRepository.findAll());
+        model.addAttribute("nhanViens", khoService.getDanhSachNhanVienHoatDong());
         return "admin/kho/phieu-ke-form";
     }
 
@@ -141,7 +169,10 @@ public class KhoController {
 
     @PostMapping("/phieu-ke/{id}/confirm")
     @ResponseBody
-    public ResponseEntity<?> confirmPhieuKe(@PathVariable Long id) {
+    public ResponseEntity<?> confirmPhieuKe(@PathVariable Long id, Authentication auth) {
+        if (!isManagerOrAdmin(auth)) {
+            return ResponseEntity.status(403).body(Map.of("success", false, "error", "Chỉ Quản trị viên (Admin) hoặc Quản lý (Manager) mới có quyền duyệt / cân hàng phiếu kiểm kê!"));
+        }
         try {
             khoService.confirmPhieuKe(id.intValue());
             return ResponseEntity.ok(Map.of("success", true));
@@ -155,5 +186,36 @@ public class KhoController {
         model.addAttribute("warnings", khoService.getLowStockWarnings(khoId.intValue()));
         model.addAttribute("kho", khoService.getKhoById(khoId.intValue()));
         return "admin/kho/warnings";
+    }
+
+    @GetMapping("/api/products-by-ncc")
+    @ResponseBody
+    public ResponseEntity<?> getProductsByNCC(@RequestParam Integer nccId) {
+        java.util.List<vn.bookstore.the4bookstore.entity.SanPham> list = sachRepository.findByNhaCungCapId(nccId);
+        java.util.List<Map<String, Object>> result = list.stream().map(sp -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("maSP", sp.getMaSP());
+            map.put("tenSP", sp.getTenSP());
+            map.put("isbn", sp.getISBN() != null ? sp.getISBN() : "");
+            map.put("giaBan", sp.getGiaBan() != null ? sp.getGiaBan() : 0);
+            return map;
+        }).toList();
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/api/products-by-kho")
+    @ResponseBody
+    public ResponseEntity<?> getProductsByKho(@RequestParam Integer khoId) {
+        java.util.List<vn.bookstore.the4bookstore.entity.KhoHang> list = khoHangRepository.findByKhoIdWithSanPham(khoId);
+        java.util.List<Map<String, Object>> result = list.stream().map(kh -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            vn.bookstore.the4bookstore.entity.SanPham sp = kh.getSanPham();
+            map.put("maSP", sp.getMaSP());
+            map.put("tenSP", sp.getTenSP());
+            map.put("isbn", sp.getISBN() != null ? sp.getISBN() : "");
+            map.put("soLuongTon", kh.getSoLuongTon() != null ? kh.getSoLuongTon() : 0);
+            return map;
+        }).toList();
+        return ResponseEntity.ok(result);
     }
 }

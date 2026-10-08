@@ -39,17 +39,14 @@
                             <span>Quay Lại</span>
                         </a>
 
-                        <!-- Quick Status Change -->
-                        <div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-xl border border-surface-container/60 shadow-sm">
-                            <span class="text-sm font-semibold text-on-surface-variant">Trạng thái:</span>
-                            <select class="text-sm font-semibold bg-transparent text-primary hover:text-primary/80 focus:outline-none cursor-pointer"
-                                    th:onchange="'updateOrderStatus(' + ${donHang.maDH} + ', this)'">
-                                <option value="ChoXuLy" th:selected="${donHang.trangThai == 'ChoXuLy' or donHang.trangThai == 'ChoDuyet'}">Chờ duyệt</option>
-                                <option value="DaXacNhan" th:selected="${donHang.trangThai == 'DaXacNhan'}">Đã xác nhận</option>
-                                <option value="DangGiao" th:selected="${donHang.trangThai == 'DangGiao'}">Đang giao</option>
-                                <option value="DaGiao" th:selected="${donHang.trangThai == 'DaGiao'}">Đã giao</option>
-                                <option value="DaHuy" th:selected="${donHang.trangThai == 'DaHuy' or donHang.trangThai == 'Huy'}">Hủy đơn</option>
-                            </select>
+                        <!-- Shop & Status Badge (Read-only for Admin) -->
+                        <div class="flex items-center gap-2 bg-surface-container-lowest px-3.5 py-2 rounded-xl border border-surface-container/60 shadow-sm">
+                            <span class="text-xs font-medium text-on-surface-variant">Gian hàng:</span>
+                            <span class="text-xs font-bold text-primary bg-primary-fixed/60 px-2 py-0.5 rounded"
+                                  th:text="${donHang.shop != null ? donHang.shop.tenShop : 'Hệ thống'}">Tên Gian Hàng</span>
+                            <span class="text-xs text-outline">|</span>
+                            <span class="text-xs font-medium text-on-surface-variant">Trạng thái:</span>
+                            <span class="text-xs font-bold text-on-surface" th:text="${donHang.trangThai}">ChoXuLy</span>
                         </div>
                     </div>
                 </div>
@@ -218,54 +215,5 @@
             </div>
         </main>
     </div>
-
-    <script>
-        async function updateOrderStatus(orderId, selectElement) {
-        const newStatus = selectElement.value;
-        const oldStatus = Array.from(selectElement.options).find(opt => opt.defaultSelected)?.value || selectElement.options[0].value;
-
-        if (!newStatus) return;
-        if (!confirm(`Bạn có chắc muốn chuyển trạng thái đơn hàng #${orderId} sang "${newStatus}"?`)) {
-            selectElement.value = oldStatus;
-            return;
-        }
-
-        const originalBtnHtml = selectElement.innerHTML;
-        selectElement.disabled = true;
-        selectElement.classList.add('opacity-50');
-
-        try {
-            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-            const response = await fetch(`/admin/orders/${orderId}/status?status=${encodeURIComponent(newStatus)}`, {
-                method: 'POST',
-                headers: { [csrfHeader]: csrfToken }
-            });
-
-            const data = await response.json();
-            if (response.ok && data.success) {
-                Array.from(selectElement.options).forEach(opt => {
-                    opt.defaultSelected = opt.value === newStatus;
-                });
-                // Note: The cancellation warning box might not disappear dynamically without reload,
-                // but for smooth status switching, page reload is avoided as requested.
-                // If they change to/from DaHuy, window.location.reload() can be optional.
-                if (newStatus === 'DaHuy' || newStatus === 'Huy' || oldStatus === 'DaHuy' || oldStatus === 'Huy') {
-                    window.location.reload();
-                }
-            } else {
-                alert("Cập nhật trạng thái thất bại: " + (data.error || "Không rõ nguyên nhân"));
-                selectElement.value = oldStatus;
-            }
-        } catch (err) {
-            alert("Lỗi kết nối máy chủ: " + err.message);
-            selectElement.value = oldStatus;
-        } finally {
-            selectElement.disabled = false;
-            selectElement.classList.remove('opacity-50');
-        }
-    }
-    </script>
 </body>
 </html>

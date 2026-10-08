@@ -247,14 +247,26 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     @Query("SELECT s FROM SanPham s WHERE s.shop.maShop = :maShop AND s.trangThai = 'DangBan' AND s.trangThaiKhoa = 'BinhThuong' AND s.shop.trangThai = 'HoatDong' AND LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY s.ngayTao DESC")
     Page<SanPham> findActiveBooksByShopAndKeyword(@Param("maShop") Integer maShop, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM SanPham s WHERE s.shop.maShop = :maShop AND s.trangThai != 'DaXoa' " +
-           "AND (:keyword IS NULL OR LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+    @Query("SELECT DISTINCT s FROM SanPham s " +
+           "LEFT JOIN s.danhMuc dm " +
+           "WHERE s.shop.maShop = :maShop AND s.trangThai != 'DaXoa' " +
            "AND (:moderationStatus IS NULL OR :moderationStatus = '' OR :moderationStatus = 'all' OR s.trangThaiKhoa = :moderationStatus) " +
+           "AND (:keyword IS NULL OR :keyword = '' OR " +
+           "     (:searchType = 'all' AND (LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(dm.tenDanhMuc) LIKE LOWER(CONCAT('%', :keyword, '%')) OR EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))) " +
+           "  OR (:searchType = 'name' AND LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "  OR (:searchType = 'isbn' AND LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "  OR (:searchType = 'category' AND LOWER(dm.tenDanhMuc) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "  OR (:searchType = 'author' AND EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
+           ") " +
            "ORDER BY s.maSP DESC")
     Page<SanPham> findShopProductsForAdmin(@Param("maShop") Integer maShop,
                                           @Param("keyword") String keyword,
+                                          @Param("searchType") String searchType,
                                           @Param("moderationStatus") String moderationStatus,
                                           Pageable pageable);
 
     long countByShop_MaShopAndTrangThaiKhoa(Integer maShop, String trangThaiKhoa);
+
+    @Query("SELECT s FROM SanPham s WHERE s.nhaCungCap.maNCC = :maNCC AND s.trangThai != 'DaXoa' ORDER BY s.tenSP ASC")
+    List<SanPham> findByNhaCungCapId(@Param("maNCC") Integer maNCC);
 }

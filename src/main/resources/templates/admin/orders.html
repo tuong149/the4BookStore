@@ -199,29 +199,25 @@
                                               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary-fixed text-primary border border-primary-fixed-dim">
                                             <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Thành công
                                         </span>
+                                        <span th:if="${dh.trangThai == 'DaHoan' or dh.trangThai == 'TraHangHoanTien'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Đã hoàn hàng
+                                        </span>
                                         <span th:if="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}"
                                               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-surface-container text-on-surface-variant border border-outline-variant">
                                             <span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Đã hủy
                                         </span>
-                                        <span th:if="${dh.trangThai != 'ChoXuLy' and dh.trangThai != 'ChoDuyet' and dh.trangThai != 'DangGiao' and dh.trangThai != 'DaGiao' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}"
+                                        <span th:if="${dh.trangThai != 'ChoXuLy' and dh.trangThai != 'ChoDuyet' and dh.trangThai != 'DangGiao' and dh.trangThai != 'DaGiao' and dh.trangThai != 'DaHoan' and dh.trangThai != 'TraHangHoanTien' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}"
                                               class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-surface-container text-on-surface-variant"
                                               th:text="${dh.trangThai}">Khác</span>
                                     </td>
                                     <td class="py-4 px-4 text-right">
-                                        <div class="inline-flex items-center justify-end gap-1.5">
-                                            <select aria-label="Cập nhật trạng thái đơn hàng"
-                                                    class="max-w-40 text-xs bg-surface-container-low border border-surface-container rounded-lg px-2 py-1.5 text-on-surface focus:outline-none focus:border-primary"
-                                                    th:attr="data-current-status=${dh.trangThai == 'ChoDuyet' ? 'ChoXuLy' : (dh.trangThai == 'Huy' ? 'DaHuy' : dh.trangThai)}"
-                                                    th:onchange="'updateOrderStatus(' + ${dh.maDH} + ', this)'">
-                                                <option value="ChoXuLy" th:selected="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}">Chờ duyệt</option>
-                                                <option value="DaXacNhan" th:selected="${dh.trangThai == 'DaXacNhan'}">Đã xác nhận</option>
-                                                <option value="DangGiao" th:selected="${dh.trangThai == 'DangGiao'}">Đang giao</option>
-                                                <option value="DaGiao" th:selected="${dh.trangThai == 'DaGiao'}">Đã giao</option>
-                                                <option value="DaHuy" th:selected="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}">Hủy đơn</option>
-                                            </select>
+                                        <div class="inline-flex items-center justify-end gap-2">
+                                            <span class="text-[11px] text-on-surface-variant font-medium bg-surface-container px-2 py-1 rounded-md"
+                                                  th:text="${dh.shop != null ? dh.shop.tenShop : 'Gian hàng'}">Shop</span>
                                             <a th:href="@{/admin/orders/{id}(id=${dh.maDH})}" title="Xem chi tiết" aria-label="Xem chi tiết đơn hàng"
-                                               class="inline-flex items-center justify-center p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
-                                                <span class="material-symbols-outlined text-lg">visibility</span>
+                                               class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary-fixed hover:bg-primary hover:text-on-primary transition">
+                                                <span class="material-symbols-outlined text-base mr-1">visibility</span> Chi tiết
                                             </a>
                                         </div>
                                     </td>
@@ -251,48 +247,17 @@
     </div>
 
     <script>
-        async function updateOrderStatus(orderId, selectElement) {
-            const newStatus = selectElement.value;
-            const previousStatus = selectElement.dataset.currentStatus;
-
-            if (!confirm(`Bạn có chắc muốn chuyển trạng thái đơn hàng #${orderId} sang "${newStatus}"?`)) {
-                selectElement.value = previousStatus;
-                return;
-            }
-
-            selectElement.disabled = true;
-            try {
-                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-                const response = await fetch(`/admin/orders/${orderId}/status?status=${encodeURIComponent(newStatus)}`, {
-                    method: 'POST',
-                    headers: { [csrfHeader]: csrfToken }
-                });
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    window.location.reload();
-                } else {
-                    alert("Cập nhật trạng thái thất bại: " + (data.error || "Không rõ nguyên nhân"));
-                    selectElement.value = previousStatus;
-                }
-            } catch (err) {
-                alert("Lỗi kết nối máy chủ: " + err.message);
-                selectElement.value = previousStatus;
-            } finally {
-                selectElement.disabled = false;
-            }
-        }
-
         const searchInput = document.getElementById('orderSearchInput');
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase().trim();
-            document.querySelectorAll('.order-row').forEach(row => {
-                const matches = ['data-id', 'data-customer', 'data-phone']
-                    .some(attribute => (row.getAttribute(attribute) || '').toLowerCase().includes(query));
-                row.hidden = !matches;
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                document.querySelectorAll('.order-row').forEach(row => {
+                    const matches = ['data-id', 'data-customer', 'data-phone']
+                        .some(attribute => (row.getAttribute(attribute) || '').toLowerCase().includes(query));
+                    row.hidden = !matches;
+                });
             });
-        });
+        }
     </script>
 </body>
 </html>

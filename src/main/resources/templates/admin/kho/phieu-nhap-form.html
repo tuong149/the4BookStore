@@ -100,7 +100,7 @@
                                     <span class="text-error">*</span>
                                 </label>
                                 <div class="relative">
-                                    <select id="nhaCungCapId" name="nhaCungCapId" class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 transition-colors appearance-none cursor-pointer shadow-xs" required>
+                                    <select id="nhaCungCapId" name="nhaCungCapId" onchange="handleNccChange(this.value)" class="w-full bg-surface-container-low px-3 py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 transition-colors appearance-none cursor-pointer shadow-xs" required>
                                         <option value="" disabled selected>Chọn đối tác cung cấp...</option>
                                         <option th:each="ncc : ${nhaCungCaps}" th:value="${ncc.maNCC}" th:text="${ncc.tenNCC}"></option>
                                     </select>
@@ -232,7 +232,6 @@
                     <div class="relative">
                         <select class="item-sach w-full bg-surface-container-low px-3 py-2 pr-8 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest border border-transparent focus:border-primary/40 transition-colors appearance-none cursor-pointer" required onchange="updateTotalCost()">
                             <option value="" disabled selected>-- Chọn Sản Phẩm --</option>
-                            <option th:each="sach : ${sachs}" th:value="${sach.maSP}" th:text="|${sach.tenSP} (${sach.ISBN != null ? sach.ISBN : 'Không có ISBN'})|"></option>
                         </select>
                         <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[18px] text-outline pointer-events-none">expand_more</span>
                     </div>
@@ -258,14 +257,93 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
 
+        let currentNccProducts = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             addItemRow();
         });
+
+        async function handleNccChange(nccId) {
+            if (!nccId) {
+                currentNccProducts = [];
+                updateAllProductSelects();
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/kho/api/products-by-ncc?nccId=' + nccId);
+                if (!response.ok) throw new Error('Không thể tải danh sách sản phẩm của nhà cung cấp này.');
+                currentNccProducts = await response.json();
+                
+                if (currentNccProducts.length === 0) {
+                    showAlert('Nhà cung cấp này hiện chưa có sản phẩm nào thuộc quyền quản lý!', 'error');
+                } else {
+                    hideAlert();
+                }
+
+                updateAllProductSelects();
+                updateTotalCost();
+            } catch (err) {
+                showAlert(err.message, 'error');
+            }
+        }
+
+        function updateAllProductSelects() {
+            const rows = document.querySelectorAll('#tableBody .item-row');
+            rows.forEach(row => {
+                const select = row.querySelector('.item-sach');
+                const selectedVal = select.value;
+                populateSelectOptions(select, selectedVal);
+            });
+        }
+
+        function populateSelectOptions(selectElement, keepValue = null) {
+            selectElement.innerHTML = '';
+            
+            if (!currentNccProducts || currentNccProducts.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.disabled = true;
+                opt.selected = true;
+                opt.textContent = document.getElementById('nhaCungCapId').value 
+                    ? '-- NCC này không có sản phẩm --' 
+                    : '-- Vui lòng chọn Nhà cung cấp trước --';
+                selectElement.appendChild(opt);
+                return;
+            }
+
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.disabled = true;
+            defaultOpt.selected = !keepValue;
+            defaultOpt.textContent = '-- Chọn Sản Phẩm --';
+            selectElement.appendChild(defaultOpt);
+
+            let matched = false;
+            currentNccProducts.forEach(sp => {
+                const opt = document.createElement('option');
+                opt.value = sp.maSP;
+                opt.textContent = `${sp.tenSP} (${sp.isbn ? sp.isbn : 'Không có ISBN'})`;
+                if (keepValue && String(sp.maSP) === String(keepValue)) {
+                    opt.selected = true;
+                    matched = true;
+                }
+                selectElement.appendChild(opt);
+            });
+
+            if (keepValue && !matched) {
+                defaultOpt.selected = true;
+            }
+        }
 
         function addItemRow() {
             const tableBody = document.getElementById('tableBody');
             const template = document.getElementById('rowTemplate').querySelector('tr');
             const clone = template.cloneNode(true);
+            
+            const select = clone.querySelector('.item-sach');
+            populateSelectOptions(select);
+
             tableBody.appendChild(clone);
             reindexRows();
             updateTotalCost();
@@ -322,6 +400,7 @@
             setTimeout(() => {
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = '';
+                currentNccProducts = [];
                 addItemRow();
                 hideAlert();
             }, 10);

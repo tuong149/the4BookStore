@@ -72,8 +72,10 @@ public class ManagerDisputeService {
         dh.setPhanQuyetTranhChap(lyDo);
 
         if (chapNhanHoanTien) {
-            dh.setTrangThai("TraHangHoanTien");
+            dh.setTrangThai("DaHoan");
             dh.setTrangThaiThanhToan("DaHoanTien");
+            dh.setTienThucNhanShop(0);
+            dh.setTienPhiSan(0);
 
             // Hoàn lại tồn kho cho sản phẩm khi hoàn tiền cho khách
             if (dh.getChiTietDonHangs() != null) {

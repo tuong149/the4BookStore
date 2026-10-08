@@ -42,13 +42,51 @@
                     </div>
                 </div>
 
-                <!-- Search -->
+                <!-- Search & Filters -->
                 <div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container mb-6 shadow-sm">
-                    <form th:action="@{/admin/shops}" method="get" class="flex items-center gap-3">
-                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm theo tên shop..."
-                               class="flex-1 px-4 py-2 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:ring-2 focus:ring-primary"/>
-                        <button type="submit" class="px-5 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all">Tìm kiếm</button>
+                    <form th:action="@{/admin/shops}" method="get" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <!-- Dropdown tiêu chí tìm kiếm -->
+                        <div class="relative min-w-[220px]">
+                            <select name="searchType" id="searchTypeSelect" onchange="updatePlaceholder()"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold text-on-surface focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
+                                <option value="all" th:selected="${searchType == 'all' or searchType == null}">🔍 Tất cả tiêu chí</option>
+                                <option value="shopName" th:selected="${searchType == 'shopName'}">🏬 Tên gian hàng</option>
+                                <option value="productName" th:selected="${searchType == 'productName'}">📚 Tên sản phẩm gian hàng bán</option>
+                                <option value="owner" th:selected="${searchType == 'owner'}">👤 Chủ gian hàng / Username</option>
+                                <option value="phone" th:selected="${searchType == 'phone'}">📞 Số điện thoại shop</option>
+                                <option value="email" th:selected="${searchType == 'email'}">✉️ Email gian hàng</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
+                        </div>
+
+                        <!-- Ô nhập từ khóa -->
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+                            <input type="text" name="keyword" id="keywordInput" th:value="${keyword}"
+                                   placeholder="Nhập từ khóa tìm kiếm gian hàng / sản phẩm..."
+                                   class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:ring-2 focus:ring-primary"/>
+                        </div>
+
+                        <!-- Nút tìm kiếm & Xóa lọc -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-xs">
+                                <span class="material-symbols-outlined text-[16px]">search</span>
+                                <span>Tìm kiếm</span>
+                            </button>
+                            <a th:if="${(keyword != null and !keyword.isBlank()) or (searchType != null and searchType != 'all')}"
+                               th:href="@{/admin/shops}"
+                               class="px-4 py-2.5 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
+                                <span>Xóa lọc</span>
+                            </a>
+                        </div>
                     </form>
+
+                    <!-- Gợi ý khi tìm kiếm theo sản phẩm -->
+                    <div th:if="${searchType == 'productName' and keyword != null and !keyword.isBlank()}" class="mt-2 text-[11px] text-primary flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">info</span>
+                        <span>Đang lọc các gian hàng có bán sản phẩm chứa từ khóa: <strong class="font-bold underline" th:text="${keyword}"></strong></span>
+                    </div>
                 </div>
 
                 <!-- Shops Table -->
@@ -155,13 +193,63 @@
                                 </td>
                             </tr>
                             <tr th:if="${shops.isEmpty()}">
-                                <td colspan="9" class="p-8 text-center text-on-surface-variant">Không có gian hàng nào được tìm thấy.</td>
+                                <td colspan="9" class="p-8 text-center text-on-surface-variant">Không có gian hàng nào khớp với tiêu chí tìm kiếm.</td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- Pagination -->
+                    <div th:if="${page.totalPages > 1}" class="p-4 border-t border-surface-container flex items-center justify-between text-xs">
+                        <span class="text-on-surface-variant">
+                            Hiển thị trang <strong th:text="${page.number + 1}">1</strong> / <strong th:text="${page.totalPages}">1</strong> (Tổng <span th:text="${page.totalElements}">0</span> gian hàng)
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <a th:if="${page.hasPrevious()}"
+                               th:href="@{/admin/shops(page=${page.number - 1}, keyword=${keyword}, searchType=${searchType})}"
+                               class="px-3 py-1.5 rounded-lg border border-surface-container hover:bg-surface-container font-bold">
+                                Trước
+                            </a>
+                            <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                                  th:if="${i >= page.number - 2 and i <= page.number + 2}">
+                                <a th:href="@{/admin/shops(page=${i}, keyword=${keyword}, searchType=${searchType})}"
+                                   th:text="${i + 1}"
+                                   th:class="${i == page.number} ? 'px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-3 py-1.5 rounded-lg border border-surface-container hover:bg-surface-container font-medium'">
+                                    1
+                                </a>
+                            </span>
+                            <a th:if="${page.hasNext()}"
+                               th:href="@{/admin/shops(page=${page.number + 1}, keyword=${keyword}, searchType=${searchType})}"
+                               class="px-3 py-1.5 rounded-lg border border-surface-container hover:bg-surface-container font-bold">
+                                Sau
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <script th:inline="javascript">
+        function updatePlaceholder() {
+            const select = document.getElementById('searchTypeSelect');
+            const input = document.getElementById('keywordInput');
+            if (!select || !input) return;
+            const val = select.value;
+            if (val === 'productName') {
+                input.placeholder = 'Nhập tên sách, tên văn phòng phẩm cần tìm gian hàng bán...';
+            } else if (val === 'shopName') {
+                input.placeholder = 'Nhập tên gian hàng (vd: Fahasa, Nhã Nam...)...';
+            } else if (val === 'owner') {
+                input.placeholder = 'Nhập tên đăng nhập hoặc email của chủ shop...';
+            } else if (val === 'phone') {
+                input.placeholder = 'Nhập số điện thoại gian hàng...';
+            } else if (val === 'email') {
+                input.placeholder = 'Nhập email liên hệ gian hàng...';
+            } else {
+                input.placeholder = 'Tìm theo tên shop, tên sản phẩm, chủ shop, SĐT...';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updatePlaceholder);
+    </script>
 </body>
 </html>

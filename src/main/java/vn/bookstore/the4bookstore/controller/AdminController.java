@@ -93,6 +93,7 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        model.addAttribute("thisMonthRevenue", reportService.getThisMonthRevenue());
         model.addAttribute("monthlyRevenue", reportService.getRevenueByMonth());
         model.addAttribute("topBooks", reportService.getTopSellingBooks());
         model.addAttribute("monthlyOrders", reportService.getThisMonthOrderCount());
@@ -137,9 +138,9 @@ public class AdminController {
         } else if ("success".equalsIgnoreCase(status) || "DaGiao".equalsIgnoreCase(status) || "HoanTat".equalsIgnoreCase(status)) {
             orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
                     java.util.List.of("DaGiao", "HoanTat"), pageable);
-        } else if ("dispute".equalsIgnoreCase(status) || "TranhChap".equalsIgnoreCase(status) || "TraHangHoanTien".equalsIgnoreCase(status)) {
+        } else if ("dispute".equalsIgnoreCase(status) || "TranhChap".equalsIgnoreCase(status) || "TraHangHoanTien".equalsIgnoreCase(status) || "DaHoan".equalsIgnoreCase(status)) {
             orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
-                    java.util.List.of("TranhChap", "TraHangHoanTien"), pageable);
+                    java.util.List.of("TranhChap", "TraHangHoanTien", "DaHoan"), pageable);
         } else if ("cancelled".equalsIgnoreCase(status) || "DaHuy".equalsIgnoreCase(status)) {
             orderPage = donHangRepository.findByTrangThaiInOrderByNgayDatDesc(
                     java.util.List.of("DaHuy", "Huy"), pageable);
@@ -154,7 +155,7 @@ public class AdminController {
         long confirmedCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaXacNhan", "YeuCauHuy"));
         long shippingCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DangGiao", "DaLayHang"));
         long successCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaGiao", "HoanTat"));
-        long disputeCount = donHangRepository.countByTrangThaiIn(java.util.List.of("TranhChap", "TraHangHoanTien"));
+        long disputeCount = donHangRepository.countByTrangThaiIn(java.util.List.of("TranhChap", "TraHangHoanTien", "DaHoan"));
         long cancelledCount = donHangRepository.countByTrangThaiIn(java.util.List.of("DaHuy", "Huy"));
         
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -214,12 +215,10 @@ public class AdminController {
     public ResponseEntity<?> updateOrderStatus(@PathVariable Long id, 
                                                @RequestParam String status,
                                                @RequestParam(value = "reason", required = false) String reason) {
-        try {
-            orderService.updateStatus(id, status, reason);
-            return ResponseEntity.ok(Map.of("success", true));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
-        }
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of(
+                "success", false,
+                "error", "Đơn hàng thuộc quyền quản lý trực tiếp của Vendor. Admin/Manager chỉ theo dõi thống kê và giải quyết tranh chấp (nếu có), không được tự ý can thiệp trạng thái đơn hàng của gian hàng."
+        ));
     }
 
     @GetMapping("/orders/{id}/json")
