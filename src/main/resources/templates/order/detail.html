@@ -120,6 +120,104 @@
                         </div>
                     </div>
 
+                    <!-- VietQR Dynamic Payment Card (When payment method is ChuyenKhoan/VIETQR and unpaid) -->
+                    <div th:if="${vietQrUrl != null}" class="mt-4 p-5 rounded-2xl bg-gradient-to-br from-primary/5 via-surface-container-low to-secondary/5 border-2 border-primary/30 shadow-sm">
+                        <div class="flex items-center gap-2.5 mb-3 text-primary">
+                            <span class="material-symbols-outlined text-[26px]">qr_code_scanner</span>
+                            <div>
+                                <h3 class="font-headline-sm text-base font-bold text-on-surface">Quét Mã VietQR Để Thanh Toán Đơn Hàng</h3>
+                                <p class="text-xs text-on-surface-variant">Sử dụng ứng dụng bất kỳ (MB, VCB, Techcombank, MoMo, BIDV...) quét mã bên dưới</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center bg-surface-container-lowest p-4 rounded-xl border border-surface-container">
+                            <!-- QR Image -->
+                            <div class="md:col-span-5 flex flex-col items-center justify-center text-center">
+                                <div class="p-2 bg-white rounded-2xl shadow-md border border-primary/20 inline-block">
+                                    <img th:src="${vietQrUrl}" alt="VietQR Thanh Toán" class="w-56 h-auto rounded-xl object-contain mx-auto" />
+                                </div>
+                                <span class="text-[11px] text-on-surface-variant mt-2 flex items-center gap-1 font-semibold text-primary">
+                                    <span class="material-symbols-outlined text-[14px]">bolt</span>
+                                    Tự động điền đúng Số Tiền &amp; Nội Dung
+                                </span>
+                            </div>
+
+                            <!-- Transfer Info -->
+                            <div class="md:col-span-7 space-y-2.5 text-xs">
+                                <div class="p-2.5 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+                                    <div>
+                                        <span class="text-on-surface-variant block text-[10px]">Ngân hàng thụ hưởng:</span>
+                                        <strong class="font-bold text-primary text-sm" th:text="${bankId}">MB Bank</strong>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">Napas247</span>
+                                </div>
+
+                                <div class="p-2.5 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+                                    <div>
+                                        <span class="text-on-surface-variant block text-[10px]">Số tài khoản nhận tiền:</span>
+                                        <strong class="font-mono font-bold text-on-surface text-sm" id="vietQrAccNo" th:text="${accountNo}">0123456789</strong>
+                                    </div>
+                                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('vietQrAccNo').innerText); alert('Đã sao chép số tài khoản!');" class="p-1.5 rounded-lg hover:bg-surface-container text-primary font-bold flex items-center gap-1 cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        <span>Sao chép</span>
+                                    </button>
+                                </div>
+
+                                <div class="p-2.5 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+                                    <div>
+                                        <span class="text-on-surface-variant block text-[10px]">Tên chủ tài khoản:</span>
+                                        <strong class="font-bold text-on-surface uppercase" th:text="${accountName}">THE4BOOKSTORE</strong>
+                                    </div>
+                                </div>
+
+                                <div class="p-2.5 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+                                    <div>
+                                        <span class="text-on-surface-variant block text-[10px]">Số tiền thanh toán:</span>
+                                        <strong class="font-mono font-bold text-primary text-base" th:text="${#numbers.formatDecimal(donHang.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</strong>
+                                    </div>
+                                    <button type="button" th:data-amount="${donHang.tongTien}" onclick="navigator.clipboard.writeText(this.getAttribute('data-amount')); alert('Đã sao chép số tiền!');" class="p-1.5 rounded-lg hover:bg-surface-container text-primary font-bold flex items-center gap-1 cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        <span>Sao chép</span>
+                                    </button>
+                                </div>
+
+                                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                                    <div>
+                                        <span class="text-amber-800 block text-[10px] font-semibold">Nội dung chuyển khoản (Bắt buộc):</span>
+                                        <strong class="font-mono font-bold text-amber-900 text-sm" id="vietQrContent" th:text="'DH' + ${donHang.maDH}">DH101</strong>
+                                    </div>
+                                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('vietQrContent').innerText); alert('Đã sao chép nội dung chuyển khoản!');" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-900 font-bold flex items-center gap-1 cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        <span>Sao chép</span>
+                                    </button>
+                                </div>
+
+                                <!-- Action Buttons: Khách báo đã chuyển & Admin/Shop duyệt -->
+                                <div class="pt-2 flex flex-wrap items-center gap-2">
+                                    <form th:if="${donHang.trangThaiThanhToan != 'ChoDuyetThanhToan'}" th:action="@{'/don-hang/' + ${donHang.maDH} + '/bao-da-chuyen-tien'}" method="post" class="inline">
+                                        <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary-container transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                            <span class="material-symbols-outlined text-[16px]">send</span>
+                                            <span>Tôi Đã Chuyển Tiền Thành Công</span>
+                                        </button>
+                                    </form>
+
+                                    <div th:if="${donHang.trangThaiThanhToan == 'ChoDuyetThanhToan'}" class="px-3.5 py-1.5 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[16px] animate-spin">sync</span>
+                                        <span>Đang chờ đối soát chuyển tiền từ ngân hàng...</span>
+                                    </div>
+
+                                    <!-- Nút dành cho Admin / Manager / Shop đối soát thủ công -->
+                                    <form sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'QUANLY', 'VENDOR', 'GIAN_HANG')" th:action="@{'/don-hang/' + ${donHang.maDH} + '/xac-nhan-thanh-toan'}" method="post" class="inline">
+                                        <button type="submit" onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng này?');" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                            <span>[Admin/Shop] Xác Nhận Đã Nhận Tiền</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tracking Code (Mã Vận Đơn) & Carrier Banner -->
                     <div th:if="${donHang.maVanDon != null}" class="mt-4 p-4 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                         <div class="flex items-center gap-3">
@@ -418,6 +516,28 @@
 
     <!-- Storefront Common Footer Fragment -->
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <!-- Real-time Payment Status Polling Script (Tự động phát hiện khi chuyển khoản thành công) -->
+    <script th:if="${vietQrUrl != null}">
+        (function() {
+            const orderId = [[${donHang.maDH}]];
+            let pollInterval = setInterval(async function() {
+                try {
+                    const response = await fetch('/don-hang/api/' + orderId + '/trang-thai-thanh-toan');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.paid || data.trangThaiThanhToan === 'DaThanhToan') {
+                            clearInterval(pollInterval);
+                            // Tự động load lại trang để hiển thị trạng thái Đã Thanh Toán
+                            window.location.reload();
+                        }
+                    }
+                } catch (e) {
+                    console.log('Polling payment status...', e);
+                }
+            }, 3000); // Kiểm tra mỗi 3 giây
+        })();
+    </script>
 
 </body>
 </html>

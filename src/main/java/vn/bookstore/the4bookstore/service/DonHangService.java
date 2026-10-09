@@ -154,11 +154,16 @@ public class DonHangService {
         donHang.setPhiVanChuyen(phiVanChuyen);
         donHang.setChietKhauAppPhanTram(chietKhauApp);
         donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
-        donHang.setTrangThaiThanhToan("VNPAY".equalsIgnoreCase(phuongThuc) ? "ChuaThanhToan" : "ChoThanhToan");
+        if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+            donHang.setTrangThai("ChoThanhToan");
+            donHang.setTrangThaiThanhToan("ChuaThanhToan");
+        } else {
+            donHang.setTrangThai("ChoXuLy");
+            donHang.setTrangThaiThanhToan("ChuaThanhToan");
+        }
         donHang.setNgayDat(LocalDateTime.now());
         donHang.setDiaChiGiao(diaChiGiao);
         donHang.setSoDienThoaiGiao(soDienThoaiGiao);
-        donHang.setTrangThai("ChoXuLy");
         donHang.setTienGiam(0);
 
         // Lưu đơn hàng trước để lấy maDH

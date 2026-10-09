@@ -28,7 +28,6 @@ public class CartController {
     private final KhuyenMaiRepository khuyenMaiRepository;
     private final DiaChiGiaoHangRepository diaChiGiaoHangRepository;
     private final NhaVanChuyenRepository nhaVanChuyenRepository;
-    private final vn.bookstore.the4bookstore.service.VNPayService vnPayService;
 
     public CartController(GioHangService gioHangService,
                           DonHangService donHangService,
@@ -36,8 +35,7 @@ public class CartController {
                           TaiKhoanRepository taiKhoanRepository,
                           KhuyenMaiRepository khuyenMaiRepository,
                           DiaChiGiaoHangRepository diaChiGiaoHangRepository,
-                          NhaVanChuyenRepository nhaVanChuyenRepository,
-                          vn.bookstore.the4bookstore.service.VNPayService vnPayService) {
+                          NhaVanChuyenRepository nhaVanChuyenRepository) {
         this.gioHangService = gioHangService;
         this.donHangService = donHangService;
         this.khachHangRepository = khachHangRepository;
@@ -45,7 +43,6 @@ public class CartController {
         this.khuyenMaiRepository = khuyenMaiRepository;
         this.diaChiGiaoHangRepository = diaChiGiaoHangRepository;
         this.nhaVanChuyenRepository = nhaVanChuyenRepository;
-        this.vnPayService = vnPayService;
     }
 
     // ==================== Helper: Lấy TaiKhoan từ Authentication ====================
@@ -297,15 +294,10 @@ public class CartController {
         try {
             DonHang donHang = donHangService.createOrder(kh, finalDiaChi, finalSoDienThoai, phuongThuc, ghiChu, selectedProductIds, maVoucher, maNvc);
 
-            if ("VNPAY".equalsIgnoreCase(phuongThuc)) {
-                String scheme = request.getScheme();
-                String serverName = request.getServerName();
-                int serverPort = request.getServerPort();
-                String portPart = (("http".equals(scheme) && serverPort == 80) || ("https".equals(scheme) && serverPort == 443)) ? "" : (":" + serverPort);
-                String returnUrl = scheme + "://" + serverName + portPart + "/don-hang/vnpay-return";
-                String ipAddr = request.getRemoteAddr();
-                String paymentUrl = vnPayService.createPaymentUrl(donHang.getMaDH(), donHang.getTongTien(), "Thanh toan don hang #" + donHang.getMaDH(), returnUrl, ipAddr);
-                return "redirect:" + paymentUrl;
+            if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đặt hàng thành công! Vui lòng quét mã VietQR bên dưới để thanh toán đơn hàng #TB-" + donHang.getMaDH());
+                return "redirect:/don-hang/" + donHang.getMaDH();
             }
 
             redirectAttributes.addFlashAttribute("orderSuccess", true);
