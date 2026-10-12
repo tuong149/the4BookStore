@@ -106,17 +106,26 @@
 
                                         <!-- Actions -->
                                         <td class="py-3.5 px-space-md text-right whitespace-nowrap">
-                                            <button th:if="${pk.trangThai == 'ChoDuyet' or pk.trangThai == 'DANG_KIEM'}"
-                                                    th:onclick="'confirmPK(' + ${pk.maPhieuKiemKe} + ')'"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-label-md transition-colors border border-emerald-200 shadow-sm" title="Xác nhận ghi đè tồn kho hệ thống bằng số liệu thực tế">
-                                                <span class="material-symbols-outlined text-[16px]">fact_check</span>
-                                                <span>Cân Hàng</span>
-                                            </button>
+                                            <div class="inline-flex items-center gap-2 justify-end">
+                                                <a th:href="@{/admin/kho/phieu-ke/{id}(id=${pk.maPhieuKiemKe})}"
+                                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md transition-colors border border-surface-container/60 shadow-xs" title="Xem chi tiết phiếu kiểm kê">
+                                                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                                    <span>Chi Tiết</span>
+                                                </a>
 
-                                            <!-- Readonly status note for completed -->
-                                            <span th:if="${pk.trangThai == 'DaDuyet' or pk.trangThai == 'DA_CAN_HANG'}" class="text-xs text-on-surface-variant flex items-center justify-end gap-1">
-                                                <span class="material-symbols-outlined text-[14px]">lock</span> Đã chốt
-                                            </span>
+                                                <button sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'QUANLY')"
+                                                        th:if="${pk.trangThai == 'ChoDuyet' or pk.trangThai == 'DANG_KIEM'}"
+                                                        th:onclick="'confirmPK(' + ${pk.maPhieuKiemKe} + ')'"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-label-md transition-colors border border-emerald-200 shadow-sm" title="Xác nhận ghi đè tồn kho hệ thống bằng số liệu thực tế">
+                                                    <span class="material-symbols-outlined text-[16px]">fact_check</span>
+                                                    <span>Cân Hàng</span>
+                                                </button>
+
+                                                <!-- Readonly status note for completed -->
+                                                <span th:if="${pk.trangThai == 'DaDuyet' or pk.trangThai == 'DA_CAN_HANG'}" class="text-xs text-on-surface-variant flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-[14px]">lock</span> Đã chốt
+                                                </span>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>

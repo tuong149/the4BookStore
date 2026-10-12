@@ -4,7 +4,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "TAI_KHOAN")
+@Table(name = "TAI_KHOAN", indexes = {
+    @Index(name = "idx_tk_vaitro_trangthai", columnList = "vaiTro, trangThai")
+})
 @Data @NoArgsConstructor @AllArgsConstructor
 public class TaiKhoan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

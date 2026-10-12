@@ -15,6 +15,7 @@ import vn.bookstore.the4bookstore.entity.KhachHang;
 import vn.bookstore.the4bookstore.entity.TaiKhoan;
 import vn.bookstore.the4bookstore.repository.KhachHangRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
+import vn.bookstore.the4bookstore.service.GioHangService;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -26,13 +27,16 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     private final JwtService jwtService;
     private final TaiKhoanRepository taiKhoanRepository;
     private final KhachHangRepository khachHangRepository;
+    private final GioHangService gioHangService;
 
     public OAuth2LoginSuccessHandler(JwtService jwtService,
                                      TaiKhoanRepository taiKhoanRepository,
-                                     KhachHangRepository khachHangRepository) {
+                                     KhachHangRepository khachHangRepository,
+                                     GioHangService gioHangService) {
         this.jwtService = jwtService;
         this.taiKhoanRepository = taiKhoanRepository;
         this.khachHangRepository = khachHangRepository;
+        this.gioHangService = gioHangService;
         setDefaultTargetUrl("/");
     }
 
@@ -43,6 +47,13 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         TaiKhoan tk = resolveTaiKhoan(authentication);
         String displayName = resolveDisplayName(authentication, tk);
 
+        // Merge giỏ hàng session vào DB nếu có
+        if (tk != null && gioHangService != null) {
+            khachHangRepository.findByTaiKhoan(tk).ifPresent(kh -> {
+                gioHangService.mergeSessionCartToDb(kh, request.getSession(false));
+            });
+        }
+
         // 2. Phát hành JWT Token và ghi vào HttpOnly Cookie
         String token = jwtService.generateToken(authentication, tk, displayName);
         ResponseCookie jwtCookie = jwtService.createJwtCookie(token);
@@ -50,7 +61,16 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 
         // 3. Phân luồng điều hướng theo vai trò
         boolean isAdminOrManager = authentication.getAuthorities().stream().anyMatch(a ->
-                "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_QUANLY".equals(a.getAuthority())
+                "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_QUANLY".equals(a.getAuthority()) || "ROLE_MANAGER".equals(a.getAuthority())
+        );
+        boolean isVendor = authentication.getAuthorities().stream().anyMatch(a ->
+                "ROLE_VENDOR".equals(a.getAuthority())
+        );
+        boolean isWarehouse = authentication.getAuthorities().stream().anyMatch(a ->
+                "ROLE_NHANVIENKHO".equals(a.getAuthority())
+        );
+        boolean isSales = authentication.getAuthorities().stream().anyMatch(a ->
+                "ROLE_NHANVIENBANHANG".equals(a.getAuthority())
         );
 
         SavedRequest savedRequest = requestCache.getRequest(request, response);
@@ -62,6 +82,29 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                 return;
             }
             getRedirectStrategy().sendRedirect(request, response, "/admin/dashboard");
+            return;
+        }
+
+        if (isVendor) {
+            if (savedRequest != null && savedRequest.getRedirectUrl().contains("/vendor")) {
+                getRedirectStrategy().sendRedirect(request, response, savedRequest.getRedirectUrl());
+                return;
+            }
+            getRedirectStrategy().sendRedirect(request, response, "/vendor/dashboard");
+            return;
+        }
+
+        if (isWarehouse) {
+            getRedirectStrategy().sendRedirect(request, response, "/admin/dashboard");
+            return;
+        }
+
+        if (isSales) {
+            if (savedRequest != null && savedRequest.getRedirectUrl().contains("/orders")) {
+                getRedirectStrategy().sendRedirect(request, response, savedRequest.getRedirectUrl());
+                return;
+            }
+            getRedirectStrategy().sendRedirect(request, response, "/admin/orders");
             return;
         }
 

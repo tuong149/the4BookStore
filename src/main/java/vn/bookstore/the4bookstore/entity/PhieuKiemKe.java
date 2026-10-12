@@ -5,7 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "PHIEU_KIEM_KE")
+@Table(name = "PHIEU_KIEM_KE", indexes = {
+    @Index(name = "idx_pkk_ngaykiemke", columnList = "ngayKiemKe"),
+    @Index(name = "idx_pkk_trangthai", columnList = "trangThai")
+})
 @Data @NoArgsConstructor @AllArgsConstructor
 public class PhieuKiemKe {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,18 +16,22 @@ public class PhieuKiemKe {
     @Column(nullable = false)
     private LocalDateTime ngayKiemKe = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name = "maNV", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maNV")
     private NhanVien nhanVien;
 
-    @ManyToOne
-    @JoinColumn(name = "maKho", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maKho")
     private Kho kho;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ma_shop")
+    private Shop shop;
 
     @Column(nullable = false, length = 30)
     private String trangThai = "ChoDuyet";
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maNVPheDuyet")
     private NhanVien nvPheDuyet;
 

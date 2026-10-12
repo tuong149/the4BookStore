@@ -8,12 +8,12 @@ import lombok.*;
 @Data @NoArgsConstructor @AllArgsConstructor
 public class ChiTietPhieuNhap {
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maPN")
     private PhieuNhap phieuNhap;
     
     @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maSP")
     private SanPham sanPham;
     

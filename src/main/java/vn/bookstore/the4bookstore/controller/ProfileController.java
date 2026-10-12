@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.bookstore.the4bookstore.entity.DonHang;
 import vn.bookstore.the4bookstore.entity.KhachHang;
+import vn.bookstore.the4bookstore.entity.KhuyenMai;
 import vn.bookstore.the4bookstore.entity.TaiKhoan;
+import vn.bookstore.the4bookstore.entity.VoucherDaLuu;
 import vn.bookstore.the4bookstore.repository.DonHangRepository;
 import vn.bookstore.the4bookstore.repository.KhachHangRepository;
+import vn.bookstore.the4bookstore.repository.KhuyenMaiRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
+import vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository;
 import vn.bookstore.the4bookstore.security.CustomOAuth2User;
 import vn.bookstore.the4bookstore.security.CustomOidcUser;
 import vn.bookstore.the4bookstore.security.CustomUserDetails;
@@ -33,21 +37,28 @@ import java.util.Collections;
 import java.util.List;
 
 @Controller
+@org.springframework.web.bind.annotation.RequestMapping("/profile")
 public class ProfileController {
 
     private final TaiKhoanRepository taiKhoanRepository;
     private final KhachHangRepository khachHangRepository;
     private final DonHangRepository donHangRepository;
+    private final VoucherDaLuuRepository voucherDaLuuRepository;
     private final PasswordEncoder passwordEncoder;
+    private final vn.bookstore.the4bookstore.service.CloudinaryService cloudinaryService;
 
     public ProfileController(TaiKhoanRepository taiKhoanRepository,
                              KhachHangRepository khachHangRepository,
                              DonHangRepository donHangRepository,
-                             PasswordEncoder passwordEncoder) {
+                             VoucherDaLuuRepository voucherDaLuuRepository,
+                             PasswordEncoder passwordEncoder,
+                             vn.bookstore.the4bookstore.service.CloudinaryService cloudinaryService) {
         this.taiKhoanRepository = taiKhoanRepository;
         this.khachHangRepository = khachHangRepository;
         this.donHangRepository = donHangRepository;
+        this.voucherDaLuuRepository = voucherDaLuuRepository;
         this.passwordEncoder = passwordEncoder;
+        this.cloudinaryService = cloudinaryService;
     }
 
     private TaiKhoan getCurrentTaiKhoan(Authentication authentication) {
@@ -130,7 +141,7 @@ public class ProfileController {
         return null;
     }
 
-    @GetMapping("/profile")
+    @GetMapping
     public String profilePage(Authentication authentication, Model model) {
         TaiKhoan tk = getCurrentTaiKhoan(authentication);
         if (tk == null) {
@@ -223,17 +234,50 @@ public class ProfileController {
             }
         }
 
+        // Lấy voucher đã thu thập vào Ví cá nhân (chỉ những mã user đã bấm "Lưu mã")
+        LocalDateTime now = LocalDateTime.now();
+        List<KhuyenMai> availableVouchers = Collections.emptyList();
+        long expiringSoonCount = 0;
+        try {
+            if (kh != null && kh.getMaKH() != null) {
+                List<VoucherDaLuu> savedVouchers = voucherDaLuuRepository
+                        .findByKhachHangAndTrangThaiOrderByNgayLuuDesc(kh, "ChuaDung");
+                availableVouchers = savedVouchers.stream()
+                        .map(VoucherDaLuu::getKhuyenMai)
+                        .filter(km -> km.isDangDienRa())
+                        .toList();
+                expiringSoonCount = availableVouchers.stream()
+                        .filter(km -> km.getNgayKetThuc() != null && km.getNgayKetThuc().isBefore(now.plusDays(3)))
+                        .count();
+            }
+        } catch (Exception ignored) {
+        }
+
+        List<KhuyenMai> platformVouchers = availableVouchers.stream()
+                .filter(km -> km.getShop() == null || "TOAN_SAN".equalsIgnoreCase(km.getPhamVi()))
+                .toList();
+        List<KhuyenMai> shopVouchers = availableVouchers.stream()
+                .filter(km -> km.getShop() != null && !"TOAN_SAN".equalsIgnoreCase(km.getPhamVi()))
+                .toList();
+
         model.addAttribute("taiKhoan", tk);
         model.addAttribute("khachHang", kh);
         model.addAttribute("donHangs", donHangs);
         model.addAttribute("totalOrders", totalOrders);
         model.addAttribute("completedOrders", completedOrders);
+        model.addAttribute("availableVouchers", availableVouchers);
+        model.addAttribute("totalVouchers", availableVouchers.size());
+        model.addAttribute("platformVouchers", platformVouchers);
+        model.addAttribute("shopVouchers", shopVouchers);
+        model.addAttribute("totalPlatformVouchers", platformVouchers.size());
+        model.addAttribute("totalShopVouchers", shopVouchers.size());
+        model.addAttribute("expiringSoonCount", expiringSoonCount);
         model.addAttribute("activePage", "profile");
 
         return "profile/index";
     }
 
-    @PostMapping("/profile/update")
+    @PostMapping("/update")
     public String updateProfile(Authentication authentication,
                                 @RequestParam("hoTen") String hoTen,
                                 @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
@@ -261,7 +305,7 @@ public class ProfileController {
         return "redirect:/profile?updated=true";
     }
 
-    @PostMapping("/profile/change-password")
+    @PostMapping("/change-password")
     public String changePassword(Authentication authentication,
                                  @RequestParam("matKhauCu") String matKhauCu,
                                  @RequestParam("matKhauMoi") String matKhauMoi,
@@ -299,7 +343,7 @@ public class ProfileController {
         return "redirect:/profile?pwdSuccess=true";
     }
 
-    @PostMapping("/profile/upload-avatar")
+    @PostMapping("/upload-avatar")
     public String uploadAvatar(Authentication authentication,
                                @RequestParam("avatarFile") MultipartFile avatarFile,
                                RedirectAttributes redirectAttributes) {
@@ -324,27 +368,8 @@ public class ProfileController {
             return "redirect:/profile";
         }
 
-        String originalFilename = avatarFile.getOriginalFilename();
-        String extension = ".png";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
-            if (!extension.matches("\\.(png|jpg|jpeg|webp|gif)")) {
-                extension = ".png";
-            }
-        }
-
         try {
-            Path uploadDir = Paths.get("uploads", "avatars");
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            String filename = "avatar_" + tk.getMaTaiKhoan() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
-            Path filePath = uploadDir.resolve(filename);
-
-            try (InputStream inputStream = avatarFile.getInputStream()) {
-                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-            }
+            String avatarUrl = cloudinaryService.uploadImage(avatarFile, "avatars");
 
             KhachHang kh = khachHangRepository.findByTaiKhoan(tk).orElseGet(() -> {
                 KhachHang newKh = new KhachHang();
@@ -355,7 +380,7 @@ public class ProfileController {
                 return newKh;
             });
 
-            kh.setAnhDaiDien("/uploads/avatars/" + filename);
+            kh.setAnhDaiDien(avatarUrl);
             khachHangRepository.save(kh);
 
             redirectAttributes.addFlashAttribute("avatarSuccess", "Tải lên ảnh đại diện thành công!");
@@ -366,7 +391,7 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
-    @PostMapping("/profile/remove-avatar")
+    @PostMapping("/remove-avatar")
     public String removeAvatar(Authentication authentication, RedirectAttributes redirectAttributes) {
         TaiKhoan tk = getCurrentTaiKhoan(authentication);
         if (tk == null) {

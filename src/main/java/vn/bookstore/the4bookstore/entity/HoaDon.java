@@ -10,11 +10,11 @@ public class HoaDon {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maHD;
     
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maDH", nullable = false, unique = true)
     private DonHang donHang;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maNV", nullable = false)
     private NhanVien nhanVien;
     

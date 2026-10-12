@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head('Chi Tiết Biên Bản Kiểm Kê - Kênh Người Bán')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('vendor')}"></header>
+
+    <main class="w-full pt-28 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-8">
+        <nav th:replace="~{fragments/vendor/vendor_nav :: vendor_navbar('inventory')}"></nav>
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <nav class="text-xs text-on-surface-variant flex items-center gap-1 mb-1">
+                    <a th:href="@{/vendor/dashboard}" class="hover:underline">Kênh người bán</a>
+                    <span class="material-symbols-outlined text-xs">chevron_right</span>
+                    <a th:href="@{/vendor/inventory}" class="hover:underline">Kiểm kê tồn kho</a>
+                    <span class="material-symbols-outlined text-xs">chevron_right</span>
+                    <span class="text-primary font-semibold" th:text="'Chi tiết biên bản #PKK-' + ${audit.maPhieuKiemKe}">Biên bản #1</span>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-bold text-on-surface" th:text="'Biên Bản Kiểm Kê #PKK-' + ${audit.maPhieuKiemKe}">Biên Bản Kiểm Kê</h1>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Đã Cân Hàng
+                    </span>
+                </div>
+            </div>
+            <a th:href="@{/vendor/inventory}" class="px-4 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <span>Quay Lại Danh Sách</span>
+            </a>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                <div>
+                    <span class="text-on-surface-variant font-medium block">Gian hàng:</span>
+                    <span class="text-sm font-bold text-on-surface" th:text="${shop.tenShop}">Shop Name</span>
+                </div>
+                <div>
+                    <span class="text-on-surface-variant font-medium block">Thời gian kiểm kê:</span>
+                    <span class="text-sm font-bold text-on-surface" th:text="${audit.ngayKiemKe != null ? #temporals.format(audit.ngayKiemKe, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</span>
+                </div>
+                <div>
+                    <span class="text-on-surface-variant font-medium block">Số lượng mặt hàng kiểm:</span>
+                    <span class="text-sm font-bold text-primary" th:text="${#lists.size(chiTiets)} + ' sản phẩm'">0 sản phẩm</span>
+                </div>
+                <div>
+                    <span class="text-on-surface-variant font-medium block">Ghi chú:</span>
+                    <span class="text-sm font-medium text-on-surface" th:text="${audit.ghiChu ?: '-'}">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Table -->
+        <div class="bg-surface-container-lowest rounded-3xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="p-4 bg-surface-container-low/70 border-b border-surface-container font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
+                <span>Chi Tiết Số Lượng Đối Chiếu &amp; Chênh Lệch</span>
+            </div>
+
+            <table class="w-full text-left text-xs">
+                <thead class="bg-surface-container-low text-on-surface-variant uppercase font-bold text-[11px] border-b border-surface-container">
+                    <tr>
+                        <th class="p-4 w-12 text-center">STT</th>
+                        <th class="p-4">Sản phẩm</th>
+                        <th class="p-4 w-32 text-center">Tồn trước kiểm</th>
+                        <th class="p-4 w-32 text-center">Tồn thực tế</th>
+                        <th class="p-4 w-32 text-center">Chênh lệch</th>
+                        <th class="p-4">Lý do điều chỉnh</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container">
+                    <tr th:each="ct, stat : ${chiTiets}" class="hover:bg-surface-container-low/50 transition-colors">
+                        <td class="p-4 text-center font-bold text-outline" th:text="${stat.count}">1</td>
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <img th:src="${ct.sanPham.hinhAnh != null ? ct.sanPham.hinhAnh : '/images/default-book.png'}"
+                                     class="w-10 h-14 object-cover rounded-lg border border-surface-container shrink-0"/>
+                                <div>
+                                    <p class="font-bold text-on-surface" th:text="${ct.sanPham.tenSP}">Tên sách</p>
+                                    <p class="text-[11px] text-on-surface-variant font-mono" th:text="'Mã SP: #' + ${ct.sanPham.maSP} + ' | ISBN: ' + (${ct.sanPham.ISBN ?: 'N/A'})"></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-center font-mono font-bold text-on-surface" th:text="${ct.soLuongHeThong}">0</td>
+                        <td class="p-4 text-center font-mono font-bold text-primary" th:text="${ct.soLuongThucTe}">0</td>
+                        <td class="p-4 text-center font-mono font-bold">
+                            <span th:if="${ct.soLuongThucTe > ct.soLuongHeThong}" class="text-emerald-600" th:text="'+' + (${ct.soLuongThucTe - ct.soLuongHeThong}) + ' (Thừa)'"></span>
+                            <span th:if="${ct.soLuongThucTe < ct.soLuongHeThong}" class="text-rose-600" th:text="(${ct.soLuongThucTe - ct.soLuongHeThong}) + ' (Thiếu)'"></span>
+                            <span th:if="${ct.soLuongThucTe == ct.soLuongHeThong}" class="text-outline">0 (Khớp)</span>
+                        </td>
+                        <td class="p-4 text-on-surface-variant" th:text="${ct.lyDo ?: '-'}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+</body>
+</html>

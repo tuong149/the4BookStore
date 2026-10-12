@@ -1,22 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="admin_head(title)">
+    <script>
+        (function() {
+            var saved = localStorage.getItem('adminSidebarCollapsed');
+            if (saved === 'true' || (saved === null && window.innerWidth < 1024)) {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <meta content="web_dashboard" name="shell-type"/>
     <title th:text="${title} ?: 'The4BookStore - Cổng Quản Trị Hệ Thống'">The4BookStore - Cổng Quản Trị</title>
+    <!-- Google Fonts: Be Vietnam Pro & Inter for native Vietnamese typography -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&amp;family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <style>
         @layer base {
-            html, body { margin: 0; padding: 0; }
+            html, body {
+                font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            input, select, textarea, button {
+                font-family: inherit;
+            }
             body { overscroll-behavior: none; }
             main > :first-child { margin-top: 0 !important; }
             main > :last-child { margin-bottom: 0 !important; }
         }
-        ::-webkit-scrollbar { display: none; }
+        .admin-sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        .admin-sidebar-scroll::-webkit-scrollbar {
+            width: 5px;
+            display: block !important;
+        }
+        .admin-sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #94a3b8;
+            border-radius: 9999px;
+        }
+        .admin-sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
     </style>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
@@ -99,18 +129,19 @@
                         "space-xl": "2rem"
                     },
                     fontFamily: {
-                        "body-md": ["Inter"],
-                        "headline-xl-mobile": ["Plus Jakarta Sans"],
-                        "body-lg": ["Inter"],
-                        "headline-xl": ["Plus Jakarta Sans"],
-                        "display-lg-mobile": ["Plus Jakarta Sans"],
-                        "display-lg": ["Plus Jakarta Sans"],
-                        "label-md": ["Inter"],
-                        "body-sm": ["Inter"],
-                        "headline-sm": ["Plus Jakarta Sans"],
-                        "label-sm": ["Inter"],
-                        "headline-md": ["Plus Jakarta Sans"],
-                        "headline-lg": ["Plus Jakarta Sans"]
+                        sans: ["'Be Vietnam Pro'", "'Inter'", "system-ui", "-apple-system", "sans-serif"],
+                        "body-md": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "body-lg": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "body-sm": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "label-md": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "label-sm": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "headline-xl-mobile": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "headline-xl": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "display-lg-mobile": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "display-lg": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "headline-sm": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "headline-md": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"],
+                        "headline-lg": ["'Be Vietnam Pro'", "'Inter'", "sans-serif"]
                     },
                     fontSize: {
                         "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
@@ -130,17 +161,67 @@
             }
         };
     </script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            /* Override Bootstrap Variables with Tailwind Forest Folio Palette */
+            --bs-primary: #004c22;
+            --bs-primary-rgb: 0, 76, 34;
+            --bs-secondary: #904d00;
+            --bs-secondary-rgb: 144, 77, 0;
+            --bs-font-sans-serif: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+            --bs-border-radius: 0.5rem;
+        }
+        .btn-primary { --bs-btn-bg: var(--bs-primary); --bs-btn-border-color: var(--bs-primary); --bs-btn-hover-bg: #166534; --bs-btn-hover-border-color: #166534; }
+        .table { --bs-table-bg: transparent; }
+
+        /* Đảm bảo tương phản icon và text khi hover/active/click đè lên Bootstrap !important */
+        .group:hover .group-hover\:text-on-primary,
+        .group:active .group-hover\:text-on-primary,
+        .group:focus .group-hover\:text-on-primary,
+        .group:hover .group-hover\:text-white,
+        .group:active .group-hover\:text-white,
+        .group:focus .group-hover\:text-white {
+            color: #ffffff !important;
+        }
+
+        /* Smooth transitions for sidebar toggle */
+        aside#admin-sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        header#admin-header {
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pl-64 {
+            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-collapsed aside#admin-sidebar {
+            transform: translateX(-100%);
+            box-shadow: none;
+        }
+        .sidebar-collapsed header#admin-header {
+            left: 0 !important;
+        }
+        .sidebar-collapsed .pl-64 {
+            padding-left: 0 !important;
+        }
+    </style>
 </head>
 
 <body>
 
     <!-- SIDEBAR FRAGMENT -->
-    <aside th:fragment="admin_sidebar(activePage)" class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-        <div class="flex flex-col">
+    <aside id="admin-sidebar" th:fragment="admin_sidebar(activePage)" class="fixed left-0 top-0 h-screen w-64 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <div class="flex flex-col flex-1 overflow-y-auto min-h-0 admin-sidebar-scroll">
             <!-- Brand Logo Header -->
-            <div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-low">
-                <a th:href="@{/admin/dashboard}" class="flex items-center gap-space-xs">
-                    <img alt="The4BookStore Logo" class="h-9 w-auto object-contain" th:src="@{/images/logo.svg}"/>
+            <div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-low border-b border-surface-container/30">
+                <a th:href="@{/admin/dashboard}" class="flex items-center gap-2">
+                    <img alt="The4BookStore Logo" class="h-8 w-auto max-w-[160px] object-contain" th:src="@{/images/Logo4bs.png}"/>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Admin</span>
                 </a>
             </div>
 
@@ -163,14 +244,37 @@
                     <span>Bảng Điều Khiển</span>
                 </a>
 
-                <!-- Books & Inventory -->
-                <a th:href="@{/admin/books}"
-                   th:class="${activePage == 'inventory'} ? 
+                <!-- Quản Lý Gian Hàng (Marketplace) -->
+                <a th:href="@{/admin/shops}"
+                   th:class="${activePage == 'shops' || activePage == 'shop-products'} ? 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
-                    <span class="material-symbols-outlined text-[20px]">menu_book</span>
-                    <span>Quản Lý Sách</span>
+                    <span class="material-symbols-outlined text-[20px]">store</span>
+                    <span class="flex-1">Quản Lý Gian Hàng</span>
+                    <span th:if="${pendingShopCount != null and pendingShopCount > 0}"
+                          class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-black bg-red-600 text-white rounded-full shadow-sm animate-pulse"
+                          th:text="${pendingShopCount}">1</span>
                 </a>
+
+
+                <!-- Categories -->
+                <a th:href="@{/admin/categories}"
+                   th:class="${activePage == 'categories'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">category</span>
+                    <span>Quản Lý Danh Mục</span>
+                </a>
+
+                <!-- Authors -->
+                <a th:href="@{/admin/authors}"
+                   th:class="${activePage == 'authors'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">person_edit</span>
+                    <span>Quản Lý Tác Giả</span>
+                </a>
+
 
                 <!-- Orders (Mock / Upcoming) -->
                 <a th:href="@{/admin/orders}"
@@ -181,31 +285,33 @@
                     <span>Đơn Hàng</span>
                 </a>
 
-                <!-- Kho Hàng -->
-                <a th:href="@{/admin/kho}"
-                   th:class="${activePage == 'kho'} ?
-                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' :
+
+
+                <!-- Xử Lý Tranh Chấp (Disputes) -->
+                <a th:href="@{/admin/disputes}"
+                   th:class="${activePage == 'disputes'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-amber-600 text-white font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-amber-700 hover:bg-amber-50 font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">gavel</span>
+                    <span>Xử Lý Tranh Chấp</span>
+                </a>
+
+                <!-- Nhà Vận Chuyển -->
+                <a th:href="@{/admin/shipping}"
+                   th:class="${activePage == 'shipping'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
-                    <span class="material-symbols-outlined text-[20px]">warehouse</span>
-                    <span>Kho Hàng</span>
+                    <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+                    <span>Nhà Vận Chuyển</span>
                 </a>
 
-                <!-- Phiếu Nhập -->
-                <a th:href="@{/admin/kho/phieu-nhap}"
-                   th:class="${activePage == 'phieu-nhap'} ?
-                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
-                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
-                    <span class="material-symbols-outlined text-[18px]">input</span>
-                    <span>Phiếu Nhập</span>
-                </a>
-
-                <!-- Phiếu Kiểm Kê -->
-                <a th:href="@{/admin/kho/phieu-ke}"
-                   th:class="${activePage == 'phieu-ke'} ?
-                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl transition-colors bg-secondary-container/30 text-sec font-bold shadow-sm' :
-                            'flex items-center gap-space-sm pl-8 pr-space-sm py-2 mt-0.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
-                    <span class="material-symbols-outlined text-[18px]">fact_check</span>
-                    <span>Phiếu Kiểm Kê</span>
+                <!-- Cấu Hình Chiết Khấu Sàn (Admin & Manager) -->
+                <a sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'QUANLY')" th:href="@{/admin/platform-fees}"
+                   th:class="${activePage == 'platform-fees'} ? 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
+                            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
+                    <span class="material-symbols-outlined text-[20px]">percent</span>
+                    <span>Chiết Khấu Sàn</span>
                 </a>
 
                 <!-- Vouchers & Promotions -->
@@ -217,13 +323,13 @@
                     <span>Mã Giảm Giá</span>
                 </a>
 
-                <!-- Import / Export -->
+                <!-- Xuất Dữ Liệu Báo Cáo -->
                 <a th:href="@{/admin/import-export}"
                    th:class="${activePage == 'import-export'} ? 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl transition-colors bg-primary-container text-on-primary font-bold shadow-sm' : 
                             'flex items-center gap-space-sm px-space-sm py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors'">
-                    <span class="material-symbols-outlined text-[20px]">sync_alt</span>
-                    <span>Nhập / Xuất Dữ Liệu</span>
+                    <span class="material-symbols-outlined text-[20px]">file_download</span>
+                    <span>Xuất Dữ Liệu Báo Cáo</span>
                 </a>
 
                 <!-- User Accounts -->
@@ -238,7 +344,7 @@
         </div>
 
         <!-- Sidebar Footer: Current User & Logout -->
-        <div class="p-space-md border-t border-surface-container">
+        <div class="p-space-md border-t border-surface-container shrink-0 bg-surface-container-low">
             <div class="flex items-center justify-between p-space-xs rounded-xl hover:bg-surface-container transition-colors">
                 <div class="flex items-center gap-space-xs">
                     <img alt="Ảnh đại diện quản trị viên" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" th:src="${userAvatar}"/>
@@ -258,21 +364,52 @@
     </aside>
 
     <!-- HEADER FRAGMENT -->
-    <header th:fragment="admin_header" class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between">
-        <!-- Search bar -->
-        <div class="flex items-center gap-space-sm w-96">
-            <div class="flex items-center w-full bg-surface-container-low px-space-sm py-2 rounded-xl text-on-surface border border-surface-container/60 shadow-inner">
-                <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-space-xs">search</span>
-                <input class="w-full bg-transparent border-0 font-body-md text-body-md placeholder:text-on-surface-variant text-on-surface focus:outline-none" placeholder="Tìm kiếm đơn hàng, mã ISBN, tiêu đề hoặc khách hàng..." type="text"/>
-            </div>
+    <header id="admin-header" th:fragment="admin_header" class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between">
+        <!-- Backdrop overlay for mobile screen -->
+        <div id="admin-sidebar-backdrop" onclick="toggleAdminSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 hidden transition-opacity duration-300 pointer-events-auto"></div>
+
+        <!-- Left: Toggle Sidebar Button -->
+        <div class="flex items-center relative z-50">
+            <button id="sidebar-toggle-btn" onclick="toggleAdminSidebar()" class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0" title="Ẩn/Hiện Sidebar" type="button" aria-label="Ẩn/Hiện Sidebar">
+                <span id="sidebar-toggle-icon" class="material-symbols-outlined text-[22px]">menu</span>
+            </button>
         </div>
 
         <!-- Quick Controls -->
         <div class="flex items-center gap-space-md">
-            <button aria-label="Thông báo" class="relative p-2 text-on-surface-variant hover:text-on-surface rounded-xl hover:bg-surface-container transition-colors" type="button">
-                <span class="material-symbols-outlined text-[22px]">notifications</span>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest"></span>
-            </button>
+            <!-- Interactive Notification Dropdown -->
+            <div class="relative">
+                <button id="ws-notif-btn" onclick="toggleNotifDropdown(event)" aria-label="Thông báo" class="relative p-2 text-on-surface-variant hover:text-on-surface rounded-xl hover:bg-surface-container transition-colors cursor-pointer" type="button">
+                    <span class="material-symbols-outlined text-[22px]">notifications</span>
+                    <span id="ws-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-danger text-white text-[10px] font-bold rounded-full px-1 shadow-sm">0</span>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="notif-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-surface-container-lowest rounded-2xl shadow-2xl border border-surface-container z-50 overflow-hidden transform transition-all duration-200">
+                    <div class="p-3.5 border-b border-surface-container/60 flex items-center justify-between bg-surface-container-low/50">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-xs uppercase tracking-wider text-on-surface">Thông Báo Hệ Thống</span>
+                            <span id="notif-count-badge" class="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">0</span>
+                        </div>
+                        <button type="button" onclick="clearNotifBadge()" class="text-[11px] text-primary hover:underline font-semibold">Đánh dấu đã đọc</button>
+                    </div>
+
+                    <!-- Notification List -->
+                    <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-surface-container/40">
+                        <div class="p-6 text-center text-xs text-on-surface-variant">
+                            <span class="material-symbols-outlined text-3xl mb-1 text-on-surface-variant/50">notifications_paused</span>
+                            <p>Đang tải thông báo...</p>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 border-t border-surface-container/60 text-center bg-surface-container-low/30">
+                        <a href="/admin/orders" class="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1">
+                            <span>Xem tất cả đơn hàng</span>
+                            <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <div class="h-5 w-[1px] bg-surface-container"></div>
 
@@ -284,7 +421,240 @@
                 </div>
             </div>
         </div>
-    </header>
 
+        <!-- TOAST NOTIFICATION CONTAINER CHO WEBSOCKET REAL-TIME -->
+        <div id="ws-toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm pointer-events-none"></div>
+
+        <!-- SockJS & STOMP JS SCRIPTS -->
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+        <script>
+            function toggleAdminSidebar() {
+                const isCollapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('adminSidebarCollapsed', isCollapsed ? 'true' : 'false');
+
+                const btn = document.getElementById('sidebar-toggle-btn');
+                const icon = document.getElementById('sidebar-toggle-icon');
+                if (icon) {
+                    icon.textContent = isCollapsed ? 'menu' : 'menu_open';
+                }
+                if (btn) {
+                    btn.setAttribute('title', isCollapsed ? 'Mở rộng Sidebar' : 'Thu gọn Sidebar');
+                }
+
+                const backdrop = document.getElementById('admin-sidebar-backdrop');
+                if (backdrop) {
+                    if (!isCollapsed && window.innerWidth < 1024) {
+                        backdrop.classList.remove('hidden');
+                    } else {
+                        backdrop.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Sync toggle button icon state on page load
+            (function initSidebarToggleState() {
+                function syncIcon() {
+                    const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
+                    const icon = document.getElementById('sidebar-toggle-icon');
+                    const btn = document.getElementById('sidebar-toggle-btn');
+                    if (icon) {
+                        icon.textContent = isCollapsed ? 'menu' : 'menu_open';
+                    }
+                    if (btn) {
+                        btn.setAttribute('title', isCollapsed ? 'Mở rộng Sidebar' : 'Thu gọn Sidebar');
+                    }
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', syncIcon);
+                } else {
+                    syncIcon();
+                }
+            })();
+
+            let unreadNotifCount = 0;
+            const recentNotifs = [];
+
+            function toggleNotifDropdown(event) {
+                if (event) event.stopPropagation();
+                const dropdown = document.getElementById('notif-dropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                    if (!dropdown.classList.contains('hidden')) {
+                        clearNotifBadge();
+                    }
+                }
+            }
+
+            function clearNotifBadge() {
+                unreadNotifCount = 0;
+                const badge = document.getElementById('ws-badge');
+                const countBadge = document.getElementById('notif-count-badge');
+                if (badge) badge.classList.add('hidden');
+                if (countBadge) countBadge.textContent = '0';
+
+                if (recentNotifs.length > 0) {
+                    localStorage.setItem('adminLastReadDh', recentNotifs[0].maDH);
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                const dropdown = document.getElementById('notif-dropdown');
+                const btn = document.getElementById('ws-notif-btn');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    if (!dropdown.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+            });
+
+            function renderNotifList() {
+                const listEl = document.getElementById('notif-list');
+                if (!listEl) return;
+
+                if (recentNotifs.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="p-6 text-center text-xs text-on-surface-variant">
+                            <span class="material-symbols-outlined text-3xl mb-1 text-on-surface-variant/40">mark_email_read</span>
+                            <p>Chưa có thông báo nào mới</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = recentNotifs.map(n => {
+                    const formatVND = n.tongTien ? new Intl.NumberFormat('vi-VN').format(n.tongTien) + ' ₫' : '';
+                    return `
+                        <a href="/admin/orders/${n.maDH}" class="flex items-start gap-3 p-3 hover:bg-surface-container transition-colors text-left block group">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-xs text-on-surface group-hover:text-primary transition-colors">Đơn hàng #${n.maDH}</span>
+                                    <span class="text-[10px] text-on-surface-variant">${n.trangThai || 'ChoXuLy'}</span>
+                                </div>
+                                <p class="text-xs text-on-surface font-medium truncate mt-0.5">${n.tenKhachHang} - <span class="text-emerald-600 font-bold">${formatVND}</span></p>
+                                <p class="text-[10px] text-on-surface-variant mt-0.5">${n.ngayDat || 'Vừa xong'}</p>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            }
+
+            // Fetch initial recent notifications on load
+            fetch('/admin/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        recentNotifs.push(...data);
+                        renderNotifList();
+
+                        const lastRead = localStorage.getItem('adminLastReadDh');
+                        let unread = 0;
+                        if (lastRead) {
+                            for (const n of data) {
+                                if (n.maDH && n.maDH.toString() === lastRead) break;
+                                unread++;
+                            }
+                        } else {
+                            unread = data.length;
+                        }
+
+                        if (unread > 0) {
+                            unreadNotifCount = unread;
+                            const badge = document.getElementById('ws-badge');
+                            const countBadge = document.getElementById('notif-count-badge');
+                            if (badge) {
+                                badge.classList.remove('hidden');
+                                badge.textContent = unreadNotifCount;
+                            }
+                            if (countBadge) countBadge.textContent = unreadNotifCount;
+                        }
+                    }
+                })
+                .catch(() => renderNotifList());
+
+            document.addEventListener("DOMContentLoaded", function () {
+                try {
+                    const socket = new SockJS('/ws');
+                    const stompClient = Stomp.over(socket);
+                    stompClient.debug = null;
+
+                    stompClient.connect({}, function (frame) {
+                        stompClient.subscribe('/topic/admin/orders', function (message) {
+                            try {
+                                const noti = JSON.parse(message.body);
+                                unreadNotifCount++;
+                                recentNotifs.unshift(noti);
+                                if (recentNotifs.length > 20) recentNotifs.pop();
+
+                                renderNotifList();
+                                showOrderToast(noti);
+
+                                const badge = document.getElementById('ws-badge');
+                                const countBadge = document.getElementById('notif-count-badge');
+                                if (badge) {
+                                    badge.classList.remove('hidden');
+                                    badge.textContent = unreadNotifCount;
+                                }
+                                if (countBadge) countBadge.textContent = unreadNotifCount;
+                            } catch (e) {
+                                console.error("Lỗi đọc gói tin WebSocket:", e);
+                            }
+                        });
+                    }, function (err) {
+                        console.warn("WebSocket kết nối lại sau 5s...", err);
+                    });
+
+                    function showOrderToast(noti) {
+                        const container = document.getElementById('ws-toast-container');
+                        if (!container) return;
+
+                        const toast = document.createElement('div');
+                        toast.className = 'pointer-events-auto bg-surface-container-lowest text-on-surface border border-emerald-500/40 shadow-2xl rounded-2xl p-4 flex items-start gap-3.5 transform transition-all duration-300 translate-y-4 opacity-0';
+                        
+                        const formatVND = noti.tongTien ? new Intl.NumberFormat('vi-VN').format(noti.tongTien) + ' ₫' : '';
+
+                        toast.innerHTML = `
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-sm text-emerald-700">Đơn hàng mới #${noti.maDH}</span>
+                                    <span class="text-xs text-on-surface-variant">Vừa xong</span>
+                                </div>
+                                <p class="text-xs text-on-surface mt-1 font-medium">${noti.tenKhachHang} - <strong class="text-emerald-600">${formatVND}</strong></p>
+                                <p class="text-[11px] text-on-surface-variant truncate max-w-[200px]">${noti.diaChiGiao || ''}</p>
+                                <a href="/admin/orders" class="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold mt-2">
+                                    <span>Xem đơn hàng</span>
+                                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                </a>
+                            </div>
+                            <button type="button" class="text-on-surface-variant hover:text-on-surface p-1" onclick="this.parentElement.remove()">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        `;
+
+                        container.appendChild(toast);
+
+                        // Animate in
+                        requestAnimationFrame(() => {
+                            toast.classList.remove('translate-y-4', 'opacity-0');
+                        });
+
+                        // Tự động ẩn sau 8 giây
+                        setTimeout(() => {
+                            toast.classList.add('translate-y-4', 'opacity-0');
+                            setTimeout(() => toast.remove(), 300);
+                        }, 8000);
+                    }
+                } catch (err) {
+                    console.warn("Không khởi tạo được WebSocket client:", err);
+                }
+            });
+        </script>
+    </header>
 </body>
 </html>

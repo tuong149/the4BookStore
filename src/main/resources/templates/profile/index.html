@@ -97,8 +97,8 @@
                                             </div>
                                             <!-- Option to revert to Initial avatar if user has a custom uploaded avatar -->
                                             <form th:if="${userHasCustomAvatar}" th:action="@{/profile/remove-avatar}" method="post" class="inline">
-                                                <button type="submit" class="text-[11px] text-on-surface-variant hover:text-error transition-colors flex items-center gap-0.5 cursor-pointer underline" title="Gỡ ảnh tùy chỉnh, quay về dùng avatar chữ cái đầu">
-                                                    <span>Dùng avatar chữ cái</span>
+                                                <button type="submit" class="text-[11px] text-on-surface-variant hover:text-error transition-colors flex items-center gap-0.5 cursor-pointer underline" title="Gỡ ảnh tùy chỉnh, quay về dùng avatar icon mặc định">
+                                                    <span>Dùng avatar mặc định</span>
                                                 </button>
                                             </form>
                                         </div>
@@ -135,7 +135,8 @@
                                         <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
                                         <span class="font-label-md text-label-md">Ví Voucher &amp; Ưu đãi</span>
                                     </div>
-                                    <span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold">2 mã</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold"
+                                          th:text="${(totalVouchers != null and totalVouchers > 0) ? totalVouchers + ' mã' : '0 mã'}">0 mã</span>
                                 </a>
                                 <a class="flex items-center justify-between px-space-md py-3 rounded-xl hover:bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors" href="#address-section">
                                     <div class="flex items-center gap-space-sm">
@@ -198,9 +199,11 @@
                                 </div>
                                 <div class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-md flex items-center justify-between border border-surface-container">
                                     <div class="flex flex-col">
-                                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Voucher có sẵn</span>
-                                        <span class="font-display-lg text-display-lg font-bold text-secondary mt-1">02</span>
-                                        <span class="font-body-sm text-body-sm text-on-surface-variant">Sắp hết hạn: 1 mã</span>
+                                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Voucher khả dụng</span>
+                                        <span class="font-display-lg text-display-lg font-bold text-secondary mt-1"
+                                              th:text="${(totalVouchers != null and totalVouchers > 0) ? (totalVouchers < 10 ? '0' + totalVouchers : totalVouchers) : '00'}">00</span>
+                                        <span class="font-body-sm text-body-sm text-on-surface-variant"
+                                              th:text="${(expiringSoonCount != null and expiringSoonCount > 0) ? 'Sắp hết hạn: ' + expiringSoonCount + ' mã' : ((totalVouchers != null and totalVouchers > 0) ? 'Áp dụng tại giỏ hàng' : 'Chưa có ưu đãi mới')}">Chưa có ưu đãi mới</span>
                                     </div>
                                     <div class="w-12 h-12 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-secondary">
                                         <span class="material-symbols-outlined text-[26px]">loyalty</span>
@@ -429,10 +432,10 @@
                                                       th:text="${#numbers.formatDecimal(dh.tongTien, 0, 'POINT', 0, 'COMMA') + '₫'}">595.000₫</span>
                                             </div>
                                             <div class="flex items-center gap-space-sm self-end sm:self-auto">
-                                                <button class="px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 cursor-pointer" type="button">
+                                                <a th:href="@{'/don-hang/' + ${dh.maDH}}" class="px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 cursor-pointer">
                                                     <span class="material-symbols-outlined text-[16px]">receipt_long</span>
                                                     <span>Chi tiết đơn</span>
-                                                </button>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -518,73 +521,122 @@
 
                             <!-- SECTION 4: Available Vouchers -->
                             <section class="bg-surface-container-lowest rounded-2xl shadow-sm p-space-lg flex flex-col gap-space-md border border-surface-container" id="voucher-section">
-                                <div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-sm border-b border-surface-container gap-2">
                                     <div>
                                         <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Kho Voucher Của Tôi</h2>
-                                        <p class="font-body-sm text-body-sm text-on-surface-variant">Mã giảm giá và ưu đãi áp dụng khi mua sách</p>
+                                        <p class="font-body-sm text-body-sm text-on-surface-variant">Mã giảm giá bạn đã thu thập từ Toàn Sàn The4BookStore &amp; Gian Hàng Đối Tác</p>
                                     </div>
-                                    <button class="font-label-md text-label-md text-primary font-semibold hover:underline cursor-pointer" type="button" onclick="alert('Nhập mã voucher tại bước Thanh toán Giỏ hàng!')">
-                                        Nhập mã mới
+                                    <div class="flex items-center gap-2">
+                                        <a th:href="@{/san-voucher}" class="px-3.5 py-1.5 rounded-xl border border-secondary text-secondary hover:bg-secondary hover:text-white font-label-md text-xs font-bold transition-all flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[16px]">celebration</span>
+                                            <span>Săn thêm mã</span>
+                                        </a>
+                                        <a th:href="@{/gio-hang}" class="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-xs font-bold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm">
+                                            <span class="material-symbols-outlined text-[16px]">shopping_cart</span>
+                                            <span>Đến giỏ hàng</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Filter Tabs: Tất cả / Voucher Sàn / Voucher Shop -->
+                                <div class="flex items-center gap-2 border-b border-surface-container/60 pb-2 overflow-x-auto" th:if="${availableVouchers != null and !#lists.isEmpty(availableVouchers)}">
+                                    <button type="button" onclick="filterVoucherTab('all', this)"
+                                            class="voucher-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary shadow-xs transition-all cursor-pointer">
+                                        <span>Tất cả</span>
+                                        <span class="ml-1 opacity-80" th:text="'(' + ${totalVouchers} + ')'">(0)</span>
+                                    </button>
+                                    <button type="button" onclick="filterVoucherTab('san', this)"
+                                            class="voucher-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">store</span>
+                                        <span>Voucher Sàn</span>
+                                        <span class="ml-0.5 text-primary font-bold" th:text="'(' + ${totalPlatformVouchers} + ')'">(0)</span>
+                                    </button>
+                                    <button type="button" onclick="filterVoucherTab('shop', this)"
+                                            class="voucher-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">storefront</span>
+                                        <span>Voucher Shop</span>
+                                        <span class="ml-0.5 text-amber-600 font-bold" th:text="'(' + ${totalShopVouchers} + ')'">(0)</span>
                                     </button>
                                 </div>
 
-                                <!-- Vouchers Grid -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-                                    <!-- Voucher 1 -->
-                                    <div class="bg-surface-container-low rounded-2xl p-space-md relative overflow-hidden flex flex-col justify-between gap-space-md border border-surface-container/60">
-                                        <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-primary/5 pointer-events-none"></div>
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex items-center gap-2.5">
-                                                <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold font-headline-sm">
-                                                    %
-                                                </div>
-                                                <div>
-                                                    <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Mã: THE4BOOK15</span>
-                                                    <h4 class="font-headline-md text-headline-md font-bold text-on-surface">Giảm 15% Tối Đa 60K</h4>
-                                                </div>
-                                            </div>
-                                            <span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-bold">Khả dụng</span>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <p class="font-body-sm text-body-sm text-on-surface-variant">Áp dụng cho mọi đơn hàng sách từ 200.000₫</p>
-                                            <p class="font-label-sm text-label-sm text-error flex items-center gap-1 font-medium">
-                                                <span class="material-symbols-outlined text-[14px]">timer</span> Có hiệu lực toàn hệ thống
-                                            </p>
-                                        </div>
-                                        <div class="flex items-center justify-between pt-space-xs border-t border-surface-container">
-                                            <span class="text-body-sm text-on-surface-variant font-body-sm">Đã lưu vào ví</span>
-                                            <a th:href="@{/gio-hang}" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors">
-                                                Dùng ngay
-                                            </a>
-                                        </div>
+                                <!-- Empty State when no collected vouchers exist -->
+                                <div th:if="${availableVouchers == null or #lists.isEmpty(availableVouchers)}" 
+                                     class="flex flex-col items-center justify-center py-12 px-4 text-center bg-surface-container-low/50 rounded-2xl border border-dashed border-surface-container">
+                                    <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
+                                        <span class="material-symbols-outlined text-[32px]">confirmation_number</span>
                                     </div>
+                                    <h3 class="font-headline-sm text-base font-bold text-on-surface">Ví Voucher trống</h3>
+                                    <p class="font-body-sm text-xs text-on-surface-variant max-w-md mt-1">Bạn chưa thu thập mã giảm giá nào. Hãy vào trang "Săn Voucher" hoặc ghé thăm các Gian Hàng để thu thập mã ưu đãi hấp dẫn!</p>
+                                    <a th:href="@{/san-voucher}" class="mt-4 inline-flex items-center gap-1.5 px-space-lg py-2.5 rounded-xl bg-gradient-to-r from-secondary to-tertiary text-on-secondary text-xs font-bold hover:opacity-90 transition-all shadow-md">
+                                        <span class="material-symbols-outlined text-[16px]">confirmation_number</span>
+                                        <span>Săn Voucher ngay</span>
+                                    </a>
+                                </div>
 
-                                    <!-- Voucher 2 -->
-                                    <div class="bg-surface-container-low rounded-2xl p-space-md relative overflow-hidden flex flex-col justify-between gap-space-md border border-surface-container/60">
-                                        <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-secondary/5 pointer-events-none"></div>
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex items-center gap-2.5">
-                                                <div class="w-10 h-10 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-bold">
-                                                    <span class="material-symbols-outlined text-[20px]">local_shipping</span>
-                                                </div>
-                                                <div>
-                                                    <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Mã: FREESHIP</span>
-                                                    <h4 class="font-headline-md text-headline-md font-bold text-on-surface">Miễn Phí Vận Chuyển</h4>
-                                                </div>
+                                <!-- Vouchers Grid with Platform / Shop classification -->
+                                <div th:unless="${availableVouchers == null or #lists.isEmpty(availableVouchers)}" 
+                                     id="voucherCardsContainer"
+                                     class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                                    <div th:each="km : ${availableVouchers}" 
+                                         class="user-voucher-card bg-surface-container-low rounded-2xl p-space-md relative overflow-hidden flex flex-col justify-between gap-space-md border border-surface-container/60 hover:shadow-md transition-shadow"
+                                         th:data-type="${km.shop == null or km.phamVi == 'TOAN_SAN' ? 'san' : 'shop'}">
+                                        <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-primary/5 pointer-events-none"></div>
+
+                                        <!-- Scope Badge: Phân loại Voucher Sàn vs Voucher Shop -->
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div th:if="${km.shop == null or km.phamVi == 'TOAN_SAN'}"
+                                                 class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20">
+                                                <span class="material-symbols-outlined text-[13px]">store</span>
+                                                <span>Voucher Toàn Sàn</span>
                                             </div>
-                                            <span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-bold">Khả dụng</span>
+                                            <div th:if="${km.shop != null and km.phamVi != 'TOAN_SAN'}"
+                                                 class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                                <span class="material-symbols-outlined text-[13px]">storefront</span>
+                                                <span th:text="'Voucher Shop: ' + ${km.shop.tenShop}">Voucher Shop</span>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-tertiary-fixed text-on-tertiary-fixed">Khả dụng</span>
                                         </div>
+
+                                        <div class="flex items-start gap-2.5">
+                                            <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold font-headline-sm shrink-0">
+                                                <span th:if="${km.loaiGiam == 'PhanTram'}">%</span>
+                                                <span th:if="${km.loaiGiam == 'Freeship'}" class="material-symbols-outlined text-[20px]">local_shipping</span>
+                                                <span th:if="${km.loaiGiam != 'PhanTram' and km.loaiGiam != 'Freeship'}" class="material-symbols-outlined text-[20px]">payments</span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold font-mono" th:text="'Mã: ' + ${km.maCode}">Mã: KM01</span>
+                                                <h4 class="font-headline-md text-headline-md font-bold text-on-surface truncate" th:text="${km.tenKM}">Tên Voucher</h4>
+                                            </div>
+                                        </div>
+
                                         <div class="space-y-1">
-                                            <p class="font-body-sm text-body-sm text-on-surface-variant">Miễn phí giao hàng toàn quốc cho mọi hóa đơn từ 250.000₫</p>
-                                            <p class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 font-medium">
-                                                <span class="material-symbols-outlined text-[14px]">event</span> Tự động áp dụng
+                                            <p class="font-body-sm text-body-sm text-on-surface font-semibold">
+                                                <span th:if="${km.loaiGiam == 'PhanTram'}" th:text="'Giảm ' + ${km.giaTriGiam} + '%' + (${km.giamToiDa != null ? ' (Tối đa ' + #numbers.formatDecimal(km.giamToiDa, 0, 'POINT', 0, 'COMMA') + '₫)' : ''})">Giảm 10%</span>
+                                                <span th:if="${km.loaiGiam == 'TienCoDinh'}" th:text="'Giảm ' + ${#numbers.formatDecimal(km.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + '₫ trực tiếp'">Giảm 50.000₫</span>
+                                                <span th:if="${km.loaiGiam == 'Freeship'}" th:text="'Miễn phí vận chuyển ' + (${km.giaTriGiam != null ? '(Tối đa ' + #numbers.formatDecimal(km.giaTriGiam, 0, 'POINT', 0, 'COMMA') + '₫)' : ''})">Freeship</span>
+                                            </p>
+                                            <p class="font-body-sm text-xs text-on-surface-variant" th:text="${(km.donToiThieu != null and km.donToiThieu > 0) ? 'Áp dụng cho đơn hàng từ ' + #numbers.formatDecimal(km.donToiThieu, 0, 'POINT', 0, 'COMMA') + '₫' : 'Áp dụng cho mọi giá trị đơn hàng'}">Đơn tối thiểu</p>
+                                            <p class="font-label-sm text-label-sm text-error flex items-center gap-1 font-medium" th:if="${km.ngayKetThuc != null}">
+                                                <span class="material-symbols-outlined text-[14px]">timer</span>
+                                                <span th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</span>
                                             </p>
                                         </div>
-                                        <div class="flex items-center justify-between pt-space-xs border-t border-surface-container">
-                                            <span class="text-body-sm text-on-surface-variant font-body-sm">Áp dụng tự động</span>
-                                            <button onclick="navigator.clipboard.writeText('FREESHIP'); alert('Đã sao chép mã FREESHIP!')" class="px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer" type="button">
+
+                                        <div class="flex items-center justify-between pt-space-xs border-t border-surface-container gap-2">
+                                            <button th:data-code="${km.maCode}"
+                                                    onclick="copyVoucherCode(this.getAttribute('data-code'))" 
+                                                    class="px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer" type="button">
                                                 Sao chép mã
                                             </button>
+                                            <div class="flex items-center gap-1.5">
+                                                <a th:if="${km.shop != null}" th:href="@{'/shop/' + ${km.shop.slug}}" 
+                                                   class="px-3 py-1.5 rounded-xl border border-amber-600 text-amber-700 hover:bg-amber-600 hover:text-white font-label-md text-xs font-semibold transition-colors">
+                                                    Ghé Shop
+                                                </a>
+                                                <a th:href="@{/gio-hang}" class="px-3 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors shadow-sm">
+                                                    Dùng ngay
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -642,6 +694,36 @@
 
     <!-- Interactive JavaScript -->
     <script>
+        function filterVoucherTab(type, btn) {
+            document.querySelectorAll('.voucher-tab-btn').forEach(b => {
+                b.className = 'voucher-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer flex items-center gap-1';
+            });
+            btn.className = 'voucher-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary shadow-xs transition-all cursor-pointer flex items-center gap-1';
+
+            const cards = document.querySelectorAll('.user-voucher-card');
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                if (type === 'all' || cardType === type) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function copyVoucherCode(code) {
+            if (!code) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Đã sao chép mã giảm giá: ' + code);
+                }).catch(() => {
+                    prompt('Mã giảm giá:', code);
+                });
+            } else {
+                prompt('Mã giảm giá:', code);
+            }
+        }
+
         document.querySelectorAll('.genre-pill').forEach(pill => {
             pill.addEventListener('click', () => {
                 const isSelected = pill.getAttribute('data-selected') === 'true';

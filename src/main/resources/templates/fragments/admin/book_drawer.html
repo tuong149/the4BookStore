@@ -2,61 +2,113 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-    <!-- Slide-over Drawer / Modal for Book Details (Add / Edit) Fragment -->
-    <div th:fragment="book_drawer(categories)" class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="quickEditModal">
+    <!-- Slide-over Drawer / Modal for Product Details (Add / Edit) Fragment -->
+    <div th:fragment="book_drawer(categories, authors, publishers)" class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="quickEditModal">
         <div class="w-full max-w-lg bg-surface-container-lowest h-full shadow-2xl flex flex-col p-space-lg overflow-y-auto animate-in slide-in-from-right duration-200 rounded-l-3xl border-l border-surface-container">
             <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
                 <div class="flex items-center gap-space-xs">
-                    <span class="material-symbols-outlined text-primary text-[24px]">edit_note</span>
-                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modalDrawerTitle">Thêm Tựa Sách Mới</h2>
+                    <span class="material-symbols-outlined text-primary text-[24px]">inventory_2</span>
+                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modalDrawerTitle">Thêm Sản Phẩm Mới</h2>
                 </div>
                 <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closeBookModal()" type="button">
                     <span class="material-symbols-outlined text-[22px]">close</span>
                 </button>
             </div>
 
-            <!-- Book Edit Form -->
-            <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/books/save}" method="post">
+            <!-- Product Edit Form -->
+            <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/products/save}" method="post">
                 <input type="hidden" name="maSP" id="modalMaSP"/>
 
+                <!-- Product Name -->
                 <div class="flex flex-col gap-1">
-                    <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalTitle">Tiêu Đề Sách *</label>
-                    <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="modalTitle" name="tenSP" placeholder="Nhập tiêu đề tác phẩm..." required="" type="text"/>
+                    <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalTitle">Tên Sản Phẩm *</label>
+                    <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                           id="modalTitle" name="tenSP" placeholder="Nhập tên sách, văn phòng phẩm hoặc quà tặng..." required="" type="text"/>
                 </div>
 
+                <!-- Product Type & Category -->
                 <div class="grid grid-cols-2 gap-space-sm">
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalIsbn">Mã ISBN-13</label>
-                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" id="modalIsbn" name="ISBN" placeholder="978-..." type="text"/>
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalLoaiSP">Phân Loại *</label>
+                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                id="modalLoaiSP" name="loaiSP" required="" onchange="toggleBookFields(this.value)">
+                            <option value="Sach">Sách</option>
+                            <option value="VanPhongPham">Văn phòng phẩm</option>
+                            <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                        </select>
                     </div>
                     <div class="flex flex-col gap-1">
                         <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalCategory">Danh Mục *</label>
-                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="modalCategory" name="maDanhMuc" required="">
+                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                id="modalCategory" name="maDanhMuc" required="">
                             <option th:each="c : ${categories}" th:value="${c.maDanhMuc}" th:text="${c.tenDanhMuc}">Văn học</option>
                         </select>
                     </div>
                 </div>
 
+                <!-- Author & Publisher (For Books) -->
+                <div class="grid grid-cols-2 gap-space-sm" id="authorPublisherGroup">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalAuthor">Tác Giả (Sách)</label>
+                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                id="modalAuthor" name="maTacGia">
+                            <option value="">-- Chưa gán tác giả --</option>
+                            <option th:each="a : ${authors}" th:value="${a.maTacGia}" th:text="${a.tenTacGia}">Matt Haig</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalPublisher">Nhà Xuất Bản (Sách)</label>
+                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                id="modalPublisher" name="maNXB">
+                            <option value="">-- Chưa gán NXB --</option>
+                            <option th:each="p : ${publishers}" th:value="${p.maNXB}" th:text="${p.tenNXB}">NXB Trẻ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ISBN & Stock -->
                 <div class="grid grid-cols-2 gap-space-sm">
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalStock">Tồn Kho (Bản in) *</label>
-                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" id="modalStock" name="soLuongTon" min="0" required="" type="number" value="25"/>
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalIsbn">Mã ISBN-13 (nếu có)</label>
+                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" 
+                               id="modalIsbn" name="ISBN" placeholder="Để trống nếu không phải sách" type="text"/>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalPrice">Giá Niêm Yết (VNĐ) *</label>
-                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" id="modalPrice" name="giaBan" min="0" required="" step="1000" type="number" value="150000"/>
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalStock">Tồn Kho (Số lượng) *</label>
+                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" 
+                               id="modalStock" name="soLuongTon" min="0" required="" type="number" value="25"/>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
-                    <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalMoTa">Đường dẫn ảnh bìa / Mô tả</label>
-                    <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="modalMoTa" name="moTa" placeholder="https://... hoặc mô tả ngắn" type="text"/>
+                <!-- Price & Status -->
+                <div class="grid grid-cols-2 gap-space-sm">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalPrice">Giá Niêm Yết (VNĐ) *</label>
+                        <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm font-mono border border-transparent focus:border-primary/30" 
+                               id="modalPrice" name="giaBan" min="0" required="" step="1000" type="number" value="150000"/>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalTrangThai">Trạng Thái Bán *</label>
+                        <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                id="modalTrangThai" name="trangThai" required="">
+                            <option value="DangBan">Đang Bán</option>
+                            <option value="HetHang">Hết Hàng</option>
+                            <option value="NgungBan">Ngừng Bán</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Notification Toast Box inside drawer -->
+                <!-- Image URL / Description -->
+                <div class="flex flex-col gap-1">
+                    <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalMoTa">Đường dẫn ảnh bìa / Mô tả</label>
+                    <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                           id="modalMoTa" name="moTa" placeholder="https://... hoặc giới thiệu ngắn" type="text"/>
+                </div>
+
+                <!-- Notification Info Box inside drawer -->
                 <div class="p-space-sm bg-primary-fixed/30 rounded-xl flex items-start gap-space-xs text-on-primary-fixed">
                     <span class="material-symbols-outlined text-[18px] text-primary">info</span>
-                    <span class="font-body-sm text-body-sm">Lưu thay đổi sẽ đồng bộ ngay lập tức với điểm bán và trang chủ The4BookStore.</span>
+                    <span class="font-body-sm text-body-sm">Lưu thay đổi sẽ đồng bộ ngay lập tức với hệ thống bán hàng và trang chủ The4BookStore.</span>
                 </div>
 
                 <!-- Drawer Action Controls -->
@@ -65,7 +117,7 @@
                         Hủy
                     </button>
                     <button class="px-space-lg py-2.5 bg-primary-container text-on-primary rounded-xl font-label-md text-label-md font-bold hover:bg-primary transition-colors shadow-sm" type="submit">
-                        Lưu Bản Ghi Sách
+                        Lưu Sản Phẩm
                     </button>
                 </div>
             </form>

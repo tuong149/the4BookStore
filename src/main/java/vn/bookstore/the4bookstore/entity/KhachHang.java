@@ -20,7 +20,7 @@ public class KhachHang {
     @Column(length = 500)
     private String anhDaiDien;
     
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maTaiKhoan", unique = true)
     private TaiKhoan taiKhoan;
     

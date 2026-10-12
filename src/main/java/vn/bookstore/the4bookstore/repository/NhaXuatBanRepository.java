@@ -1,8 +1,14 @@
 package vn.bookstore.the4bookstore.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+
 import vn.bookstore.the4bookstore.entity.NhaXuatBan;
 
-@Repository
+import java.util.Optional;
+import java.util.List;
+
+
 public interface NhaXuatBanRepository extends JpaRepository<NhaXuatBan, Integer> {
+    Optional<NhaXuatBan> findByTenNXB(String tenNXB);
+    Optional<NhaXuatBan> findByTenNXBIgnoreCase(String tenNXB);
+    List<NhaXuatBan> findByTenNXBContainingIgnoreCase(String keyword);
 }

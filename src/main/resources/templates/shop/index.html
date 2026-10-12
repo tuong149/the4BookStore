@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head(${shop.tenShop} + ' - Gian Hàng Sách')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('shop')}"></header>
+
+    <main class="w-full pt-28 md:pt-32 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-8">
+        <!-- Breadcrumb Navigation -->
+        <nav class="flex items-center gap-2 text-xs text-on-surface-variant mb-5">
+            <a th:href="@{/}" class="hover:text-primary transition-colors flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">home</span>
+                <span>Trang chủ</span>
+            </a>
+            <span class="text-on-surface-variant/40">/</span>
+            <span class="text-on-surface-variant">Gian hàng</span>
+            <span class="text-on-surface-variant/40">/</span>
+            <span class="text-on-surface font-semibold truncate max-w-[200px] sm:max-w-none" th:text="${shop.tenShop}">Tên Gian Hàng</span>
+        </nav>
+
+        <!-- Shop Header & Banner -->
+        <div class="rounded-3xl overflow-hidden bg-surface-container-lowest border border-surface-container shadow-sm mb-8">
+            <!-- Banner Section -->
+            <div class="h-44 sm:h-56 md:h-64 w-full relative bg-surface-container-low">
+                <img th:src="${shop.banner != null ? shop.banner : 'https://images.unsplash.com/photo-1507842229451-7f01be45c06b?w=1200'}"
+                     alt="Banner Shop" class="w-full h-full object-cover"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            </div>
+
+            <!-- Shop Info Card Section -->
+            <div class="px-6 pb-6 pt-4 md:px-8 md:pb-8 relative bg-surface-container-lowest">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                    <div class="flex flex-col sm:flex-row items-start gap-5 relative z-20 w-full lg:w-auto">
+                        <!-- Logo with prominent white ring -->
+                        <div class="-mt-14 sm:-mt-16 shrink-0 relative z-20">
+                            <img th:src="${shop.logo != null ? shop.logo : '/images/default-shop.png'}"
+                                 alt="Shop Logo" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl md:rounded-3xl object-cover ring-4 ring-surface-container-lowest shadow-xl bg-surface-container-lowest"/>
+                        </div>
+                        
+                        <!-- Shop Info Text -->
+                        <div class="pt-1 sm:pt-2 flex-1">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <h1 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight" th:text="${shop.tenShop}">Tên Gian Hàng</h1>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary text-on-primary shadow-xs flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px]">verified</span>
+                                    <span>Gian Hàng Xác Thực</span>
+                                </span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant mt-2 max-w-2xl leading-relaxed" th:text="${shop.moTa ?: 'Gian hàng sách chọn lọc chính hãng trên The4BookStore'}">Mô tả gian hàng</p>
+                            
+                            <!-- Badges row -->
+                            <div class="flex items-center gap-4 text-xs text-on-surface-variant mt-3 flex-wrap">
+                                <span th:if="${shop.diaChiShop}" class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px] text-primary">location_on</span>
+                                    <span th:text="${shop.diaChiShop}">Địa chỉ</span>
+                                </span>
+                                <span th:if="${shop.soDienThoai}" class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px] text-primary">call</span>
+                                    <span th:text="${shop.soDienThoai}">SĐT</span>
+                                </span>
+                                <span class="flex items-center gap-1 font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg">
+                                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                                    <span th:text="${page.totalElements} + ' cuốn sách'">15 cuốn sách</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Quick Actions & Store Metrics -->
+                    <div class="flex items-center sm:items-end lg:items-center gap-3 self-stretch lg:self-auto justify-end shrink-0 pt-2 lg:pt-0">
+                        <a th:if="${shop.soDienThoai}" th:href="'tel:' + ${shop.soDienThoai}"
+                           class="px-4 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">call</span>
+                            <span>Liên Hệ Shop</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Vouchers Section -->
+        <div th:if="${vouchers != null and !vouchers.isEmpty()}" class="mb-10">
+            <div class="flex items-center justify-between gap-2 mb-4">
+                <h2 class="text-base font-bold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                    <span>Mã Giảm Giá Của Gian Hàng</span>
+                </h2>
+                <span class="text-xs text-on-surface-variant font-medium" th:text="${vouchers.size()} + ' mã có hiệu lực'"></span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div th:each="v : ${vouchers}" 
+                     class="voucher-ticket relative overflow-hidden rounded-3xl border-2 border-dashed border-primary bg-gradient-to-br from-primary/5 via-surface-container-lowest to-primary/10 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 shadow-xs flex items-stretch justify-between">
+                    
+                    <!-- Left: Voucher Info -->
+                    <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-2 min-w-0 pr-3">
+                        <div>
+                            <!-- Type Badge -->
+                            <div class="inline-flex items-center gap-1 w-fit px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary">
+                                <span class="material-symbols-outlined text-[13px]"
+                                      th:if="${v.loaiGiam == 'PhanTram'}">percent</span>
+                                <span class="material-symbols-outlined text-[13px]"
+                                      th:if="${v.loaiGiam == 'Freeship'}">local_shipping</span>
+                                <span class="material-symbols-outlined text-[13px]"
+                                      th:if="${v.loaiGiam != 'PhanTram' and v.loaiGiam != 'Freeship'}">payments</span>
+                                
+                                <span th:if="${v.loaiGiam == 'PhanTram'}">% GIẢM %</span>
+                                <span th:if="${v.loaiGiam == 'Freeship'}">FREESHIP</span>
+                                <span th:if="${v.loaiGiam != 'PhanTram' and v.loaiGiam != 'Freeship'}">GIẢM TIỀN</span>
+                            </div>
+
+                            <!-- Big Discount Text -->
+                            <div class="text-2xl sm:text-[26px] font-black tracking-tight text-primary mt-1.5 leading-tight">
+                                <span th:if="${v.loaiGiam == 'PhanTram'}" th:text="'Giảm ' + ${v.giaTriGiam} + '%'">Giảm 20%</span>
+                                <span th:if="${v.loaiGiam == 'TienCoDinh'}" th:text="'Giảm ' + ${#numbers.formatDecimal(v.giaTriGiam, 0, 'POINT', 0, 'COMMA')} + '₫'">Giảm 20.000₫</span>
+                                <span th:if="${v.loaiGiam == 'Freeship'}">Freeship</span>
+                            </div>
+
+                            <!-- Voucher Campaign Name / Code -->
+                            <p class="font-bold text-xs sm:text-sm text-on-surface truncate mt-1" 
+                               th:text="${v.tenKM != null and !v.tenKM.isEmpty() ? v.tenKM : v.maCode}">Khai Trương</p>
+                        </div>
+
+                        <!-- Conditions & Expiry -->
+                        <div class="space-y-0.5 text-[11px] text-on-surface-variant pt-1 border-t border-primary/10">
+                            <p th:if="${v.giamToiDa != null and v.giamToiDa > 0}" class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[13px] text-outline">info</span>
+                                <span th:text="'Tối đa ' + ${#numbers.formatDecimal(v.giamToiDa, 0, 'POINT', 0, 'COMMA')} + '₫'">Tối đa 50.000₫</span>
+                            </p>
+                            <p th:if="${v.donToiThieu != null and v.donToiThieu > 0}" class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[13px] text-outline">shopping_cart</span>
+                                <span th:text="'Đơn từ ' + ${#numbers.formatDecimal(v.donToiThieu, 0, 'POINT', 0, 'COMMA')} + '₫'">Đơn từ 0₫</span>
+                            </p>
+                            <p th:if="${v.ngayKetThuc != null}" class="flex items-center gap-1.5 text-error font-medium">
+                                <span class="material-symbols-outlined text-[13px]">timer</span>
+                                <span th:text="'HSD: ' + ${#temporals.format(v.ngayKetThuc, 'dd/MM/yyyy')}">HSD: 02/11/2026</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Save Button Area separated by vertical perforation line -->
+                    <div class="w-[76px] sm:w-[84px] border-l-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-1.5 p-3 shrink-0 bg-primary/5">
+                        <!-- Already Saved State -->
+                        <div th:if="${savedIds != null and savedIds.contains(v.maKM)}"
+                             class="flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-[28px] text-primary">bookmark_added</span>
+                            <span class="text-[10px] font-bold text-primary text-center leading-tight">Đã lưu</span>
+                        </div>
+                        <!-- Save Button -->
+                        <button th:unless="${savedIds != null and savedIds.contains(v.maKM)}"
+                                type="button"
+                                th:data-makm="${v.maKM}"
+                                th:data-code="${v.maCode}"
+                                onclick="saveShopVoucher(this)"
+                                class="voucher-save-btn flex flex-col items-center gap-1 cursor-pointer group transition-transform hover:scale-110 border-0 bg-transparent active:scale-95 p-0"
+                                title="Lưu mã vào ví voucher của bạn">
+                            <span class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-primary transition-colors">bookmark_add</span>
+                            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary text-center leading-tight transition-colors">Lưu mã</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Books Section -->
+        <div class="mb-12">
+            <!-- Toolbar: Header & Search Form -->
+            <div class="bg-surface-container-lowest border border-surface-container rounded-2xl p-4 sm:p-5 shadow-xs mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">local_fire_department</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base sm:text-lg font-bold text-on-surface">
+                                <span th:if="${keyword != null and !keyword.isEmpty()}">Kết Quả Tìm Kiếm</span>
+                                <span th:unless="${keyword != null and !keyword.isEmpty()}">Sách Bán Chạy Của Gian Hàng</span>
+                            </h2>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary" 
+                                  th:text="${page.totalElements} + ' cuốn sách'">2 cuốn sách</span>
+                        </div>
+                        <p th:if="${keyword != null and !keyword.isEmpty()}" class="text-xs text-on-surface-variant mt-0.5" 
+                           th:text="'Tìm theo từ khóa \'' + ${keyword} + '\''"></p>
+                        <p th:unless="${keyword != null and !keyword.isEmpty()}" class="text-xs text-on-surface-variant mt-0.5">
+                            Sắp xếp theo lượt bán chạy nhất của gian hàng
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Search form -->
+                <form method="get" th:action="@{'/shop/' + ${shop.slug}}" class="relative flex items-center w-full md:w-80 shrink-0">
+                    <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">search</span>
+                    <input type="text" name="q" th:value="${keyword}" placeholder="Tìm sách trong gian hàng..."
+                           class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-surface-container-low border border-surface-container text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"/>
+                    <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{'/shop/' + ${shop.slug}}"
+                       class="absolute right-3 text-on-surface-variant hover:text-error text-xs flex items-center" title="Xóa tìm kiếm">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </a>
+                </form>
+            </div>
+
+            <!-- Các loại sách (Filter Pills ngang Giống 100% trang Tất Cả Sản Phẩm) -->
+            <div th:if="${!#lists.isEmpty(navbarCategoriesSach)}" class="mb-space-md">
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scroll-smooth horizontal-scroll-category flex-nowrap">
+                    <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1.5 pr-1">
+                        <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
+                        <span>Loại sách:</span>
+                    </span>
+                    
+                    <button type="button" onclick="filterShopCategory('all', this)"
+                            class="shop-cat-filter-btn shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1 cursor-pointer border-0">
+                        <span class="material-symbols-outlined text-[14px]">apps</span>
+                        <span>Tất cả sách</span>
+                    </button>
+
+                    <button type="button" th:each="cat : ${navbarCategoriesSach}"
+                            th:data-cat-name="${cat.tenDanhMuc}"
+                            onclick="filterShopCategory(this.getAttribute('data-cat-name'), this)"
+                            class="shop-cat-filter-btn shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs cursor-pointer">
+                        <span th:text="${cat.tenDanhMuc}">Tiểu Thuyết &amp; Văn Học</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Books Grid (4 cột chuẩn trang Tất Cả Sản Phẩm, khoảng cách gap-space-md) -->
+            <div th:unless="${books.isEmpty()}" 
+                 id="shopBooksGrid"
+                 class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-space-md">
+                <th:block th:each="book : ${books}">
+                    <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                </th:block>
+            </div>
+
+            <!-- Empty Filter State -->
+            <div id="shopCategoryNoMatch" class="hidden py-16 text-center bg-surface-container-lowest rounded-3xl border border-surface-container shadow-xs">
+                <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-2">filter_alt_off</span>
+                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sách trong loại này</h3>
+                <p class="text-xs text-on-surface-variant max-w-sm mx-auto">Gian hàng hiện chưa có sách thuộc thể loại này.</p>
+                <button type="button" onclick="filterShopCategory('all', document.querySelector('.shop-cat-filter-btn'))"
+                        class="mt-4 px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all cursor-pointer">
+                    Xem tất cả sách của gian hàng
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${books.isEmpty()}" class="p-16 text-center text-on-surface-variant bg-surface-container-lowest rounded-3xl border border-surface-container shadow-xs">
+                <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-3">menu_book</span>
+                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sách nào</h3>
+                <p class="text-xs text-on-surface-variant max-w-md mx-auto" th:if="${keyword != null and !keyword.isEmpty()}">
+                    Không tìm thấy sách nào phù hợp với từ khóa "<span class="font-semibold text-primary" th:text="${keyword}"></span>" trong gian hàng.
+                </p>
+                <p class="text-xs text-on-surface-variant max-w-md mx-auto" th:if="${keyword == null or keyword.isEmpty()}">
+                    Gian hàng hiện chưa có sản phẩm sách nào đang mở bán.
+                </p>
+                <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{'/shop/' + ${shop.slug}}"
+                   class="inline-block mt-4 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-all">
+                    Xem tất cả sách của shop
+                </a>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${page.totalPages > 1}" class="flex items-center justify-center gap-2 mt-8">
+                <a th:if="${page.hasPrevious()}" th:href="@{'/shop/' + ${shop.slug}(q=${keyword}, page=${page.number - 1})}"
+                   class="px-4 py-2 rounded-xl bg-surface-container text-xs font-bold hover:bg-surface-container-high transition-all flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                    <span>Trước</span>
+                </a>
+                <span class="text-xs text-on-surface-variant font-medium px-3" th:text="'Trang ' + (${page.number} + 1) + ' / ' + ${page.totalPages}"></span>
+                <a th:if="${page.hasNext()}" th:href="@{'/shop/' + ${shop.slug}(q=${keyword}, page=${page.number + 1})}"
+                   class="px-4 py-2 rounded-xl bg-surface-container text-xs font-bold hover:bg-surface-container-high transition-all flex items-center gap-1">
+                    <span>Sau</span>
+                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Store Guarantees / Service Promises -->
+        <div class="mt-8 border-t border-surface-container pt-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">verified</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-on-surface">100% Sách Thật &amp; Bản Quyền</h4>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">Tuyển chọn từ NXB uy tín</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">local_shipping</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-on-surface">Đóng Gói Chống Sốc</h4>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">Bọc 3 lớp an toàn tới bạn</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">published_with_changes</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-on-surface">Đổi Trả Dễ Dàng 7 Ngày</h4>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">Nếu sách lỗi in ấn, cong vênh</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">support_agent</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-on-surface">Hỗ Trợ Gian Hàng Chu Đáo</h4>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">Tư vấn tận tâm mọi lúc</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <!-- Toast notification -->
+    <div id="shopVoucherToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div class="px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-primary" id="shopToastInner">
+            <span class="material-symbols-outlined text-[20px] text-primary" id="shopToastIcon">check_circle</span>
+            <span id="shopToastText">Đã lưu mã giảm giá thành công!</span>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('shopVoucherToast');
+            const inner = document.getElementById('shopToastInner');
+            const icon = document.getElementById('shopToastIcon');
+            const text = document.getElementById('shopToastText');
+            if (!toast) return;
+
+            text.textContent = message;
+            if (isSuccess) {
+                inner.className = 'px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-primary';
+                icon.className = 'material-symbols-outlined text-[20px] text-primary';
+                icon.textContent = 'check_circle';
+            } else {
+                inner.className = 'px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 border bg-surface-container-lowest text-on-surface border-error';
+                icon.className = 'material-symbols-outlined text-[20px] text-error';
+                icon.textContent = 'error';
+            }
+
+            toast.classList.remove('hidden');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function saveShopVoucher(btn) {
+            const maKM = btn.getAttribute('data-makm');
+            btn.disabled = true;
+            fetch('/api/voucher/luu?maKM=' + maKM, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.requireLogin) {
+                    if (confirm(data.message + '\nBạn có muốn chuyển đến trang Đăng nhập không?')) {
+                        window.location.href = '/login';
+                    }
+                    btn.disabled = false;
+                    return;
+                }
+                if (data.success || data.alreadySaved) {
+                    btn.outerHTML = '<div class="flex flex-col items-center gap-1"><span class="material-symbols-outlined text-[28px] text-primary">bookmark_added</span><span class="text-[10px] font-bold text-primary text-center leading-tight">Đã lưu</span></div>';
+                    showToast(data.message || 'Đã lưu mã giảm giá vào Ví Voucher của bạn!', true);
+                } else {
+                    showToast(data.message, false);
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                showToast('Lỗi kết nối khi lưu mã voucher!', false);
+                btn.disabled = false;
+            });
+        }
+
+        function filterShopCategory(targetCat, btn) {
+            document.querySelectorAll('.shop-cat-filter-btn').forEach(b => {
+                b.className = 'shop-cat-filter-btn shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs cursor-pointer';
+            });
+            btn.className = 'shop-cat-filter-btn shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1 cursor-pointer border-0';
+
+            const cards = document.querySelectorAll('#shopBooksGrid article');
+            let matchedCount = 0;
+            const filterText = targetCat.trim().toLowerCase();
+
+            cards.forEach(card => {
+                const cat = (card.getAttribute('data-category') || '').trim().toLowerCase();
+                if (filterText === 'all' || cat === filterText || cat.includes(filterText)) {
+                    card.style.display = '';
+                    matchedCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const noMatch = document.getElementById('shopCategoryNoMatch');
+            if (noMatch) {
+                if (matchedCount === 0 && cards.length > 0) {
+                    noMatch.classList.remove('hidden');
+                } else {
+                    noMatch.classList.add('hidden');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

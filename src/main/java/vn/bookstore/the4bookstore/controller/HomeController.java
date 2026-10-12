@@ -1,37 +1,144 @@
 package vn.bookstore.the4bookstore.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import vn.bookstore.the4bookstore.entity.DanhMuc;
+import vn.bookstore.the4bookstore.entity.KhachHang;
+import vn.bookstore.the4bookstore.entity.KhuyenMai;
 import vn.bookstore.the4bookstore.entity.SanPham;
-import vn.bookstore.the4bookstore.repository.SanPhamRepository;
+import vn.bookstore.the4bookstore.entity.TaiKhoan;
+import vn.bookstore.the4bookstore.repository.KhachHangRepository;
+import vn.bookstore.the4bookstore.repository.KhuyenMaiRepository;
+import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
+import vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository;
+import vn.bookstore.the4bookstore.security.CustomOAuth2User;
+import vn.bookstore.the4bookstore.security.CustomOidcUser;
+import vn.bookstore.the4bookstore.security.CustomUserDetails;
+import vn.bookstore.the4bookstore.service.DanhMucService;
+import vn.bookstore.the4bookstore.service.SanPhamService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.List;
+import java.util.*;
 
 @Controller
+@RequiredArgsConstructor
 public class HomeController {
 
-    private final SanPhamRepository sanPhamRepository;
+    private final SanPhamService sanPhamService;
+    private final DanhMucService danhMucService;
+    private final vn.bookstore.the4bookstore.service.KhuyenMaiService khuyenMaiService;
+    private final KhuyenMaiRepository khuyenMaiRepository;
+    private final VoucherDaLuuRepository voucherDaLuuRepository;
+    private final KhachHangRepository khachHangRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
+    private final vn.bookstore.the4bookstore.repository.SanPhamRepository sanPhamRepository;
+    private final vn.bookstore.the4bookstore.service.UserInteractionService userInteractionService;
 
-    public HomeController(SanPhamRepository sanPhamRepository) {
-        this.sanPhamRepository = sanPhamRepository;
+    private KhachHang getCurrentKhachHang(Authentication auth, jakarta.servlet.http.HttpServletRequest request) {
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) return null;
+        if (request != null) {
+            Object cached = request.getAttribute("CURRENT_KHACH_HANG_CACHE");
+            if (cached instanceof KhachHang kh) return kh;
+            if (Boolean.TRUE.equals(request.getAttribute("CURRENT_KHACH_HANG_CACHE_NULL"))) return null;
+        }
+        TaiKhoan tk = null;
+        Object p = auth.getPrincipal();
+        if (p instanceof CustomUserDetails ud && ud.getTaiKhoan() != null && ud.getTaiKhoan().getMaTaiKhoan() != null)
+            tk = taiKhoanRepository.findById(ud.getTaiKhoan().getMaTaiKhoan()).orElse(ud.getTaiKhoan());
+        else if (p instanceof CustomOAuth2User o && o.getEmail() != null)
+            tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
+        else if (p instanceof CustomOidcUser o && o.getEmail() != null)
+            tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
+        else if (p instanceof OidcUser o && o.getEmail() != null)
+            tk = taiKhoanRepository.findByEmail(o.getEmail()).orElse(null);
+        else if (p instanceof OAuth2User o) {
+            Object em = o.getAttribute("email");
+            if (em != null) tk = taiKhoanRepository.findByEmail(em.toString()).orElse(null);
+        }
+        if (tk == null && auth.getName() != null)
+            tk = taiKhoanRepository.findByEmail(auth.getName()).or(() -> taiKhoanRepository.findByTenDangNhap(auth.getName())).orElse(null);
+        if (tk == null) return null;
+        KhachHang kh = khachHangRepository.findByTaiKhoan(tk).orElse(null);
+        if (request != null && kh != null) request.setAttribute("CURRENT_KHACH_HANG_CACHE", kh);
+        return kh;
     }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(
+            @RequestParam(name = "catPage", required = false) Integer catPage,
+            @RequestParam(name = "page", required = false) Integer page,
+            jakarta.servlet.http.HttpServletRequest request,
+            Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             model.addAttribute("username", auth.getName());
         }
 
-        // Fetch first 8 books for featured section
-        List<SanPham> featuredBooks = sanPhamRepository.findAll();
-        if (featuredBooks.size() > 8) {
-            featuredBooks = featuredBooks.subList(0, 8);
+        int requestedPage = (catPage != null) ? catPage : (page != null ? page : 0);
+        if (requestedPage < 0) requestedPage = 0;
+
+        int pageSize = 10;
+        List<DanhMuc> allActive = danhMucService.getAllActive();
+        Page<DanhMuc> categoryPage = danhMucService.getAllActivePaged(requestedPage, pageSize);
+
+        // Section: Hero Spotlight - Sách Nổi Bật Tháng (Thuật toán đa tiêu chí)
+        model.addAttribute("bookOfTheMonth", sanPhamService.getBookOfTheMonth());
+
+        // Section: Sách Bán Chạy
+        model.addAttribute("featuredBooks", sanPhamService.getFeaturedBooks());
+
+        // Section: Tất Cả Sản Phẩm (Previews & Subcategories)
+        model.addAttribute("sachPreview", sanPhamService.getPreviewByLoaiSP("Sach"));
+        model.addAttribute("vppPreview", sanPhamService.getPreviewByLoaiSP("VanPhongPham"));
+        model.addAttribute("quaTangPreview", sanPhamService.getPreviewByLoaiSP("QuaTang"));
+        model.addAttribute("categoriesSach", sanPhamService.getCategoriesByLoaiSP("Sach"));
+        model.addAttribute("categoriesVpp", sanPhamService.getCategoriesByLoaiSP("VanPhongPham"));
+        model.addAttribute("categoriesQuaTang", sanPhamService.getCategoriesByLoaiSP("QuaTang"));
+
+        // Section: Các Danh Mục (ở cuối, 10 mục / trang)
+        model.addAttribute("categories", categoryPage.getContent());
+        model.addAttribute("allCategories", allActive);
+        model.addAttribute("categoryPage", categoryPage);
+        model.addAttribute("catCurrentPage", categoryPage.getNumber());
+        model.addAttribute("catTotalPages", categoryPage.getTotalPages());
+        model.addAttribute("catTotalElements", categoryPage.getTotalElements());
+
+        // Section: Săn Voucher - Lấy voucher công khai đang hoạt động
+        List<KhuyenMai> publicVouchers = Collections.emptyList();
+        Set<Integer> savedVoucherIds = new HashSet<>();
+        boolean isGuest = (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal()));
+        KhachHang kh = null;
+        try {
+            publicVouchers = khuyenMaiService.getActivePublicVouchers();
+
+            kh = getCurrentKhachHang(auth, request);
+            if (kh != null) {
+                savedVoucherIds.addAll(voucherDaLuuRepository.findSavedVoucherIdsByKhachHang(kh));
+            }
+        } catch (Exception ignored) {}
+        model.addAttribute("publicVouchers", publicVouchers);
+        model.addAttribute("savedVoucherIds", savedVoucherIds);
+        model.addAttribute("isGuest", isGuest);
+
+        // --- ĐẶC QUYỀN GUEST: Sản phẩm bán trên 10 sản phẩm (sắp xếp giảm dần) ---
+        List<SanPham> guestTopSold = sanPhamService.getGuestTopSold();
+        model.addAttribute("guestTopSold", guestTopSold);
+
+        // --- ĐẶC QUYỀN USER: 20 sản phẩm mới nhất, bán chạy, đánh giá cao, yêu thích nhất ---
+        if (!isGuest && kh != null) {
+            model.addAttribute("top20Newest", sanPhamRepository.findTop20Newest(null, org.springframework.data.domain.PageRequest.of(0, 20)).getContent());
+            model.addAttribute("top20BestSelling", sanPhamRepository.findTop20BestSelling(null, org.springframework.data.domain.PageRequest.of(0, 20)).getContent());
+            model.addAttribute("top20HighestRated", sanPhamRepository.findTop20HighestRated(null, org.springframework.data.domain.PageRequest.of(0, 20)).getContent());
+            model.addAttribute("top20MostFavorited", sanPhamRepository.findTop20MostFavorited(null, org.springframework.data.domain.PageRequest.of(0, 20)).getContent());
+            model.addAttribute("recentlyViewed", userInteractionService.getRecentlyViewed(kh));
         }
-        model.addAttribute("featuredBooks", featuredBooks);
 
         return "home/index";
     }

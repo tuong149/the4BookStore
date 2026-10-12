@@ -21,7 +21,7 @@ public class PasswordResetToken {
     @Column(nullable = true, length = 100)
     private String token;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maTaiKhoan", nullable = false)
     private TaiKhoan taiKhoan;
 

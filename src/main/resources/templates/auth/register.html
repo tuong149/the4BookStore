@@ -15,14 +15,10 @@
         <div class="relative z-10 w-full sm:max-w-xl lg:w-[600px] xl:w-[650px] my-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-11 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between">
             
             <!-- Brand Logo Header -->
-            <div class="flex items-center justify-center gap-3.5 pt-1">
-                <div class="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-md shrink-0">
-                    <span class="material-symbols-outlined text-[28px]">menu_book</span>
-                </div>
-                <div class="flex flex-col text-left">
-                    <span class="font-headline-sm text-base sm:text-lg font-black text-primary tracking-wider leading-tight drop-shadow-sm">THE4BOOKSTORE</span>
-                    <span class="font-headline-sm text-[10px] sm:text-[11px] font-extrabold text-primary tracking-widest uppercase leading-none mt-1">Nhà Sách Trực Tuyến &amp; Quản Trị</span>
-                </div>
+            <div class="flex items-center justify-center pt-1">
+                <a th:href="@{/}" class="inline-block transition-transform hover:scale-105">
+                    <img alt="The4BookStore Logo" class="h-11 sm:h-12 w-auto object-contain" th:src="@{/images/Logo4bs.png}"/>
+                </a>
             </div>
 
             <!-- Main Heading -->

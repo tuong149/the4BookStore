@@ -11,11 +11,11 @@ public class KhoHang {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maKhoHang;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maKho", nullable = false)
     private Kho kho;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maSP", nullable = false)
     private SanPham sanPham;
 

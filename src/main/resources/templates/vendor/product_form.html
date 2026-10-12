@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head('Đăng Bán / Sửa Sách - Kênh Người Bán')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('vendor')}"></header>
+
+    <main class="w-full pt-28 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <nav th:replace="~{fragments/vendor/vendor_nav :: vendor_navbar('products')}"></nav>
+
+        <!-- Top Breadcrumbs & Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <nav class="text-xs text-on-surface-variant flex items-center gap-1.5 mb-1">
+                    <a th:href="@{/vendor/dashboard}" class="hover:text-primary transition-colors">Kênh người bán</a>
+                    <span class="material-symbols-outlined text-xs text-outline">chevron_right</span>
+                    <a th:href="@{/vendor/products}" class="hover:text-primary transition-colors">Sản phẩm</a>
+                    <span class="material-symbols-outlined text-xs text-outline">chevron_right</span>
+                    <span class="text-primary font-bold" th:text="${sanPham.maSP != null ? 'Chỉnh sửa #' + sanPham.maSP : 'Đăng sách mới'}">Đăng sách mới</span>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-bold text-on-surface tracking-tight" th:text="${sanPham.maSP != null ? 'Chỉnh Sửa Sách' : 'Đăng Bán Sách Mới'}">Đăng Bán Sách Mới</h1>
+                    <span th:if="${sanPham.maSP != null}" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20" th:text="'#' + ${sanPham.maSP}">#1</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <a th:href="@{/vendor/products}" class="px-4 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Quay lại</span>
+                </a>
+                <button type="button" onclick="document.getElementById('productForm').requestSubmit()" class="px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">save</span>
+                    <span>Lưu Sách</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Feedback Alerts -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-xs">
+            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2 shadow-xs">
+            <span class="material-symbols-outlined text-rose-600">error</span>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Cảnh báo khi nhập thiếu thông tin -->
+        <div id="clientValidationAlert" class="hidden mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-800 text-xs font-semibold shadow-xs">
+            <div class="flex items-center gap-2 mb-1.5 font-bold text-sm text-rose-700">
+                <span class="material-symbols-outlined text-rose-600">warning</span>
+                <span>Vui lòng kiểm tra và điền đầy đủ các thông tin bắt buộc sau:</span>
+            </div>
+            <ul id="clientValidationList" class="ml-6 space-y-1 list-disc text-rose-700"></ul>
+        </div>
+
+        <form id="productForm" th:action="@{/vendor/products/save}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="maSP" th:value="${sanPham.maSP}"/>
+
+            <!-- 2-Column Professional Layout Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- ===== CỘT TRÁI (8 / 12): THÔNG TIN CHÍNH ===== -->
+                <div class="lg:col-span-8 space-y-6">
+
+                    <!-- 1. Thông tin sách cơ bản -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-5">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-surface-container">
+                            <span class="p-2 rounded-xl bg-primary/10 text-primary material-symbols-outlined text-[20px]">menu_book</span>
+                            <div>
+                                <h2 class="text-sm font-bold text-on-surface">Thông Tin Tựa Sách</h2>
+                                <p class="text-[11px] text-on-surface-variant">Tên hiển thị và mã định danh quốc tế ISBN</p>
+                            </div>
+                        </div>
+
+                        <!-- Tên sách -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1.5" for="inputTenSP">
+                                Tên Sách / Tác Phẩm <span class="text-error font-bold text-sm">*</span>
+                            </label>
+                            <input type="text" name="tenSP" id="inputTenSP" th:value="${sanPham.tenSP}" placeholder="Ví dụ: Đắc Nhân Tâm, Nhà Giả Kim, Tuổi Trẻ Đáng Giá Bao Nhiêu..." required
+                                   class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                        </div>
+
+                        <!-- ISBN Code -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputISBN">
+                                    Mã Sách / ISBN <span class="text-[10px] text-outline font-normal lowercase">(tùy chọn)</span>
+                                </label>
+                                <button type="button" onclick="generateRandomIsbn()" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[13px]">autorenew</span>
+                                    <span>Tự sinh mã ISBN</span>
+                                </button>
+                            </div>
+                            <input type="text" name="ISBN" id="inputISBN" th:value="${sanPham.ISBN}" placeholder="Để trống hệ thống sẽ tự động tạo mã định danh duy nhất..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                            <p class="text-[11px] text-on-surface-variant mt-1.5">Mã ISBN giúp độc giả dễ tìm kiếm và tối ưu SEO sách trên Google.</p>
+                        </div>
+
+                        <!-- Tác Giả & Nhà Xuất Bản (2 cột cân xứng) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputTenTacGia">Tác Giả</label>
+                                    <span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Tự do nhập</span>
+                                </div>
+                                <input type="text" name="tenTacGia" id="inputTenTacGia" list="tacGiaSuggestions"
+                                       th:value="${sanPham.danhSachTacGia}"
+                                       placeholder="Ví dụ: Nguyễn Nhật Ánh, Haruki Murakami..."
+                                       class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                                <datalist id="tacGiaSuggestions">
+                                    <option th:each="tg : ${tacGias}" th:value="${tg.tenTacGia}"></option>
+                                </datalist>
+                                <p class="text-[10px] text-on-surface-variant mt-1">Nhiều tác giả cách nhau bằng dấu phẩy (,)</p>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputTenNXB">Nhà Xuất Bản</label>
+                                    <span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Gợi ý / Tự do</span>
+                                </div>
+                                <input type="text" name="tenNXB" id="inputTenNXB" list="nhaXuatBanSuggestions"
+                                       th:value="${sanPham.nhaXuatBan != null ? sanPham.nhaXuatBan.tenNXB : ''}"
+                                       placeholder="Ví dụ: NXB Trẻ, Kim Đồng, Nhã Nam..."
+                                       class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                                <datalist id="nhaXuatBanSuggestions">
+                                    <option th:each="nxb : ${nhaXuatBans}" th:value="${nxb.tenNXB}"></option>
+                                </datalist>
+                                <p class="text-[10px] text-on-surface-variant mt-1">Gõ NXB mới để tạo hoặc chọn từ gợi ý</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Giới thiệu & Mô tả nội dung -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-surface-container">
+                            <span class="p-2 rounded-xl bg-blue-50 text-blue-600 material-symbols-outlined text-[20px]">description</span>
+                            <div>
+                                <h2 class="text-sm font-bold text-on-surface">Giới Thiệu &amp; Tóm Tắt Nội Dung</h2>
+                                <p class="text-[11px] text-on-surface-variant">Lời tựa, trích đoạn hoặc nội dung nổi bật cuốn sách</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <textarea name="moTa" rows="6" th:text="${sanPham.moTa}"
+                                      class="w-full px-4 py-3 rounded-2xl border border-surface-container bg-surface-container-low text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"
+                                      placeholder="Viết đoạn văn ngắn giới thiệu nội dung cuốn sách, những giải thưởng đã đạt được hoặc lý do độc giả nên sở hữu tác phẩm này..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 3. Ảnh bìa sách (Cloudinary & Local Upload) -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                            <div class="flex items-center gap-2.5">
+                                <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600 material-symbols-outlined text-[20px]">image</span>
+                                <div>
+                                    <h2 class="text-sm font-bold text-on-surface">Ảnh Bìa Sách</h2>
+                                    <p class="text-[11px] text-on-surface-variant">Tải ảnh từ máy tính hoặc dán URL trực tiếp</p>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-primary font-semibold flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-full">
+                                <span class="material-symbols-outlined text-sm">cloud_done</span>
+                                <span>Cloudinary Cloud</span>
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-2">
+                            <!-- Preview Box chuẩn tỷ lệ bìa sách 3:4 -->
+                            <div class="flex flex-col items-center gap-2 shrink-0">
+                                <div class="relative w-32 aspect-[3/4] rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low overflow-hidden flex items-center justify-center shadow-sm group">
+                                    <img id="bookImagePreview" 
+                                         th:src="${sanPham.hinhAnh != null and !sanPham.hinhAnh.isEmpty() ? sanPham.hinhAnh : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300'}" 
+                                         alt="Ảnh bìa xem trước" 
+                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold pointer-events-none">
+                                        Xem trước
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-outline font-medium">Tỷ lệ chuẩn 3:4</span>
+                            </div>
+
+                            <!-- Upload options -->
+                            <div class="flex-1 w-full space-y-4">
+                                <!-- Cách 1: Tải file từ máy tính -->
+                                <div class="p-4 rounded-2xl bg-surface-container-low border border-surface-container">
+                                    <label class="block text-xs font-bold text-on-surface mb-1.5 flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-primary">upload_file</span>
+                                        <span>Cách 1: Tải tệp ảnh từ máy tính (Khuyên dùng)</span>
+                                    </label>
+                                    <input type="file" name="imageFile" id="imageFileInput" accept="image/png,image/jpeg,image/webp,image/gif"
+                                           onchange="previewUploadedImage(this)"
+                                           class="block w-full text-xs text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-on-primary hover:file:bg-primary-container file:cursor-pointer cursor-pointer border border-surface-container rounded-xl bg-surface-container-lowest"/>
+                                    <p class="text-[10px] text-on-surface-variant mt-1.5">Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB). Ảnh được nén và lưu trữ đám mây tự động.</p>
+                                </div>
+
+                                <div class="relative flex items-center justify-center">
+                                    <div class="w-full border-t border-surface-container"></div>
+                                    <span class="absolute bg-surface-container-lowest px-3 text-[10px] text-outline font-bold uppercase tracking-wider">Hoặc</span>
+                                </div>
+
+                                <!-- Cách 2: Dán URL ảnh trực tiếp -->
+                                <div class="p-4 rounded-2xl bg-surface-container-low border border-surface-container">
+                                    <label class="block text-xs font-bold text-on-surface mb-1.5 flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-sm text-primary">link</span>
+                                        <span>Cách 2: Dán đường dẫn liên kết ảnh trực tiếp (URL)</span>
+                                    </label>
+                                    <input type="url" name="hinhAnh" id="imageUrlInput" th:value="${sanPham.hinhAnh}" placeholder="https://domain.com/path-to-cover-image.jpg"
+                                           oninput="previewUrlImage(this.value)"
+                                           class="w-full px-4 py-2 rounded-xl border border-surface-container bg-surface-container-lowest text-xs focus:outline-none focus:ring-2 focus:ring-primary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== CỘT PHẢI (4 / 12): THIẾT LẬP & XUẤT BẢN ===== -->
+                <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+
+                    <!-- 1. Hộp Xuất bản & Lưu -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 pb-3 border-b border-surface-container">
+                            <span class="p-1.5 rounded-lg bg-primary/10 text-primary material-symbols-outlined text-[18px]">toggle_on</span>
+                            <h2 class="text-sm font-bold text-on-surface">Xuất Bản &amp; Trạng Thái</h2>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1.5">Trạng Thái Kinh Doanh</label>
+                            <select name="trangThai" class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
+                                <option value="DangBan" th:selected="${sanPham.trangThai == 'DangBan'}">🟢 Đang mở bán</option>
+                                <option value="HetHang" th:selected="${sanPham.trangThai == 'HetHang'}">🟡 Tạm hết hàng</option>
+                                <option value="NgungBan" th:selected="${sanPham.trangThai == 'NgungBan'}">🔴 Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+
+                        <div class="pt-2 flex flex-col gap-2.5">
+                            <button type="submit" class="w-full py-3 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">save</span>
+                                <span>Lưu Cuốn Sách Này</span>
+                            </button>
+                            <a th:href="@{/vendor/products}" class="w-full py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all text-center">
+                                Hủy bỏ &amp; Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Giá bán & Kho hàng -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 pb-3 border-b border-surface-container">
+                            <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 material-symbols-outlined text-[18px]">payments</span>
+                            <h2 class="text-sm font-bold text-on-surface">Giá Bán &amp; Tồn Kho</h2>
+                        </div>
+
+                        <!-- Giá bán -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1.5" for="inputGiaBan">
+                                Giá Bán (VNĐ) <span class="text-error font-bold text-sm">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="giaBan" id="inputGiaBan" th:value="${sanPham.giaBan}" required min="1000" step="1000" placeholder="89000"
+                                       class="w-full pl-4 pr-12 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                                <span class="absolute right-3.5 top-2.5 text-xs font-bold text-outline pointer-events-none">₫</span>
+                            </div>
+                            <p class="text-[10px] text-on-surface-variant mt-1">Giá hiển thị niêm yết tới độc giả</p>
+                        </div>
+
+                        <!-- Số lượng tồn kho -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputSoLuongTon">
+                                    Tồn Kho <span class="text-error font-bold text-sm">*</span>
+                                </label>
+                                <a th:href="@{/vendor/stock-requests/create}" class="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5">
+                                    <span class="material-symbols-outlined text-[13px]">warehouse</span>
+                                    <span>Xin cấp từ Kho Tổng</span>
+                                </a>
+                            </div>
+                            <input type="number" name="soLuongTon" id="inputSoLuongTon" th:value="${sanPham.soLuongTon != null ? sanPham.soLuongTon : 0}" required min="0"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
+                            <p class="text-[10px] text-on-surface-variant mt-1">Số lượng khả dụng để người mua đặt hàng</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Phân loại danh mục -->
+                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 pb-3 border-b border-surface-container">
+                            <span class="p-1.5 rounded-lg bg-amber-50 text-amber-600 material-symbols-outlined text-[18px]">category</span>
+                            <h2 class="text-sm font-bold text-on-surface">Phân Loại Thể Loại</h2>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1.5">Danh Mục Sách</label>
+                            <select name="maDanhMuc" class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
+                                <option th:each="dm : ${danhMucs}" th:value="${dm.maDanhMuc}" th:text="${dm.tenDanhMuc}"
+                                        th:selected="${sanPham.danhMuc != null and sanPham.danhMuc.maDanhMuc == dm.maDanhMuc}"></option>
+                            </select>
+                            <p class="text-[10px] text-on-surface-variant mt-1">Giúp độc giả lọc sách nhanh trên trang chủ</p>
+                        </div>
+                    </div>
+
+                    <!-- 4. Thông tin gian hàng -->
+                    <div class="p-5 rounded-3xl bg-surface-container-low border border-surface-container text-xs space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">storefront</span>
+                            <span class="font-bold text-on-surface">Gian Hàng Phân Phối</span>
+                        </div>
+                        <p class="text-on-surface-variant leading-relaxed">
+                            Sách sẽ được bán trực tiếp dưới tên gian hàng <strong class="text-on-surface" th:text="${shop.tenShop}">Shop</strong>.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <script>
+        function generateRandomIsbn() {
+            const randomCode = 'BK-' + Math.floor(10000000 + Math.random() * 90000000);
+            document.getElementById('inputISBN').value = randomCode;
+        }
+
+        function previewUploadedImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('bookImagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewUrlImage(url) {
+            if (url && url.trim().startsWith('http')) {
+                document.getElementById('bookImagePreview').src = url.trim();
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            const tenSP = document.getElementById('inputTenSP').value.trim();
+            const giaBan = document.getElementById('inputGiaBan').value;
+            const soLuongTon = document.getElementById('inputSoLuongTon').value;
+
+            let missingFields = [];
+            if (!tenSP) {
+                missingFields.push('Tên Sách / Sản Phẩm (không được để trống)');
+                document.getElementById('inputTenSP').classList.add('border-error', 'ring-1', 'ring-error');
+            } else {
+                document.getElementById('inputTenSP').classList.remove('border-error', 'ring-1', 'ring-error');
+            }
+
+            if (!giaBan || Number(giaBan) < 1000) {
+                missingFields.push('Giá Bán (phải từ 1,000 VNĐ trở lên)');
+                document.getElementById('inputGiaBan').classList.add('border-error', 'ring-1', 'ring-error');
+            } else {
+                document.getElementById('inputGiaBan').classList.remove('border-error', 'ring-1', 'ring-error');
+            }
+
+            if (soLuongTon === '' || Number(soLuongTon) < 0) {
+                missingFields.push('Số Lượng Trong Kho (phải lớn hơn hoặc bằng 0)');
+                document.getElementById('inputSoLuongTon').classList.add('border-error', 'ring-1', 'ring-error');
+            } else {
+                document.getElementById('inputSoLuongTon').classList.remove('border-error', 'ring-1', 'ring-error');
+            }
+
+            const alertBox = document.getElementById('clientValidationAlert');
+            const alertList = document.getElementById('clientValidationList');
+
+            if (missingFields.length > 0) {
+                e.preventDefault();
+                alertList.innerHTML = missingFields.map(m => `<li>${m}</li>`).join('');
+                alertBox.classList.remove('hidden');
+                alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

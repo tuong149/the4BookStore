@@ -104,6 +104,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (optionalTaiKhoan.isPresent()) {
             tk = optionalTaiKhoan.get();
+            if ("BiKhoa".equalsIgnoreCase(tk.getTrangThai())) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("account_locked"),
+                        "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ nhasachthe4bookstore@gmail.com để được hỗ trợ mở khóa.");
+            }
             boolean needUpdateTk = false;
 
             if (tk.getProviderId() == null && safeSub != null) {
@@ -120,6 +124,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 tk.setTenDangNhap(candidate);
                 needUpdateTk = true;
             }
+            java.util.List<String> adminEmails = java.util.List.of(
+                    "caotuong14@gmail.com", "caotuong06@gmail.com", "24110375@student.hcmute.edu.vn"
+            );
+            boolean isAdmin = adminEmails.contains(normalizedEmail) || normalizedEmail.contains("admin");
+
+            if (isAdmin && !"ADMIN".equalsIgnoreCase(tk.getVaiTro())) {
+                tk.setVaiTro("ADMIN");
+                needUpdateTk = true;
+            }
+
             if (needUpdateTk) {
                 try {
                     tk = taiKhoanRepository.save(tk);
@@ -146,15 +160,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 if (safePicture != null && !safePicture.isBlank()) {
                     kh.setAnhDaiDien(safePicture);
                 }
-                // Đảm bảo số điện thoại không bị null nếu DB có ràng buộc NOT NULL
-                if (kh.getSoDienThoai() == null || kh.getSoDienThoai().isBlank()) {
-                    String seed = String.format("%08d", Math.abs((normalizedEmail + "_" + tk.getMaTaiKhoan()).hashCode() % 100000000));
-                    String tempPhone = "09" + seed;
-                    while (khachHangRepository.findBySoDienThoai(tempPhone).isPresent()) {
-                        tempPhone = "09" + String.format("%08d", (int)(Math.random() * 100000000));
-                    }
-                    kh.setSoDienThoai(tempPhone);
-                }
                 if (kh.getNgayDangKy() == null) {
                     kh.setNgayDangKy(LocalDateTime.now());
                 }
@@ -165,12 +170,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
         } else {
             // TỰ ĐỘNG TẠO TÀI KHOẢN MỚI CHO NGƯỜI DÙNG ĐĂNG NHẬP GOOGLE CHƯA ĐĂNG KÝ
+            java.util.List<String> adminEmails = java.util.List.of(
+                    "caotuong14@gmail.com", "caotuong06@gmail.com", "24110375@student.hcmute.edu.vn"
+            );
+            boolean isAdmin = adminEmails.contains(normalizedEmail) || normalizedEmail.contains("admin");
+
             tk = new TaiKhoan();
             String candidate = generateSafeUsername(normalizedEmail, displayName);
             tk.setTenDangNhap(candidate);
             tk.setEmail(normalizedEmail);
             tk.setMatKhauHash("OAUTH2_" + UUID.randomUUID());
-            tk.setVaiTro("KHACHHANG");
+            tk.setVaiTro(isAdmin ? "ADMIN" : "KHACHHANG");
             tk.setTrangThai("HoatDong");
             tk.setAuthProvider(provider);
             tk.setProviderId(safeSub);
@@ -188,15 +198,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 newKh.setEmail(normalizedEmail);
                 if (safePicture != null && !safePicture.isBlank()) {
                     newKh.setAnhDaiDien(safePicture);
-                }
-                // Tạo số điện thoại giữ chỗ hợp lệ và duy nhất để thỏa mãn ràng buộc NOT NULL & UNIQUE
-                if (newKh.getSoDienThoai() == null || newKh.getSoDienThoai().isBlank()) {
-                    String seed = String.format("%08d", Math.abs((normalizedEmail + "_" + tk.getMaTaiKhoan()).hashCode() % 100000000));
-                    String tempPhone = "09" + seed;
-                    while (khachHangRepository.findBySoDienThoai(tempPhone).isPresent()) {
-                        tempPhone = "09" + String.format("%08d", (int)(Math.random() * 100000000));
-                    }
-                    newKh.setSoDienThoai(tempPhone);
                 }
                 if (newKh.getNgayDangKy() == null) {
                     newKh.setNgayDangKy(LocalDateTime.now());

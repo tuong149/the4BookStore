@@ -2,8 +2,12 @@ package vn.bookstore.the4bookstore.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
 @Table(name = "TAC_GIA")
+@org.hibernate.annotations.BatchSize(size = 50)
 @Data @NoArgsConstructor @AllArgsConstructor
 public class TacGia {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,4 +16,9 @@ public class TacGia {
     private String tenTacGia;
     @Column(length = 500)
     private String moTa;
+
+    @OneToMany(mappedBy = "tacGia", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<SanPhamTacGia> sanPhamTacGias = new ArrayList<>();
 }

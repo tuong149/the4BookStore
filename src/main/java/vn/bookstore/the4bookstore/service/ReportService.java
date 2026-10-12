@@ -1,30 +1,38 @@
 package vn.bookstore.the4bookstore.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import vn.bookstore.the4bookstore.dto.MonthlyRevenueDTO;
 import vn.bookstore.the4bookstore.dto.TopSellingBookDTO;
 import vn.bookstore.the4bookstore.repository.ChiTietDonHangRepository;
 import vn.bookstore.the4bookstore.repository.DonHangRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
+@Transactional(readOnly = true)
 public class ReportService {
 
-    @Autowired
-    private DonHangRepository donHangRepository;
+    private final DonHangRepository donHangRepository;
 
-    @Autowired
-    private ChiTietDonHangRepository chiTietDonHangRepository;
+    private final ChiTietDonHangRepository chiTietDonHangRepository;
+
+    public ReportService(DonHangRepository donHangRepository,
+                         ChiTietDonHangRepository chiTietDonHangRepository) {
+        this.donHangRepository = donHangRepository;
+        this.chiTietDonHangRepository = chiTietDonHangRepository;
+    }
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -37,39 +45,46 @@ public class ReportService {
         return revenue != null ? new BigDecimal(revenue) : BigDecimal.ZERO;
     }
 
+    public BigDecimal getThisMonthRevenue() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime nextMonth = startOfMonth.plusMonths(1);
+
+        Long revenue = donHangRepository.getRevenueByDateRange(startOfMonth, nextMonth);
+        return revenue != null ? new BigDecimal(revenue) : BigDecimal.ZERO;
+    }
+
     public List<MonthlyRevenueDTO> getRevenueByMonth() {
-        String sql = "SELECT YEAR(dh.ngay_dat) as nam, MONTH(dh.ngay_dat) as thang, SUM(dh.tong_tien) as doanh_thu " +
-                     "FROM don_hang dh " +
-                     "WHERE dh.trang_thai = 'DaGiao' " +
-                     "GROUP BY YEAR(dh.ngay_dat), MONTH(dh.ngay_dat) " +
-                     "ORDER BY nam DESC, thang DESC " +
-                     "LIMIT 12";
+        String sql = "CALL sp_DoanhThuTheoThang()";
 
         Query query = entityManager.createNativeQuery(sql);
+        @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
 
-        List<MonthlyRevenueDTO> dtos = new ArrayList<>();
+        Map<String, BigDecimal> dbMap = new HashMap<>();
         for (Object[] row : results) {
             Integer year = ((Number) row[0]).intValue();
             Integer month = ((Number) row[1]).intValue();
             BigDecimal revenue = new BigDecimal(((Number) row[2]).longValue());
             String monthStr = String.format("%04d-%02d", year, month);
+            dbMap.put(monthStr, revenue);
+        }
+
+        List<MonthlyRevenueDTO> dtos = new ArrayList<>();
+        int currentYear = LocalDate.now().getYear();
+        int currentMonth = LocalDate.now().getMonthValue();
+        for (int m = currentMonth; m >= 1; m--) {
+            String monthStr = String.format("%04d-%02d", currentYear, m);
+            BigDecimal revenue = dbMap.getOrDefault(monthStr, BigDecimal.ZERO);
             dtos.add(new MonthlyRevenueDTO(monthStr, revenue));
         }
         return dtos;
     }
 
     public List<TopSellingBookDTO> getTopSellingBooks() {
-        String sql = "SELECT sp.masp, sp.tensp, SUM(ct.so_luong) as so_luong_ban " +
-                     "FROM chi_tiet_don_hang ct " +
-                     "JOIN don_hang dh ON ct.madh = dh.madh " +
-                     "JOIN san_pham sp ON ct.masp = sp.masp " +
-                     "WHERE dh.trang_thai = 'DaGiao' " +
-                     "GROUP BY sp.masp, sp.tensp " +
-                     "ORDER BY so_luong_ban DESC " +
-                     "LIMIT 10";
+        String sql = "CALL sp_TopSachBanChay(10)";
 
         Query query = entityManager.createNativeQuery(sql);
+        @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
 
         List<TopSellingBookDTO> dtos = new ArrayList<>();
@@ -77,7 +92,9 @@ public class ReportService {
             Long maSP = ((Number) row[0]).longValue();
             String tenSP = (String) row[1];
             Long soLuongBan = ((Number) row[2]).longValue();
-            dtos.add(new TopSellingBookDTO(maSP, tenSP, soLuongBan));
+            Integer giaBan = (row.length > 3 && row[3] != null) ? ((Number) row[3]).intValue() : null;
+            Long doanhThuDongGop = (row.length > 4 && row[4] != null) ? ((Number) row[4]).longValue() : null;
+            dtos.add(new TopSellingBookDTO(maSP, tenSP, soLuongBan, giaBan, doanhThuDongGop));
         }
         return dtos;
     }
@@ -90,8 +107,36 @@ public class ReportService {
         return count != null ? count : 0L;
     }
 
+    public Long getThisMonthOrderCount() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime nextMonth = startOfMonth.plusMonths(1);
+
+        Long count = donHangRepository.getOrderCountByDateRange(startOfMonth, nextMonth);
+        return count != null ? count : 0L;
+    }
+
     public Long getTotalBooksSold() {
         Long total = chiTietDonHangRepository.getTotalBooksSold();
         return total != null ? total : 0L;
+    }
+
+    public List<Map<String, Object>> getShopMonthlyRevenue(Integer maShop) {
+        String sql = "CALL sp_DoanhThuShopTheoThang(:maShop)";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("maShop", maShop);
+        List<Object[]> results = query.getResultList();
+
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("nam", row[0]);
+            map.put("thang", row[1]);
+            map.put("tongDonHang", row[2]);
+            map.put("tongDoanhThu", row[3]);
+            map.put("tongPhiSan", row[4]);
+            map.put("thucNhanShop", row[5]);
+            list.add(map);
+        }
+        return list;
     }
 }

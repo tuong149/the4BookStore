@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head(${isEdit ? 'Chỉnh Sửa Mã Khuyến Mãi' : 'Thêm Mới Mã Khuyến Mãi'})}">
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('vouchers')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="max-w-5xl mx-auto w-full">
+
+                <!-- Ambient Glow Background -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Breadcrumbs & Title -->
+                    <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-space-xs">
+                        <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                        <a th:href="@{/admin/vouchers}" class="hover:text-primary transition">MÃ GIẢM GIÁ</a>
+                        <span>/</span>
+                        <span class="text-primary font-semibold" th:text="${isEdit ? 'CHỈNH SỬA MÃ' : 'THÊM MỚI MÃ'}">CẤU HÌNH</span>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-space-lg">
+                        <div>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight"
+                                th:text="${isEdit ? 'Chỉnh Sửa Mã: ' + khuyenMai.maCode : 'Tạo Mã Khuyến Mãi Mới'}">
+                                Cấu Hình Mã Khuyến Mãi
+                            </h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+                                Điền các thông tin bên dưới để cấu hình chi tiết chiến dịch giảm giá.
+                            </p>
+                        </div>
+                        <a th:href="@{/admin/vouchers}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold transition">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                            <span>Quay lại</span>
+                        </a>
+                    </div>
+
+                    <!-- Error Alert if any -->
+                    <div th:if="${errorMessage}" class="mb-space-md p-space-md rounded-2xl bg-error-container border border-error/20 text-error flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-space-xs font-semibold">
+                            <span class="material-symbols-outlined text-error text-[22px]">error</span>
+                            <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:bg-error/10 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- FORM -->
+                    <form th:action="@{/admin/vouchers/luu}" th:object="${khuyenMai}" method="post" class="space-y-6">
+                        <input type="hidden" th:field="*{maKM}"/>
+                        <input type="hidden" th:field="*{soLuongDaDung}"/>
+
+                        <!-- THÔNG TIN CƠ BẢN -->
+                        <div class="bg-surface-container-lowest p-space-lg rounded-3xl border border-surface-container/70 shadow-sm">
+                            <div class="flex items-center gap-3 pb-space-sm border-b border-surface-container mb-space-md">
+                                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[22px]">info</span>
+                                </div>
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Thông Tin Cơ Bản</h2>
+                                    <p class="text-xs text-on-surface-variant">Tên chương trình, định danh mã và hình thức hiển thị</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                                <!-- Mã Code với nút Tạo ngẫu nhiên -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Mã Khuyến Mãi (Code) <span class="text-error">*</span>
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <div class="relative flex-1">
+                                            <input type="text" id="maCodeInput" th:field="*{maCode}" required placeholder="VD: SUMMER26, BOOK50..."
+                                                   class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl font-mono font-bold text-primary tracking-wider uppercase focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                        </div>
+                                        <button type="button" onclick="generateRandomCode()" class="px-3 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold text-xs transition flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[16px]">shuffle</span>
+                                            <span>Tạo ngẫu nhiên</span>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-on-surface-variant mt-1">Chỉ sử dụng chữ cái viết hoa và chữ số, không dấu.</p>
+                                </div>
+
+                                <!-- Tên chương trình -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Tên Chương Trình <span class="text-error">*</span>
+                                    </label>
+                                    <input type="text" th:field="*{tenKM}" required placeholder="VD: Khuyến mãi mùa hè đọc sách 2026..."
+                                           class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                </div>
+
+                                <!-- Mô tả chiến dịch -->
+                                <div class="md:col-span-2">
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Mô Tả / Nội Dung Ưu Đãi
+                                    </label>
+                                    <textarea th:field="*{moTa}" rows="2" placeholder="Nhập mô tả ngắn gọn về ưu đãi để khách hàng hoặc nhân viên nắm rõ..."
+                                              class="w-full px-3.5 py-2 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+                                </div>
+
+                                <!-- Hiển thị công khai Checkbox -->
+                                <div class="md:col-span-2 flex items-center gap-3 p-3 bg-surface-container-low/70 rounded-2xl border border-surface-container/60">
+                                    <input type="checkbox" id="hienThiCongKhai" th:field="*{hienThiCongKhai}" class="w-5 h-5 rounded text-primary focus:ring-primary"/>
+                                    <label for="hienThiCongKhai" class="flex flex-col cursor-pointer">
+                                        <span class="font-semibold text-sm text-on-surface">Hiển thị công khai trên giỏ hàng và trang chủ</span>
+                                        <span class="text-xs text-on-surface-variant">Nếu bỏ tích, mã này sẽ là "Mã ẩn / Mã bí mật", chỉ những khách hàng được gửi mã trực tiếp mới có thể áp dụng khi thanh toán.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- THIẾT LẬP GIÁ TRỊ GIẢM -->
+                        <div class="bg-surface-container-lowest p-space-lg rounded-3xl border border-surface-container/70 shadow-sm">
+                            <div class="flex items-center gap-3 pb-space-sm border-b border-surface-container mb-space-md">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[22px]">percent</span>
+                                </div>
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Thiết Lập Giá Trị Giảm</h2>
+                                    <p class="text-xs text-on-surface-variant">Lựa chọn hình thức giảm giá và giới hạn số tiền giảm chống lỗ</p>
+                                </div>
+                            </div>
+
+                            <!-- Radio Cards: Loại giảm -->
+                            <div class="mb-space-md">
+                                <label class="block font-label-md text-label-md font-semibold text-on-surface mb-2">Loại Giảm Giá <span class="text-error">*</span></label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <!-- Phần trăm -->
+                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           th:classappend="${khuyenMai.loaiGiam == 'PhanTram'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
+                                        <input type="radio" name="loaiGiam" value="PhanTram" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-sm text-on-surface">Phần Trăm (%)</span>
+                                            <span class="text-[11px] text-on-surface-variant">Giảm theo tỷ lệ % đơn hàng</span>
+                                        </div>
+                                    </label>
+
+                                    <!-- Tiền cố định -->
+                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           th:classappend="${khuyenMai.loaiGiam == 'TienCoDinh'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
+                                        <input type="radio" name="loaiGiam" value="TienCoDinh" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-sm text-on-surface">Số Tiền Cố Định (đ)</span>
+                                            <span class="text-[11px] text-on-surface-variant">Giảm trực tiếp số tiền cụ thể</span>
+                                        </div>
+                                    </label>
+
+                                    <!-- Freeship -->
+                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           th:classappend="${khuyenMai.loaiGiam == 'Freeship'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
+                                        <input type="radio" name="loaiGiam" value="Freeship" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-sm text-on-surface">Miễn Phí Vận Chuyển</span>
+                                            <span class="text-[11px] text-on-surface-variant">Tài trợ / Miễn trừ phí giao hàng</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                                <!-- Giá trị giảm -->
+                                <div>
+                                    <label id="giaTriGiamLabel" class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Giá Trị Giảm <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input type="number" th:field="*{giaTriGiam}" required min="1" placeholder="VD: 15 hoặc 50000"
+                                               class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md font-semibold focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                        <span id="donViGiamLabel" class="absolute right-3.5 top-2.5 text-on-surface-variant font-semibold text-sm">%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Giảm tối đa (Chống lỗ khi giảm %) -->
+                                <div id="giamToiDaGroup">
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Giảm Tối Đa (VNĐ) <span class="text-xs text-on-surface-variant font-normal">(Bảo vệ chống lỗ)</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input type="number" th:field="*{giamToiDa}" placeholder="VD: 50000 (Để trống = không giới hạn)"
+                                               class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                        <span class="absolute right-3.5 top-2.5 text-on-surface-variant font-semibold text-sm">đ</span>
+                                    </div>
+                                    <p class="text-[11px] text-on-surface-variant mt-1">Áp dụng cho giảm %, đơn hàng giá trị cao sẽ chỉ giảm tối đa mức này.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ĐIỀU KIỆN ÁP DỤNG (CONSTRAINTS) -->
+                        <div class="bg-surface-container-lowest p-space-lg rounded-3xl border border-surface-container/70 shadow-sm">
+                            <div class="flex items-center gap-3 pb-space-sm border-b border-surface-container mb-space-md">
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[22px]">tune</span>
+                                </div>
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Điều Kiện Áp Dụng (Constraints)</h2>
+                                    <p class="text-xs text-on-surface-variant">Quy định giá trị đơn tối thiểu, phạm vi sản phẩm và nhóm khách hàng</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-md">
+                                <!-- Đơn tối thiểu -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Giá Trị Đơn Hàng Tối Thiểu (VNĐ)
+                                    </label>
+                                    <div class="relative">
+                                        <input type="number" th:field="*{donToiThieu}" placeholder="VD: 150000 (0 = Mọi đơn)"
+                                               class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                        <span class="absolute right-3.5 top-2.5 text-on-surface-variant font-semibold text-sm">đ</span>
+                                    </div>
+                                    <p class="text-[11px] text-on-surface-variant mt-1">Chỉ áp dụng khi tổng tiền các sản phẩm được chọn đạt mức này.</p>
+                                </div>
+
+                                <!-- Đối tượng khách hàng -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Đối Tượng Khách Hàng
+                                    </label>
+                                    <select th:field="*{doiTuongKhachHang}" class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none">
+                                        <option value="ALL">Tất cả mọi khách hàng</option>
+                                        <option value="NEW">Khách hàng mới (Lần đầu mua)</option>
+                                        <option value="VIP">Thành viên thân thiết / Khách VIP</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Áp dụng cho: Tất cả / Danh mục / Sản phẩm -->
+                            <div class="space-y-3">
+                                <label class="block font-label-md text-label-md font-semibold text-on-surface">Phạm Vi Sản Phẩm Áp Dụng</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
+                                        <input type="radio" name="apDungCho" value="ALL" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
+                                        <span class="text-sm font-medium">Toàn bộ sản phẩm</span>
+                                    </label>
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
+                                        <input type="radio" name="apDungCho" value="DANHMUC" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
+                                        <span class="text-sm font-medium">Theo danh mục cụ thể</span>
+                                    </label>
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
+                                        <input type="radio" name="apDungCho" value="SANPHAM" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
+                                        <span class="text-sm font-medium">Theo sản phẩm cụ thể</span>
+                                    </label>
+                                </div>
+
+                                <!-- Chọn danh mục nếu apDungCho == DANHMUC -->
+                                <div id="danhMucSelectGroup" class="hidden p-3 bg-surface-container-low rounded-2xl border border-surface-container">
+                                    <label class="block text-xs font-semibold text-on-surface mb-2">Chọn Danh Mục Áp Dụng (Phân cách bằng dấu phẩy):</label>
+                                    <input type="text" th:field="*{danhSachDanhMucIds}" placeholder="VD: 1, 2, 5 (ID danh mục sách)" class="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container rounded-xl text-sm"/>
+                                </div>
+
+                                <!-- Loại trừ sản phẩm -->
+                                <div>
+                                    <label class="block font-label-sm text-label-sm font-semibold text-on-surface-variant mb-1">
+                                        Mã ID Sản Phẩm Loại Trừ (Tùy chọn)
+                                    </label>
+                                    <input type="text" th:field="*{loaiTruSanPhamIds}" placeholder="VD: 101, 105 (Các sản phẩm giảm sâu, xả kho không áp dụng)"
+                                           class="w-full px-3.5 py-2 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GIỚI HẠN SỬ DỤNG & THỜI GIAN -->
+                        <div class="bg-surface-container-lowest p-space-lg rounded-3xl border border-surface-container/70 shadow-sm">
+                            <div class="flex items-center gap-3 pb-space-sm border-b border-surface-container mb-space-md">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-700 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[22px]">schedule</span>
+                                </div>
+                                <div>
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Giới Hạn Sử Dụng & Thời Gian</h2>
+                                    <p class="text-xs text-on-surface-variant">Lượt dùng tối đa, hạn mức cho mỗi khách và khung giờ hiệu lực</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-md">
+                                <!-- Tổng số lượt dùng toàn hệ thống -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Tổng Số Lượt Dùng Toàn Hệ Thống
+                                    </label>
+                                    <input type="number" th:field="*{soLuongToiDa}" min="1" placeholder="Để trống nếu không giới hạn"
+                                           class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                    <p class="text-[11px] text-on-surface-variant mt-1">Khi số lượt đạt mốc này, mã sẽ tự động chuyển sang Hết hạn.</p>
+                                </div>
+
+                                <!-- Giới hạn trên mỗi khách hàng -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Giới Hạn / Khách Hàng <span class="text-error">*</span>
+                                    </label>
+                                    <input type="number" th:field="*{gioiHanMoiKhachHang}" min="1" value="1" required
+                                           class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                    <p class="text-[11px] text-on-surface-variant mt-1">Mặc định 1 lần/khách để tránh spam gom mã.</p>
+                                </div>
+
+                                <!-- Thời gian bắt đầu -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Thời Gian Bắt Đầu <span class="text-error">*</span>
+                                    </label>
+                                    <input type="datetime-local" th:field="*{ngayBatDau}" required
+                                           class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                </div>
+
+                                <!-- Thời gian kết thúc -->
+                                <div>
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">
+                                        Thời Gian Kết Thúc <span class="text-error">*</span>
+                                    </label>
+                                    <input type="datetime-local" th:field="*{ngayKetThuc}" required
+                                           class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none"/>
+                                </div>
+
+                                <!-- Trạng thái ban đầu -->
+                                <div class="md:col-span-2">
+                                    <label class="block font-label-md text-label-md font-semibold text-on-surface mb-1">Trạng Thái Chiến Dịch</label>
+                                    <select th:field="*{trangThai}" class="w-full px-3.5 py-2.5 bg-surface-container-low border border-surface-container rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:outline-none">
+                                        <option value="HoatDong">Hoạt Động (Kích hoạt ngay khi tới ngày)</option>
+                                        <option value="VoHieuHoa">Vô Hiệu Hóa (Tạm ngừng)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SUBMIT BUTTONS BAR -->
+                        <div class="flex items-center justify-end gap-3 pt-space-md border-t border-surface-container">
+                            <a th:href="@{/admin/vouchers}" class="px-6 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold transition">
+                                Hủy bỏ
+                            </a>
+                            <button type="submit" class="px-8 py-2.5 rounded-xl bg-primary text-on-primary font-bold hover:bg-primary-container transition shadow-md flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">save</span>
+                                <span th:text="${isEdit ? 'Lưu Thay Đổi' : 'Khởi Tạo Mã Khuyến Mãi'}">Lưu</span>
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Auto-generate Code & Dynamic Fields Toggle -->
+    <script>
+        function generateRandomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let randomStr = '';
+            for (let i = 0; i < 8; i++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('maCodeInput').value = 'KM-' + randomStr;
+        }
+
+        function handleLoaiGiamChange() {
+            const loaiGiamRadios = document.getElementsByName('loaiGiam');
+            let selected = 'PhanTram';
+            for (const r of loaiGiamRadios) {
+                if (r.checked) {
+                    selected = r.value;
+                    break;
+                }
+            }
+
+            const donVi = document.getElementById('donViGiamLabel');
+            const giamToiDaGroup = document.getElementById('giamToiDaGroup');
+
+            if (selected === 'PhanTram') {
+                donVi.textContent = '%';
+                giamToiDaGroup.style.display = 'block';
+            } else if (selected === 'TienCoDinh') {
+                donVi.textContent = 'đ';
+                giamToiDaGroup.style.display = 'none';
+            } else if (selected === 'Freeship') {
+                donVi.textContent = 'đ';
+                giamToiDaGroup.style.display = 'none';
+            }
+        }
+
+        function handleApDungChoChange() {
+            const radios = document.getElementsByName('apDungCho');
+            let val = 'ALL';
+            for (const r of radios) {
+                if (r.checked) { val = r.value; break; }
+            }
+            const dmGroup = document.getElementById('danhMucSelectGroup');
+            if (val === 'DANHMUC') {
+                dmGroup.classList.remove('hidden');
+            } else {
+                dmGroup.classList.add('hidden');
+            }
+        }
+
+        // Initialize state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            handleLoaiGiamChange();
+            handleApDungChoChange();
+        });
+    </script>
+</body>
+</html>

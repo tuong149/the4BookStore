@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head('Kênh Người Bán - The4BookStore')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('vendor')}"></header>
+
+    <main class="w-full pt-28 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <nav th:replace="~{fragments/vendor/vendor_nav :: vendor_navbar('dashboard')}"></nav>
+
+        <!-- 1. Shop Header Bar (Bảng chào & trạng thái gian hàng) -->
+        <div class="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-surface-container mb-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div class="flex items-center gap-4">
+                <div class="relative shrink-0">
+                    <img th:src="${shop.logo != null ? shop.logo : '/images/default-shop.png'}" alt="Shop Logo" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20 shadow-sm"/>
+                    <span th:if="${shop.trangThai == 'HoatDong'}" class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface-container-lowest" title="Đang hoạt động"></span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl font-bold text-on-surface tracking-tight" th:text="${shop.tenShop}">Tên Shop</h1>
+                        <span th:switch="${shop.trangThai}">
+                            <span th:case="'HoatDong'" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                <span>Đang hoạt động</span>
+                            </span>
+                            <span th:case="'ChoDuyet'" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                <span>Chờ duyệt</span>
+                            </span>
+                            <span th:case="*" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                                <span>Tạm khóa</span>
+                            </span>
+                        </span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px] text-outline">location_on</span>
+                        <span th:text="${shop.diaChiShop != null and !shop.diaChiShop.isEmpty() ? shop.diaChiShop : 'Chưa cập nhật địa chỉ kho xuất hàng'}">Địa chỉ shop</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0 self-start md:self-auto">
+                <a th:if="${shop.trangThai == 'HoatDong'}" th:href="@{'/shop/' + ${shop.slug}}" target="_blank"
+                   class="px-4 py-2.5 text-xs font-bold border border-primary/30 text-primary hover:bg-primary hover:text-white rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
+                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                    <span>Xem Gian Hàng Trực Tiếp</span>
+                </a>
+                <span th:if="${shop.trangThai == 'ChoDuyet'}" class="px-3.5 py-2 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 rounded-xl flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-amber-600">hourglass_empty</span>
+                    <span>Đang chờ Admin phê duyệt</span>
+                </span>
+                <a th:href="@{/vendor/profile}" class="px-4 py-2.5 text-xs font-bold bg-surface-container text-on-surface hover:bg-surface-container-high rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
+                    <span class="material-symbols-outlined text-[16px]">settings</span>
+                    <span>Cài Đặt Gian Hàng</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Pending Approval Banner -->
+        <div th:if="${shop.trangThai == 'ChoDuyet'}" class="mb-8 p-5 rounded-3xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-3.5 shadow-sm">
+            <span class="material-symbols-outlined text-amber-600 text-2xl shrink-0 mt-0.5">hourglass_top</span>
+            <div class="space-y-1">
+                <p class="font-bold text-sm text-amber-900">Gian hàng đang trong quá trình xét duyệt hồ sơ</p>
+                <p class="text-amber-800 leading-relaxed">Hồ sơ đăng ký gian hàng của bạn đã được ghi nhận. Ban Quản trị The4BookStore đang kiểm tra thông tin. Sau khi duyệt, gian hàng sẽ tự động mở bán công khai và người mua có thể đặt hàng trực tuyến.</p>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-xs">
+            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <!-- 2. KPI Financial Cards (3 Thẻ tài chính & quy mô đồng đều) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Thẻ 1: Doanh Thu -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Doanh Thu Thực Nhận</span>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[22px]">payments</span>
+                        </div>
+                    </div>
+                    <div class="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                </div>
+                <div class="pt-4 mt-4 border-t border-surface-container/60 text-[11px] text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-emerald-600">check_circle</span>
+                    <span>Đã khấu trừ phí sàn từ các đơn hoàn tất</span>
+                </div>
+            </div>
+
+            <!-- Thẻ 2: Chiết Khấu Sàn -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Chiết Khấu Sàn Đã Nộp</span>
+                        <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+                        </div>
+                    </div>
+                    <div class="text-2xl lg:text-3xl font-black text-amber-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.platformFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                </div>
+                <div class="pt-4 mt-4 border-t border-surface-container/60 text-[11px] text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-amber-600">percent</span>
+                    <span th:text="'Mức phí sàn quy định: ' + ${shop.chietKhauPhanTram != null ? shop.chietKhauPhanTram : '5.0'} + '% / đơn thành công'">Phí sàn 5.0%</span>
+                </div>
+            </div>
+
+            <!-- Thẻ 3: Quy Mô Kho Sách -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Quy Mô Kho Sách</span>
+                        <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[22px]">menu_book</span>
+                        </div>
+                    </div>
+                    <div class="text-2xl lg:text-3xl font-black text-blue-600 tracking-tight" th:text="${stats.totalBooks} + ' đầu sách'">0 đầu sách</div>
+                </div>
+                <div class="pt-4 mt-4 border-t border-surface-container/60 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant">Đầu sách trong kho</span>
+                    <a th:href="@{/vendor/products/add}" class="font-bold text-primary hover:underline flex items-center gap-0.5">
+                        <span>+ Đăng sách mới</span>
+                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Tiến Trình Quản Lý Đơn Hàng (Bố cục 2 hàng x 5 cột cân xứng, không vỡ chữ) -->
+        <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm mb-8">
+            <div class="flex items-center justify-between mb-6 pb-3 border-b border-surface-container">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-on-surface">Tiến Trình Xử Lý Đơn Hàng</h2>
+                        <p class="text-[11px] text-on-surface-variant">Phân luồng 10 trạng thái đơn hàng thời gian thực</p>
+                    </div>
+                </div>
+                <a th:href="@{/vendor/orders}" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                    <span>Xem tất cả đơn hàng</span>
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- Grid 10 trạng thái: 2 hàng x 5 cột rộng rãi, dễ đọc -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+                <!-- 1. Đơn Mới -->
+                <a th:href="@{/vendor/orders(status='DonHangMoi')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full inline-block mb-1.5">1. Đơn Mới</span>
+                    <div class="text-2xl font-black text-blue-600" th:text="${stats.newOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Chờ xác nhận</div>
+                </a>
+
+                <!-- 2. Đã Xác Nhận -->
+                <a th:href="@{/vendor/orders(status='DaXacNhan')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full inline-block mb-1.5">2. Xác Nhận</span>
+                    <div class="text-2xl font-black text-indigo-600" th:text="${stats.confirmedOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Chuẩn bị hàng</div>
+                </a>
+
+                <!-- 3. Đã Lấy Hàng -->
+                <a th:href="@{/vendor/orders(status='DaLayHang')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full inline-block mb-1.5">3. Lấy Hàng</span>
+                    <div class="text-2xl font-black text-purple-600" th:text="${stats.pickedUpOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Shipper đã nhận</div>
+                </a>
+
+                <!-- 4. Đang Giao -->
+                <a th:href="@{/vendor/orders(status='DangGiao')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full inline-block mb-1.5">4. Đang Giao</span>
+                    <div class="text-2xl font-black text-amber-600" th:text="${stats.shippingOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đang vận chuyển</div>
+                </a>
+
+                <!-- 5. Đã Giao -->
+                <a th:href="@{/vendor/orders(status='DaGiao')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-full inline-block mb-1.5">5. Đã Giao</span>
+                    <div class="text-2xl font-black text-teal-600" th:text="${stats.deliveredOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Khách đã nhận</div>
+                </a>
+
+                <!-- 6. Hoàn Tất -->
+                <a th:href="@{/vendor/orders(status='HoanTat')}" class="p-4 rounded-2xl bg-emerald-50/60 hover:bg-emerald-100/60 hover:-translate-y-0.5 transition-all text-center group border border-emerald-200 shadow-xs">
+                    <span class="text-[10px] font-bold text-emerald-800 bg-emerald-200 px-2 py-0.5 rounded-full inline-block mb-1.5">6. Hoàn Tất</span>
+                    <div class="text-2xl font-black text-emerald-700" th:text="${stats.completedOrders}">0</div>
+                    <div class="text-[11px] text-emerald-800 font-medium mt-1">Thành công 100%</div>
+                </a>
+
+                <!-- 7. Yêu Cầu Hủy -->
+                <a th:href="@{/vendor/orders(status='YeuCauHuy')}" class="p-4 rounded-2xl bg-rose-50/60 hover:bg-rose-100/60 hover:-translate-y-0.5 transition-all text-center group border border-rose-200 shadow-xs">
+                    <span class="text-[10px] font-bold text-rose-800 bg-rose-200 px-2 py-0.5 rounded-full inline-block mb-1.5">7. Chờ Hủy</span>
+                    <div class="text-2xl font-black text-rose-600" th:text="${stats.cancelRequests}">0</div>
+                    <div class="text-[11px] text-rose-700 font-medium mt-1">Yêu cầu từ khách</div>
+                </a>
+
+                <!-- 8. Trả Hàng -->
+                <a th:href="@{/vendor/orders(status='TraHangHoanTien')}" class="p-4 rounded-2xl bg-purple-50/60 hover:bg-purple-100/60 hover:-translate-y-0.5 transition-all text-center group border border-purple-200 shadow-xs">
+                    <span class="text-[10px] font-bold text-purple-800 bg-purple-200 px-2 py-0.5 rounded-full inline-block mb-1.5">8. Trả Hàng</span>
+                    <div class="text-2xl font-black text-purple-600" th:text="${stats.returnRefundOrders}">0</div>
+                    <div class="text-[11px] text-purple-700 font-medium mt-1">Đổi trả / hoàn tiền</div>
+                </a>
+
+                <!-- 9. Tranh Chấp -->
+                <a th:href="@{/vendor/orders(status='TranhChap')}" class="p-4 rounded-2xl bg-amber-50/60 hover:bg-amber-100/60 hover:-translate-y-0.5 transition-all text-center group border border-amber-200 shadow-xs">
+                    <span class="text-[10px] font-bold text-amber-800 bg-amber-200 px-2 py-0.5 rounded-full inline-block mb-1.5">9. Tranh Chấp</span>
+                    <div class="text-2xl font-black text-amber-600" th:text="${stats.disputeOrders}">0</div>
+                    <div class="text-[11px] text-amber-700 font-medium mt-1">Sàn trung gian xử lý</div>
+                </a>
+
+                <!-- 10. Đã Hủy -->
+                <a th:href="@{/vendor/orders(status='DaHuy')}" class="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container hover:-translate-y-0.5 transition-all text-center group border border-surface-container shadow-xs">
+                    <span class="text-[10px] font-bold text-gray-700 bg-gray-200 px-2 py-0.5 rounded-full inline-block mb-1.5">10. Đã Hủy</span>
+                    <div class="text-2xl font-black text-gray-600" th:text="${stats.cancelledOrders}">0</div>
+                    <div class="text-[11px] text-on-surface-variant font-medium mt-1">Đơn bị hủy bỏ</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Lối Tắt Quản Trị Nhanh (Grid 3 cột rộng rãi, card cân đối) -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Danh Mục Quản Trị Gian Hàng</h2>
+                <span class="text-xs text-outline">6 phân hệ chức năng</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- 1. Sản Phẩm -->
+                <a th:href="@{/vendor/products}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">library_books</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">Kho Sản Phẩm</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Thêm mới, sửa giá &amp; đăng sách</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+
+                <!-- 2. Nhập Hàng -->
+                <a th:href="@{/vendor/imports}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">input</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-blue-600 transition-colors">Nhập Hàng Mới</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Nhập kho và quản lý giá vốn</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-blue-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+
+                <!-- 3. Kiểm Kê Kho -->
+                <a th:href="@{/vendor/inventory}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">fact_check</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-emerald-600 transition-colors">Kiểm Kê Kho</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Tự cân bằng và chốt số tồn kho</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-emerald-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+
+                <!-- 4. Đơn Hàng -->
+                <a th:href="@{/vendor/orders}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">local_shipping</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-indigo-600 transition-colors">Quản Lý Đơn Hàng</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Xác nhận và theo dõi giao hàng</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-indigo-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+
+                <!-- 5. Voucher Shop -->
+                <a th:href="@{/vendor/promotions}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">confirmation_number</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-amber-600 transition-colors">Voucher Khuyến Mãi</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Tạo mã giảm giá riêng của shop</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-amber-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+
+                <!-- 6. Hồ Sơ Shop -->
+                <a th:href="@{/vendor/profile}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-12 h-12 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">store</span>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">Hồ Sơ Gian Hàng</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Trang trí banner, logo &amp; thông tin</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+</body>
+</html>

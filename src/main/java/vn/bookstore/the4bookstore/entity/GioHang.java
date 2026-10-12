@@ -10,7 +10,7 @@ public class GioHang {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maGioHang;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maKH", nullable = false)
     private KhachHang khachHang;
     

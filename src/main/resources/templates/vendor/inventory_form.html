@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head('Lập Biên Bản Kiểm Kê - Kênh Người Bán')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('vendor')}"></header>
+
+    <main class="w-full pt-28 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-8">
+        <nav th:replace="~{fragments/vendor/vendor_nav :: vendor_navbar('inventory')}"></nav>
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <nav class="text-xs text-on-surface-variant flex items-center gap-1 mb-1">
+                    <a th:href="@{/vendor/dashboard}" class="hover:underline">Kênh người bán</a>
+                    <span class="material-symbols-outlined text-xs">chevron_right</span>
+                    <a th:href="@{/vendor/inventory}" class="hover:underline">Kiểm kê tồn kho</a>
+                    <span class="material-symbols-outlined text-xs">chevron_right</span>
+                    <span class="text-primary font-semibold">Tạo biên bản kiểm đếm mới</span>
+                </nav>
+                <h1 class="text-2xl font-bold text-on-surface">Lập Biên Bản Kiểm Kê Gian Hàng</h1>
+                <p class="text-xs text-on-surface-variant mt-1">
+                    Nhập số lượng thực tế kiểm đếm tại gian hàng. Khi xác nhận, hệ thống sẽ tự động cập nhật số lượng tồn kho của shop.
+                </p>
+            </div>
+            <a th:href="@{/vendor/inventory}" class="px-4 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                <span>Quay Lại</span>
+            </a>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-600">error</span>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <form th:action="@{/vendor/inventory/create}" method="post" id="inventoryForm">
+            <!-- Header Card -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm mb-6">
+                <h2 class="text-base font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">description</span>
+                    <span>Thông Tin Đợt Kiểm Kê</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1">Gian hàng thực hiện</label>
+                        <input type="text" th:value="${shop.tenShop}" disabled
+                               class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-bold text-on-surface"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1">Ghi chú đợt kiểm kê</label>
+                        <input type="text" name="ghiChu" placeholder="Ví dụ: Kiểm kê định kỳ tháng 10, kiểm đếm tồn sau hội chợ..."
+                               class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-lowest text-xs text-on-surface focus:ring-2 focus:ring-primary"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Audit Table -->
+            <div class="bg-surface-container-lowest rounded-3xl border border-surface-container shadow-sm overflow-hidden mb-6">
+                <div class="p-4 bg-surface-container-low/70 border-b border-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span class="font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">menu_book</span>
+                        <span>Danh Sách Sách Trong Shop Cần Kiểm Đếm (<span th:text="${#lists.size(products)}">0</span>)</span>
+                    </span>
+                    <div class="relative w-full sm:w-72">
+                        <span class="material-symbols-outlined absolute left-3 top-2 text-on-surface-variant text-[18px]">search</span>
+                        <input type="text" id="quickFilterInput" placeholder="Lọc nhanh sách..." oninput="filterTable(this.value)"
+                               class="w-full pl-9 pr-3 py-1.5 rounded-xl border border-surface-container bg-surface-container-lowest text-xs text-on-surface focus:outline-none focus:border-primary/50 shadow-2xs"/>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="auditTable">
+                        <thead class="bg-surface-container-low text-on-surface-variant uppercase font-bold text-[11px] border-b border-surface-container">
+                            <tr>
+                                <th class="p-4 w-12 text-center">STT</th>
+                                <th class="p-4">Sách</th>
+                                <th class="p-4 w-28 text-center">Tồn sàn hiện tại</th>
+                                <th class="p-4 w-36 text-center">Số lượng thực tế *</th>
+                                <th class="p-4 w-28 text-center">Chênh lệch</th>
+                                <th class="p-4 w-60">Lý do điều chỉnh (nếu có)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-container">
+                            <tr th:if="${products == null or products.isEmpty()}">
+                                <td colspan="6" class="p-8 text-center text-on-surface-variant">
+                                    Gian hàng chưa có sách nào đang bán để kiểm kê.
+                                </td>
+                            </tr>
+                            <tr th:each="p, stat : ${products}" class="hover:bg-surface-container-low/50 transition-colors product-row" th:data-name="${p.tenSP.toLowerCase()}">
+                                <td class="p-4 text-center font-bold text-outline" th:text="${stat.count}">1</td>
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <img th:src="${p.hinhAnh != null ? p.hinhAnh : '/images/default-book.png'}"
+                                             class="w-10 h-14 object-cover rounded-lg border border-surface-container shrink-0"/>
+                                        <div class="min-w-0 max-w-xs">
+                                            <input type="hidden" name="productIds" th:value="${p.maSP}"/>
+                                            <p class="font-bold text-on-surface truncate" th:text="${p.tenSP}">Tên sách</p>
+                                            <p class="text-[11px] text-on-surface-variant font-mono" th:text="'Mã: #' + ${p.maSP} + ' | ISBN: ' + (${p.ISBN ?: 'N/A'})"></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-center font-mono font-bold text-on-surface system-qty" th:text="${p.soLuongTon ?: 0}">0</td>
+                                <td class="p-4 text-center">
+                                    <input type="number" name="soLuongThucTes" min="0" th:value="${p.soLuongTon ?: 0}" required
+                                           oninput="calculateDiff(this)"
+                                           class="w-24 text-center px-2 py-1.5 rounded-xl border border-surface-container bg-surface-container-lowest font-mono font-bold text-xs focus:ring-2 focus:ring-primary actual-input"/>
+                                </td>
+                                <td class="p-4 text-center font-mono font-bold diff-badge text-outline">
+                                    0
+                                </td>
+                                <td class="p-4">
+                                    <input type="text" name="lyDos" placeholder="Lý do hư hỏng, thất thoát, bù hàng..."
+                                           class="w-full px-3 py-1.5 rounded-xl border border-surface-container bg-surface-container-lowest text-xs text-on-surface focus:outline-none focus:border-primary/40"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-on-surface-variant">Lưu ý: Tồn kho trên sàn sẽ được tự động đồng bộ theo số lượng thực tế khi bấm xác nhận.</span>
+                <div class="flex items-center gap-3">
+                    <a th:href="@{/vendor/inventory}" class="px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-bold text-xs hover:bg-surface-container-high transition-all">Hủy bỏ</a>
+                    <button type="submit" onclick="return confirm('Xác nhận hoàn tất kiểm kê và cân bằng tồn kho cho gian hàng?');" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary-container shadow-sm transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">verified</span>
+                        <span>Xác Nhận &amp; Cân Bằng Kho</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <script>
+        function calculateDiff(input) {
+            const row = input.closest('tr');
+            const systemQty = parseInt(row.querySelector('.system-qty').textContent.trim()) || 0;
+            const actualQty = parseInt(input.value) || 0;
+            const diff = actualQty - systemQty;
+            const badge = row.querySelector('.diff-badge');
+
+            if (diff > 0) {
+                badge.textContent = '+' + diff + ' (Thừa)';
+                badge.className = 'p-4 text-center font-mono font-bold diff-badge text-emerald-600';
+            } else if (diff < 0) {
+                badge.textContent = diff + ' (Thiếu)';
+                badge.className = 'p-4 text-center font-mono font-bold diff-badge text-rose-600';
+            } else {
+                badge.textContent = '0 (Khớp)';
+                badge.className = 'p-4 text-center font-mono font-bold diff-badge text-outline';
+            }
+        }
+
+        function filterTable(kw) {
+            const term = (kw || '').trim().toLowerCase();
+            const rows = document.querySelectorAll('.product-row');
+            rows.forEach(r => {
+                const name = r.getAttribute('data-name') || '';
+                if (!term || name.includes(term)) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

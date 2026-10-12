@@ -10,7 +10,7 @@ public class ThanhToan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maThanhToan;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maDH", nullable = false)
     private DonHang donHang;
     

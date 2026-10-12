@@ -23,19 +23,37 @@ public class AuthController {
     private final KhachHangRepository khachHangRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetService passwordResetService;
+    private final vn.bookstore.the4bookstore.security.JwtService jwtService;
 
     public AuthController(TaiKhoanRepository taiKhoanRepository,
                           KhachHangRepository khachHangRepository,
                           PasswordEncoder passwordEncoder,
-                          PasswordResetService passwordResetService) {
+                          PasswordResetService passwordResetService,
+                          vn.bookstore.the4bookstore.security.JwtService jwtService) {
         this.taiKhoanRepository = taiKhoanRepository;
         this.khachHangRepository = khachHangRepository;
         this.passwordEncoder = passwordEncoder;
         this.passwordResetService = passwordResetService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/login")
-    public String loginPage(Authentication authentication) {
+    public String loginPage(@RequestParam(value = "adminDenied", required = false) String adminDenied,
+                            @RequestParam(value = "switch", required = false) String switchAccount,
+                            jakarta.servlet.http.HttpServletRequest request,
+                            jakarta.servlet.http.HttpServletResponse response,
+                            Authentication authentication) {
+        if (adminDenied != null || switchAccount != null) {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            org.springframework.http.ResponseCookie deleteCookie = jwtService.cleanJwtCookie();
+            response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, deleteCookie.toString());
+            return "auth/login";
+        }
+
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             return "redirect:/";
         }
@@ -61,7 +79,10 @@ public class AuthController {
             model.addAttribute("error", "Email đã được sử dụng!");
             return "auth/register";
         }
-        if (khachHangRepository.findBySoDienThoai(request.getSoDienThoai()).isPresent()) {
+        String phone = (request.getSoDienThoai() != null && !request.getSoDienThoai().isBlank()) ? request.getSoDienThoai().trim() : null;
+        String address = (request.getDiaChi() != null && !request.getDiaChi().isBlank()) ? request.getDiaChi().trim() : null;
+
+        if (phone != null && khachHangRepository.findBySoDienThoai(phone).isPresent()) {
             model.addAttribute("error", "Số điện thoại đã được sử dụng!");
             return "auth/register";
         }
@@ -79,9 +100,9 @@ public class AuthController {
         // Tạo hồ sơ khách hàng
         KhachHang kh = new KhachHang();
         kh.setHoTen(request.getHoTen());
-        kh.setSoDienThoai(request.getSoDienThoai());
+        kh.setSoDienThoai(phone);
         kh.setEmail(request.getEmail());
-        kh.setDiaChi(request.getDiaChi());
+        kh.setDiaChi(address);
         kh.setTaiKhoan(tk);
         khachHangRepository.save(kh);
 

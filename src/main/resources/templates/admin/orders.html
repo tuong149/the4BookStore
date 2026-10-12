@@ -1,236 +1,262 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <th:block th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Đơn Hàng')}"></th:block>
 </head>
-
 <body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
-
-    <!-- Admin Sidebar -->
     <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('orders')}"></aside>
 
-    <div class="pl-64">
-        <!-- Admin Header -->
+    <div class="pl-64 min-h-screen">
         <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
 
-        <!-- Main Content Area -->
         <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
-            <div class="flex flex-col w-full">
-
-                <!-- Page Title -->
-                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mb-space-lg">
-                    <div class="flex flex-col gap-space-xs">
-                        <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                            <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
-                            <span>VẬN HÀNH THE4BOOKSTORE</span>
-                            <span>/</span>
-                            <span class="text-primary font-semibold">ĐƠN HÀNG</span>
+            <div class="flex flex-col w-full gap-space-md">
+                <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+                    <div>
+                        <div class="flex items-center gap-space-sm">
+                            <h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">Quản Lý Đơn Hàng</h1>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-fixed text-primary border border-primary-fixed-dim">Trực tuyến</span>
                         </div>
-                        <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Đơn Hàng</h1>
-                        <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                            Theo dõi, kiểm duyệt và cập nhật trạng thái đơn hàng từ khách hàng trong hệ thống.
-                        </p>
+                        <p class="text-xs text-on-surface-variant mt-1">Theo dõi, xử lý và cập nhật tiến trình đơn đặt hàng của khách hàng The4BookStore.</p>
                     </div>
+                </section>
 
-                    <!-- Summary metrics -->
-                    <div class="flex items-center gap-space-sm flex-wrap">
-                        <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
-                            <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
-                                <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                <section aria-label="Thống kê đơn hàng" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-sm">
+                    <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container/60 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-on-surface-variant">Đơn hàng tháng này</span>
+                            <span class="w-9 h-9 rounded-xl bg-primary-fixed text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums" th:text="${monthlyOrders}">—</span>
+                            <p class="text-xs text-on-surface-variant mt-1">Đơn được tạo trong tháng</p>
+                        </div>
+                    </article>
+
+                    <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-secondary-fixed/70 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-on-secondary-fixed-variant">Chờ xác nhận</span>
+                            <span class="w-9 h-9 rounded-xl bg-secondary-fixed text-on-secondary-fixed-variant flex items-center justify-center">
+                                <span class="material-symbols-outlined text-xl">pending_actions</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="font-headline-lg text-headline-lg font-bold text-on-secondary-fixed-variant tabular-nums" th:text="${pendingCount}">—</span>
+                            <p class="text-xs text-on-surface-variant mt-1">Cần được kiểm tra</p>
+                        </div>
+                    </article>
+
+                    <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container/60 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-on-surface-variant">Đang vận chuyển</span>
+                            <span class="w-9 h-9 rounded-xl bg-surface-container-high text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-xl">local_shipping</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="font-headline-lg text-headline-lg font-bold text-on-surface tabular-nums" th:text="${shippingCount}">—</span>
+                            <p class="text-xs text-on-surface-variant mt-1">Đơn đang giao</p>
+                        </div>
+                    </article>
+
+                    <article class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container/60 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-on-surface-variant">Doanh thu đã giao trong tháng</span>
+                            <span class="w-9 h-9 rounded-xl bg-primary-fixed text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-xl">payments</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="flex items-baseline gap-1">
+                                <span class="font-mono font-bold text-xl text-primary tabular-nums" th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'POINT', 0, 'COMMA')}">—</span>
+                                <span class="text-xs font-bold text-primary">đ</span>
                             </div>
-                            <div class="flex flex-col">
-                                <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG ĐƠN</span>
-                                <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${orders != null ? #lists.size(orders) : 0}">0</span>
-                            </div>
+                            <p class="text-xs text-on-surface-variant mt-1">Từ đơn đã giao trong tháng</p>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="bg-surface-container-lowest rounded-2xl border border-surface-container/60 p-space-md shadow-sm space-y-space-sm">
+                    <nav class="flex items-center gap-1 overflow-x-auto pb-space-sm border-b border-surface-container/60" aria-label="Lọc trạng thái đơn hàng">
+                        <a th:href="@{/admin/orders}" th:attr="aria-current=${currentStatus == '' ? 'page' : null}"
+                           th:class="${currentStatus == ''} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Tất cả
+                            <span class="px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-mono" th:text="${allOrdersCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='pending')}" th:attr="aria-current=${currentStatus == 'pending' ? 'page' : null}"
+                           th:class="${currentStatus == 'pending'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Chờ xác nhận
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${pendingCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='confirmed')}" th:attr="aria-current=${currentStatus == 'confirmed' ? 'page' : null}"
+                           th:class="${currentStatus == 'confirmed'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Đã xác nhận
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${confirmedCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='DangGiao')}" th:attr="aria-current=${currentStatus == 'DangGiao' ? 'page' : null}"
+                           th:class="${currentStatus == 'DangGiao'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Đang vận chuyển
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${shippingCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='DaGiao')}" th:attr="aria-current=${currentStatus == 'DaGiao' ? 'page' : null}"
+                           th:class="${currentStatus == 'DaGiao'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Đã giao / Hoàn tất
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${successCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='dispute')}" th:attr="aria-current=${currentStatus == 'dispute' ? 'page' : null}"
+                           th:class="${currentStatus == 'dispute'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-amber-600 text-white transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-amber-700 hover:bg-amber-50 transition whitespace-nowrap'">
+                            Tranh chấp / Trả hàng
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${disputeCount}">—</span>
+                        </a>
+                        <a th:href="@{/admin/orders(status='cancelled')}" th:attr="aria-current=${currentStatus == 'cancelled' ? 'page' : null}"
+                           th:class="${currentStatus == 'cancelled'} ? 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-bold bg-primary text-on-primary transition whitespace-nowrap' : 'flex items-center gap-2 px-space-sm py-2 rounded-xl text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition whitespace-nowrap'">
+                            Đã hủy
+                            <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] font-mono" th:text="${cancelledCount}">—</span>
+                        </a>
+                    </nav>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-sm pt-1">
+                        <label class="relative flex-1 max-w-lg">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+                            <input id="orderSearchInput" type="search"
+                                   class="w-full pl-9 pr-4 py-2 bg-surface-container-low border border-surface-container rounded-xl text-xs text-on-surface placeholder:text-on-surface-variant focus:bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary outline-none transition"
+                                   placeholder="Tìm mã đơn, khách hàng hoặc số điện thoại"/>
+                        </label>
+                        <div class="flex items-center gap-space-sm">
+                            <span class="text-xs text-on-surface-variant whitespace-nowrap">
+                                <span th:text="${startCount}">—</span>–<span th:text="${endCount}">—</span>
+                                trên <span th:text="${totalElements}">—</span> đơn hàng
+                            </span>
+                            <a th:href="@{/admin/orders(status=${currentStatus})}"
+                               class="p-2 border border-surface-container rounded-xl hover:bg-surface-container-low text-on-surface-variant transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                               title="Tải lại danh sách" aria-label="Tải lại danh sách">
+                                <span class="material-symbols-outlined text-lg">refresh</span>
+                            </a>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Action Toolbar / Filters -->
-                <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm mb-space-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md border border-surface-container/60">
-                    <div class="flex flex-wrap items-center gap-space-sm flex-1">
-                        <!-- Search Box -->
-                        <div class="relative flex-1 min-w-[240px] max-w-md">
-                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
-                            <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30"
-                                   id="orderSearchInput"
-                                   placeholder="Tìm kiếm theo mã đơn, tên KH, SĐT..."
-                                   type="text"
-                                   onkeyup="filterOrders()"/>
-                        </div>
-
-                        <!-- Status Filter -->
-                        <div class="relative">
-                            <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30"
-                                    id="statusFilter"
-                                    onchange="filterOrders()">
-                                <option value="all">Tất cả trạng thái</option>
-                                <option value="ChoXuLy">Chờ xử lý / Chờ duyệt</option>
-                                <option value="DangGiao">Đang giao</option>
-                                <option value="DaGiao">Đã giao</option>
-                                <option value="DaHuy">Đã hủy</option>
-                            </select>
-                            <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Orders Table Container -->
-                <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-surface-container/60">
+                <section class="bg-surface-container-lowest rounded-2xl border border-surface-container/60 shadow-sm overflow-hidden" aria-label="Danh sách đơn hàng">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse" id="ordersTable">
+                        <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="border-b border-surface-container/60 bg-surface-container-low/40 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                                    <th class="py-3.5 px-space-md">MÃ ĐƠN</th>
-                                    <th class="py-3.5 px-space-md">KHÁCH HÀNG</th>
-                                    <th class="py-3.5 px-space-md">NGÀY ĐẶT</th>
-                                    <th class="py-3.5 px-space-md">ĐỊA CHỈ GIAO</th>
-                                    <th class="py-3.5 px-space-md text-right">TỔNG TIỀN</th>
-                                    <th class="py-3.5 px-space-md text-center">TRẠNG THÁI</th>
-                                    <th class="py-3.5 px-space-md text-right">THAO TÁC</th>
+                                <tr class="bg-surface-container-low/70 border-b border-surface-container text-on-surface-variant font-semibold uppercase tracking-wider text-label-sm">
+                                    <th class="py-3.5 px-4">Mã đơn hàng</th>
+                                    <th class="py-3.5 px-3">Khách hàng</th>
+                                    <th class="py-3.5 px-3">Ngày đặt</th>
+                                    <th class="py-3.5 px-3 text-center">Số lượng</th>
+                                    <th class="py-3.5 px-3 text-right">Tổng tiền</th>
+                                    <th class="py-3.5 px-3">Trạng thái</th>
+                                    <th class="py-3.5 px-4 text-right">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-surface-container/40">
+                            <tbody class="divide-y divide-surface-container/60 text-on-surface">
                                 <tr th:if="${orders == null || #lists.isEmpty(orders)}">
-                                    <td colspan="7" class="py-8 text-center text-on-surface-variant">
-                                        Không tìm thấy đơn hàng nào.
-                                    </td>
+                                    <td colspan="7" class="py-12 text-center text-on-surface-variant">Không tìm thấy đơn hàng nào.</td>
                                 </tr>
-
-                                <tr th:each="dh : ${orders}"
-                                    class="order-row hover:bg-surface-container-low/50 transition-colors"
-                                    th:attr="data-id=${dh.maDH}, data-customer=${dh.khachHang != null ? dh.khachHang.hoTen?.toLowerCase() : ''}, data-phone=${dh.soDienThoaiGiao}, data-status=${dh.trangThai}">
-
-                                    <!-- Order ID -->
-                                    <td class="py-3.5 px-space-md font-mono font-bold text-primary" th:text="'#DH-' + ${dh.maDH}">#DH-001</td>
-
-                                    <!-- Customer Info -->
-                                    <td class="py-3.5 px-space-md">
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold text-on-surface" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Nguyễn Văn A</span>
-                                            <span class="text-xs text-on-surface-variant" th:text="${dh.soDienThoaiGiao}">0912345678</span>
+                                <tr th:each="dh : ${orders}" class="order-row hover:bg-surface-container-low/60 transition-colors"
+                                    th:classappend="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'} ? 'opacity-75' : ''"
+                                    th:attr="data-id=${dh.maDH}, data-customer=${dh.khachHang != null ? dh.khachHang.hoTen?.toLowerCase() : ''}, data-phone=${dh.soDienThoaiGiao}">
+                                    <td class="py-4 px-4">
+                                        <span class="font-mono font-bold text-primary text-sm" th:text="'#TB-' + ${#numbers.formatInteger(dh.maDH, 4)}">#TB-—</span>
+                                    </td>
+                                    <td class="py-4 px-3">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-primary-fixed text-primary font-bold text-xs flex items-center justify-center flex-shrink-0"
+                                                 th:text="${dh.khachHang != null and dh.khachHang.hoTen != null and !#strings.isEmpty(dh.khachHang.hoTen) ? #strings.toUpperCase(#strings.substring(dh.khachHang.hoTen, 0, 1)) : '?'}">?</div>
+                                            <div>
+                                                <div class="font-semibold text-on-surface" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Khách hàng</div>
+                                                <div class="text-[11px] text-on-surface-variant font-mono" th:text="${dh.soDienThoaiGiao}">—</div>
+                                            </div>
                                         </div>
                                     </td>
-
-                                    <!-- Order Date -->
-                                    <td class="py-3.5 px-space-md text-on-surface-variant text-sm" th:text="${#temporals.format(dh.ngayDat, 'dd/MM/yyyy HH:mm')}">
-                                        01/01/2026 10:00
+                                    <td class="py-4 px-3 text-on-surface-variant whitespace-nowrap">
+                                        <span class="font-medium text-on-surface" th:text="${dh.ngayDat != null ? #temporals.format(dh.ngayDat, 'dd/MM/yyyy') : '—'}">—</span>
+                                        <span class="block text-[11px] text-on-surface-variant font-mono" th:text="${dh.ngayDat != null ? #temporals.format(dh.ngayDat, 'HH:mm') : ''}"></span>
                                     </td>
-
-                                    <!-- Shipping Address -->
-                                    <td class="py-3.5 px-space-md max-w-xs truncate text-sm text-on-surface-variant" th:title="${dh.diaChiGiao}" th:text="${dh.diaChiGiao}">
-                                        123 Đường ABC, Quận 1, TP.HCM
+                                    <td class="py-4 px-3 text-center">
+                                        <span class="inline-block px-2 py-0.5 rounded-md bg-surface-container-low text-on-surface-variant font-medium"
+                                              th:text="${dh.chiTietDonHangs != null ? #lists.size(dh.chiTietDonHangs) : 0}">—</span>
                                     </td>
-
-                                    <!-- Total Amount -->
-                                    <td class="py-3.5 px-space-md text-right font-semibold text-on-surface tabular-nums" th:text="${#numbers.formatDecimal(dh.tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'">
-                                        250.000 ₫
+                                    <td class="py-4 px-3 text-right font-mono font-bold text-primary text-sm whitespace-nowrap"
+                                        th:text="${#numbers.formatDecimal(dh.tongTien, 0, 'POINT', 0, 'COMMA')} + ' đ'">—</td>
+                                    <td class="py-4 px-3 whitespace-nowrap">
+                                        <span th:if="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-secondary-fixed text-on-secondary-fixed-variant border border-secondary-fixed-dim">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span> Chờ xác nhận
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DangGiao'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-surface-container-high text-primary border border-surface-container">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Đang vận chuyển
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DaGiao'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary-fixed text-primary border border-primary-fixed-dim">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Thành công
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DaHoan' or dh.trangThai == 'TraHangHoanTien'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Đã hoàn hàng
+                                        </span>
+                                        <span th:if="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}"
+                                              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-surface-container text-on-surface-variant border border-outline-variant">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Đã hủy
+                                        </span>
+                                        <span th:if="${dh.trangThai != 'ChoXuLy' and dh.trangThai != 'ChoDuyet' and dh.trangThai != 'DangGiao' and dh.trangThai != 'DaGiao' and dh.trangThai != 'DaHoan' and dh.trangThai != 'TraHangHoanTien' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}"
+                                              class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-surface-container text-on-surface-variant"
+                                              th:text="${dh.trangThai}">Khác</span>
                                     </td>
-
-                                    <!-- Status Badge -->
-                                    <td class="py-3.5 px-space-md text-center">
-                                        <span th:if="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                            Chờ duyệt
-                                        </span>
-                                        <span th:if="${dh.trangThai == 'DangGiao'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Đang giao
-                                        </span>
-                                        <span th:if="${dh.trangThai == 'DaGiao'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                            Đã giao
-                                        </span>
-                                        <span th:if="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
-                                            Đã hủy
-                                        </span>
-                                        <span th:if="${dh.trangThai != 'ChoXuLy' and dh.trangThai != 'ChoDuyet' and dh.trangThai != 'DangGiao' and dh.trangThai != 'DaGiao' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" th:text="${dh.trangThai}">
-                                            Khác
-                                        </span>
-                                    </td>
-
-                                    <!-- Actions: Quick status changer -->
-                                    <td class="py-3.5 px-space-md text-right">
-                                        <select class="text-xs bg-surface-container-low border border-surface-container rounded-lg px-2 py-1 text-on-surface focus:outline-none focus:border-primary/50"
-                                                th:onchange="'updateOrderStatus(' + ${dh.maDH} + ', this.value)'">
-                                            <option value="" disabled selected>Đổi trạng thái...</option>
-                                            <option value="ChoXuLy" th:selected="${dh.trangThai == 'ChoXuLy' or dh.trangThai == 'ChoDuyet'}">Chờ duyệt</option>
-                                            <option value="DangGiao" th:selected="${dh.trangThai == 'DangGiao'}">Đang giao</option>
-                                            <option value="DaGiao" th:selected="${dh.trangThai == 'DaGiao'}">Đã giao</option>
-                                            <option value="DaHuy" th:selected="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}">Hủy đơn</option>
-                                        </select>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="inline-flex items-center justify-end gap-2">
+                                            <span class="text-[11px] text-on-surface-variant font-medium bg-surface-container px-2 py-1 rounded-md"
+                                                  th:text="${dh.shop != null ? dh.shop.tenShop : 'Gian hàng'}">Shop</span>
+                                            <a th:href="@{/admin/orders/{id}(id=${dh.maDH})}" title="Xem chi tiết" aria-label="Xem chi tiết đơn hàng"
+                                               class="inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary-fixed hover:bg-primary hover:text-on-primary transition">
+                                                <span class="material-symbols-outlined text-base mr-1">visibility</span> Chi tiết
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-
+                    <nav th:if="${totalPages > 1}" class="flex items-center justify-between gap-space-sm border-t border-surface-container/60 px-space-md py-space-sm" aria-label="Phân trang đơn hàng">
+                        <a th:if="${currentPage > 1}" th:href="@{/admin/orders(page=${currentPage - 1}, status=${currentStatus})}"
+                           class="inline-flex items-center gap-1 px-space-sm py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low">
+                            <span class="material-symbols-outlined text-base">chevron_left</span> Trước
+                        </a>
+                        <span th:unless="${currentPage > 1}" class="px-space-sm py-2 text-xs text-on-surface-variant/50">Trước</span>
+                        <span class="text-xs text-on-surface-variant">
+                            Trang <span class="font-semibold text-on-surface" th:text="${currentPage}">—</span>
+                            / <span th:text="${totalPages}">—</span>
+                        </span>
+                        <a th:if="${currentPage < totalPages}" th:href="@{/admin/orders(page=${currentPage + 1}, status=${currentStatus})}"
+                           class="inline-flex items-center gap-1 px-space-sm py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-low">
+                            Sau <span class="material-symbols-outlined text-base">chevron_right</span>
+                        </a>
+                        <span th:unless="${currentPage < totalPages}" class="px-space-sm py-2 text-xs text-on-surface-variant/50">Sau</span>
+                    </nav>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- Script to handle dynamic filtering and updating status -->
     <script>
-        function filterOrders() {
-            const query = document.getElementById('orderSearchInput').value.toLowerCase().trim();
-            const selectedStatus = document.getElementById('statusFilter').value;
-            const rows = document.querySelectorAll('.order-row');
-
-            rows.forEach(row => {
-                const id = row.getAttribute('data-id') || '';
-                const customer = row.getAttribute('data-customer') || '';
-                const phone = row.getAttribute('data-phone') || '';
-                const status = row.getAttribute('data-status') || '';
-
-                const matchesQuery = id.includes(query) || customer.includes(query) || phone.includes(query);
-
-                let matchesStatus = true;
-                if (selectedStatus !== 'all') {
-                    if (selectedStatus === 'ChoXuLy') {
-                        matchesStatus = (status === 'ChoXuLy' || status === 'ChoDuyet');
-                    } else if (selectedStatus === 'DaHuy') {
-                        matchesStatus = (status === 'DaHuy' || status === 'Huy');
-                    } else {
-                        matchesStatus = (status === selectedStatus);
-                    }
-                }
-
-                if (matchesQuery && matchesStatus) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        async function updateOrderStatus(orderId, newStatus) {
-            if (!newStatus) return;
-
-            if (!confirm(`Bạn có chắc muốn chuyển trạng thái đơn hàng #${orderId} sang "${newStatus}"?`)) {
-                window.location.reload();
-                return;
-            }
-
-            try {
-                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-                const response = await fetch(`/admin/orders/${orderId}/status?status=${encodeURIComponent(newStatus)}`, {
-                    method: 'POST',
-                    headers: {
-                        [csrfHeader]: csrfToken
-                    }
+        const searchInput = document.getElementById('orderSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                document.querySelectorAll('.order-row').forEach(row => {
+                    const matches = ['data-id', 'data-customer', 'data-phone']
+                        .some(attribute => (row.getAttribute(attribute) || '').toLowerCase().includes(query));
+                    row.hidden = !matches;
                 });
-
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    window.location.reload();
-                } else {
-                    alert("Cập nhật trạng thái thất bại: " + (data.error || "Không rõ nguyên nhân"));
-                }
-            } catch (err) {
-                alert("Lỗi kết nối máy chủ: " + err.message);
-            }
+            });
         }
     </script>
 </body>

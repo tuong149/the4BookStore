@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common/head :: common_head('Kiểm Kê Tồn Kho - Kênh Người Bán')}"></head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+
+    <header th:replace="~{fragments/common/navbar :: common_navbar('vendor')}"></header>
+
+    <main class="w-full pt-28 pb-16 flex-1 max-w-7xl mx-auto px-4 md:px-8">
+        <nav th:replace="~{fragments/vendor/vendor_nav :: vendor_navbar('inventory')}"></nav>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <nav class="text-xs text-on-surface-variant flex items-center gap-1 mb-1">
+                    <a th:href="@{/vendor/dashboard}" class="hover:underline">Kênh người bán</a>
+                    <span class="material-symbols-outlined text-xs">chevron_right</span>
+                    <span class="text-primary font-semibold">Quản lý kho &amp; Kiểm kê</span>
+                </nav>
+                <h1 class="text-2xl font-bold text-on-surface">Kiểm Kê Tồn Kho Gian Hàng</h1>
+                <p class="text-xs text-on-surface-variant mt-1">
+                    Gian hàng tự chủ đối chiếu số lượng thực tế tại quầy/kho riêng của shop và tự động cân bằng tồn kho trên sàn.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a th:href="@{/vendor/inventory/create}" class="px-5 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container shadow-sm transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-lg">fact_check</span>
+                    <span>Tạo Đợt Kiểm Kê Mới</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric strip -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">shelves</span>
+                </div>
+                <div>
+                    <div class="text-xs text-on-surface-variant font-medium">Quy mô đầu sách shop</div>
+                    <div class="text-xl font-bold text-on-surface" th:text="${totalProducts} + ' sản phẩm'">0 sản phẩm</div>
+                </div>
+            </div>
+            <div class="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">verified</span>
+                </div>
+                <div>
+                    <div class="text-xs text-on-surface-variant font-medium">Số đợt kiểm kê đã lập</div>
+                    <div class="text-xl font-bold text-emerald-600" th:text="${auditPage.totalElements} + ' đợt'">0 đợt</div>
+                </div>
+            </div>
+            <div class="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">sync_alt</span>
+                </div>
+                <div>
+                    <div class="text-xs text-on-surface-variant font-medium">Cơ chế quản trị</div>
+                    <div class="text-xs font-bold text-amber-800 mt-1">Vendor tự chủ cân bằng kho 100%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-600">error</span>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-surface-container-lowest rounded-3xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="p-4 bg-surface-container-low/70 border-b border-surface-container flex items-center justify-between">
+                <span class="font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">history</span>
+                    <span>Lịch Sử Các Đợt Kiểm Kê Của Shop</span>
+                </span>
+                <span class="text-xs text-on-surface-variant font-mono" th:text="'Tổng số: ' + ${auditPage.totalElements} + ' biên bản'"></span>
+            </div>
+
+            <table class="w-full text-left text-xs">
+                <thead class="bg-surface-container-low text-on-surface-variant uppercase font-bold text-[11px] border-b border-surface-container">
+                    <tr>
+                        <th class="p-4 w-14 text-center">STT</th>
+                        <th class="p-4">Mã biên bản</th>
+                        <th class="p-4">Thời gian kiểm kê</th>
+                        <th class="p-4">Ghi chú kiểm đếm</th>
+                        <th class="p-4 text-center">Trạng thái</th>
+                        <th class="p-4 text-right">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container">
+                    <tr th:if="${audits == null or audits.isEmpty()}">
+                        <td colspan="6" class="p-12 text-center text-on-surface-variant">
+                            <span class="material-symbols-outlined text-4xl mb-2 text-outline">fact_check</span>
+                            <p class="font-medium">Gian hàng chưa thực hiện đợt kiểm kê nào.</p>
+                            <a th:href="@{/vendor/inventory/create}" class="inline-flex items-center gap-1 text-xs text-primary font-bold hover:underline mt-2">
+                                <span>+ Tạo đợt kiểm kê đầu tiên ngay</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:each="a, stat : ${audits}" class="hover:bg-surface-container-low/50 transition-colors">
+                        <td class="p-4 text-center font-bold text-outline" th:text="${auditPage.number * auditPage.size + stat.count}">1</td>
+                        <td class="p-4 font-mono font-bold text-primary" th:text="'#PKK-' + ${a.maPhieuKiemKe}">#PKK-1</td>
+                        <td class="p-4 text-on-surface font-medium" th:text="${a.ngayKiemKe != null ? #temporals.format(a.ngayKiemKe, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</td>
+                        <td class="p-4 text-on-surface-variant max-w-md truncate" th:text="${a.ghiChu != null and !a.ghiChu.isEmpty() ? a.ghiChu : 'Kiểm kê định kỳ'}">Ghi chú</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                                <span>Đã Cân Hàng</span>
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <a th:href="@{'/vendor/inventory/' + ${a.maPhieuKiemKe}}" class="px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs transition-all inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                <span>Xem</span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div th:if="${auditPage.totalPages > 1}" class="p-4 border-t border-surface-container flex items-center justify-between text-xs">
+                <span class="text-on-surface-variant">Trang <strong th:text="${auditPage.number + 1}">1</strong> / <span th:text="${auditPage.totalPages}">1</span></span>
+                <div class="flex items-center gap-1">
+                    <a th:if="${auditPage.hasPrevious()}" th:href="@{/vendor/inventory(page=${auditPage.number - 1})}" class="px-3 py-1.5 rounded-xl bg-surface-container font-bold hover:bg-surface-container-high">Trước</a>
+                    <a th:if="${auditPage.hasNext()}" th:href="@{/vendor/inventory(page=${auditPage.number + 1})}" class="px-3 py-1.5 rounded-xl bg-surface-container font-bold hover:bg-surface-container-high">Sau</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+</body>
+</html>

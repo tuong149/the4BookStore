@@ -15,16 +15,10 @@
         <div class="relative z-10 w-full sm:max-w-lg lg:w-[540px] xl:w-[580px] my-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between">
             
             <!-- Brand Logo Header -->
-            <div class="flex items-center justify-center gap-3.5 pt-1">
-                <!-- Green Icon Box -->
-                <div class="w-12 h-12 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-md shrink-0">
-                    <span class="material-symbols-outlined text-[28px]">menu_book</span>
-                </div>
-                <!-- Brand Title & Subtitle -->
-                <div class="flex flex-col text-left">
-                    <span class="font-headline-sm text-base sm:text-lg font-black text-primary tracking-wider leading-tight drop-shadow-sm">THE4BOOKSTORE</span>
-                    <span class="font-headline-sm text-[10px] sm:text-[11px] font-extrabold text-primary tracking-widest uppercase leading-none mt-1">Nhà Sách Trực Tuyến &amp; Quản Trị</span>
-                </div>
+            <div class="flex items-center justify-center pt-1">
+                <a th:href="@{/}" class="inline-block transition-transform hover:scale-105">
+                    <img alt="The4BookStore Logo" class="h-11 sm:h-12 w-auto object-contain" th:src="@{/images/Logo4bs.png}"/>
+                </a>
             </div>
 
             <!-- Main Heading -->
@@ -33,6 +27,29 @@
             </h1>
 
             <!-- Feedback Alerts -->
+            <div th:if="${param.locked}" class="mb-4 p-4 rounded-2xl bg-rose-50 border-2 border-rose-500/60 text-rose-950 text-xs sm:text-sm font-semibold flex flex-col gap-2 shadow-md animate-in fade-in duration-300">
+                <div class="flex items-start gap-2.5">
+                    <span class="material-symbols-outlined text-[24px] text-rose-600 shrink-0 mt-0.5">lock_person</span>
+                    <div class="space-y-1">
+                        <div class="font-bold text-rose-700 text-sm">Tài khoản của bạn đã bị khóa!</div>
+                        <p class="text-xs text-rose-900 leading-relaxed font-normal">
+                            Tài khoản này hiện đang bị tạm khóa theo quyết định của ban quản lý. Để gửi phản hồi khiếu nại và được hỗ trợ mở khóa, vui lòng liên hệ trực tiếp qua email:
+                        </p>
+                        <div class="pt-1 flex items-center gap-1.5 font-bold text-primary font-mono text-xs">
+                            <span class="material-symbols-outlined text-[16px]">mail</span>
+                            <a href="mailto:nhasachthe4bookstore@gmail.com" class="hover:underline">nhasachthe4bookstore@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${param.adminDenied}" class="mb-4 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-500/60 text-amber-950 text-xs sm:text-sm font-semibold flex flex-col gap-2 shadow-md animate-in fade-in duration-300">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px] text-amber-600 shrink-0">lock</span>
+                    <span>Tài khoản hiện tại không có quyền truy cập Quản trị. Vui lòng đăng nhập với tài khoản hợp lệ.</span>
+                </div>
+            </div>
+
             <div th:if="${param.error}" class="mb-4 px-4 py-3 rounded-2xl bg-white/95 border-2 border-error/50 text-error text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-md animate-in fade-in duration-300">
                 <span class="material-symbols-outlined text-[20px]">error</span>
                 <span>Sai tên đăng nhập hoặc mật khẩu!</span>
@@ -124,7 +141,7 @@
             </div>
 
             <!-- Back to Home Floating Link -->
-            <div class="text-center pt-2.5">
+            <div class="text-center pt-2.5 flex items-center justify-center gap-4">
                 <a th:href="@{/}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-800 hover:text-primary font-bold transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                     <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                     <span>Quay về trang chủ</span>
@@ -134,6 +151,5 @@
         </div>
 
     </main>
-
 </body>
 </html>

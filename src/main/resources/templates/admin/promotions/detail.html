@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('Báo Cáo Hiệu Quả & Đối Soát Voucher')}">
+</head>
+
+<body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
+
+    <!-- Admin Sidebar -->
+    <aside th:replace="~{admin/fragments/admin_fragments :: admin_sidebar('vouchers')}"></aside>
+
+    <div class="pl-64">
+        <!-- Admin Header -->
+        <header th:replace="~{admin/fragments/admin_fragments :: admin_header}"></header>
+
+        <!-- Main Content Area -->
+        <main class="w-full pt-16 px-gutter-desktop py-space-lg bg-background">
+            <div class="flex flex-col w-full">
+
+                <!-- Ambient Glow Background -->
+                <div class="relative w-full overflow-hidden">
+                    <div class="absolute -top-24 -right-16 w-96 h-96 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div class="absolute top-48 left-1/3 w-80 h-80 bg-secondary-fixed/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+                    <!-- Breadcrumbs & Header -->
+                    <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-space-xs">
+                        <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
+                        <a th:href="@{/admin/vouchers}" class="hover:text-primary transition">MÃ GIẢM GIÁ</a>
+                        <span>/</span>
+                        <span class="text-primary font-semibold">BÁO CÁO HIỆU QUẢ & ĐỐI SOÁT</span>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-lg">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-3">
+                                <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight" th:text="${khuyenMai.tenKM}">Tên Voucher</h1>
+                                <span class="font-mono text-sm px-3 py-1 bg-surface-container-high font-bold rounded-xl border border-surface-container text-primary" th:text="${khuyenMai.maCode}">CODE</span>
+                                <!-- Status Badge -->
+                                <span th:if="${khuyenMai.computedStatus == 'DangDienRa'}" class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Đang diễn ra</span>
+                                <span th:if="${khuyenMai.computedStatus == 'SapToi'}" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Sắp tới</span>
+                                <span th:if="${khuyenMai.computedStatus == 'HetHan'}" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">Đã hết hạn</span>
+                                <span th:if="${khuyenMai.computedStatus == 'VoHieuHoa'}" class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Đã vô hiệu hóa</span>
+                            </div>
+                            <p class="font-body-md text-body-md text-on-surface-variant" th:text="${khuyenMai.moTa ?: 'Không có mô tả chi tiết'}">Mô tả chương trình khuyến mãi</p>
+                        </div>
+
+                        <!-- Top Action Buttons -->
+                        <div class="flex items-center gap-2">
+                            <a th:href="@{'/admin/vouchers/' + ${khuyenMai.maKM} + '/sua'}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-semibold hover:bg-primary-container transition shadow-sm">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                                <span>Chỉnh Sửa</span>
+                            </a>
+                            <form th:action="@{'/admin/vouchers/' + ${khuyenMai.maKM} + '/duplicate'}" method="post" class="inline">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container-high text-on-surface font-semibold hover:bg-surface-container-highest transition shadow-sm">
+                                    <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                                    <span>Nhân Bản</span>
+                                </button>
+                            </form>
+                            <a th:href="@{/admin/vouchers}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold transition">
+                                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                                <span>Quay lại</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 4 Bento Metrics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
+                        <!-- Lượt đã dùng -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl border border-surface-container/60 shadow-sm flex items-center gap-space-md">
+                            <div class="w-12 h-12 rounded-xl bg-primary-fixed/40 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-[28px]">shopping_cart_checkout</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">TỔNG LƯỢT ĐÃ DÙNG</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="font-headline-md text-headline-md font-bold text-on-surface tabular-nums" th:text="${totalOrders}">0</span>
+                                    <span class="text-xs text-on-surface-variant font-medium" th:text="${khuyenMai.soLuongToiDa != null ? '/ ' + khuyenMai.soLuongToiDa : '/ Không giới hạn'}">/ 100</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tổng tiền đã giảm -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl border border-surface-container/60 shadow-sm flex items-center gap-space-md">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+                                <span class="material-symbols-outlined text-[28px]">savings</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">TỔNG GIÁ TRỊ ĐÃ GIẢM</span>
+                                <span class="font-headline-md text-headline-md font-bold text-amber-700 tabular-nums"
+                                      th:text="${#numbers.formatDecimal(totalDiscount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            </div>
+                        </div>
+
+                        <!-- Doanh thu mang lại -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl border border-surface-container/60 shadow-sm flex items-center gap-space-md">
+                            <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-700">
+                                <span class="material-symbols-outlined text-[28px]">payments</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">DOANH THU MANG LẠI</span>
+                                <span class="font-headline-md text-headline-md font-bold text-green-700 tabular-nums"
+                                      th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            </div>
+                        </div>
+
+                        <!-- Giá trị đơn TB (AOV) -->
+                        <div class="bg-surface-container-lowest p-space-md rounded-2xl border border-surface-container/60 shadow-sm flex items-center gap-space-md">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700">
+                                <span class="material-symbols-outlined text-[28px]">trending_up</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">GIÁ TRỊ ĐƠN TRUNG BÌNH</span>
+                                <span class="font-headline-md text-headline-md font-bold text-blue-700 tabular-nums"
+                                      th:text="${#numbers.formatDecimal(averageOrderValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voucher Summary Details Strip -->
+                    <div class="bg-surface-container-lowest p-space-md rounded-2xl border border-surface-container/60 shadow-sm mb-space-lg">
+                        <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+                            <span>Cấu Hình Chi Tiết</span>
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-on-surface-variant">Loại giảm giá:</span>
+                                <span class="font-semibold text-on-surface" th:if="${khuyenMai.loaiGiam == 'PhanTram'}" th:text="'Giảm ' + ${khuyenMai.giaTriGiam} + '%'">Giảm %</span>
+                                <span class="font-semibold text-on-surface" th:if="${khuyenMai.loaiGiam == 'TienCoDinh'}" th:text="'Giảm ' + ${#numbers.formatDecimal(khuyenMai.giaTriGiam, 0, 'COMMA', 0, 'POINT')} + ' đ'">Giảm tiền</span>
+                                <span class="font-semibold text-on-surface" th:if="${khuyenMai.loaiGiam == 'Freeship'}" th:text="'Freeship tối đa ' + ${#numbers.formatDecimal(khuyenMai.giaTriGiam, 0, 'COMMA', 0, 'POINT')} + ' đ'">Freeship</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-xs text-on-surface-variant">Giảm tối đa:</span>
+                                <span class="font-semibold text-on-surface" th:text="${khuyenMai.giamToiDa != null ? #numbers.formatDecimal(khuyenMai.giamToiDa, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Không giới hạn'}">Không giới hạn</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-xs text-on-surface-variant">Đơn tối thiểu:</span>
+                                <span class="font-semibold text-on-surface" th:text="${khuyenMai.donToiThieu != null ? #numbers.formatDecimal(khuyenMai.donToiThieu, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">0 đ</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-xs text-on-surface-variant">Thời gian áp dụng:</span>
+                                <span class="font-semibold text-on-surface" th:text="${#temporals.format(khuyenMai.ngayBatDau, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(khuyenMai.ngayKetThuc, 'dd/MM/yyyy')}">Thời gian</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Table: Orders that used this voucher -->
+                    <div class="bg-surface-container-lowest rounded-2xl border border-surface-container/60 shadow-sm overflow-hidden mb-space-lg">
+                        <div class="p-space-md border-b border-surface-container flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[22px]">receipt_long</span>
+                                <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Lịch Sử Đơn Hàng Đã Áp Dụng Mã</h3>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant" th:text="${#lists.size(orders)} + ' đơn hàng'">0 đơn</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-surface-container-low/70 border-b border-surface-container text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                                        <th class="py-3 px-space-md">Mã Đơn Hàng</th>
+                                        <th class="py-3 px-space-md">Thời Gian Đặt</th>
+                                        <th class="py-3 px-space-md">Khách Hàng / SĐT</th>
+                                        <th class="py-3 px-space-md">Số Tiền Giảm</th>
+                                        <th class="py-3 px-space-md">Tổng Đơn Hàng</th>
+                                        <th class="py-3 px-space-md text-center">Trạng Thái Đơn</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container/60">
+                                    <tr th:if="${#lists.isEmpty(orders)}">
+                                        <td colspan="6" class="py-12 text-center text-on-surface-variant">
+                                            <div class="flex flex-col items-center justify-center gap-2">
+                                                <span class="material-symbols-outlined text-[40px] text-on-surface-variant/40">inbox</span>
+                                                <span class="font-semibold">Chưa có đơn hàng nào sử dụng mã khuyến mãi này</span>
+                                                <p class="text-xs text-on-surface-variant">Khi khách hàng áp mã và đặt hàng thành công, lịch sử sẽ xuất hiện tại đây.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr th:each="dh : ${orders}" class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="py-3.5 px-space-md">
+                                            <span class="font-mono font-bold text-primary" th:text="'#' + ${dh.maDH}">#1001</span>
+                                        </td>
+                                        <td class="py-3.5 px-space-md text-xs text-on-surface-variant" th:text="${#temporals.format(dh.ngayDat, 'dd/MM/yyyy HH:mm')}">
+                                            01/01/2026 10:00
+                                        </td>
+                                        <td class="py-3.5 px-space-md">
+                                            <div class="flex flex-col">
+                                                <span class="font-semibold text-on-surface text-sm" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Tên KH</span>
+                                                <span class="text-xs text-on-surface-variant" th:text="${dh.soDienThoaiGiao}">0901234567</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-space-md">
+                                            <span class="font-semibold text-amber-700 text-sm" th:text="'-' + ${#numbers.formatDecimal(dh.tienGiam, 0, 'COMMA', 0, 'POINT')} + ' đ'">-20.000 đ</span>
+                                        </td>
+                                        <td class="py-3.5 px-space-md">
+                                            <span class="font-bold text-on-surface text-sm" th:text="${#numbers.formatDecimal(dh.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">150.000 đ</span>
+                                        </td>
+                                        <td class="py-3.5 px-space-md text-center">
+                                            <span th:if="${dh.trangThai == 'DaGiao'}" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Đã giao</span>
+                                            <span th:if="${dh.trangThai == 'DangGiao'}" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Đang giao</span>
+                                            <span th:if="${dh.trangThai == 'ChoXuLy'}" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Chờ xử lý</span>
+                                            <span th:if="${dh.trangThai == 'DaHuy'}" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Đã hủy</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
