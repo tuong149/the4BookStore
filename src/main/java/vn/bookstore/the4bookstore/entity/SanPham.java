@@ -61,11 +61,11 @@ public class SanPham {
 
     public String getDanhSachTacGia() {
         try {
-            if (sanPhamTacGias == null || !org.hibernate.Hibernate.isInitialized(sanPhamTacGias) || sanPhamTacGias.isEmpty()) {
+            if (sanPhamTacGias == null || sanPhamTacGias.isEmpty()) {
                 return "";
             }
             return sanPhamTacGias.stream()
-                    .filter(sptg -> sptg != null && org.hibernate.Hibernate.isInitialized(sptg) && sptg.getTacGia() != null && org.hibernate.Hibernate.isInitialized(sptg.getTacGia()))
+                    .filter(sptg -> sptg != null && sptg.getTacGia() != null)
                     .map(sptg -> sptg.getTacGia().getTenTacGia())
                     .filter(name -> name != null && !name.isBlank())
                     .collect(java.util.stream.Collectors.joining(", "));

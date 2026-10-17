@@ -318,6 +318,7 @@
                                 <span class="bg-surface-container px-2 py-0.5 rounded-full font-label-sm text-[10px] font-semibold text-on-surface-variant mb-1 inline-block"
                                       th:text="${ct.sanPham.danhMuc?.tenDanhMuc ?: ct.sanPham.loaiSP}">Thể loại</span>
                                 <h3 class="font-headline-sm text-sm font-bold text-on-surface" th:text="${ct.sanPham.tenSP}">Tên sách</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5" th:if="${ct.sanPham.loaiSP == 'Sach' and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" th:text="'Tác giả: ' + ${ct.sanPham.danhSachTacGia}">Tác giả</p>
                                 
                                 <div class="flex flex-wrap items-center gap-y-1 gap-x-4 mt-2 text-xs">
                                     <span class="text-on-surface-variant">Đơn giá: <strong class="font-mono text-primary font-bold" th:text="${#numbers.formatDecimal(ct.donGia, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</strong></span>

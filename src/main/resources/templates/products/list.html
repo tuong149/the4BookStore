@@ -127,6 +127,19 @@
                         </option>
                     </select>
 
+                    <!-- Container Tác giả (Chỉ hiển thị cho Danh mục Sách) -->
+                    <div id="authorGroup" class="flex items-center gap-space-sm flex-wrap"
+                         th:classappend="${loaiSP != 'Sach'} ? ' hidden' : ''">
+                        <select th:if="${authors != null && !#lists.isEmpty(authors)}" name="tacGia" id="filterTacGia"
+                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[140px]">
+                            <option value="0" th:selected="${selectedTacGia == null || selectedTacGia == 0}">Tất cả tác giả</option>
+                            <option th:each="tg : ${authors}"
+                                    th:value="${tg.maTacGia}"
+                                    th:text="${tg.tenTacGia}"
+                                    th:selected="${selectedTacGia != null && selectedTacGia == tg.maTacGia}">Tác giả</option>
+                        </select>
+                    </div>
+
                     <!-- Sắp xếp -->
                     <select name="sort"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[130px]">
@@ -288,6 +301,18 @@
                 if (!isInit && !selectedStillValid) {
                     catSelect.value = '0';
                     defaultCatOpt.selected = true;
+                }
+            }
+
+            // 3. Tác giả chỉ hiển thị khi chọn Danh mục Sách
+            const authorGroup = document.getElementById('authorGroup');
+            const tacGiaSelect = document.getElementById('filterTacGia');
+            if (authorGroup) {
+                if (group === 'Sach') {
+                    authorGroup.classList.remove('hidden');
+                } else {
+                    authorGroup.classList.add('hidden');
+                    if (tacGiaSelect) tacGiaSelect.value = '0';
                 }
             }
         }

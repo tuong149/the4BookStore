@@ -212,7 +212,17 @@ public class SanPhamService {
     }
 
     public Optional<SanPham> getById(Integer id) {
-        return sanPhamRepository.findById(id);
+        Optional<SanPham> opt = sanPhamRepository.findById(id);
+        opt.ifPresent(sp -> {
+            if (sp.getSanPhamTacGias() != null) {
+                sp.getSanPhamTacGias().forEach(sptg -> {
+                    if (sptg != null && sptg.getTacGia() != null) {
+                        sptg.getTacGia().getTenTacGia();
+                    }
+                });
+            }
+        });
+        return opt;
     }
 
     public List<SanPham> getRelatedBooks(SanPham sanPham, int limit) {
