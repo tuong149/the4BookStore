@@ -48,15 +48,11 @@
                     </h3>
                 </a>
                 <p class="text-xs text-on-surface-variant mt-1 truncate block"
-                   th:title="${(book.danhSachTacGia != null ? book.danhSachTacGia : '') + (book.tenNhaXuatBan != null and !book.tenNhaXuatBan.isEmpty() ? ' • ' + book.tenNhaXuatBan : '')}">
+                   th:title="${book.danhSachTacGia != null ? book.danhSachTacGia : 'The4BookStore Tuyển Chọn'}">
                     <span th:if="${book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty()}" 
                           class="font-medium text-primary"
                           th:text="${book.danhSachTacGia}">Tác giả</span>
-                    <span th:if="${book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty() and book.tenNhaXuatBan != null and !book.tenNhaXuatBan.isEmpty()}" class="text-outline text-[10px] mx-1">•</span>
-                    <span th:if="${book.tenNhaXuatBan != null and !book.tenNhaXuatBan.isEmpty()}" 
-                          th:text="${book.tenNhaXuatBan}" 
-                          class="text-on-surface-variant/80">Nhà Xuất Bản</span>
-                    <span th:if="${(book.danhSachTacGia == null or book.danhSachTacGia.isEmpty()) and (book.tenNhaXuatBan == null or book.tenNhaXuatBan.isEmpty())}">The4BookStore Tuyển Chọn</span>
+                    <span th:unless="${book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty()}">The4BookStore Tuyển Chọn</span>
                 </p>
 
                 <div class="flex items-center justify-between gap-1 mt-2 text-[11px] text-on-surface-variant">

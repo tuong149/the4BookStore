@@ -175,7 +175,6 @@ public class SanPhamService {
             String keyword,
             Integer maDanhMuc,
             Integer maTacGia,
-            Integer maNXB,
             String sortBy,
             int page,
             int size) {
@@ -186,11 +185,20 @@ public class SanPhamService {
         if (maTacGia != null && maTacGia > 0) {
             return sanPhamRepository.findByTacGiaId(maTacGia, pageable);
         }
-        if (maNXB != null && maNXB > 0) {
-            return sanPhamRepository.findByNhaXuatBan_MaNXBAndTrangThaiIn(maNXB, CUSTOMER_STATUSES, pageable);
-        }
 
         return searchAndFilter(loaiSP, keyword, maDanhMuc, sortBy, page, size);
+    }
+
+    public Page<SanPham> searchAndFilter(
+            String loaiSP,
+            String keyword,
+            Integer maDanhMuc,
+            Integer maTacGia,
+            Integer maNXB,
+            String sortBy,
+            int page,
+            int size) {
+        return searchAndFilter(loaiSP, keyword, maDanhMuc, maTacGia, sortBy, page, size);
     }
 
     public Page<SanPham> searchAndFilterByGroup(

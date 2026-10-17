@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.bookstore.the4bookstore.entity.DanhMuc;
-import vn.bookstore.the4bookstore.entity.NhaXuatBan;
 import vn.bookstore.the4bookstore.entity.SanPham;
 import vn.bookstore.the4bookstore.entity.Shop;
 import vn.bookstore.the4bookstore.repository.*;
@@ -27,7 +26,6 @@ class VendorServiceTest {
     @Mock private DonHangRepository donHangRepository;
     @Mock private KhuyenMaiRepository khuyenMaiRepository;
     @Mock private DanhMucRepository danhMucRepository;
-    @Mock private NhaXuatBanRepository nhaXuatBanRepository;
     @Mock private TacGiaRepository tacGiaRepository;
     @Mock private SanPhamTacGiaRepository sanPhamTacGiaRepository;
     @Mock private SanPhamService sanPhamService;
@@ -58,50 +56,20 @@ class VendorServiceTest {
     }
 
     @Test
-    @DisplayName("Vendor tự nhập NXB mới: Hệ thống tự động tạo mới NhaXuatBan và gán vào sách")
-    void testSaveShopProduct_WithNewPublisher_CreatesPublisher() {
-        when(nhaXuatBanRepository.findByTenNXBIgnoreCase("NXB Tuổi Trẻ Mới")).thenReturn(Optional.empty());
-        when(nhaXuatBanRepository.save(any(NhaXuatBan.class))).thenAnswer(invocation -> {
-            NhaXuatBan nxb = invocation.getArgument(0);
-            nxb.setMaNXB(99);
-            return nxb;
-        });
-
+    @DisplayName("Vendor lưu sản phẩm mới thành công")
+    void testSaveShopProduct_Success() {
         SanPham sp = new SanPham();
         sp.setTenSP("Tuyển Tập Kỹ Năng Sống");
         sp.setGiaBan(120000);
         sp.setSoLuongTon(50);
 
-        SanPham saved = vendorService.saveShopProduct(1, sp, 1, null, "NXB Tuổi Trẻ Mới");
+        SanPham saved = vendorService.saveShopProduct(1, sp, 1);
 
         assertNotNull(saved);
-        assertNotNull(saved.getNhaXuatBan());
-        assertEquals("NXB Tuổi Trẻ Mới", saved.getNhaXuatBan().getTenNXB());
-        assertEquals(99, saved.getNhaXuatBan().getMaNXB());
-        verify(nhaXuatBanRepository, times(1)).save(any(NhaXuatBan.class));
-    }
-
-    @Test
-    @DisplayName("Vendor nhập tên NXB đã có sẵn: Hệ thống tái sử dụng NhaXuatBan cũ, không tạo trùng")
-    void testSaveShopProduct_WithExistingPublisher_ReusesExisting() {
-        NhaXuatBan existingNxb = new NhaXuatBan();
-        existingNxb.setMaNXB(5);
-        existingNxb.setTenNXB("NXB Trẻ");
-
-        when(nhaXuatBanRepository.findByTenNXBIgnoreCase("NXB Trẻ")).thenReturn(Optional.of(existingNxb));
-
-        SanPham sp = new SanPham();
-        sp.setTenSP("Đắc Nhân Tâm");
-        sp.setGiaBan(85000);
-        sp.setSoLuongTon(100);
-
-        SanPham saved = vendorService.saveShopProduct(1, sp, 1, null, "  NXB Trẻ  ");
-
-        assertNotNull(saved);
-        assertNotNull(saved.getNhaXuatBan());
-        assertEquals(5, saved.getNhaXuatBan().getMaNXB());
-        assertEquals("NXB Trẻ", saved.getNhaXuatBan().getTenNXB());
-        verify(nhaXuatBanRepository, never()).save(any(NhaXuatBan.class));
+        assertEquals("Tuyển Tập Kỹ Năng Sống", saved.getTenSP());
+        assertEquals(120000, saved.getGiaBan());
+        assertEquals(50, saved.getSoLuongTon());
+        verify(sanPhamRepository, times(1)).save(any(SanPham.class));
     }
 
     @Test
@@ -119,7 +87,7 @@ class VendorServiceTest {
         sp.setGiaBan(110000);
         sp.setSoLuongTon(30);
 
-        SanPham saved = vendorService.saveShopProduct(1, sp, 1, null, "NXB Trẻ", "Nguyễn Nhật Ánh");
+        SanPham saved = vendorService.saveShopProduct(1, sp, 1, "Nguyễn Nhật Ánh");
 
         assertNotNull(saved);
         assertNotNull(saved.getSanPhamTacGias());
@@ -149,7 +117,7 @@ class VendorServiceTest {
         sp.setGiaBan(95000);
         sp.setSoLuongTon(20);
 
-        SanPham saved = vendorService.saveShopProduct(1, sp, 1, null, "NXB Văn Học", "Tô Hoài, Nam Cao");
+        SanPham saved = vendorService.saveShopProduct(1, sp, 1, "Tô Hoài, Nam Cao");
 
         assertNotNull(saved);
         assertEquals(2, saved.getSanPhamTacGias().size());

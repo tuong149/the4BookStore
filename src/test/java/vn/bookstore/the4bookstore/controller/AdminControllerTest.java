@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import vn.bookstore.the4bookstore.entity.NhaXuatBan;
 import vn.bookstore.the4bookstore.entity.TacGia;
 import vn.bookstore.the4bookstore.repository.*;
 import vn.bookstore.the4bookstore.security.*;
@@ -34,7 +33,6 @@ class AdminControllerTest {
 
     @MockitoBean private SanPhamRepository sanPhamRepository;
     @MockitoBean private DanhMucRepository danhMucRepository;
-    @MockitoBean private NhaXuatBanRepository nhaXuatBanRepository;
     @MockitoBean private TacGiaRepository tacGiaRepository;
     @MockitoBean private SanPhamTacGiaRepository sanPhamTacGiaRepository;
     @MockitoBean private DonHangRepository donHangRepository;
@@ -42,7 +40,6 @@ class AdminControllerTest {
     @MockitoBean private ReportService reportService;
     @MockitoBean private OrderService orderService;
     @MockitoBean private TacGiaService tacGiaService;
-    @MockitoBean private NhaXuatBanService nhaXuatBanService;
 
     @MockitoBean private TaiKhoanRepository taiKhoanRepository;
     @MockitoBean private KhachHangRepository khachHangRepository;

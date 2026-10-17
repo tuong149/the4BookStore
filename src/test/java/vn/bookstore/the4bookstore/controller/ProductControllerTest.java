@@ -34,7 +34,6 @@ class ProductControllerTest {
     @MockitoBean private SanPhamService sanPhamService;
     @MockitoBean private DanhMucService danhMucService;
     @MockitoBean private TacGiaService tacGiaService;
-    @MockitoBean private NhaXuatBanService nhaXuatBanService;
     @MockitoBean private ShopService shopService;
 
     @MockitoBean private SanPhamRepository sanPhamRepository;
@@ -78,7 +77,6 @@ class ProductControllerTest {
         when(sanPhamService.getCategoriesByLoaiSP("VanPhongPham")).thenReturn(List.of(catVpp));
         when(sanPhamService.getCategoriesByLoaiSP("QuaTang")).thenReturn(List.of());
         when(tacGiaService.getAll()).thenReturn(List.of());
-        when(nhaXuatBanService.getAll()).thenReturn(List.of());
         when(userInteractionService.getReviewsForProduct(any())).thenReturn(List.of());
         when(userInteractionService.getAverageRating(any())).thenReturn(0.0);
     }

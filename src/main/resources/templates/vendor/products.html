@@ -159,12 +159,10 @@
                             </h3>
                             
                             <p class="text-xs text-on-surface-variant mt-1.5 truncate block"
-                               th:title="${(sp.danhSachTacGia != null ? sp.danhSachTacGia : '') + (sp.tenNhaXuatBan != null and !sp.tenNhaXuatBan.isEmpty() ? ' • ' + sp.tenNhaXuatBan : '')}">
+                               th:title="${sp.danhSachTacGia != null ? sp.danhSachTacGia : 'The4BookStore'}">
                                 <span th:if="${sp.danhSachTacGia != null and !sp.danhSachTacGia.isEmpty()}" 
                                       class="font-medium text-primary" th:text="${sp.danhSachTacGia}">Tác giả</span>
-                                <span th:if="${sp.danhSachTacGia != null and !sp.danhSachTacGia.isEmpty() and sp.tenNhaXuatBan != null and !sp.tenNhaXuatBan.isEmpty()}" class="text-outline text-[10px] mx-1">•</span>
-                                <span th:if="${sp.tenNhaXuatBan != null and !sp.tenNhaXuatBan.isEmpty()}" class="text-on-surface-variant/80" th:text="${sp.tenNhaXuatBan}">Nhà Xuất Bản</span>
-                                <span th:if="${(sp.danhSachTacGia == null or sp.danhSachTacGia.isEmpty()) and (sp.tenNhaXuatBan == null or sp.tenNhaXuatBan.isEmpty())}">The4BookStore</span>
+                                <span th:unless="${sp.danhSachTacGia != null and !sp.danhSachTacGia.isEmpty()}">The4BookStore</span>
                             </p>
 
                             <!-- Stock & Sales info row -->
@@ -263,8 +261,7 @@
                                 <span class="font-mono text-primary font-bold" th:text="'Mã SP: #' + ${sp.maSP}">Mã SP: #1</span>
                                 <span class="text-outline">|</span>
                                 <span th:text="'ISBN: ' + (${sp.ISBN != null and !sp.ISBN.isEmpty() ? sp.ISBN : 'N/A'})">ISBN</span>
-                                <span th:if="${sp.nhaXuatBan != null}" class="text-outline">|</span>
-                                <span th:if="${sp.nhaXuatBan != null}" class="text-emerald-700 font-medium" th:text="'NXB: ' + ${sp.nhaXuatBan.tenNXB}">NXB</span>
+
                             </div>
                         </td>
                         <td class="p-4 text-on-surface-variant" th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : 'N/A'}">Danh mục</td>

@@ -139,15 +139,7 @@
                                     th:text="${tg.tenTacGia}"
                                     th:selected="${selectedTacGia != null && selectedTacGia == tg.maTacGia}">Tác giả</option>
                         </select>
-                        <!-- Dropdown: NXB -->
-                        <select th:if="${publishers != null && !#lists.isEmpty(publishers)}" name="nxb" id="filterNxb"
-                                class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[140px]">
-                            <option value="0" th:selected="${selectedNxb == null || selectedNxb == 0}">Tất cả NXB</option>
-                            <option th:each="pub : ${publishers}"
-                                    th:value="${pub.maNXB}"
-                                    th:text="${pub.tenNXB}"
-                                    th:selected="${selectedNxb != null && selectedNxb == pub.maNXB}">NXB</option>
-                        </select>
+
                     </div>
 
                     <!-- Sắp xếp -->

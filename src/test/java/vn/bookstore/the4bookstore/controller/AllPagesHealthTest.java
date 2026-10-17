@@ -47,8 +47,7 @@ public class AllPagesHealthTest {
         mockMvc.perform(get("/vendor/products")).andExpect(status().isOk());
         mockMvc.perform(get("/vendor/orders")).andExpect(status().isOk());
         mockMvc.perform(get("/vendor/promotions")).andExpect(status().isOk());
-        mockMvc.perform(get("/vendor/stock-requests")).andExpect(status().isOk());
-        mockMvc.perform(get("/vendor/inventory")).andExpect(status().isOk());
+        mockMvc.perform(get("/vendor/profile")).andExpect(status().isOk());
     }
 
     // 4. MANAGER & ADMIN ROUTES

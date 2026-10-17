@@ -27,7 +27,6 @@ public class VendorService {
     private final DonHangRepository donHangRepository;
     private final KhuyenMaiRepository khuyenMaiRepository;
     private final DanhMucRepository danhMucRepository;
-    private final NhaXuatBanRepository nhaXuatBanRepository;
     private final SanPhamService sanPhamService;
     private final ThanhToanRepository thanhToanRepository;
 
@@ -36,7 +35,6 @@ public class VendorService {
                          DonHangRepository donHangRepository,
                          KhuyenMaiRepository khuyenMaiRepository,
                          DanhMucRepository danhMucRepository,
-                         NhaXuatBanRepository nhaXuatBanRepository,
                          SanPhamService sanPhamService,
                          ThanhToanRepository thanhToanRepository) {
         this.shopRepository = shopRepository;
@@ -44,7 +42,6 @@ public class VendorService {
         this.donHangRepository = donHangRepository;
         this.khuyenMaiRepository = khuyenMaiRepository;
         this.danhMucRepository = danhMucRepository;
-        this.nhaXuatBanRepository = nhaXuatBanRepository;
         this.sanPhamService = sanPhamService;
         this.thanhToanRepository = thanhToanRepository;
     }
@@ -111,15 +108,11 @@ public class VendorService {
         this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
     }
 
-    public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc, Integer maNXB) {
-        return saveShopProduct(maShop, sanPham, maDanhMuc, maNXB, null, null);
+    public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc) {
+        return saveShopProduct(maShop, sanPham, maDanhMuc, (String) null);
     }
 
-    public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc, Integer maNXB, String tenNXB) {
-        return saveShopProduct(maShop, sanPham, maDanhMuc, maNXB, tenNXB, null);
-    }
-
-    public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc, Integer maNXB, String tenNXB, String tenTacGia) {
+    public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc, String tenTacGia) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
 
@@ -138,9 +131,6 @@ public class VendorService {
         if (sanPham.getGiaBan() == null) {
             sanPham.setGiaBan(0);
         }
-
-        // Xử lý Nhà Xuất Bản do Vendor tự do nhập (lưu trực tiếp dạng text)
-        String resolvedTenNXB = (tenNXB != null && !tenNXB.trim().isEmpty()) ? tenNXB.trim() : null;
 
         SanPham saved;
         if (sanPham.getMaSP() != null) {
@@ -163,9 +153,6 @@ public class VendorService {
             if (maDanhMuc != null) {
                 existing.setDanhMuc(danhMucRepository.findById(maDanhMuc).orElse(null));
             }
-            if (resolvedTenNXB != null) {
-                existing.setTenNhaXuatBan(resolvedTenNXB);
-            }
             saved = sanPhamRepository.save(existing);
         } else {
             sanPham.setShop(shop);
@@ -179,7 +166,6 @@ public class VendorService {
             if (sanPham.getDanhMuc() == null) {
                 sanPham.setDanhMuc(danhMucRepository.findAll().stream().findFirst().orElse(null));
             }
-            sanPham.setTenNhaXuatBan(resolvedTenNXB);
             saved = sanPhamRepository.save(sanPham);
         }
 

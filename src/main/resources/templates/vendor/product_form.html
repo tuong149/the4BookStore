@@ -99,11 +99,11 @@
                             <p class="text-[11px] text-on-surface-variant mt-1.5">Mã ISBN giúp độc giả dễ tìm kiếm và tối ưu SEO sách trên Google.</p>
                         </div>
 
-                        <!-- Tác Giả & Nhà Xuất Bản (2 cột cân xứng) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <!-- Tác Giả (Áp dụng cho sách) -->
+                        <div class="pt-2">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
-                                    <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputTenTacGia">Tác Giả</label>
+                                    <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputTenTacGia">Tác Giả (Nếu là Sách)</label>
                                     <span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Tự do nhập</span>
                                 </div>
                                 <input type="text" name="tenTacGia" id="inputTenTacGia" list="tacGiaSuggestions"
@@ -114,21 +114,6 @@
                                     <option th:each="tg : ${tacGias}" th:value="${tg.tenTacGia}"></option>
                                 </datalist>
                                 <p class="text-[10px] text-on-surface-variant mt-1">Nhiều tác giả cách nhau bằng dấu phẩy (,)</p>
-                            </div>
-
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <label class="block text-xs font-bold uppercase text-on-surface-variant" for="inputTenNXB">Nhà Xuất Bản</label>
-                                    <span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Gợi ý / Tự do</span>
-                                </div>
-                                <input type="text" name="tenNXB" id="inputTenNXB" list="nhaXuatBanSuggestions"
-                                       th:value="${sanPham.nhaXuatBan != null ? sanPham.nhaXuatBan.tenNXB : ''}"
-                                       placeholder="Ví dụ: NXB Trẻ, Kim Đồng, Nhã Nam..."
-                                       class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
-                                <datalist id="nhaXuatBanSuggestions">
-                                    <option th:each="nxb : ${nhaXuatBans}" th:value="${nxb.tenNXB}"></option>
-                                </datalist>
-                                <p class="text-[10px] text-on-surface-variant mt-1">Gõ NXB mới để tạo hoặc chọn từ gợi ý</p>
                             </div>
                         </div>
                     </div>

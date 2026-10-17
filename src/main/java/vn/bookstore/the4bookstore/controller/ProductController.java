@@ -14,7 +14,6 @@ import vn.bookstore.the4bookstore.service.DanhMucService;
 import vn.bookstore.the4bookstore.service.SanPhamService;
 import vn.bookstore.the4bookstore.entity.KhachHang;
 import vn.bookstore.the4bookstore.service.TacGiaService;
-import vn.bookstore.the4bookstore.service.NhaXuatBanService;
 import vn.bookstore.the4bookstore.service.UserInteractionService;
 import org.springframework.security.core.Authentication;
 
@@ -25,7 +24,6 @@ public class ProductController {
 
     private final SanPhamService sanPhamService;
     private final TacGiaService tacGiaService;
-    private final NhaXuatBanService nhaXuatBanService;
     private final UserInteractionService userInteractionService;
     private final vn.bookstore.the4bookstore.service.ShopService shopService;
     private final vn.bookstore.the4bookstore.service.CurrentUserService currentUserService;
@@ -95,7 +93,7 @@ public class ProductController {
         model.addAttribute("categoriesVpp",     categoriesVpp);
         model.addAttribute("categoriesQuaTang", categoriesQuaTang);
         model.addAttribute("authors",           tacGiaService.getAll());
-        model.addAttribute("publishers",        nhaXuatBanService.getAll());
+        model.addAttribute("publishers",        List.of());
 
         if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
             model.addAttribute("categories", sanPhamService.getCategoriesByLoaiSP(loaiSP));
@@ -172,7 +170,7 @@ public class ProductController {
         model.addAttribute("categoriesVpp",   sanPhamService.getCategoriesByLoaiSP("VanPhongPham"));
         model.addAttribute("categoriesQuaTang", sanPhamService.getCategoriesByLoaiSP("QuaTang"));
         model.addAttribute("authors",         tacGiaService.getAll());
-        model.addAttribute("publishers",      nhaXuatBanService.getAll());
+        model.addAttribute("publishers",      List.of());
         model.addAttribute("selectedDanhMuc", validDanhMuc);
         model.addAttribute("selectedTacGia",  tacGia);
         model.addAttribute("selectedNxb",     nxb);

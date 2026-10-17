@@ -13,7 +13,6 @@ import vn.bookstore.the4bookstore.entity.Shop;
 import vn.bookstore.the4bookstore.entity.TaiKhoan;
 import vn.bookstore.the4bookstore.repository.DanhMucRepository;
 import vn.bookstore.the4bookstore.repository.DonHangRepository;
-import vn.bookstore.the4bookstore.repository.NhaXuatBanRepository;
 import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 import vn.bookstore.the4bookstore.repository.ShopRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
@@ -37,20 +36,17 @@ public class AdminImportExportController {
     private final TaiKhoanRepository taiKhoanRepository;
     private final ShopRepository shopRepository;
     private final DanhMucRepository danhMucRepository;
-    private final NhaXuatBanRepository nhaXuatBanRepository;
 
     public AdminImportExportController(SanPhamRepository sanPhamRepository,
                                        DonHangRepository donHangRepository,
                                        TaiKhoanRepository taiKhoanRepository,
                                        ShopRepository shopRepository,
-                                       DanhMucRepository danhMucRepository,
-                                       NhaXuatBanRepository nhaXuatBanRepository) {
+                                       DanhMucRepository danhMucRepository) {
         this.sanPhamRepository = sanPhamRepository;
         this.donHangRepository = donHangRepository;
         this.taiKhoanRepository = taiKhoanRepository;
         this.shopRepository = shopRepository;
         this.danhMucRepository = danhMucRepository;
-        this.nhaXuatBanRepository = nhaXuatBanRepository;
     }
 
     @GetMapping
@@ -75,9 +71,9 @@ public class AdminImportExportController {
             os.write(0xBB);
             os.write(0xBF);
 
-            writer.println("ISBN,TenSP,GiaBan,SoLuongTon,LoaiSP,MaDanhMuc,MaNXB,MoTa");
-            writer.println("9786043658999,Đắc Nhân Tâm - Khổ Tiêu Chuẩn,85000,100,Sach,1,1,Sách kinh điển về nghệ thuật ứng xử và kết nối.");
-            writer.println("8935244855523,Sổ Tay Dot Grid Bìa Da Cao Cấp,45000,50,VanPhongPham,2,1,Sổ tay kẻ chấm dot ghi chép bullet journal.");
+            writer.println("ISBN,TenSP,GiaBan,SoLuongTon,LoaiSP,MaDanhMuc,MoTa");
+            writer.println("9786043658999,Đắc Nhân Tâm - Khổ Tiêu Chuẩn,85000,100,Sach,1,Sách kinh điển về nghệ thuật ứng xử và kết nối.");
+            writer.println("8935244855523,Sổ Tay Dot Grid Bìa Da Cao Cấp,45000,50,VanPhongPham,2,Sổ tay kẻ chấm dot ghi chép bullet journal.");
             writer.flush();
         }
     }
@@ -95,14 +91,13 @@ public class AdminImportExportController {
              PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
             os.write(0xEF); os.write(0xBB); os.write(0xBF);
 
-            writer.println("Mã SP,ISBN,Tên Sản Phẩm,Giá Bán (VNĐ),Số Lượng Tồn,Số Lượng Đã Bán,Loại Sản Phẩm,Danh Mục,Nhà Xuất Bản,Gian Hàng,Trạng Thái Bán,Trạng Thái Khóa");
+            writer.println("Mã SP,ISBN,Tên Sản Phẩm,Giá Bán (VNĐ),Số Lượng Tồn,Số Lượng Đã Bán,Loại Sản Phẩm,Danh Mục,Gian Hàng,Trạng Thái Bán,Trạng Thái Khóa");
 
             for (SanPham p : list) {
                 String shopName = p.getShop() != null ? escapeCsv(p.getShop().getTenShop()) : "The4BookStore Official";
-                String nxbName = p.getNhaXuatBan() != null ? escapeCsv(p.getNhaXuatBan().getTenNXB()) : "";
                 String dmName = p.getDanhMuc() != null ? escapeCsv(p.getDanhMuc().getTenDanhMuc()) : "";
 
-                writer.println(String.format("%d,%s,%s,%d,%d,%d,%s,%s,%s,%s,%s,%s",
+                writer.println(String.format("%d,%s,%s,%d,%d,%d,%s,%s,%s,%s,%s",
                         p.getMaSP(),
                         p.getISBN() != null ? escapeCsv(p.getISBN()) : "",
                         escapeCsv(p.getTenSP()),
@@ -111,7 +106,6 @@ public class AdminImportExportController {
                         p.getSoLuongDaBan() != null ? p.getSoLuongDaBan() : 0,
                         escapeCsv(p.getLoaiSP()),
                         dmName,
-                        nxbName,
                         shopName,
                         escapeCsv(p.getTrangThai()),
                         escapeCsv(p.getTrangThaiKhoa())
@@ -268,8 +262,7 @@ public class AdminImportExportController {
                 int tonKho = parseIntSafe(cols[3], 0);
                 String loaiSP = cols.length > 4 && !cols[4].isBlank() ? cols[4].trim() : "Sach";
                 Integer maDanhMuc = cols.length > 5 ? parseIntegerSafe(cols[5]) : 1;
-                Integer maNxb = cols.length > 6 ? parseIntegerSafe(cols[6]) : null;
-                String moTa = cols.length > 7 ? cols[7].trim() : "";
+                String moTa = cols.length > 6 ? cols[6].trim() : "";
 
                 if (tenSP.isEmpty()) continue;
 
@@ -306,9 +299,6 @@ public class AdminImportExportController {
                     }
                     if (sp.getDanhMuc() == null) {
                         danhMucRepository.findAll().stream().findFirst().ifPresent(sp::setDanhMuc);
-                    }
-                    if (maNxb != null) {
-                        nhaXuatBanRepository.findById(maNxb).ifPresent(sp::setNhaXuatBan);
                     }
 
                     sanPhamRepository.save(sp);

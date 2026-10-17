@@ -276,29 +276,6 @@ PRIMARY KEY CLUSTERED
 
 GO
 
--- Bảng: nha_xuat_ban
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[nha_xuat_ban](
-	[manxb] [int] IDENTITY(1,1) NOT NULL,
-	[tennxb] [nvarchar](150) COLLATE Vietnamese_CI_AS NOT NULL,
-	[dia_chi] [nvarchar](255) COLLATE Vietnamese_CI_AS NULL,
-	[so_dien_thoai] [varchar](20) COLLATE Vietnamese_CI_AS NULL,
-	[email] [varchar](100) COLLATE Vietnamese_CI_AS NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[manxb] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-
 -- Bảng: san_pham
 SET ANSI_NULLS ON
 GO
@@ -311,7 +288,6 @@ CREATE TABLE [dbo].[san_pham](
 	[ma_shop] [int] NOT NULL,
 	[ma_danh_muc] [int] NOT NULL,
 	[tensp] [nvarchar](200) COLLATE Vietnamese_CI_AS NOT NULL,
-	[ten_nha_xuat_ban] [nvarchar](150) COLLATE Vietnamese_CI_AS NULL,
 	[isbn] [varchar](20) COLLATE Vietnamese_CI_AS NULL,
 	[gia_ban] [int] NOT NULL,
 	[so_luong_ton] [int] NOT NULL,
@@ -1415,7 +1391,6 @@ RETURN (
     SELECT 
         sp.masp,
         sp.tensp,
-        sp.ten_nha_xuat_ban,
         dm.ten_danh_muc,
         sp.gia_ban,
         sp.so_luong_ton,
@@ -1955,7 +1930,6 @@ BEGIN
         SELECT 
             sp.masp,
             sp.tensp,
-            sp.ten_nha_xuat_ban,
             sp.gia_ban,
             sp.hinh_anh,
             sp.so_luong_ton,
@@ -1969,7 +1943,7 @@ BEGIN
         JOIN danh_muc dm ON sp.ma_danh_muc = dm.ma_danh_muc
         WHERE sp.trang_thai = N'HoatDong'
           AND s.trang_thai = N'HoatDong'
-          AND (@tu_khoa IS NULL OR sp.tensp LIKE N'%' + @tu_khoa + N'%' OR sp.ten_nha_xuat_ban LIKE N'%' + @tu_khoa + N'%')
+          AND (@tu_khoa IS NULL OR sp.tensp LIKE N'%' + @tu_khoa + N'%')
           AND (@ma_danh_muc IS NULL OR sp.ma_danh_muc = @ma_danh_muc)
           AND (@gia_tu IS NULL OR sp.gia_ban >= @gia_tu)
           AND (@gia_den IS NULL OR sp.gia_ban <= @gia_den)
@@ -2086,34 +2060,23 @@ INSERT [dbo].[tac_gia] ([ma_tac_gia], [ten_tac_gia], [mo_ta]) VALUES (8, N'Morga
 SET IDENTITY_INSERT [dbo].[tac_gia] OFF
 GO
 
--- Dữ liệu bảng: nha_xuat_ban (5 dòng)
-SET IDENTITY_INSERT [dbo].[nha_xuat_ban] ON 
-
-INSERT [dbo].[nha_xuat_ban] ([manxb], [tennxb], [dia_chi], [so_dien_thoai], [email]) VALUES (1, N'NXB Kim Äá»“ng', N'55 Quang Trung, Hà Nội', N'02439434730', N'cskh@nxbkimdong.com.vn')
-INSERT [dbo].[nha_xuat_ban] ([manxb], [tennxb], [dia_chi], [so_dien_thoai], [email]) VALUES (2, N'NXB Trẻ', N'161B LÃ½ ChÃ­nh Tháº¯ng, Q3, TP.HCM', N'02839316289', N'hopthu@nxbtre.com.vn')
-INSERT [dbo].[nha_xuat_ban] ([manxb], [tennxb], [dia_chi], [so_dien_thoai], [email]) VALUES (3, N'NXB Phụ Nữ', N'39 Hàng Chuối, Hà Nội', N'02439710723', N'truyenthong@nxbphunu.com.vn')
-INSERT [dbo].[nha_xuat_ban] ([manxb], [tennxb], [dia_chi], [so_dien_thoai], [email]) VALUES (4, N'NXB Tổng Hợp TP.HCM', N'62 Nguyễn Thị Minh Khai, Q1, TP.HCM', N'02838225340', N'tonghop@nxbhcm.com.vn')
-INSERT [dbo].[nha_xuat_ban] ([manxb], [tennxb], [dia_chi], [so_dien_thoai], [email]) VALUES (5, N'NXB Giáo Dục Việt Nam', N'81 Tráº§n HÆ°ng Äáº¡o, HÃ  Ná»™i', N'02438220801', N'contact@nxbgd.vn')
-SET IDENTITY_INSERT [dbo].[nha_xuat_ban] OFF
-GO
-
--- Dữ liệu bảng: san_pham (14 dòng)
+-- -- Dữ liệu bảng: san_pham (14 dòng)
 SET IDENTITY_INSERT [dbo].[san_pham] ON 
 
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (1, 1, 1, N'Mắt Biếc', N'NXB Trẻ', N'9786041071234', 110000, 47, 18, 5, N'Sach', N'Câu chuyện tình yêu tuổi học trò sâu lắng và day dứt của Ngạn và Hà Lan nơi làng Đo Đo mộc mạc.', N'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (2, 1, 1, N'Tôi Thấy Hoa Vàng Trên Cỏ Xanh', N'NXB Trẻ', N'9786041054321', 125000, 33, 22, 5, N'Sach', N'Tấm vé trở về tuổi thơ nơi miền quê nghèo êm đềm với những ký ức ngọt ngào và tình anh em ruột thịt.', N'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (3, 1, 5, N'Dế Mèn Phiêu Lưu Ký', N'NXB Kim Đồng', N'9786042087654', 65000, 79, 43, 5, N'Sach', N'Tác phẩm thiếu nhi kinh điển của nhà văn Tô Hoài về bài học đường đời đầu tiên và tình bạn cao đẹp.', N'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (4, 2, 2, N'Rừng Na Uy', N'NXB Hội Nhà Văn', N'9786045612345', 135000, 38, 30, 5, N'Sach', N'Kiệt tác nổi tiếng nhất của Haruki Murakami về nỗi cô đơn, tình yêu và tuổi trẻ đầy trăn trở tại Tokyo.', N'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (5, 2, 3, N'Đắc Nhân Tâm', N'NXB Tổng Hợp TP.HCM', N'9786045876543', 95000, 100, 65, 5, N'Sach', N'Tác phẩm kinh điển vượt thời gian về nghệ thuật thu phục lòng người và kỹ năng giao tiếp chân thành.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (6, 2, 4, N'Clean Code - Mã Sạch', N'NXB Thông Tin & Truyền Thông', N'9780132350884', 250000, 19, 13, 5, N'Sach', N'Cẩm nang nâng cao chất lượng mã nguồn dành cho mọi kỹ sư phần mềm chuyên nghiệp hướng đến sự tinh gọn.', N'https://images.unsplash.com/photo-1532012164546-f432f2e37b73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (7, 2, 2, N'Hoàng Tử Bé', N'NXB Hội Nhà Văn', N'9786045634567', 75000, 60, 38, 5, N'Sach', N'Một câu chuyện ngụ ngôn tuyệt mỹ dành cho cả trẻ em lẫn người lớn về tình yêu thương và sự gắn kết.', N'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1719499' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (8, 2, 2, N'Nhà Giả Kim', N'NXB Văn Học', N'9786046987654', 85000, 90, 85, 5, N'Sach', N'Hành trình theo đuổi vận mệnh và giấc mơ cá nhân của chàng trai chăn cừu Santiago qua sa mạc mênh mông.', N'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1739494' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (9, 2, 3, N'Tâm Lý Học Về Tiền', N'NXB Lao Động', N'9786045987123', 145000, 45, 52, 5, N'Sach', N'Những bí mật về cách con người suy nghĩ, cảm nhận và đưa ra quyết định với tiền bạc trong đời sống thực tế.', N'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1739494' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (10, 1, 1, N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'NXB Trẻ', N'9786041088899', 95000, 68, 36, 5, N'Sach', N'Tác phẩm đưa người đọc quay trở lại thế giới ngây ngô, tươi vui của tuổi ấu thơ với đầy ắp tiếng cười.', N'https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (11, 1, 5, N'Doraemon Tuyển Tập Tranh Truyện Màu', N'NXB Kim Đồng', N'9786042123456', 55000, 120, 95, 5, N'Sach', N'Tập truyện tranh màu đặc sắc kể về chú mèo máy thông minh đến từ thế kỷ 22 và nhóm bạn Nobita.', N'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (12, 2, 4, N'Kiến Trúc Phần Mềm Thực Chiến', N'NXB Thông Tin & Truyền Thông', N'9786048033221', 280000, 30, 19, 5, N'Sach', N'Hướng dẫn chi tiết xây dựng hệ thống phân tán, Microservices và thiết kế CSDL chịu tải cao.', N'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1759510' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (13, 2, 4, N'Sổ Tay Da Cao Cấp Nhã Nam Edition', N'Nhã Nam Studio', N'VPP-9001', 89000, 49, 23, 5, N'VanPhongPham', N'Sổ tay bìa da PU cao cấp, giấy chống lóa 100gsm chuyên dụng ghi chép sáng tạo.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2))
-INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [ten_nha_xuat_ban], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (14, 1, 5, N'Đèn Đọc Sách Mini Kẹp Bìa Sách LED', N'Kim Đồng Goods', N'QT-8001', 65000, 37, 18, 5, N'QuaTang', N'Đèn LED kẹp sách 3 mức sáng bảo vệ mắt ban đêm, pin sạc USB tiện dụng.', N'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (1, 1, 1, N'Mắt Biếc', N'9786041071234', 110000, 47, 18, 5, N'Sach', N'Câu chuyện tình yêu tuổi học trò sâu lắng và day dứt của Ngạn và Hà Lan nơi làng Đo Đo mộc mạc.', N'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (2, 1, 1, N'Tôi Thấy Hoa Vàng Trên Cỏ Xanh', N'9786041054321', 125000, 33, 22, 5, N'Sach', N'Tấm vé trở về tuổi thơ nơi miền quê nghèo êm đềm với những ký ức ngọt ngào và tình anh em ruột thịt.', N'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (3, 1, 5, N'Dế Mèn Phiêu Lưu Ký', N'9786042087654', 65000, 79, 43, 5, N'Sach', N'Tác phẩm thiếu nhi kinh điển của nhà văn Tô Hoài về bài học đường đời đầu tiên và tình bạn cao đẹp.', N'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (4, 2, 2, N'Rừng Na Uy', N'9786045612345', 135000, 38, 30, 5, N'Sach', N'Kiệt tác nổi tiếng nhất của Haruki Murakami về nỗi cô đơn, tình yêu và tuổi trẻ đầy trăn trở tại Tokyo.', N'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (5, 2, 3, N'Đắc Nhân Tâm', N'9786045876543', 95000, 100, 65, 5, N'Sach', N'Tác phẩm kinh điển vượt thời gian về nghệ thuật thu phục lòng người và kỹ năng giao tiếp chân thành.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (6, 2, 4, N'Clean Code - Mã Sạch', N'9780132350884', 250000, 19, 13, 5, N'Sach', N'Cẩm nang nâng cao chất lượng mã nguồn dành cho mọi kỹ sư phần mềm chuyên nghiệp hướng đến sự tinh gọn.', N'https://images.unsplash.com/photo-1532012164546-f432f2e37b73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T15:04:53.1483971' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (7, 2, 2, N'Hoàng Tử Bé', N'9786045634567', 75000, 60, 38, 5, N'Sach', N'Một câu chuyện ngụ ngôn tuyệt mỹ dành cho cả trẻ em lẫn người lớn về tình yêu thương và sự gắn kết.', N'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1719499' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (8, 2, 2, N'Nhà Giả Kim', N'9786046987654', 85000, 90, 85, 5, N'Sach', N'Hành trình theo đuổi vận mệnh và giấc mơ cá nhân của chàng trai chăn cừu Santiago qua sa mạc mênh mông.', N'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1739494' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (9, 2, 3, N'Tâm Lý Học Về Tiền', N'9786045987123', 145000, 45, 52, 5, N'Sach', N'Những bí mật về cách con người suy nghĩ, cảm nhận và đưa ra quyết định với tiền bạc trong đời sống thực tế.', N'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1739494' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (10, 1, 1, N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'9786041088899', 95000, 68, 36, 5, N'Sach', N'Tác phẩm đưa người đọc quay trở lại thế giới ngây ngô, tươi vui của tuổi ấu thơ với đầy ắp tiếng cười.', N'https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (11, 1, 5, N'Doraemon Tuyển Tập Tranh Truyện Màu', N'9786042123456', 55000, 120, 95, 5, N'Sach', N'Tập truyện tranh màu đặc sắc kể về chú mèo máy thông minh đến từ thế kỷ 22 và nhóm bạn Nobita.', N'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (12, 2, 4, N'Kiến Trúc Phần Mềm Thực Chiến', N'9786048033221', 280000, 30, 19, 5, N'Sach', N'Hướng dẫn chi tiết xây dựng hệ thống phân tán, Microservices và thiết kế CSDL chịu tải cao.', N'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1759510' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (13, 2, 4, N'Sổ Tay Da Cao Cấp Nhã Nam Edition', N'VPP-9001', 89000, 49, 23, 5, N'VanPhongPham', N'Sổ tay bìa da PU cao cấp, giấy chống lóa 100gsm chuyên dụng ghi chép sáng tạo.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2))
+INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia_ban], [so_luong_ton], [so_luong_da_ban], [muc_ton_toi_thieu], [loaisp], [mo_ta], [hinh_anh], [trang_thai], [trang_thai_khoa], [ngay_tao]) VALUES (14, 1, 5, N'Đèn Đọc Sách Mini Kẹp Bìa Sách LED', N'QT-8001', 65000, 37, 18, 5, N'QuaTang', N'Đèn LED kẹp sách 3 mức sáng bảo vệ mắt ban đêm, pin sạc USB tiện dụng.', N'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2))
 SET IDENTITY_INSERT [dbo].[san_pham] OFF
 GO
 

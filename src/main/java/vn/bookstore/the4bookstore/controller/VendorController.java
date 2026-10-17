@@ -49,7 +49,6 @@ public class VendorController {
     private final CloudinaryService cloudinaryService;
     private final TaiKhoanRepository taiKhoanRepository;
     private final DanhMucRepository danhMucRepository;
-    private final NhaXuatBanRepository nhaXuatBanRepository;
     private final TacGiaRepository tacGiaRepository;
     private final SanPhamRepository sanPhamRepository;
 
@@ -280,7 +279,6 @@ public class VendorController {
         model.addAttribute("shop", shop);
         model.addAttribute("sanPham", new SanPham());
         model.addAttribute("danhMucs", danhMucRepository.findAll());
-        model.addAttribute("nhaXuatBans", nhaXuatBanRepository.findAll());
         model.addAttribute("tacGias", tacGiaRepository.findAll());
         return "vendor/product_form";
     }
@@ -298,7 +296,6 @@ public class VendorController {
         model.addAttribute("shop", shop);
         model.addAttribute("sanPham", sp);
         model.addAttribute("danhMucs", danhMucRepository.findAll());
-        model.addAttribute("nhaXuatBans", nhaXuatBanRepository.findAll());
         model.addAttribute("tacGias", tacGiaRepository.findAll());
         return "vendor/product_form";
     }
@@ -308,8 +305,6 @@ public class VendorController {
                               @ModelAttribute SanPham sanPham,
                               @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                               @RequestParam(required = false) Integer maDanhMuc,
-                              @RequestParam(required = false) Integer maNXB,
-                              @RequestParam(required = false) String tenNXB,
                               @RequestParam(required = false) String tenTacGia,
                               RedirectAttributes redirectAttributes) {
         Shop shop = getCurrentShop(auth);
@@ -323,7 +318,7 @@ public class VendorController {
                     sanPham.setHinhAnh(uploadedImg);
                 }
             }
-            vendorService.saveShopProduct(shop.getMaShop(), sanPham, maDanhMuc, maNXB, tenNXB, tenTacGia);
+            vendorService.saveShopProduct(shop.getMaShop(), sanPham, maDanhMuc, tenTacGia);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu sản phẩm thành công!");
             return "redirect:/vendor/products";
         } catch (Exception ex) {
@@ -363,9 +358,9 @@ public class VendorController {
             os.write(0xBB);
             os.write(0xBF);
 
-            writer.println("ISBN,TenSP,GiaBan,SoLuongTon,LoaiSP,MaDanhMuc,MaNXB,MoTa");
-            writer.println("9786043658999,Đắc Nhân Tâm - Khổ Tiêu Chuẩn,85000,100,Sach,1,1,Sách kinh điển về nghệ thuật ứng xử và kết nối.");
-            writer.println("8935244855523,Sổ Tay Dot Grid Bìa Da Cao Cấp,45000,50,VanPhongPham,2,1,Sổ tay kẻ chấm dot ghi chép bullet journal.");
+            writer.println("ISBN,TenSP,GiaBan,SoLuongTon,LoaiSP,MaDanhMuc,MoTa");
+            writer.println("9786043658999,Đắc Nhân Tâm - Khổ Tiêu Chuẩn,85000,100,Sach,1,Sách kinh điển về nghệ thuật ứng xử và kết nối.");
+            writer.println("8935244855523,Sổ Tay Dot Grid Bìa Da Cao Cấp,45000,50,VanPhongPham,2,Sổ tay kẻ chấm dot ghi chép bullet journal.");
             writer.flush();
         }
     }
@@ -411,8 +406,7 @@ public class VendorController {
                 int tonKho = parseIntSafe(cols[3], 0);
                 String loaiSP = cols.length > 4 && !cols[4].isBlank() ? cols[4].trim() : "Sach";
                 Integer maDanhMuc = cols.length > 5 ? parseIntegerSafe(cols[5]) : 1;
-                Integer maNxb = cols.length > 6 ? parseIntegerSafe(cols[6]) : null;
-                String moTa = cols.length > 7 ? cols[7].trim() : "";
+                String moTa = cols.length > 6 ? cols[6].trim() : "";
 
                 if (tenSP.isEmpty()) continue;
 
@@ -453,9 +447,6 @@ public class VendorController {
                     }
                     if (sp.getDanhMuc() == null) {
                         danhMucRepository.findAll().stream().findFirst().ifPresent(sp::setDanhMuc);
-                    }
-                    if (maNxb != null) {
-                        nhaXuatBanRepository.findById(maNxb).ifPresent(sp::setNhaXuatBan);
                     }
 
                     sanPhamRepository.save(sp);

@@ -41,7 +41,6 @@ class AdminUserAndImportExportTest {
     @MockitoBean private SanPhamRepository sanPhamRepository;
     @MockitoBean private DonHangRepository donHangRepository;
     @MockitoBean private DanhMucRepository danhMucRepository;
-    @MockitoBean private NhaXuatBanRepository nhaXuatBanRepository;
     @MockitoBean private PasswordEncoder passwordEncoder;
 
     @MockitoBean private JwtAuthenticationFilter jwtAuthenticationFilter;

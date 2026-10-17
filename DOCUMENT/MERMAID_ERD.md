@@ -34,9 +34,6 @@ erDiagram
     tac_gia {
         int ma_tac_gia PK
     }
-    nha_xuat_ban {
-        int manxb PK
-    }
     san_pham {
         int masp PK
         int ma_shop FK

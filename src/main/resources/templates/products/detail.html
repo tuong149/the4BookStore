@@ -99,12 +99,7 @@
                             <span class="italic font-medium">Đang cập nhật</span>
                         </div>
 
-                        <!-- Publisher -->
-                        <div th:if="${sanPham.nhaXuatBan != null}" class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[18px] text-secondary">apartment</span>
-                            <span>NXB: </span>
-                            <a th:href="@{/san-pham/sach(nxb=${sanPham.nhaXuatBan.maNXB})}" class="font-semibold text-on-surface hover:text-primary hover:underline" th:text="${sanPham.nhaXuatBan.tenNXB}">NXB</a>
-                        </div>
+
                     </div>
 
                     <!-- ISBN -->
@@ -183,10 +178,7 @@
                             <p class="text-xs text-on-surface-variant mb-0.5">Loại sản phẩm</p>
                             <p class="text-sm font-semibold text-on-surface" th:text="${sanPham.danhMuc.tenDanhMuc}">Tiểu thuyết</p>
                         </div>
-                        <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60" th:if="${sanPham.nhaXuatBan != null}">
-                            <p class="text-xs text-on-surface-variant mb-0.5">Nhà Xuất Bản</p>
-                            <p class="text-sm font-semibold text-on-surface truncate" th:text="${sanPham.nhaXuatBan.tenNXB}">NXB</p>
-                        </div>
+
                         <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60" th:if="${sanPham.shop != null}">
                             <p class="text-xs text-on-surface-variant mb-0.5">Cửa hàng bán</p>
                             <a th:href="@{'/shop/' + ${sanPham.shop.slug}}" class="text-sm font-bold text-primary hover:underline truncate block" th:text="${sanPham.shop.tenShop}">Tên Shop</a>

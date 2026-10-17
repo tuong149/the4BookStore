@@ -31,8 +31,24 @@ class VoucherSystemTest {
     @Autowired
     private KhuyenMaiRepository khuyenMaiRepository;
 
+    @Autowired(required = false)
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @Autowired
     private CartController cartController;
+
+    private void deleteVoucherSafely(String code) {
+        khuyenMaiRepository.findByMaCode(code).ifPresent(km -> {
+            if (jdbcTemplate != null) {
+                try {
+                    jdbcTemplate.update("DELETE FROM voucher_da_luu WHERE makm = ?", km.getMaKM());
+                } catch (Exception ignored) {}
+            }
+            try {
+                khuyenMaiRepository.delete(km);
+            } catch (Exception ignored) {}
+        });
+    }
 
     @Test
     @DisplayName("Kiểm tra danh sách voucher hiện có trong DB và xóa các mã mẫu cũ nếu có")
@@ -45,17 +61,10 @@ class VoucherSystemTest {
         }
 
         // Đảm bảo các mã mặc định cũ không tồn tại
-        Optional<KhuyenMai> old1 = khuyenMaiRepository.findByMaCode("THE4BOOK15");
-        old1.ifPresent(km -> khuyenMaiRepository.delete(km));
-
-        Optional<KhuyenMai> old2 = khuyenMaiRepository.findByMaCode("FREESHIP");
-        old2.ifPresent(km -> khuyenMaiRepository.delete(km));
-
-        Optional<KhuyenMai> old3 = khuyenMaiRepository.findByMaCode("BOOK15");
-        old3.ifPresent(km -> khuyenMaiRepository.delete(km));
-
-        Optional<KhuyenMai> old4 = khuyenMaiRepository.findByMaCode("SALE15");
-        old4.ifPresent(km -> khuyenMaiRepository.delete(km));
+        deleteVoucherSafely("THE4BOOK15");
+        deleteVoucherSafely("FREESHIP");
+        deleteVoucherSafely("BOOK15");
+        deleteVoucherSafely("SALE15");
     }
 
     @Test
@@ -156,6 +165,7 @@ class VoucherSystemTest {
     }
 
     @Test
+    @org.springframework.security.test.context.support.WithMockUser(username = "customer", roles = {"USER"})
     @DisplayName("Trang Săn Voucher /san-voucher render thành công")
     void testSanVoucherPage() throws Exception {
         mockMvc.perform(get("/san-voucher"))

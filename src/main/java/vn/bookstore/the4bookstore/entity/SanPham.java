@@ -23,9 +23,6 @@ public class SanPham {
     @JoinColumn(name = "maDanhMuc", nullable = false)
     private DanhMuc danhMuc;
     
-    @Column(name = "ten_nha_xuat_ban", length = 150)
-    private String tenNhaXuatBan;
-    
     @Column(nullable = false, length = 30)
     private String loaiSP = "SACH";
     @Column(unique = true, length = 20)
@@ -77,33 +74,6 @@ public class SanPham {
         }
     }
 
-    public static class NxbProxy {
-        private final String tenNXB;
-        private final Integer maNXB;
-        public NxbProxy(String tenNXB, Integer maNXB) {
-            this.tenNXB = tenNXB;
-            this.maNXB = maNXB != null ? maNXB : 1;
-        }
-        public String getTenNXB() { return tenNXB; }
-        public Integer getMaNXB() { return maNXB; }
-    }
-
-    public NxbProxy getNhaXuatBan() {
-        if (tenNhaXuatBan != null && !tenNhaXuatBan.isBlank()) {
-            return new NxbProxy(tenNhaXuatBan, 1);
-        }
-        return null;
-    }
-
-    public void setNhaXuatBan(NhaXuatBan nxb) {
-        if (nxb != null) {
-            this.tenNhaXuatBan = nxb.getTenNXB();
-        }
-    }
-
-    public String getTenNhaXuatBan() {
-        return tenNhaXuatBan != null ? tenNhaXuatBan : "";
-    }
 
     public String getTenShop() {
         try {

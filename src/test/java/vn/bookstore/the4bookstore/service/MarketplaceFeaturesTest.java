@@ -81,15 +81,15 @@ class MarketplaceFeaturesTest {
     }
 
     @Test
-    @DisplayName("User: Đánh giá dưới 50 ký tự phải ném ngoại lệ IllegalArgumentException")
+    @DisplayName("User: Đánh giá dưới 10 ký tự phải ném ngoại lệ IllegalArgumentException")
     void testSubmitReview_TooShortContent_ShouldThrowException() {
-        String shortContent = "Sách này rất hay, đóng gói đẹp!"; // 30 ký tự (< 50)
+        String shortContent = "Sách hay"; // < 10 ký tự
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
             userInteractionService.submitReview(khachHang, 100, 500, 5, shortContent, List.of());
         });
 
-        assertTrue(ex.getMessage().contains("tối thiểu 50 ký tự"));
+        assertTrue(ex.getMessage().contains("tối thiểu 10 ký tự"));
         verifyNoInteractions(danhGiaRepository);
     }
 

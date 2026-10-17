@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quản Lý Sản Phẩm & Kho Hàng')}">
+<head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quáº£n LÃ½ Sáº£n Pháº©m & Kho HÃ ng')}">
 </head>
 
 <body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen">
@@ -25,7 +25,7 @@
                     <div th:if="${successMessage}" class="mb-space-md p-space-md rounded-2xl bg-primary-fixed/30 border border-primary/20 text-on-primary-fixed flex items-center justify-between shadow-sm animate-in fade-in duration-200">
                         <div class="flex items-center gap-space-xs font-semibold">
                             <span class="material-symbols-outlined text-primary text-[22px]">check_circle</span>
-                            <span th:text="${successMessage}">Thực hiện thao tác thành công!</span>
+                            <span th:text="${successMessage}">Thá»±c hiá»‡n thao tÃ¡c thÃ nh cÃ´ng!</span>
                         </div>
                         <button onclick="this.parentElement.remove()" class="p-1 hover:bg-primary/10 rounded-lg transition-colors">
                             <span class="material-symbols-outlined text-[18px]">close</span>
@@ -35,7 +35,7 @@
                     <div th:if="${errorMessage}" class="mb-space-md p-space-md rounded-2xl bg-error-container border border-error/20 text-error flex items-center justify-between shadow-sm animate-in fade-in duration-200">
                         <div class="flex items-center gap-space-xs font-semibold">
                             <span class="material-symbols-outlined text-error text-[22px]">error</span>
-                            <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+                            <span th:text="${errorMessage}">ÄÃ£ xáº£y ra lá»—i!</span>
                         </div>
                         <button onclick="this.parentElement.remove()" class="p-1 hover:bg-error/10 rounded-lg transition-colors">
                             <span class="material-symbols-outlined text-[18px]">close</span>
@@ -45,7 +45,7 @@
                     <div th:if="${warningMessage}" class="mb-space-md p-space-md rounded-2xl bg-secondary-fixed border border-secondary/20 text-secondary flex items-center justify-between shadow-sm animate-in fade-in duration-200">
                         <div class="flex items-center gap-space-xs font-semibold">
                             <span class="material-symbols-outlined text-secondary text-[22px]">warning</span>
-                            <span th:text="${warningMessage}">Cảnh báo!</span>
+                            <span th:text="${warningMessage}">Cáº£nh bÃ¡o!</span>
                         </div>
                         <button onclick="this.parentElement.remove()" class="p-1 hover:bg-secondary/10 rounded-lg transition-colors">
                             <span class="material-symbols-outlined text-[18px]">close</span>
@@ -57,13 +57,13 @@
                         <div class="flex flex-col gap-space-xs">
                             <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
                                 <span class="inline-flex w-2 h-2 rounded-full bg-primary-container"></span>
-                                <span>VẬN HÀNH THE4BOOKSTORE</span>
+                                <span>Váº¬N HÃ€NH THE4BOOKSTORE</span>
                                 <span>/</span>
-                                <span class="text-primary font-semibold">QUẢN LÝ SẢN PHẨM</span>
+                                <span class="text-primary font-semibold">QUáº¢N LÃ Sáº¢N PHáº¨M</span>
                             </div>
-                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Sản Phẩm &amp; Tồn Kho</h1>
+                            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quáº£n LÃ½ Sáº£n Pháº©m &amp; Tá»“n Kho</h1>
                             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                                Quản lý dữ liệu sản phẩm (Sách, Văn phòng phẩm, Quà tặng &amp; Trang trí), theo dõi số lượng tồn kho và cập nhật giá niêm yết.
+                                Quáº£n lÃ½ dá»¯ liá»‡u sáº£n pháº©m (SÃ¡ch, VÄƒn phÃ²ng pháº©m, QuÃ  táº·ng &amp; Trang trÃ­), theo dÃµi sá»‘ lÆ°á»£ng tá»“n kho vÃ  cáº­p nháº­t giÃ¡ niÃªm yáº¿t.
                             </p>
                         </div>
 
@@ -74,7 +74,7 @@
                                     <span class="material-symbols-outlined text-[20px]">inventory_2</span>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG SẢN PHẨM</span>
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">Tá»”NG Sáº¢N PHáº¨M</span>
                                     <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${totalBooks ?: #lists.size(books)}">1.420</span>
                                 </div>
                             </div>
@@ -83,7 +83,7 @@
                                     <span class="material-symbols-outlined text-[20px]">production_quantity_limits</span>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">SẮP HẾT HÀNG</span>
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">Sáº®P Háº¾T HÃ€NG</span>
                                     <span class="font-headline-sm text-headline-sm font-bold text-secondary tabular-nums" th:text="${lowStockCount} ?: '0'">18</span>
                                 </div>
                             </div>
@@ -92,7 +92,7 @@
                                     <span class="material-symbols-outlined text-[20px]">warning</span>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">HẾT HÀNG</span>
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">Háº¾T HÃ€NG</span>
                                     <span class="font-headline-sm text-headline-sm font-bold text-error tabular-nums" th:text="${outOfStockCount} ?: '0'">7</span>
                                 </div>
                             </div>
@@ -108,17 +108,17 @@
                                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
                                 <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
                                        id="catalogSearchInput" 
-                                       placeholder="Tìm theo tên sản phẩm, mã ISBN..." 
+                                       placeholder="TÃ¬m theo tÃªn sáº£n pháº©m, mÃ£ ISBN..." 
                                        type="text"/>
                             </div>
 
                             <!-- Product Type Filter -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="loaiSPFilter">
-                                    <option value="all">Tất cả phân loại</option>
-                                    <option value="Sach">Sách</option>
-                                    <option value="VanPhongPham">Văn phòng phẩm</option>
-                                    <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                                    <option value="all">Táº¥t cáº£ phÃ¢n loáº¡i</option>
+                                    <option value="Sach">SÃ¡ch</option>
+                                    <option value="VanPhongPham">VÄƒn phÃ²ng pháº©m</option>
+                                    <option value="QuaTang">QuÃ  táº·ng &amp; Trang trÃ­</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
@@ -126,8 +126,8 @@
                             <!-- Category Dropdown Filter -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="categoryFilter">
-                                    <option value="all">Tất cả danh mục</option>
-                                    <option th:each="cat : ${categories}" th:value="${cat.maDanhMuc}" th:text="${cat.tenDanhMuc}">Văn học</option>
+                                    <option value="all">Táº¥t cáº£ danh má»¥c</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.maDanhMuc}" th:text="${cat.tenDanhMuc}">VÄƒn há»c</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
@@ -135,17 +135,17 @@
                             <!-- Stock Status Dropdown Filter -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="stockFilter">
-                                    <option value="all">Tất cả trạng thái kho</option>
-                                    <option value="in_stock">Còn Hàng (&gt; 5)</option>
-                                    <option value="low_stock">Sắp Hết (&le; 5)</option>
-                                    <option value="out_of_stock">Hết Hàng (0)</option>
+                                    <option value="all">Táº¥t cáº£ tráº¡ng thÃ¡i kho</option>
+                                    <option value="in_stock">CÃ²n HÃ ng (&gt; 5)</option>
+                                    <option value="low_stock">Sáº¯p Háº¿t (&le; 5)</option>
+                                    <option value="out_of_stock">Háº¿t HÃ ng (0)</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
 
-                            <button class="text-on-surface-variant hover:text-primary px-3 py-2 rounded-xl hover:bg-surface-container transition-colors flex items-center gap-1 font-label-sm text-label-sm" onclick="resetFilters()" title="Đặt lại bộ lọc" type="button">
+                            <button class="text-on-surface-variant hover:text-primary px-3 py-2 rounded-xl hover:bg-surface-container transition-colors flex items-center gap-1 font-label-sm text-label-sm" onclick="resetFilters()" title="Äáº·t láº¡i bá»™ lá»c" type="button">
                                 <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-                                <span>Đặt lại</span>
+                                <span>Äáº·t láº¡i</span>
                             </button>
                         </div>
 
@@ -154,7 +154,7 @@
                             <!-- Add Product CTA -->
                             <button class="bg-primary-container text-on-primary hover:bg-primary px-space-md py-2.5 rounded-xl font-label-md text-label-md font-bold flex items-center gap-space-xs shadow-sm transition-all transform active:scale-95" onclick="openBookModal('add')" type="button">
                                 <span class="material-symbols-outlined text-[18px]">add_box</span>
-                                <span>Thêm Sản Phẩm Mới</span>
+                                <span>ThÃªm Sáº£n Pháº©m Má»›i</span>
                             </button>
                         </div>
                     </div>
@@ -165,15 +165,15 @@
                             <table class="w-full text-left" id="booksInventoryTable">
                                 <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
                                     <tr>
-                                        <th class="py-3 px-space-sm w-24" scope="col">MÃ SP</th>
-                                        <th class="py-3 px-space-sm w-16" scope="col">ẢNH</th>
-                                        <th class="py-3 px-space-md" scope="col">TÊN SẢN PHẨM &amp; ISBN</th>
-                                        <th class="py-3 px-space-md w-36" scope="col">PHÂN LOẠI</th>
-                                        <th class="py-3 px-space-md w-44" scope="col">DANH MỤC</th>
-                                        <th class="py-3 px-space-md w-40" scope="col">TỒN KHO</th>
-                                        <th class="py-3 px-space-md text-right w-36" scope="col">GIÁ BÁN</th>
-                                        <th class="py-3 px-space-md text-center w-32" scope="col">TRẠNG THÁI</th>
-                                        <th class="py-3 px-space-md text-center w-28" scope="col">THAO TÁC</th>
+                                        <th class="py-3 px-space-sm w-24" scope="col">MÃƒ SP</th>
+                                        <th class="py-3 px-space-sm w-16" scope="col">áº¢NH</th>
+                                        <th class="py-3 px-space-md" scope="col">TÃŠN Sáº¢N PHáº¨M &amp; ISBN</th>
+                                        <th class="py-3 px-space-md w-36" scope="col">PHÃ‚N LOáº I</th>
+                                        <th class="py-3 px-space-md w-44" scope="col">DANH Má»¤C</th>
+                                        <th class="py-3 px-space-md w-40" scope="col">Tá»’N KHO</th>
+                                        <th class="py-3 px-space-md text-right w-36" scope="col">GIÃ BÃN</th>
+                                        <th class="py-3 px-space-md text-center w-32" scope="col">TRáº NG THÃI</th>
+                                        <th class="py-3 px-space-md text-center w-28" scope="col">THAO TÃC</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface" id="inventoryTableBody">
@@ -182,7 +182,7 @@
                                     <tr th:if="${#lists.isEmpty(books)}">
                                         <td colspan="9" class="py-12 text-center text-on-surface-variant">
                                             <span class="material-symbols-outlined text-[36px] text-on-surface-variant/50 mb-2 block">inventory_2</span>
-                                            Chưa có sản phẩm nào. Nhấp "Thêm Sản Phẩm Mới" để bắt đầu.
+                                            ChÆ°a cÃ³ sáº£n pháº©m nÃ o. Nháº¥p "ThÃªm Sáº£n Pháº©m Má»›i" Ä‘á»ƒ báº¯t Ä‘áº§u.
                                         </td>
                                     </tr>
 
@@ -199,14 +199,14 @@
                                             <div class="w-12 h-14 bg-surface-container rounded-lg overflow-hidden shadow-sm flex-shrink-0">
                                                 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
                                                      th:src="${b.moTa != null && b.moTa.startsWith('http') ? b.moTa : 'https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y'}" 
-                                                     alt="Ảnh sản phẩm"/>
+                                                     alt="áº¢nh sáº£n pháº©m"/>
                                             </div>
                                         </td>
 
                                         <td class="py-3 px-space-md">
                                             <div class="flex flex-col">
                                                 <span class="font-headline-sm text-headline-sm font-semibold text-on-surface group-hover:text-primary transition-colors" th:text="${b.tenSP}">
-                                                    Tên sản phẩm
+                                                    TÃªn sáº£n pháº©m
                                                 </span>
                                                 <span class="font-label-sm text-label-sm text-on-surface-variant/80 font-mono mt-0.5" th:if="${b.ISBN != null && !b.ISBN.isBlank()}" th:text="'ISBN: ' + ${b.ISBN}">
                                                     ISBN: 978-0525559474
@@ -217,28 +217,28 @@
                                         <td class="py-3 px-space-md">
                                             <span th:if="${b.loaiSP == 'Sach' || b.loaiSP == null}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-label-sm font-medium bg-primary-fixed/30 text-primary">
                                                 <span class="material-symbols-outlined text-[14px]">menu_book</span>
-                                                Sách
+                                                SÃ¡ch
                                             </span>
                                             <span th:if="${b.loaiSP == 'VanPhongPham'}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-label-sm font-medium bg-amber-100 text-amber-800">
                                                 <span class="material-symbols-outlined text-[14px]">edit</span>
-                                                Văn phòng phẩm
+                                                VÄƒn phÃ²ng pháº©m
                                             </span>
                                             <span th:if="${b.loaiSP == 'QuaTang'}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-label-sm font-medium bg-purple-100 text-purple-800">
                                                 <span class="material-symbols-outlined text-[14px]">featured_seasonal_and_gifts</span>
-                                                Quà tặng
+                                                QuÃ  táº·ng
                                             </span>
                                         </td>
 
                                         <td class="py-3 px-space-md">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-label-sm font-medium bg-surface-container text-on-surface" th:text="${b.danhMuc != null ? b.danhMuc.tenDanhMuc : 'Chưa gán'}">
-                                                Tiểu thuyết
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-label-sm font-medium bg-surface-container text-on-surface" th:text="${b.danhMuc != null ? b.danhMuc.tenDanhMuc : 'ChÆ°a gÃ¡n'}">
+                                                Tiá»ƒu thuyáº¿t
                                             </span>
                                         </td>
 
                                         <td class="py-3 px-space-md">
                                             <div class="flex flex-col gap-1 w-28">
                                                 <div class="flex items-center justify-between text-body-sm font-mono">
-                                                    <span class="font-bold text-on-surface" th:text="${b.soLuongTon} + ' cái'">25 cái</span>
+                                                    <span class="font-bold text-on-surface" th:text="${b.soLuongTon} + ' cÃ¡i'">25 cÃ¡i</span>
                                                 </div>
                                                 <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
                                                     <div class="h-full rounded-full transition-all duration-300" 
@@ -248,30 +248,30 @@
                                             </div>
                                         </td>
 
-                                        <td class="py-3 px-space-md text-right font-mono font-bold text-on-surface" th:text="${#numbers.formatDecimal(b.giaBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                                            150.000 đ
+                                        <td class="py-3 px-space-md text-right font-mono font-bold text-on-surface" th:text="${#numbers.formatDecimal(b.giaBan, 0, 'COMMA', 0, 'POINT')} + ' Ä‘'">
+                                            150.000 Ä‘
                                         </td>
 
                                         <td class="py-3 px-space-md text-center">
                                             <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon > 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-primary bg-primary-fixed/30 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                                                Đang Bán
+                                                Äang BÃ¡n
                                             </span>
                                             <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon > 0 && b.soLuongTon <= 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-secondary bg-secondary-fixed/40 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                                Sắp Hết
+                                                Sáº¯p Háº¿t
                                             </span>
                                             <span th:if="${b.trangThai == 'DangBan' && (b.soLuongTon == null || b.soLuongTon == 0)}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-error bg-error-container/60 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-                                                Hết Hàng
+                                                Háº¿t HÃ ng
                                             </span>
                                             <span th:if="${b.trangThai == 'HetHang'}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-error bg-error-container/60 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-                                                Hết Hàng
+                                                Háº¿t HÃ ng
                                             </span>
                                             <span th:if="${b.trangThai == 'NgungBan'}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
-                                                Ngừng Bán
+                                                Ngá»«ng BÃ¡n
                                             </span>
                                         </td>
 
@@ -284,19 +284,11 @@
                                                         th:data-isbn="${b.ISBN}"
                                                         th:data-danhmuc="${b.danhMuc != null ? b.danhMuc.maDanhMuc : ''}"
                                                         th:data-tacgia="${b.sanPhamTacGias != null and !b.sanPhamTacGias.isEmpty() ? b.sanPhamTacGias[0].tacGia?.maTacGia : ''}"
-                                                        th:data-nxb="${b.nhaXuatBan != null ? b.nhaXuatBan.maNXB : ''}"
-                                                        th:data-soluong="${b.soLuongTon}"
-                                                        th:data-giaban="${b.giaBan}"
-                                                        th:data-trangthai="${b.trangThai}"
-                                                        th:data-mota="${b.moTa ?: ''}"
-                                                        onclick="editProduct(this)" 
-                                                        title="Chỉnh sửa sản phẩm" 
-                                                        type="button">
                                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                                 </button>
                                                 
-                                                <form th:action="@{'/admin/products/delete/' + ${b.maSP}}" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
-                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Xóa sản phẩm" type="submit">
+                                                <form th:action="@{'/admin/products/delete/' + ${b.maSP}}" method="post" class="inline" onsubmit="return confirm('Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a sáº£n pháº©m nÃ y?');">
+                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="XÃ³a sáº£n pháº©m" type="submit">
                                                         <span class="material-symbols-outlined text-[18px]">delete</span>
                                                     </button>
                                                 </form>
@@ -313,7 +305,7 @@
             </div>
 
             <!-- Slide-over Drawer / Modal for Product Details (Add / Edit) Fragment -->
-            <div th:replace="~{fragments/admin/book_drawer :: book_drawer(${categories}, ${authors}, ${publishers})}"></div>
+            <div th:replace="~{fragments/admin/book_drawer :: book_drawer(${categories}, ${authors})}"></div>
 
         </main>
     </div>
@@ -333,7 +325,7 @@
         const modalIsbn = document.getElementById('modalIsbn');
         const modalCategory = document.getElementById('modalCategory');
         const modalAuthor = document.getElementById('modalAuthor');
-        const modalPublisher = document.getElementById('modalPublisher');
+        
         const modalStock = document.getElementById('modalStock');
         const modalPrice = document.getElementById('modalPrice');
         const modalTrangThai = document.getElementById('modalTrangThai');
@@ -387,13 +379,13 @@
 
         function openBookModal(mode) {
             if (mode === 'add') {
-                if (modalDrawerTitle) modalDrawerTitle.textContent = 'Thêm Sản Phẩm Mới';
+                if (modalDrawerTitle) modalDrawerTitle.textContent = 'ThÃªm Sáº£n Pháº©m Má»›i';
                 if (modalMaSP) modalMaSP.value = '';
                 if (modalTitle) modalTitle.value = '';
                 if (modalLoaiSP) modalLoaiSP.value = 'Sach';
                 if (modalIsbn) modalIsbn.value = '';
                 if (modalAuthor) modalAuthor.value = '';
-                if (modalPublisher) modalPublisher.value = '';
+                
                 if (modalStock) modalStock.value = '25';
                 if (modalPrice) modalPrice.value = '150000';
                 if (modalTrangThai) modalTrangThai.value = 'DangBan';
@@ -404,7 +396,7 @@
         }
 
         function editProduct(button) {
-            if (modalDrawerTitle) modalDrawerTitle.textContent = 'Chỉnh Sửa: ' + button.getAttribute('data-tensp');
+            if (modalDrawerTitle) modalDrawerTitle.textContent = 'Chá»‰nh Sá»­a: ' + button.getAttribute('data-tensp');
             if (modalMaSP) modalMaSP.value = button.getAttribute('data-masp') || '';
             if (modalTitle) modalTitle.value = button.getAttribute('data-tensp') || '';
             const loaiVal = button.getAttribute('data-loaisp') || 'Sach';
@@ -412,7 +404,6 @@
             if (modalIsbn) modalIsbn.value = button.getAttribute('data-isbn') || '';
             if (modalCategory) modalCategory.value = button.getAttribute('data-danhmuc') || '';
             if (modalAuthor) modalAuthor.value = button.getAttribute('data-tacgia') || '';
-            if (modalPublisher) modalPublisher.value = button.getAttribute('data-nxb') || '';
             if (modalStock) modalStock.value = button.getAttribute('data-soluong') || '0';
             if (modalPrice) modalPrice.value = button.getAttribute('data-giaban') || '0';
             if (modalTrangThai) modalTrangThai.value = button.getAttribute('data-trangthai') || 'DangBan';

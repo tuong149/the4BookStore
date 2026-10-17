@@ -115,7 +115,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
            "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong') " +
            "AND (LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(s.tenNhaXuatBan) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))")
     Page<SanPham> searchByLoaiSPAndKeyword(@Param("loaiSP") String loaiSP,
                                             @Param("keyword") String keyword,
@@ -128,7 +127,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
            "AND s.danhMuc.maDanhMuc = :maDanhMuc " +
            "AND (LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(s.tenNhaXuatBan) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))")
     Page<SanPham> searchByLoaiSPAndDanhMucAndKeyword(@Param("loaiSP") String loaiSP,
                                                       @Param("maDanhMuc") Integer maDanhMuc,
@@ -153,7 +151,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
            "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong') AND (" +
            "LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(s.tenNhaXuatBan) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))")
     Page<SanPham> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
@@ -163,7 +160,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
            "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong') AND (" +
            "LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(s.tenNhaXuatBan) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND LOWER(sptg.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))")
     Page<SanPham> searchAllByDanhMucAndKeyword(@Param("keyword") String keyword,
                                                @Param("maDanhMuc") Integer maDanhMuc,
@@ -196,10 +192,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     // ====================================================================
     @Query(value = "SELECT dbo.fn_TinhDiemDanhGiaTrungBinh(:maSP)", nativeQuery = true)
     Double getAverageRatingByProductId(@Param("maSP") Integer maSP);
-
-    default List<SanPham> findByNhaXuatBan_MaNXB(Integer maNXB) { return java.util.List.of(); }
-    default long countByNhaXuatBan_MaNXB(Integer maNXB) { return 0L; }
-    default Page<SanPham> findByNhaXuatBan_MaNXBAndTrangThaiIn(Integer maNXB, List<String> trangThais, Pageable pageable) { return Page.empty(); }
 
     @Query("SELECT sptg.sanPham FROM SanPhamTacGia sptg WHERE sptg.tacGia.maTacGia = :maTacGia")
     List<SanPham> findBooksByTacGiaId(@Param("maTacGia") Integer maTacGia);

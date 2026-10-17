@@ -12,11 +12,9 @@ import vn.bookstore.the4bookstore.entity.DanhMuc;
 import vn.bookstore.the4bookstore.entity.SanPham;
 import vn.bookstore.the4bookstore.entity.DonHang;
 import vn.bookstore.the4bookstore.entity.TacGia;
-import vn.bookstore.the4bookstore.entity.NhaXuatBan;
 import vn.bookstore.the4bookstore.entity.SanPhamTacGia;
 import vn.bookstore.the4bookstore.entity.SanPhamTacGiaId;
 import vn.bookstore.the4bookstore.repository.DanhMucRepository;
-import vn.bookstore.the4bookstore.repository.NhaXuatBanRepository;
 import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 import vn.bookstore.the4bookstore.repository.DonHangRepository;
 import vn.bookstore.the4bookstore.repository.TacGiaRepository;
@@ -24,7 +22,6 @@ import vn.bookstore.the4bookstore.repository.SanPhamTacGiaRepository;
 import vn.bookstore.the4bookstore.service.ReportService;
 import vn.bookstore.the4bookstore.service.OrderService;
 import vn.bookstore.the4bookstore.service.TacGiaService;
-import vn.bookstore.the4bookstore.service.NhaXuatBanService;
 import vn.bookstore.the4bookstore.service.SanPhamService;
 import vn.bookstore.the4bookstore.service.CloudinaryService;
 import vn.bookstore.the4bookstore.repository.ShopRepository;
@@ -48,7 +45,6 @@ public class AdminController {
 
     private final SanPhamRepository sanPhamRepository;
     private final DanhMucRepository danhMucRepository;
-    private final NhaXuatBanRepository nhaXuatBanRepository;
     private final TacGiaRepository tacGiaRepository;
     private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
 
@@ -68,7 +64,6 @@ public class AdminController {
 
         public AdminController(SanPhamRepository sanPhamRepository,
                            DanhMucRepository danhMucRepository,
-                           NhaXuatBanRepository nhaXuatBanRepository,
                            TacGiaRepository tacGiaRepository,
                            SanPhamTacGiaRepository sanPhamTacGiaRepository,
                            ReportService reportService,
@@ -76,7 +71,6 @@ public class AdminController {
                            DonHangRepository donHangRepository) {
         this.sanPhamRepository = sanPhamRepository;
         this.danhMucRepository = danhMucRepository;
-        this.nhaXuatBanRepository = nhaXuatBanRepository;
         this.tacGiaRepository = tacGiaRepository;
         this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
         this.reportService = reportService;
@@ -350,8 +344,6 @@ public class AdminController {
                     data.put("loaiSP", sp.getLoaiSP() != null ? sp.getLoaiSP() : "Sach");
                     data.put("maDanhMuc", sp.getDanhMuc() != null && sp.getDanhMuc().getMaDanhMuc() != null ? sp.getDanhMuc().getMaDanhMuc() : 0);
                     data.put("tenDanhMuc", sp.getDanhMuc() != null ? sp.getDanhMuc().getTenDanhMuc() : "Chưa phân loại");
-                    data.put("maNXB", sp.getNhaXuatBan() != null && sp.getNhaXuatBan().getMaNXB() != null ? sp.getNhaXuatBan().getMaNXB() : 0);
-                    data.put("tenNXB", sp.getNhaXuatBan() != null ? sp.getNhaXuatBan().getTenNXB() : "Chưa cập nhật");
                     data.put("maTacGia", authorId != null ? authorId : 0);
                     data.put("tenTacGia", sp.getDanhSachTacGia() != null && !sp.getDanhSachTacGia().isBlank() ? sp.getDanhSachTacGia() : "Chưa cập nhật");
                     data.put("maShop", sp.getShop() != null ? sp.getShop().getMaShop() : 1);
@@ -540,7 +532,6 @@ public class AdminController {
             map.put("trangThai", b.getTrangThai());
             map.put("hinhAnh", b.getHinhAnh());
             map.put("danhMuc", b.getDanhMuc() != null ? b.getDanhMuc().getTenDanhMuc() : "");
-            map.put("nhaXuatBan", b.getNhaXuatBan() != null ? b.getNhaXuatBan().getTenNXB() : "");
             return map;
         }).toList();
         return ResponseEntity.ok(bookDtos);
