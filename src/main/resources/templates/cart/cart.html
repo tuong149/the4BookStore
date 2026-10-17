@@ -182,7 +182,6 @@
                                     <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight hover:text-primary transition-colors">
                                         <a th:href="@{'/san-pham/' + ${ct.sanPham.maSP}}" th:text="${ct.sanPham.tenSP}">Tên sách</a>
                                     </h3>
-                                    <span class="text-xs text-on-surface-variant mt-0.5" th:text="${ct.sanPham.danhSachTacGia ?: 'The4BookStore'}">Tác giả</span>
 
                                     <div class="mt-2 text-primary font-bold font-mono text-sm sm:text-base"
                                          th:text="${#numbers.formatDecimal(ct.sanPham.giaBan, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</div>
