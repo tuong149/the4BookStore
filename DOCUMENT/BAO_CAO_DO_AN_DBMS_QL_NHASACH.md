@@ -59,7 +59,7 @@ Trước đây, hệ thống *The4BookStore* được xây dựng theo mô hình
 ## 1.2. Phân tích loại bỏ & tối ưu các bảng dư thừa
 Dựa trên yêu cầu nghiệp vụ sàn thương mại điện tử:
 1. **Loại bỏ bảng Nhà cung cấp (`nha_cung_cap`) và Kho tổng (`kho`, `kho_hang`):** Trong mô hình sàn, sàn không mua buôn sách từ NCC về kho tổng để bán lại; từng gian hàng tự chịu trách nhiệm về nguồn hàng và kho hàng của mình.
-2. **Tối ưu Nhà xuất bản (`nha_xuat_ban`):** Chuyển trường nhà xuất bản trên sách thành chuỗi thuộc tính mở (`ten_nha_xuat_ban NVARCHAR(150)`) giúp các gian hàng linh hoạt đăng bán sách từ mọi nhà xuất bản trong nước và quốc tế mà không bị phụ thuộc vào bảng danh mục cứng.
+2. **Loại bỏ Nhà xuất bản (`nha_xuat_ban`):** Do hệ thống mở rộng bán đa dạng mặt hàng (văn phòng phẩm, quà tặng, phụ kiện đọc sách...), việc ràng buộc nhà xuất bản là không cần thiết, loại bỏ hoàn toàn bảng `nha_xuat_ban` để tối ưu mô hình dữ liệu đa năng.
 3. **Chuẩn hóa Khuyến mãi (`khuyen_mai`):** Loại bỏ triệt để các chuỗi phi chuẩn 1NF (`danhSachSanPhamIds`, `danhSachDanhMucIds`). Hệ thống khuyến mãi chia rõ 2 phạm vi: **Voucher Toàn Sàn** (`TOAN_SAN`) và **Voucher Gian Hàng** (`SHOP` gắn với `ma_shop`).
 4. **Tối ưu Đơn hàng - Hóa đơn - Thanh toán:** Gộp các thuộc tính tài chính vào `don_hang` và `thanh_toan`, liên kết trực tiếp với mã giao dịch ngân hàng / VietQR, đảm bảo tính nhất quán và không trùng lặp dữ liệu.
 5. **Chống đánh giá rác (`danh_gia`):** Ràng buộc UNIQUE `(madh, masp)` và Trigger kiểm tra bắt buộc đơn hàng đã ở trạng thái `GiaoThanhCong`/`HoanTat` mới được gửi nhận xét.
@@ -77,7 +77,7 @@ Toàn bộ hệ thống gồm 22 bảng cốt lõi và các bảng bổ trợ đ
 5. `shop` (**ma_shop**, *ma_tai_khoan*, ten_shop, slug, mo_ta, logo, dia_chi_kho, so_dien_thoai, email_shop, chiet_khau_phan_tram, trang_thai, ngay_tao, ngay_cap_nhat)
 6. `danh_muc` (**ma_danh_muc**, ten_danh_muc, slug, loai_sp, ma_danh_muc_cha, trang_thai)
 7. `tac_gia` (**ma_tac_gia**, ten_tac_gia, tieu_su, quoc_tich)
-8. `san_pham` (**masp**, *ma_shop*, *ma_danh_muc*, tensp, ten_nha_xuat_ban, isbn, gia_ban, so_luong_ton, so_luong_da_ban, muc_ton_toi_thieu, loaisp, mo_ta, hinh_anh, trang_thai, trang_thai_khoa, ngay_tao)
+8. `san_pham` (**masp**, *ma_shop*, *ma_danh_muc*, tensp, isbn, gia_ban, so_luong_ton, so_luong_da_ban, muc_ton_toi_thieu, loaisp, mo_ta, hinh_anh, trang_thai, trang_thai_khoa, ngay_tao)
 9. `san_pham_tac_gia` (**\*masp\*, \*ma_tac_gia\***, thu_tu_tac_gia)
 10. `phieu_kiem_ke` (**ma_phieu**, *ma_shop*, *ma_tai_khoan_nguoi_tao*, *ma_tai_khoan_nguoi_duyet*, ngay_tao, ngay_kiem_ke, trang_thai, ghi_chu)
 11. `chi_tiet_kiem_ke` (**\*ma_phieu\*, \*masp\***, so_luong_he_thong, so_luong_thuc_te, chenh_lech, ly_do)

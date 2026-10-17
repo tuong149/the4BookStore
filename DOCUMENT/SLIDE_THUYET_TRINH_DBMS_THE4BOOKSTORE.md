@@ -20,7 +20,7 @@
   - Khuyến mãi vi phạm dạng chuẩn 1NF (lưu chuỗi ID `1,2,3`).
 - **Giải pháp - Chuyển sang Sàn thương mại điện tử trung gian (Multi-vendor Marketplace):**
   - **Bỏ kho tổng:** Gian hàng (Shop) tự quản lý và tự thực hiện kiểm kê kho riêng (`phieu_kiem_ke` thuộc `ma_shop`).
-  - **Bỏ ràng buộc cứng NXB:** Tên nhà xuất bản là trường text độc lập (`ten_nha_xuat_ban`) trên sách.
+  - **Mở rộng đa dạng ngành hàng:** Loại bỏ bảng Nhà xuất bản để phù hợp kinh doanh cả sách, văn phòng phẩm và quà tặng.
   - **Chuẩn hóa Khuyến mãi 1NF:** Chia tách rõ ràng Voucher Toàn Sàn (`TOAN_SAN`) và Voucher Shop (`SHOP`).
   - **Kinh doanh đa đối tác:** Sàn thu phí hoa hồng chiết khấu (`tien_phi_san`) trên từng đơn hàng thành công.
 
