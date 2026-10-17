@@ -2223,14 +2223,52 @@ IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'Role_Vendor' 
 IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'Role_Manager' AND type = 'R') CREATE ROLE Role_Manager;
 IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'Role_KhachHang' AND type = 'R') CREATE ROLE Role_KhachHang;
 GO
+-- 1. Cấp quyền cơ bản (GRANT) cho các Roles
 GRANT CONTROL TO Role_Admin;
+
+-- Role_Vendor: Quản lý sản phẩm, xác nhận đơn hàng của shop, kiểm kê
 GRANT SELECT, INSERT, UPDATE, DELETE ON san_pham TO Role_Vendor;
 GRANT SELECT, UPDATE ON don_hang TO Role_Vendor;
+GRANT SELECT, INSERT, UPDATE, DELETE ON phieu_kiem_ke TO Role_Vendor;
+GRANT SELECT, INSERT, UPDATE, DELETE ON chi_tiet_kiem_ke TO Role_Vendor;
+GRANT SELECT ON vw_CanhBaoTonKhoShop TO Role_Vendor;
+GRANT EXECUTE ON sp_ShopXacNhanDonHang TO Role_Vendor;
+GRANT EXECUTE ON sp_ShopXacNhanKiemKe TO Role_Vendor;
+
+-- Role_Manager: Quản lý gian hàng, danh mục, tác giả, báo cáo toàn sàn
 GRANT SELECT, UPDATE ON shop TO Role_Manager;
-GRANT SELECT ON don_hang TO Role_Manager;
+GRANT SELECT, UPDATE ON don_hang TO Role_Manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON danh_muc TO Role_Manager;
+GRANT SELECT, INSERT, UPDATE, DELETE ON tac_gia TO Role_Manager;
+GRANT SELECT ON vw_BaoCaoDoanhThuTheoThang TO Role_Manager;
+GRANT SELECT ON vw_DoanhThuTungShop TO Role_Manager;
+GRANT EXECUTE ON sp_DoanhThuTheoThang TO Role_Manager;
+
+-- Role_KhachHang: Xem sản phẩm, quản lý giỏ hàng, đặt hàng, đánh giá
 GRANT SELECT ON san_pham TO Role_KhachHang;
 GRANT SELECT, INSERT, UPDATE, DELETE ON gio_hang TO Role_KhachHang;
+GRANT SELECT, INSERT, UPDATE, DELETE ON chi_tiet_gio_hang TO Role_KhachHang;
 GRANT SELECT, INSERT ON don_hang TO Role_KhachHang;
+GRANT SELECT, INSERT ON chi_tiet_don_hang TO Role_KhachHang;
+GRANT SELECT, INSERT ON danh_gia TO Role_KhachHang;
+GRANT SELECT ON vw_TopSachBanChayToanSan TO Role_KhachHang;
+GRANT SELECT ON vw_ThongKeDanhGiaSanPham TO Role_KhachHang;
+GRANT EXECUTE ON sp_DatHangVaTruTonKho TO Role_KhachHang;
+GRANT EXECUTE ON sp_HuyDonHang TO Role_KhachHang;
+GRANT EXECUTE ON sp_TimKiemSachPhanTrang TO Role_KhachHang;
+GRANT EXECUTE ON fn_TinhDiemDanhGiaTrungBinh TO Role_KhachHang;
+
+-- 2. Minh họa lệnh cấm tuyệt đối (DENY) theo chính sách phân quyền
+-- Vendor không được phép xóa đơn hàng khỏi hệ thống (đảm bảo tính toàn vẹn kiểm toán tài chính)
+DENY DELETE ON don_hang TO Role_Vendor;
+-- Manager chỉ quản lý duyệt shop, không được tự ý xóa vĩnh viễn shop khỏi CSDL
+DENY DELETE ON shop TO Role_Manager;
+-- Khách hàng không được can thiệp chỉnh sửa hay xóa sản phẩm
+DENY INSERT, UPDATE, DELETE ON san_pham TO Role_KhachHang;
+
+-- 3. Minh họa lệnh thu hồi quyền (REVOKE) theo yêu cầu chuẩn môn học
+-- Thu hồi quyền sửa đổi bảng danh mục nếu đã từng cấp nhầm
+REVOKE UPDATE, DELETE ON danh_muc FROM Role_Vendor;
 GO
 
 IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = 'the4book_user')
