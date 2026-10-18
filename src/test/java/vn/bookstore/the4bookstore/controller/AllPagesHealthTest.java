@@ -29,7 +29,7 @@ public class AllPagesHealthTest {
 
     // 2. CUSTOMER ROUTES
     @Test
-    @WithMockUser(username = "khachhang_an", roles = {"KHACHHANG", "USER"})
+    @WithMockUser(username = "user", roles = {"USER", "KHACHHANG"})
     void testCustomerPages() throws Exception {
         mockMvc.perform(get("/gio-hang")).andExpect(status().isOk());
         mockMvc.perform(get("/san-voucher")).andExpect(status().isOk());
@@ -41,7 +41,7 @@ public class AllPagesHealthTest {
 
     // 3. VENDOR ROUTES
     @Test
-    @WithMockUser(username = "vendor_kimdong", roles = {"VENDOR"})
+    @WithMockUser(username = "vendor_hoasen", roles = {"VENDOR"})
     void testVendorPages() throws Exception {
         mockMvc.perform(get("/vendor/dashboard")).andExpect(status().isOk());
         mockMvc.perform(get("/vendor/products")).andExpect(status().isOk());

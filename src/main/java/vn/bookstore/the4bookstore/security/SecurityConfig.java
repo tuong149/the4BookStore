@@ -80,7 +80,7 @@ public class SecurityConfig {
                 .frameOptions(frame -> frame.sameOrigin())
                 .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
             )
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/api/webhooks/**", "/don-hang/api/**", "/ws/**"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/api/webhooks/**", "/don-hang/api/**", "/ws/**", "/vendor/imports", "/vendor/imports/**"))
             .authorizeHttpRequests(auth -> auth
                 // Phân quyền cho Vendor Portal (Chủ shop, Quản trị, Manager)
                 .requestMatchers("/vendor", "/vendor/register", "/vendor/register/**", "/vendor/pending", "/vendor/blocked").authenticated()

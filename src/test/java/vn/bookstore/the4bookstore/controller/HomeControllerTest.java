@@ -51,6 +51,7 @@ class HomeControllerTest {
     @MockitoBean private CustomOAuth2UserService customOAuth2UserService;
     @MockitoBean private CustomOidcUserService customOidcUserService;
     @MockitoBean private CustomUserDetailsService customUserDetailsService;
+    @MockitoBean private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     private List<DanhMuc> mockCategoryList;
 

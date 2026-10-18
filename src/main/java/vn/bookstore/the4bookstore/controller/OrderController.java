@@ -398,6 +398,7 @@ public class OrderController {
     @PostMapping("/{id}/xac-nhan-thanh-toan")
     public String confirmPaymentByShop(@PathVariable("id") Integer id,
                                        Authentication authentication,
+                                       jakarta.servlet.http.HttpServletRequest request,
                                        RedirectAttributes redirectAttributes) {
         boolean isStaff = authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
@@ -436,6 +437,11 @@ public class OrderController {
         }
         donHangRepository.save(dh);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xác nhận thanh toán thành công cho đơn hàng #TB-" + id + "!");
+        
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("/admin/orders/")) {
+            return "redirect:/admin/orders/" + id;
+        }
         return "redirect:/don-hang/" + id;
     }
 

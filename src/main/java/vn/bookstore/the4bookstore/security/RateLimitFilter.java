@@ -36,7 +36,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final int LOGIN_MAX_REQUESTS = 10;
 
     private static final long OTP_TIME_WINDOW = 5 * 60 * 1000; // 5 minutes
-    private static final int OTP_MAX_REQUESTS = 15;
+    private static final int OTP_MAX_REQUESTS = 50; // Cho phép thử nghiệm và xác nhận mật khẩu thoải mái
 
 
     @Override
@@ -53,7 +53,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     sendRateLimitError(request, response, "Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.", "/login?error=true");
                     return;
                 }
-            } else if ("/forgot-password".equals(path) || "/resend-otp".equals(path) || "/reset-password".equals(path)) {
+            } else if ("/forgot-password".equals(path) || "/resend-otp".equals(path)) {
                 if (!isAllowed(otpAttempts, ipAddress, OTP_TIME_WINDOW, OTP_MAX_REQUESTS)) {
                     String redirectUrl = "/forgot-password?rateLimited=true";
                     if ("/reset-password".equals(path) || "/resend-otp".equals(path)) {

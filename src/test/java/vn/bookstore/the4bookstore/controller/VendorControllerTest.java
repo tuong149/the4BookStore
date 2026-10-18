@@ -49,6 +49,7 @@ class VendorControllerTest {
     @MockitoBean private CustomOAuth2UserService customOAuth2UserService;
     @MockitoBean private CustomOidcUserService customOidcUserService;
     @MockitoBean private CustomUserDetailsService customUserDetailsService;
+    @MockitoBean private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     private TaiKhoan mockUser;
 
@@ -86,7 +87,7 @@ class VendorControllerTest {
 
     @Test
     @WithMockUser(username = "customer", roles = {"KHACHHANG"})
-    @DisplayName("Khách hàng đã có shop đang hoạt động truy cập GET /vendor/register sẽ chuyển hướng về dashboard")
+    @DisplayName("Khách hàng đã có shop (HoatDong) truy cập GET /vendor/register sẽ chuyển hướng về dashboard")
     void testRegisterForm_AlreadyHasShop_RedirectsToDashboard() throws Exception {
         Shop existingShop = new Shop();
         existingShop.setMaShop(1);
@@ -105,6 +106,7 @@ class VendorControllerTest {
         Shop newShop = new Shop();
         newShop.setMaShop(2);
         newShop.setTenShop("Nhà Sách Mới");
+        newShop.setTrangThai("ChoDuyet");
         when(shopService.registerShop(any(), anyString(), any(), anyString(), anyString(), anyString())).thenReturn(newShop);
 
         mockMvc.perform(post("/vendor/register")

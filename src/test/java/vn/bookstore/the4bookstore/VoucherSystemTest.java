@@ -121,6 +121,54 @@ class VoucherSystemTest {
         }
     }
 
+    @Test
+    @DisplayName("Kiểm tra 2 loại mã giảm giá: 1 loại giảm tiền sản phẩm, 1 loại giảm phí vận chuyển")
+    @Transactional
+    void testTwoDistinctVoucherTypes() {
+        // Mã loại 1: Giảm tiền sản phẩm (TienCoDinh)
+        String productVoucherCode = "PROD_DISCOUNT_" + System.currentTimeMillis();
+        KhuyenMai kmProd = new KhuyenMai();
+        kmProd.setMaCode(productVoucherCode);
+        kmProd.setTenKM("Giảm 30K tiền sản phẩm");
+        kmProd.setLoaiGiam("TienCoDinh");
+        kmProd.setGiaTriGiam(30000);
+        kmProd.setDonToiThieu(100000);
+        kmProd.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        kmProd.setNgayKetThuc(LocalDateTime.now().plusDays(10));
+        kmProd.setTrangThai("HoatDong");
+        kmProd = khuyenMaiRepository.save(kmProd);
+
+        // Mã loại 2: Giảm phí vận chuyển (Freeship)
+        String shipVoucherCode = "FREESHIP_DISCOUNT_" + System.currentTimeMillis();
+        KhuyenMai kmShip = new KhuyenMai();
+        kmShip.setMaCode(shipVoucherCode);
+        kmShip.setTenKM("Giảm 25K phí vận chuyển");
+        kmShip.setLoaiGiam("Freeship");
+        kmShip.setGiaTriGiam(25000);
+        kmShip.setDonToiThieu(100000);
+        kmShip.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        kmShip.setNgayKetThuc(LocalDateTime.now().plusDays(10));
+        kmShip.setTrangThai("HoatDong");
+        kmShip = khuyenMaiRepository.save(kmShip);
+
+        try {
+            // Validate mã sản phẩm
+            Map<String, Object> resProd = cartController.apiValidateVoucher(productVoucherCode, 150000);
+            assertTrue((Boolean) resProd.get("valid"));
+            assertEquals("TienCoDinh", resProd.get("loaiGiam"));
+            assertEquals(30000, ((Number) resProd.get("discountAmount")).intValue());
+
+            // Validate mã freeship
+            Map<String, Object> resShip = cartController.apiValidateVoucher(shipVoucherCode, 150000);
+            assertTrue((Boolean) resShip.get("valid"));
+            assertEquals("Freeship", resShip.get("loaiGiam"));
+            assertEquals(25000, ((Number) resShip.get("discountAmount")).intValue());
+        } finally {
+            khuyenMaiRepository.delete(kmProd);
+            khuyenMaiRepository.delete(kmShip);
+        }
+    }
+
     @Autowired
     private vn.bookstore.the4bookstore.repository.TaiKhoanRepository taiKhoanRepository;
 
@@ -246,9 +294,154 @@ class VoucherSystemTest {
             assertEquals(50000, ((Number) voucherItem600k.get("discountPreview")).intValue());
         } finally {
             voucherDaLuuRepository.deleteAll(voucherDaLuuRepository.findByKhachHangOrderByNgayLuuDesc(kh));
-            khuyenMaiRepository.delete(km);
+            khachHangRepository.delete(kh);
+            taiKhoanRepository.delete(tk);
+        }
+    }
+
+    @Autowired
+    private vn.bookstore.the4bookstore.service.DonHangService donHangService;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.repository.SanPhamRepository sanPhamRepository;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.repository.DonHangRepository donHangRepository;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.service.GioHangService gioHangService;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.repository.DanhMucRepository danhMucRepository;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.repository.ShopRepository shopRepository;
+
+    @Test
+    @DisplayName("Áp dụng đồng thời 2 voucher (1 mã sản phẩm + 1 mã freeship) thành công; Chặn khi chọn 2 mã cùng loại")
+    @Transactional
+    void testDualVouchersApplicationAndDuplicatePrevention() {
+        // 1. Tạo user và sp
+        vn.bookstore.the4bookstore.entity.TaiKhoan tk = new vn.bookstore.the4bookstore.entity.TaiKhoan();
+        tk.setTenDangNhap("dual_vouch_user_" + System.currentTimeMillis());
+        tk.setEmail("dual_vouch_" + System.currentTimeMillis() + "@gmail.com");
+        tk.setMatKhauHash("123456");
+        tk.setVaiTro("KHACHHANG");
+        tk.setTrangThai("HoatDong");
+        tk = taiKhoanRepository.save(tk);
+
+        vn.bookstore.the4bookstore.entity.KhachHang kh = new vn.bookstore.the4bookstore.entity.KhachHang();
+        kh.setHoTen("Nguyễn Văn Dual Voucher");
+        kh.setEmail(tk.getEmail());
+        kh.setTaiKhoan(tk);
+        kh = khachHangRepository.save(kh);
+
+        vn.bookstore.the4bookstore.entity.SanPham sp = sanPhamRepository.findAll().stream()
+                .filter(s -> "HoatDong".equalsIgnoreCase(s.getTrangThai()) && s.getSoLuongTon() != null && s.getSoLuongTon() > 5)
+                .findFirst()
+                .orElse(null);
+
+        if (sp == null) {
+            sp = new vn.bookstore.the4bookstore.entity.SanPham();
+            sp.setTenSP("Sách Test Voucher Đồng Thời");
+            sp.setGiaBan(200000);
+            sp.setSoLuongTon(50);
+            sp.setLoaiSP("Sach");
+            sp.setTrangThai("HoatDong");
+            sp.setDanhMuc(danhMucRepository.findAll().stream().findFirst().orElse(null));
+            sp.setShop(shopRepository.findAll().stream().findFirst().orElse(null));
+            sp = sanPhamRepository.save(sp);
+        }
+
+        gioHangService.addToCart(kh, sp.getMaSP(), 1);
+
+        // 2. Tạo 1 mã Order Discount
+        KhuyenMai kmOrder = new KhuyenMai();
+        kmOrder.setMaCode("ORDER20K_" + System.currentTimeMillis());
+        kmOrder.setTenKM("Giảm 20K tiền sách");
+        kmOrder.setLoaiGiam("TienCoDinh");
+        kmOrder.setGiaTriGiam(20000);
+        kmOrder.setDonToiThieu(100000);
+        kmOrder.setTrangThai("HoatDong");
+        kmOrder.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        kmOrder.setNgayKetThuc(LocalDateTime.now().plusDays(5));
+        kmOrder = khuyenMaiRepository.save(kmOrder);
+
+        // 3. Tạo 1 mã Freeship
+        KhuyenMai kmShip = new KhuyenMai();
+        kmShip.setMaCode("FREESHIP15K_" + System.currentTimeMillis());
+        kmShip.setTenKM("Giảm 15K tiền ship");
+        kmShip.setLoaiGiam("Freeship");
+        kmShip.setGiaTriGiam(15000);
+        kmShip.setDonToiThieu(100000);
+        kmShip.setTrangThai("HoatDong");
+        kmShip.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        kmShip.setNgayKetThuc(LocalDateTime.now().plusDays(5));
+        kmShip = khuyenMaiRepository.save(kmShip);
+
+        // 4. Tạo 1 mã Order Discount thứ 2 (để test chặn 2 mã cùng loại)
+        KhuyenMai kmOrder2 = new KhuyenMai();
+        kmOrder2.setMaCode("ORDER10PCT_" + System.currentTimeMillis());
+        kmOrder2.setTenKM("Giảm 10% tiền sách");
+        kmOrder2.setLoaiGiam("PhanTram");
+        kmOrder2.setGiaTriGiam(10);
+        kmOrder2.setDonToiThieu(100000);
+        kmOrder2.setTrangThai("HoatDong");
+        kmOrder2.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        kmOrder2.setNgayKetThuc(LocalDateTime.now().plusDays(5));
+        kmOrder2 = khuyenMaiRepository.save(kmOrder2);
+
+        try {
+            // Case A: Truyền 2 mã cùng loại (kmOrder và kmOrder2) -> Bị ném lỗi
+            KhuyenMai finalKmOrder = kmOrder;
+            KhuyenMai finalKmOrder2 = kmOrder2;
+            vn.bookstore.the4bookstore.entity.KhachHang finalKh = kh;
+            vn.bookstore.the4bookstore.entity.SanPham finalSp = sp;
+
+            assertThrows(RuntimeException.class, () -> {
+                donHangService.createOrder(
+                        finalKh,
+                        "Hà Nội",
+                        "0987654321",
+                        "COD",
+                        "Ghi chú",
+                        List.of(finalSp.getMaSP()),
+                        finalKmOrder.getMaCode(),
+                        finalKmOrder2.getMaCode(),
+                        null
+                );
+            }, "Không được dùng 2 mã cùng loại cho 1 đơn hàng");
+
+            // Case B: Áp dụng đồng thời 1 mã Order + 1 mã Shipping -> Hợp lệ
+            vn.bookstore.the4bookstore.entity.DonHang order = donHangService.createOrder(
+                    kh,
+                    "TP Hồ Chí Minh",
+                    "0912345678",
+                    "COD",
+                    "Giao cẩn thận",
+                    List.of(sp.getMaSP()),
+                    kmOrder.getMaCode(),
+                    kmShip.getMaCode(),
+                    null
+            );
+
+            assertNotNull(order);
+            assertEquals(20000, order.getTienGiam(), "Tiền giảm sản phẩm phải là 20.000đ");
+            assertEquals(15000, order.getTienGiamFreeship(), "Tiền giảm freeship phải là 15.000đ");
+            int expectedTotal = (sp.getGiaBan() - 20000) + Math.max(0, order.getPhiVanChuyen() - 15000);
+            assertEquals(expectedTotal, order.getTongTien(), "Tổng thanh toán phải khớp sau khi trừ cả 2 mã");
+            assertNotNull(order.getKhuyenMai());
+            assertEquals(kmOrder.getMaCode(), order.getKhuyenMai().getMaCode());
+            assertNotNull(order.getKhuyenMaiFreeship());
+            assertEquals(kmShip.getMaCode(), order.getKhuyenMaiFreeship().getMaCode());
+
+        } finally {
+            khuyenMaiRepository.delete(kmOrder);
+            khuyenMaiRepository.delete(kmShip);
+            khuyenMaiRepository.delete(kmOrder2);
             khachHangRepository.delete(kh);
             taiKhoanRepository.delete(tk);
         }
     }
 }
+

@@ -18,6 +18,12 @@
                 <span class="text-primary font-semibold" th:text="${groupName}">Sách</span>
             </div>
 
+            <!-- Flash Message Cảnh Báo (Sản phẩm bị khóa / tạm ngừng) -->
+            <div th:if="${errorMessage}" class="mb-space-md p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-semibold flex items-center gap-3 shadow-xs">
+                <span class="material-symbols-outlined text-[24px] text-amber-600 shrink-0">info</span>
+                <span th:text="${errorMessage}">Sản phẩm này hiện đang tạm ngừng kinh doanh hoặc gian hàng đang bị tạm khóa!</span>
+            </div>
+
             <!-- Page header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-lg gap-space-sm">
                 <div>

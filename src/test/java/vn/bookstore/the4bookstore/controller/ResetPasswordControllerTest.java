@@ -55,6 +55,9 @@ class ResetPasswordControllerTest {
     private CustomUserDetailsService customUserDetailsService;
 
     @MockitoBean
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @MockitoBean
     private JwtService jwtService;
 
     @org.junit.jupiter.api.BeforeEach

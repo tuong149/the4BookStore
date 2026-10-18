@@ -259,6 +259,8 @@ public class CartController {
                              @RequestParam(value = "ghiChu", required = false) String ghiChu,
                              @RequestParam(value = "selectedProductIds", required = false) List<Integer> selectedProductIds,
                              @RequestParam(value = "maVoucher", required = false) String maVoucher,
+                             @RequestParam(value = "maVoucherOrder", required = false) String maVoucherOrder,
+                             @RequestParam(value = "maVoucherShipping", required = false) String maVoucherShipping,
                              jakarta.servlet.http.HttpServletRequest request,
                              Authentication authentication,
                              RedirectAttributes redirectAttributes) {
@@ -285,8 +287,12 @@ public class CartController {
             finalSoDienThoai = kh.getSoDienThoai() != null ? kh.getSoDienThoai() : "0900000000";
         }
 
+        // Tương thích ngược: Nếu chỉ có maVoucher thì xem là maVoucherOrder
+        String orderVoucher = (maVoucherOrder != null && !maVoucherOrder.isBlank()) ? maVoucherOrder : maVoucher;
+        String shippingVoucher = maVoucherShipping;
+
         try {
-            DonHang donHang = donHangService.createOrder(kh, finalDiaChi, finalSoDienThoai, phuongThuc, ghiChu, selectedProductIds, maVoucher, maNvc);
+            DonHang donHang = donHangService.createOrder(kh, finalDiaChi, finalSoDienThoai, phuongThuc, ghiChu, selectedProductIds, orderVoucher, shippingVoucher, maNvc);
 
             if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
                 redirectAttributes.addFlashAttribute("successMessage",
@@ -350,15 +356,22 @@ public class CartController {
             }
 
             int discount = 0;
-            if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
+            // 2 loại mã giảm giá:
+            // 1) Giảm theo sản phẩm (PhanTram hoặc TienCoDinh - chỉ tính trên subtotal sản phẩm)
+            // 2) Giảm tiền vận chuyển (Freeship)
+            if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
+                // Giảm phí vận chuyển: giá trị giảm tối đa theo cấu hình (mặc định 30.000đ)
+                discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
+            } else if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
                 discount = (int) Math.round(subtotal * (km.getGiaTriGiam() / 100.0));
                 if (km.getGiamToiDa() != null && discount > km.getGiamToiDa()) {
                     discount = km.getGiamToiDa();
                 }
+                if (discount > subtotal) {
+                    discount = subtotal;
+                }
             } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
                 discount = Math.min(subtotal, km.getGiaTriGiam());
-            } else if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
-                discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
             } else {
                 discount = Math.min(subtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
             }
@@ -367,7 +380,13 @@ public class CartController {
             result.put("code", cleanCode);
             result.put("discountAmount", discount);
             result.put("loaiGiam", km.getLoaiGiam());
+            result.put("voucherType", km.getVoucherType()); // ORDER_DISCOUNT hoặc SHIPPING_DISCOUNT
+            result.put("discountType", km.getDiscountType()); // PERCENTAGE hoặc FIXED_AMOUNT
             result.put("giaTriGiam", km.getGiaTriGiam());
+            result.put("giamToiDa", km.getGiamToiDa());
+            result.put("maxDiscountValue", km.getGiamToiDa());
+            result.put("donToiThieu", km.getDonToiThieu());
+            result.put("minOrderValue", km.getDonToiThieu());
             result.put("tenKM", km.getTenKM());
             result.put("message", "Áp dụng thành công mã [" + cleanCode + "] - " + km.getTenKM());
             return result;

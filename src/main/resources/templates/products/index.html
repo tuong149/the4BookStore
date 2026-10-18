@@ -41,6 +41,12 @@
                 <p class="text-on-surface-variant text-sm mt-1">Toàn bộ danh mục sản phẩm chọn lọc tại The4BookStore</p>
             </div>
 
+            <!-- Flash Message Cảnh Báo (Sản phẩm bị khóa / tạm ngừng) -->
+            <div th:if="${errorMessage}" class="mb-space-md p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-semibold flex items-center gap-3 shadow-xs">
+                <span class="material-symbols-outlined text-[24px] text-amber-600 shrink-0">info</span>
+                <span th:text="${errorMessage}">Sản phẩm này hiện đang tạm ngừng kinh doanh hoặc gian hàng đang bị tạm khóa!</span>
+            </div>
+
             <!-- Filter & Search Toolbar -->
             <form method="get" th:action="@{/san-pham}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
                 <div class="flex flex-col lg:flex-row gap-space-sm items-stretch lg:items-center">

@@ -39,6 +39,16 @@
                             <span>Quay Lại</span>
                         </a>
 
+                        <!-- Nút Admin Xác nhận đã nhận tiền (khi đơn chưa thanh toán hoặc đang chờ duyệt) -->
+                        <form th:if="${donHang.trangThaiThanhToan != 'DaThanhToan' and donHang.trangThaiThanhToan != 'DaHoanTien'}" 
+                              th:action="@{'/don-hang/' + ${donHang.maDH} + '/xac-nhan-thanh-toan'}" method="post" class="inline">
+                            <button type="submit" onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng này?');" 
+                                    class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">verified</span>
+                                <span>[Admin/Shop] Xác Nhận Đã Nhận Tiền</span>
+                            </button>
+                        </form>
+
                         <!-- Shop & Status Badge (Read-only for Admin) -->
                         <div class="flex items-center gap-2 bg-surface-container-lowest px-3.5 py-2 rounded-xl border border-surface-container/60 shadow-sm">
                             <span class="text-xs font-medium text-on-surface-variant">Gian hàng:</span>
@@ -47,8 +57,23 @@
                             <span class="text-xs text-outline">|</span>
                             <span class="text-xs font-medium text-on-surface-variant">Trạng thái:</span>
                             <span class="text-xs font-bold text-on-surface" th:text="${donHang.trangThai}">ChoXuLy</span>
+                            <span class="text-xs text-outline">|</span>
+                            <span class="text-xs font-medium text-on-surface-variant">Thanh toán:</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded"
+                                  th:classappend="${donHang.trangThaiThanhToan == 'DaThanhToan' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}"
+                                  th:text="${donHang.trangThaiThanhToan == 'DaThanhToan' ? 'Đã thanh toán' : (donHang.trangThaiThanhToan == 'ChoDuyetThanhToan' ? 'Chờ duyệt' : 'Chưa thanh toán')}">Chưa thanh toán</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Flash Message thông báo thành công / lỗi -->
+                <div th:if="${successMessage}" class="mb-space-md p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center gap-2 shadow-xs">
+                    <span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
+                    <span th:text="${successMessage}"></span>
+                </div>
+                <div th:if="${errorMessage}" class="mb-space-md p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center gap-2 shadow-xs">
+                    <span class="material-symbols-outlined text-[20px] text-rose-600">error</span>
+                    <span th:text="${errorMessage}"></span>
                 </div>
 
                 <!-- Grid Layout (Info/Status + Order Items) -->
@@ -118,16 +143,20 @@
                                 <hr class="border-surface-container/60 my-1">
 
                                 <div class="flex justify-between items-center text-on-surface-variant">
-                                    <span>Tạm tính</span>
-                                    <span class="font-semibold text-on-surface" th:text="${#numbers.formatDecimal(donHang.tongTien + donHang.tienGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
+                                    <span>Tạm tính tiền hàng</span>
+                                    <span class="font-semibold text-on-surface" th:text="${#numbers.formatDecimal(donHang.tongTien + donHang.tienGiam + (donHang.tienGiamFreeship != null ? donHang.tienGiamFreeship : 0) - donHang.phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
+                                </div>
+                                <div class="flex justify-between items-center text-on-surface-variant">
+                                    <span>Phí vận chuyển gốc</span>
+                                    <span class="font-semibold text-on-surface" th:text="${#numbers.formatDecimal(donHang.phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
                                 </div>
                                 <div class="flex justify-between items-center text-error" th:if="${donHang.tienGiam > 0}">
-                                    <span>Khuyến mãi / Giảm giá</span>
+                                    <span>Giảm giá sản phẩm <span class="font-mono text-xs" th:if="${donHang.khuyenMai != null}">([[${donHang.khuyenMai.maCode}]])</span></span>
                                     <span class="font-semibold" th:text="'-' + ${#numbers.formatDecimal(donHang.tienGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
                                 </div>
-                                <div class="flex justify-between items-center text-primary text-sm font-semibold mb-2" th:if="${donHang.khuyenMai != null}">
-                                    <span>Mã sử dụng:</span>
-                                    <span th:text="${donHang.khuyenMai.maCode}">GCODE50</span>
+                                <div class="flex justify-between items-center text-teal-700" th:if="${donHang.tienGiamFreeship != null and donHang.tienGiamFreeship > 0}">
+                                    <span>Giảm phí ship <span class="font-mono text-xs" th:if="${donHang.khuyenMaiFreeship != null}">([[${donHang.khuyenMaiFreeship.maCode}]])</span></span>
+                                    <span class="font-semibold" th:text="'-' + ${#numbers.formatDecimal(donHang.tienGiamFreeship, 0, 'POINT', 0, 'COMMA')} + ' ₫'">0 ₫</span>
                                 </div>
 
                                 <div class="flex justify-between items-center mt-2 pt-2 border-t border-surface-container/60">

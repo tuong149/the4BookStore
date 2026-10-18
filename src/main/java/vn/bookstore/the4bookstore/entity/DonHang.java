@@ -37,7 +37,16 @@ public class DonHang {
     private KhuyenMai khuyenMai;
     
     @Column(nullable = false)
-    private Integer tienGiam = 0;
+    private Integer tienGiam = 0; // Giảm giá sản phẩm (ORDER_DISCOUNT)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ma_km_freeship")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private KhuyenMai khuyenMaiFreeship;
+
+    @Column(name = "tien_giam_freeship", nullable = false)
+    private Integer tienGiamFreeship = 0; // Giảm giá phí ship (SHIPPING_DISCOUNT)
     @Column(nullable = false, length = 30)
     private String trangThai = "ChoXuLy";
     @Column(length = 500)

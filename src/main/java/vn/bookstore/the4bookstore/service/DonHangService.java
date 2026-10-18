@@ -78,6 +78,16 @@ public class DonHangService {
                                List<Integer> selectedProductIds,
                                String maVoucher,
                                Integer maNvc) {
+        return createOrder(khachHang, diaChiGiao, soDienThoaiGiao, phuongThuc, ghiChu, selectedProductIds, maVoucher, null, maNvc);
+    }
+
+    @Transactional
+    public DonHang createOrder(KhachHang khachHang, String diaChiGiao,
+                               String soDienThoaiGiao, String phuongThuc, String ghiChu,
+                               List<Integer> selectedProductIds,
+                               String maVoucherOrder,
+                               String maVoucherShipping,
+                               Integer maNvc) {
 
         // 1. Lấy giỏ hàng
         List<ChiTietGioHang> allCartItems = gioHangService.getCartItems(khachHang);
@@ -194,17 +204,30 @@ public class DonHangService {
             tongTien += sp.getGiaBan() * ctGH.getSoLuong();
         }
 
-        // 6. Xử lý giảm giá từ mã khuyến mãi (chỉ chấp nhận mã từ trang Admin Khuyến Mãi)
-        int tienGiam = 0;
-        KhuyenMai khuyenMai = null;
-        if (maVoucher != null && !maVoucher.isBlank()) {
-            String cleanCode = maVoucher.trim().toUpperCase();
-            Optional<KhuyenMai> kmOpt = khuyenMaiRepository.findByMaCode(cleanCode);
-            if (kmOpt.isEmpty()) {
-                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] không tồn tại trên hệ thống!");
-            }
+        // 6. Xử lý giảm giá từ mã khuyến mãi (Hỗ trợ áp dụng cùng lúc 1 ORDER_DISCOUNT và 1 SHIPPING_DISCOUNT)
+        int tienGiamSanPham = 0;
+        int tienGiamFreeship = 0;
+        KhuyenMai voucherOrder = null;
+        KhuyenMai voucherShipping = null;
 
-            KhuyenMai km = kmOpt.get();
+        // Nếu client cũ gửi 1 mã duy nhất qua maVoucherOrder
+        if ((maVoucherShipping == null || maVoucherShipping.isBlank()) && maVoucherOrder != null && !maVoucherOrder.isBlank()) {
+            Optional<KhuyenMai> kmOpt = khuyenMaiRepository.findByMaCode(maVoucherOrder.trim().toUpperCase());
+            if (kmOpt.isPresent() && kmOpt.get().isShippingDiscount()) {
+                maVoucherShipping = maVoucherOrder;
+                maVoucherOrder = null;
+            }
+        }
+
+        // Xử lý mã giảm giá sản phẩm (ORDER_DISCOUNT)
+        if (maVoucherOrder != null && !maVoucherOrder.isBlank()) {
+            String cleanCode = maVoucherOrder.trim().toUpperCase();
+            KhuyenMai km = khuyenMaiRepository.findByMaCode(cleanCode)
+                    .orElseThrow(() -> new RuntimeException("Mã giảm giá [" + cleanCode + "] không tồn tại trên hệ thống!"));
+
+            if (!km.isOrderDiscount()) {
+                throw new RuntimeException("Mã [" + cleanCode + "] không phải là mã giảm giá sản phẩm! Vui lòng nhập vào ô mã vận chuyển.");
+            }
             if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
                 throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
             }
@@ -218,48 +241,83 @@ public class DonHangService {
                 throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết lượt sử dụng!");
             }
             if (km.getDonToiThieu() != null && tongTien < km.getDonToiThieu()) {
-                throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã giảm giá này!");
+                throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
             }
 
             if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
-                tienGiam = (int) Math.round(tongTien * (km.getGiaTriGiam() / 100.0));
-                if (km.getGiamToiDa() != null && tienGiam > km.getGiamToiDa()) {
-                    tienGiam = km.getGiamToiDa();
+                tienGiamSanPham = (int) Math.round(tongTien * (km.getGiaTriGiam() / 100.0));
+                if (km.getGiamToiDa() != null && tienGiamSanPham > km.getGiamToiDa()) {
+                    tienGiamSanPham = km.getGiamToiDa();
+                }
+                if (tienGiamSanPham > tongTien) {
+                    tienGiamSanPham = tongTien;
                 }
             } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
-                tienGiam = Math.min(tongTien, km.getGiaTriGiam());
-            } else if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
-                tienGiam = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
+                tienGiamSanPham = Math.min(tongTien, km.getGiaTriGiam());
             } else {
-                tienGiam = Math.min(tongTien, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
+                tienGiamSanPham = Math.min(tongTien, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
             }
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
             khuyenMaiRepository.save(km);
-            khuyenMai = km;
+            voucherOrder = km;
 
-            // Nếu khách hàng đã lưu voucher này trong ví, đánh dấu là đã dùng
-            try {
-                if (khachHang != null) {
-                    Optional<VoucherDaLuu> vdlOpt = voucherDaLuuRepository.findByKhachHangAndKhuyenMai(khachHang, km);
-                    if (vdlOpt.isPresent()) {
-                        VoucherDaLuu vdl = vdlOpt.get();
-                        vdl.setTrangThai("DaDung");
-                        vdl.setNgaySuDung(LocalDateTime.now());
-                        voucherDaLuuRepository.save(vdl);
-                    }
-                }
-            } catch (Exception ignored) {}
+            markVoucherUsedInWallet(khachHang, km);
         }
 
-        int finalTotal = Math.max(0, tongTien - tienGiam);
+        // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT)
+        if (maVoucherShipping != null && !maVoucherShipping.isBlank()) {
+            String cleanCode = maVoucherShipping.trim().toUpperCase();
+            KhuyenMai km = khuyenMaiRepository.findByMaCode(cleanCode)
+                    .orElseThrow(() -> new RuntimeException("Mã miễn phí vận chuyển [" + cleanCode + "] không tồn tại trên hệ thống!"));
+
+            if (!km.isShippingDiscount()) {
+                throw new RuntimeException("Mã [" + cleanCode + "] không phải là mã giảm phí vận chuyển! Vui lòng nhập vào ô mã giảm giá đơn hàng.");
+            }
+            if (voucherOrder != null && voucherOrder.getMaCode().equalsIgnoreCase(cleanCode)) {
+                throw new RuntimeException("Không thể sử dụng cùng một mã cho cả 2 loại ưu đãi!");
+            }
+            if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
+                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
+            }
+            if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
+                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] chưa đến ngày áp dụng!");
+            }
+            if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
+                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn sử dụng!");
+            }
+            if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
+                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết lượt sử dụng!");
+            }
+            if (km.getDonToiThieu() != null && tongTien < km.getDonToiThieu()) {
+                throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
+            }
+
+            int maxFreeshipDiscount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
+            tienGiamFreeship = Math.min(phiVanChuyen, maxFreeshipDiscount);
+
+            km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
+            khuyenMaiRepository.save(km);
+            voucherShipping = km;
+
+            markVoucherUsedInWallet(khachHang, km);
+        }
+
+        // Tổng tiền đơn hàng:
+        // (Tiền hàng - Giảm giá sản phẩm) + (Phí vận chuyển - Giảm phí vận chuyển)
+        int tienHangSauGiam = Math.max(0, tongTien - tienGiamSanPham);
+        int phiShipSauGiam = Math.max(0, phiVanChuyen - tienGiamFreeship);
+        int finalTotal = Math.max(0, tienHangSauGiam + phiShipSauGiam);
+
         int tienPhiSan = (int) Math.round(tongTien * (chietKhauApp.doubleValue() / 100.0));
-        int tienThucNhan = Math.max(0, finalTotal - tienPhiSan);
+        int tienThucNhan = Math.max(0, tienHangSauGiam - tienPhiSan);
         donHang.setTienPhiSan(tienPhiSan);
         donHang.setTienThucNhanShop(tienThucNhan);
         donHang.setTongTien(finalTotal);
-        donHang.setTienGiam(tienGiam);
-        donHang.setKhuyenMai(khuyenMai);
+        donHang.setTienGiam(tienGiamSanPham);
+        donHang.setTienGiamFreeship(tienGiamFreeship);
+        donHang.setKhuyenMai(voucherOrder);
+        donHang.setKhuyenMaiFreeship(voucherShipping);
         donHang.setChiTietDonHangs(chiTietList);
         donHang = donHangRepository.save(donHang);
 
@@ -355,5 +413,19 @@ public class DonHangService {
         }
         donHang.setLyDoHuy(lyDoHuy != null && !lyDoHuy.isBlank() ? lyDoHuy : "Khách hàng tự hủy");
         donHangRepository.save(donHang);
+    }
+
+    private void markVoucherUsedInWallet(KhachHang khachHang, KhuyenMai km) {
+        try {
+            if (khachHang != null && km != null) {
+                Optional<VoucherDaLuu> vdlOpt = voucherDaLuuRepository.findByKhachHangAndKhuyenMai(khachHang, km);
+                if (vdlOpt.isPresent()) {
+                    VoucherDaLuu vdl = vdlOpt.get();
+                    vdl.setTrangThai("DaDung");
+                    vdl.setNgaySuDung(LocalDateTime.now());
+                    voucherDaLuuRepository.save(vdl);
+                }
+            }
+        } catch (Exception ignored) {}
     }
 }

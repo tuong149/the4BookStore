@@ -20,7 +20,8 @@ import java.util.Optional;
 
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
-    @Query(value = "SELECT * FROM san_pham WITH (UPDLOCK, ROWLOCK) WHERE masp = :id", nativeQuery = true)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM SanPham s WHERE s.maSP = :id")
     Optional<SanPham> findByIdWithLock(@Param("id") Integer id);
 
     @Modifying
