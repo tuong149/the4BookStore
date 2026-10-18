@@ -79,7 +79,7 @@
                                 <img th:src="${ct.sanPham.hinhAnh != null ? ct.sanPham.hinhAnh : '/images/default-book.png'}"
                                      class="w-10 h-14 object-cover rounded-lg border border-surface-container shrink-0"/>
                                 <div>
-                                    <p class="font-bold text-on-surface" th:text="${ct.sanPham.tenSP}">Tên sách</p>
+                                    <p class="font-bold text-on-surface" th:text="${ct.sanPham.tenSP}">Tên sản phẩm</p>
                                     <p class="text-[11px] text-on-surface-variant font-mono" th:text="'Mã SP: #' + ${ct.sanPham.maSP} + ' | ISBN: ' + (${ct.sanPham.ISBN ?: 'N/A'})"></p>
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common/head :: common_head('Sách Đã Xem Gần Đây - The4BookStore')}"></head>
+<head th:replace="~{fragments/common/head :: common_head('Sản Phẩm Đã Xem Gần Đây - The4BookStore')}"></head>
 
 <body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
@@ -15,7 +15,7 @@
             </nav>
             <h1 class="text-2xl font-bold text-on-surface flex items-center gap-2">
                 <span class="material-symbols-outlined text-amber-500">history</span>
-                <span>Cuốn Sách Bạn Đã Xem Gần Đây</span>
+                <span>Sản Phẩm Bạn Đã Xem Gần Đây</span>
             </h1>
         </div>
 
@@ -27,8 +27,8 @@
 
         <div th:if="${recentlyViewed.isEmpty()}" class="p-16 text-center text-on-surface-variant bg-surface-container-lowest rounded-3xl border border-surface-container">
             <span class="material-symbols-outlined text-5xl text-amber-300 mb-2">visibility_off</span>
-            <p class="font-bold text-sm text-on-surface">Chưa có lịch sử xem sách</p>
-            <p class="text-xs mt-1">Khi bạn bấm vào xem chi tiết các cuốn sách, chúng sẽ tự động được lưu lại tại đây.</p>
+            <p class="font-bold text-sm text-on-surface">Chưa có lịch sử xem sản phẩm</p>
+            <p class="text-xs mt-1">Khi bạn bấm vào xem chi tiết các sản phẩm, chúng sẽ tự động được lưu lại tại đây.</p>
         </div>
     </main>
 

@@ -255,18 +255,25 @@ public class VendorController {
     @GetMapping("/products")
     public String products(Authentication auth,
                            @RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) Integer category,
+                           @RequestParam(required = false) String loaiSP,
+                           @RequestParam(required = false, defaultValue = "newest") String sort,
                            @RequestParam(defaultValue = "0") int page,
                            Model model) {
         Shop shop = getCurrentShop(auth);
         String redirect = checkShopAccess(shop);
         if (redirect != null) return redirect;
 
-        Page<SanPham> productPage = vendorService.getShopProducts(shop.getMaShop(), keyword, 
-                PageRequest.of(page, 12, Sort.by(Sort.Direction.DESC, "maSP")));
+        Page<SanPham> productPage = vendorService.getShopProducts(shop.getMaShop(), keyword, category, loaiSP, sort,
+                PageRequest.of(page, 12));
         model.addAttribute("shop", shop);
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("page", productPage);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("category", category);
+        model.addAttribute("loaiSP", loaiSP);
+        model.addAttribute("sort", sort);
+        model.addAttribute("categories", danhMucRepository.findAll());
         return "vendor/products";
     }
 

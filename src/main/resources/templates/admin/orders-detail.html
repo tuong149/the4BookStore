@@ -215,7 +215,7 @@
                                         <tr th:each="ct : ${donHang.chiTietDonHangs}" class="hover:bg-surface-container-low/50 transition-colors">
                                             <td class="py-3 px-space-md">
                                                 <div class="w-12 h-16 rounded-md overflow-hidden bg-surface-container-highest shadow-inner shrink-0">
-                                                    <img th:if="${ct.sanPham.hinhAnh != null}" th:src="${ct.sanPham.hinhAnh}" alt="Bìa sách" class="w-full h-full object-cover">
+                                                    <img th:if="${ct.sanPham.hinhAnh != null}" th:src="${ct.sanPham.hinhAnh}" alt="Ảnh sản phẩm" class="w-full h-full object-cover">
                                                     <div th:unless="${ct.sanPham.hinhAnh != null}" class="w-full h-full flex items-center justify-center text-on-surface-variant">
                                                         <span class="material-symbols-outlined text-[20px]">image</span>
                                                     </div>
@@ -223,7 +223,7 @@
                                             </td>
                                             <td class="py-3 px-space-md">
                                                 <div class="flex flex-col">
-                                                    <a th:href="@{/chi-tiet-san-pham/{id}(id=${ct.sanPham.maSP})}" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${ct.sanPham.tenSP}" th:text="${ct.sanPham.tenSP}">Tên Sách</a>
+                                                    <a th:href="@{/chi-tiet-san-pham/{id}(id=${ct.sanPham.maSP})}" class="font-semibold text-on-surface hover:text-primary transition-colors max-w-sm truncate" th:title="${ct.sanPham.tenSP}" th:text="${ct.sanPham.tenSP}">Tên Sản Phẩm</a>
                                                     <span class="text-xs text-on-surface-variant mt-0.5">
                                                         Mã SP: [[${ct.sanPham.maSP}]]
                                                         <span th:if="${ct.sanPham.ISBN != null}"> • ISBN: [[${ct.sanPham.ISBN}]]</span>

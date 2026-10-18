@@ -251,6 +251,16 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     @Query("SELECT s FROM SanPham s WHERE s.shop.maShop = :maShop AND s.trangThai != 'DaXoa' AND LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<SanPham> findActiveByShopAndKeyword(@Param("maShop") Integer maShop, @Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT s FROM SanPham s WHERE s.shop.maShop = :maShop AND s.trangThai != 'DaXoa' " +
+           "AND (:keyword IS NULL OR :keyword = '' OR LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:maDanhMuc IS NULL OR s.danhMuc.maDanhMuc = :maDanhMuc) " +
+           "AND (:loaiSP IS NULL OR :loaiSP = '' OR LOWER(s.loaiSP) = LOWER(:loaiSP))")
+    Page<SanPham> filterShopProducts(@Param("maShop") Integer maShop,
+                                     @Param("keyword") String keyword,
+                                     @Param("maDanhMuc") Integer maDanhMuc,
+                                     @Param("loaiSP") String loaiSP,
+                                     Pageable pageable);
+
     @Query("SELECT COUNT(s) FROM SanPham s WHERE s.shop.maShop = :maShop AND s.trangThai != 'DaXoa'")
     long countActiveByShop(@Param("maShop") Integer maShop);
 

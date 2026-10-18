@@ -115,9 +115,9 @@
                         <div th:if="${cartItems == null or cartItems.isEmpty()}" class="p-12 text-center flex flex-col items-center justify-center gap-3">
                             <span class="material-symbols-outlined text-[64px] text-outline-variant">remove_shopping_cart</span>
                             <div class="text-base font-bold text-on-surface">Giỏ hàng của bạn đang trống</div>
-                            <p class="text-xs text-on-surface-variant max-w-sm">Hãy khám phá hàng ngàn tựa sách hay chọn lọc tại The4BookStore để tiếp tục mua sắm nhé!</p>
+                            <p class="text-xs text-on-surface-variant max-w-sm">Hãy khám phá hàng ngàn sản phẩm chất lượng chọn lọc tại The4BookStore để tiếp tục mua sắm nhé!</p>
                             <a th:href="@{/}" class="mt-2 px-6 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-container transition-all shadow-sm">
-                                Khám Phá Sách Ngay
+                                Khám Phá Sản Phẩm Ngay
                             </a>
                         </div>
 
@@ -180,7 +180,7 @@
                                     </div>
 
                                     <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight hover:text-primary transition-colors">
-                                        <a th:href="@{'/san-pham/' + ${ct.sanPham.maSP}}" th:text="${ct.sanPham.tenSP}">Tên sách</a>
+                                        <a th:href="@{'/san-pham/' + ${ct.sanPham.maSP}}" th:text="${ct.sanPham.tenSP}">Tên sản phẩm</a>
                                     </h3>
                                     <span th:if="${ct.sanPham.loaiSP == 'Sach' and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" 
                                           class="text-xs text-on-surface-variant mt-0.5" 
@@ -500,7 +500,7 @@
                                     <input type="radio" name="phuongThuc" value="COD" checked class="text-primary focus:ring-primary w-4 h-4 cursor-pointer" />
                                     <span class="font-bold text-xs text-on-surface">Tiền mặt (COD)</span>
                                 </div>
-                                <div class="text-[11px] text-on-surface-variant">Thanh toán khi nhận sách tại nhà</div>
+                                <div class="text-[11px] text-on-surface-variant">Thanh toán khi nhận hàng tại nhà</div>
                             </label>
 
                             <label class="flex flex-col gap-2 p-3.5 rounded-2xl border-2 border-surface-container hover:border-outline-variant cursor-pointer transition-all payment-label">

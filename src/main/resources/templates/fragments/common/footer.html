@@ -35,7 +35,7 @@
 
             <div>
                 <h4 class="font-headline-sm font-bold text-on-surface text-sm mb-3">Bản Tin Tri Thức</h4>
-                <p class="mb-3 leading-relaxed">Đăng ký để nhận thông tin về sách mới tuyển chọn và các chương trình ưu đãi độc quyền.</p>
+                <p class="mb-3 leading-relaxed">Đăng ký để nhận thông tin về sản phẩm mới tuyển chọn và các chương trình ưu đãi độc quyền.</p>
                 <div class="flex gap-2">
                     <input type="email" placeholder="Email của bạn..." class="bg-surface-container-lowest px-3 py-2 rounded-xl text-xs flex-1 border border-surface-container focus:outline-none focus:ring-1 focus:ring-primary"/>
                     <button class="px-4 py-2 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-all shadow-xs">Gửi</button>
@@ -113,7 +113,7 @@
                     }
 
                     if (data.success) {
-                        showGlobalToast(data.message || 'Đã thêm sách vào giỏ hàng!', true);
+                        showGlobalToast(data.message || 'Đã thêm sản phẩm vào giỏ hàng!', true);
                         const badge = document.getElementById('global-cart-badge');
                         if (badge && data.cartCount !== undefined) {
                             if (data.cartCount > 0) {

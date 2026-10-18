@@ -202,7 +202,7 @@
                                 <span th:if="${sanPham.shop.maShop == 1}" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Gian Hàng Chính Hãng</span>
                                 <span th:unless="${sanPham.shop.maShop == 1}" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700">Gian Hàng Đối Tác</span>
                             </div>
-                            <p class="text-xs text-on-surface-variant mt-1 line-clamp-1" th:text="${sanPham.shop.moTa != null ? sanPham.shop.moTa : 'Chuyên cung cấp ấn phẩm sách chính hãng chọn lọc.'}">Mô tả shop</p>
+                            <p class="text-xs text-on-surface-variant mt-1 line-clamp-1" th:text="${sanPham.shop.moTa != null ? sanPham.shop.moTa : 'Chuyên cung cấp sản phẩm chính hãng chọn lọc.'}">Mô tả shop</p>
                             <div class="flex items-center gap-4 text-xs text-on-surface-variant mt-1.5 flex-wrap">
                                 <span class="flex items-center gap-1" th:if="${sanPham.shop.soDienThoai != null}">
                                     <span class="material-symbols-outlined text-[14px] text-primary">call</span>

@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class SanPhamService {
 
     public static final List<String> CUSTOMER_STATUSES = List.of("DangBan", "HetHang");
@@ -28,6 +27,23 @@ public class SanPhamService {
     private final DanhGiaRepository danhGiaRepository;
     private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
     private final SanPhamYeuThichRepository sanPhamYeuThichRepository;
+
+    public SanPhamService(
+            SanPhamRepository sanPhamRepository,
+            DanhMucRepository danhMucRepository,
+            ChiTietDonHangRepository chiTietDonHangRepository,
+            ChiTietGioHangRepository chiTietGioHangRepository,
+            DanhGiaRepository danhGiaRepository,
+            SanPhamTacGiaRepository sanPhamTacGiaRepository,
+            SanPhamYeuThichRepository sanPhamYeuThichRepository) {
+        this.sanPhamRepository = sanPhamRepository;
+        this.danhMucRepository = danhMucRepository;
+        this.chiTietDonHangRepository = chiTietDonHangRepository;
+        this.chiTietGioHangRepository = chiTietGioHangRepository;
+        this.danhGiaRepository = danhGiaRepository;
+        this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
+        this.sanPhamYeuThichRepository = sanPhamYeuThichRepository;
+    }
 
     @PersistenceContext
     private EntityManager entityManager;

@@ -103,7 +103,7 @@
                         <!-- Card 3: Tổng sản phẩm đã bán -->
                         <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between hover:shadow-md transition-all">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Tổng Sách Đã Bán</span>
+                                <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Tổng Sản Phẩm Đã Bán</span>
                                 <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                                     <span class="material-symbols-outlined text-[20px]">inventory_2</span>
                                 </div>
@@ -116,12 +116,12 @@
                             </div>
                         </div>
 
-                        <!-- Card 4: Tổng đầu sách trên sàn -->
+                        <!-- Card 4: Tổng sản phẩm trên sàn -->
                         <div class="bg-surface-container-lowest p-space-md rounded-2xl shadow-sm border border-surface-container/60 flex flex-col justify-between hover:shadow-md transition-all">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant tracking-wider">Quy Mô Sản Phẩm</span>
                                 <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                                    <span class="material-symbols-outlined text-[20px]">inventory_2</span>
                                 </div>
                             </div>
                             <div>
@@ -134,7 +134,7 @@
                                         (0 gian hàng)
                                     </span>
                                 </div>
-                                <span class="text-xs text-on-surface-variant mt-1 block">Đầu sách đang niêm yết trên hệ thống</span>
+                                <span class="text-xs text-on-surface-variant mt-1 block">Sản phẩm đang niêm yết trên hệ thống</span>
                             </div>
                         </div>
 
@@ -164,7 +164,7 @@
                             <div class="flex items-center justify-between mb-space-md">
                                 <div>
                                     <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Top Sản Phẩm Tiêu Thụ</h2>
-                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Phân bố sản lượng sách bán chạy</p>
+                                    <p class="font-body-sm text-body-sm text-on-surface-variant">Phân bố sản lượng sản phẩm bán chạy</p>
                                 </div>
                             </div>
                             <div class="relative h-[320px] w-full flex items-center justify-center">
@@ -182,7 +182,7 @@
                                     <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
                                     <span>Danh Sách Sản Phẩm Mới Trên Sàn</span>
                                 </h2>
-                                <p class="font-body-sm text-body-sm text-on-surface-variant">Các đầu sách mới cập nhật, tình trạng kiểm duyệt và lượng tồn kho thực tế</p>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">Các sản phẩm mới cập nhật, tình trạng kiểm duyệt và lượng tồn kho thực tế</p>
                             </div>
                             <a th:href="@{/admin/products}" class="px-3.5 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold transition-all flex items-center gap-1 shrink-0 shadow-xs">
                                 <span>Xem tất cả sản phẩm</span>
@@ -208,7 +208,7 @@
                                         </td>
                                     </tr>
                                     <tr th:each="sp : ${recentProducts}" class="hover:bg-surface-container-low/50 transition-colors">
-                                        <!-- Cột 1: Thông tin sách + ảnh -->
+                                        <!-- Cột 1: Thông tin sản phẩm + ảnh -->
                                         <td class="py-3.5 px-space-md">
                                             <div class="flex items-center gap-3">
                                                 <img th:src="${sp.hinhAnh != null and !sp.hinhAnh.isEmpty() ? sp.hinhAnh : '/images/default-book.png'}"
@@ -216,9 +216,9 @@
                                                      onerror="this.src='/images/default-book.png'"/>
                                                 <div>
                                                     <a th:href="@{'/san-pham/' + ${sp.maSP}}" class="font-bold text-xs text-on-surface hover:text-primary transition-colors line-clamp-1" th:text="${sp.tenSP}">
-                                                        Tên Sách
+                                                        Tên Sản Phẩm
                                                     </a>
-                                                    <span class="text-[11px] text-on-surface-variant block mt-0.5" th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : 'Sách tổng hợp'}">
+                                                    <span class="text-[11px] text-on-surface-variant block mt-0.5" th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : 'Sản phẩm'}">
                                                         Thể loại
                                                     </span>
                                                 </div>
@@ -229,7 +229,7 @@
                                         <td class="py-3.5 px-space-md text-xs font-semibold text-on-surface">
                                             <div class="flex items-center gap-1.5">
                                                 <span class="material-symbols-outlined text-[16px] text-primary">storefront</span>
-                                                <span th:text="${sp.shop != null ? sp.shop.tenShop : 'Nhà sách The4'}">Tên shop</span>
+                                                <span th:text="${sp.shop != null ? sp.shop.tenShop : 'The4 Official'}">Tên shop</span>
                                             </div>
                                         </td>
 
@@ -374,7 +374,7 @@
                                     <div>
                                         <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
                                             <span class="material-symbols-outlined text-amber-600 text-[20px]">military_tech</span>
-                                            <span>Top Sách Bán Chạy Nhất</span>
+                                            <span>Top Sản Phẩm Bán Chạy Nhất</span>
                                         </h2>
                                         <p class="font-body-sm text-body-sm text-on-surface-variant">Xếp hạng theo sản lượng bán ra thực tế</p>
                                     </div>
