@@ -79,6 +79,17 @@ public class ManagerDisputeController {
         return "redirect:/admin/shops";
     }
 
+    @PostMapping("/shops/{id}/reject")
+    public String rejectShop(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            shopService.tuChoiShop(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối đơn đăng ký gian hàng #" + id);
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/shops";
+    }
+
     @PostMapping("/shops/{id}/lock")
     public String lockShop(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {

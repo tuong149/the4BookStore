@@ -53,7 +53,7 @@ public class Shop {
     private BigDecimal chietKhauPhanTram; // Tỷ lệ chiết khấu sàn riêng cho shop, nếu null lấy mặc định
 
     @Column(name = "trang_thai", nullable = false, length = 30)
-    private String trangThai = "ChoDuyet"; // ChoDuyet, HoatDong, TamKhoa, BiKhoa
+    private String trangThai = "ChoDuyet"; // ChoDuyet, HoatDong, TuChoi, BiKhoa, DaXoa
 
     @Column(name = "ngay_tao", nullable = false)
     private LocalDateTime ngayTao = LocalDateTime.now();
