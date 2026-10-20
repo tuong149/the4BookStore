@@ -232,6 +232,11 @@ public class AdminPromotionController {
         }
         if (khuyenMai.getDoiTuongKhachHang() == null) {
             khuyenMai.setDoiTuongKhachHang("ALL");
+        if ("Freeship".equalsIgnoreCase(khuyenMai.getLoaiGiam())) {
+            khuyenMai.setLoaiKhuyenMai("MIEN_PHI_VAN_CHUYEN");
+        } else if (khuyenMai.getLoaiKhuyenMai() == null || khuyenMai.getLoaiKhuyenMai().isBlank()) {
+            khuyenMai.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
+        }
         }
 
         try {

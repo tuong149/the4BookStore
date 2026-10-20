@@ -359,7 +359,7 @@ public class CartController {
             // 2 loại mã giảm giá:
             // 1) Giảm theo sản phẩm (PhanTram hoặc TienCoDinh - chỉ tính trên subtotal sản phẩm)
             // 2) Giảm tiền vận chuyển (Freeship)
-            if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
+            if ("Freeship".equalsIgnoreCase(km.getLoaiGiam()) || km.isShippingDiscount()) {
                 // Giảm phí vận chuyển: giá trị giảm tối đa theo cấu hình (mặc định 30.000đ)
                 discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
             } else if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {

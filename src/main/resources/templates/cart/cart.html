@@ -808,10 +808,20 @@
             };
         }
 
+        function isShippingVoucher(v) {
+            if (!v) return false;
+            if (v.voucherType === 'SHIPPING_DISCOUNT' || v.voucherType === 'FREESHIP') return true;
+            if (v.loaiKhuyenMai === 'MIEN_PHI_VAN_CHUYEN' || v.loaiKhuyenMai === 'SHIPPING_DISCOUNT') return true;
+            const lg = (v.loaiGiam || '').toString().toLowerCase();
+            return lg === 'freeship' || lg === 'mienphivanchuyen' || lg === 'ship';
+        }
+
         // Apply Order Voucher (Sản phẩm)
-        function applyOrderVoucher() {
+        function applyOrderVoucher(codeOverride) {
             const codeInput = document.getElementById('voucherOrderCode');
-            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            const code = (codeOverride !== undefined ? codeOverride : (codeInput ? codeInput.value : '')).trim().toUpperCase();
+            if (codeInput && codeOverride !== undefined) codeInput.value = code;
+
             const msgEl = document.getElementById('orderVoucherSuccessMsg');
             const textEl = document.getElementById('orderVoucherSuccessText');
             const errEl = document.getElementById('orderVoucherErrorMsg');
@@ -819,7 +829,7 @@
 
             if (!code) {
                 showOrderVoucherError('Vui lòng nhập mã giảm giá sản phẩm!');
-                return;
+                return Promise.resolve(false);
             }
 
             const calc = recalculateSelectedCart();
@@ -827,31 +837,34 @@
             formData.append('code', code);
             formData.append('subtotal', calc.selectedSubtotal);
 
-            fetch('/api/gio-hang/kiem-tra-voucher', {
+            return fetch('/api/gio-hang/kiem-tra-voucher', {
                 method: 'POST',
                 body: formData
             })
             .then(res => res.json())
             .then(data => {
                 if (data.valid) {
-                    if (data.voucherType === 'SHIPPING_DISCOUNT' || data.loaiGiam === 'Freeship') {
+                    if (isShippingVoucher(data)) {
                         showOrderVoucherError('Mã này là mã Vận Chuyển. Vui lòng nhập vào ô "Mã miễn phí vận chuyển" bên dưới!');
-                        return;
+                        return false;
                     }
                     activeOrderVoucher = data;
                     if (errEl) { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }
                     if (msgEl) { msgEl.classList.remove('hidden'); msgEl.classList.add('flex'); }
                     if (textEl) textEl.textContent = data.message || `Đã áp dụng mã sản phẩm ${data.code}`;
                     recalculateSelectedCart();
+                    return true;
                 } else {
                     activeOrderVoucher = null;
                     showOrderVoucherError(data.message || 'Mã giảm giá không hợp lệ hoặc đã hết lượt!');
                     recalculateSelectedCart();
+                    return false;
                 }
             })
             .catch(err => {
                 console.error('Lỗi kiểm tra voucher sản phẩm:', err);
                 showOrderVoucherError('Lỗi kết nối khi kiểm tra mã!');
+                return false;
             });
         }
 
@@ -873,12 +886,15 @@
             if (msgEl) { msgEl.classList.add('hidden'); msgEl.classList.remove('flex'); }
             if (errEl) { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }
             recalculateSelectedCart();
+            if (isWalletModalOpen()) renderWalletModal();
         }
 
         // Apply Shipping Voucher (Vận chuyển)
-        function applyShippingVoucher() {
+        function applyShippingVoucher(codeOverride) {
             const codeInput = document.getElementById('voucherShippingCode');
-            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            const code = (codeOverride !== undefined ? codeOverride : (codeInput ? codeInput.value : '')).trim().toUpperCase();
+            if (codeInput && codeOverride !== undefined) codeInput.value = code;
+
             const msgEl = document.getElementById('shippingVoucherSuccessMsg');
             const textEl = document.getElementById('shippingVoucherSuccessText');
             const errEl = document.getElementById('shippingVoucherErrorMsg');
@@ -886,7 +902,7 @@
 
             if (!code) {
                 showShippingVoucherError('Vui lòng nhập mã miễn phí vận chuyển!');
-                return;
+                return Promise.resolve(false);
             }
 
             const calc = recalculateSelectedCart();
@@ -894,31 +910,34 @@
             formData.append('code', code);
             formData.append('subtotal', calc.selectedSubtotal);
 
-            fetch('/api/gio-hang/kiem-tra-voucher', {
+            return fetch('/api/gio-hang/kiem-tra-voucher', {
                 method: 'POST',
                 body: formData
             })
             .then(res => res.json())
             .then(data => {
                 if (data.valid) {
-                    if (data.voucherType === 'ORDER_DISCOUNT' || (data.loaiGiam !== 'Freeship' && data.loaiKhuyenMai !== 'MIEN_PHI_VAN_CHUYEN' && data.loaiKhuyenMai !== 'SHIPPING_DISCOUNT')) {
+                    if (!isShippingVoucher(data)) {
                         showShippingVoucherError('Mã này là mã Giảm Giá Sản Phẩm. Vui lòng nhập vào ô "Mã giảm giá sản phẩm" ở trên!');
-                        return;
+                        return false;
                     }
                     activeShippingVoucher = data;
                     if (errEl) { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }
                     if (msgEl) { msgEl.classList.remove('hidden'); msgEl.classList.add('flex'); }
                     if (textEl) textEl.textContent = data.message || `Đã áp dụng mã ship ${data.code}`;
                     recalculateSelectedCart();
+                    return true;
                 } else {
                     activeShippingVoucher = null;
                     showShippingVoucherError(data.message || 'Mã vận chuyển không hợp lệ hoặc đã hết lượt!');
                     recalculateSelectedCart();
+                    return false;
                 }
             })
             .catch(err => {
                 console.error('Lỗi kiểm tra voucher ship:', err);
                 showShippingVoucherError('Lỗi kết nối khi kiểm tra mã!');
+                return false;
             });
         }
 
@@ -940,6 +959,12 @@
             if (msgEl) { msgEl.classList.add('hidden'); msgEl.classList.remove('flex'); }
             if (errEl) { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }
             recalculateSelectedCart();
+            if (isWalletModalOpen()) renderWalletModal();
+        }
+
+        function isWalletModalOpen() {
+            const modal = document.getElementById('walletModal');
+            return modal && !modal.classList.contains('hidden');
         }
 
         // Checkout Modal Functions
@@ -1031,21 +1056,21 @@
         // Initialize state on load
         document.addEventListener('DOMContentLoaded', () => {
             recalculateSelectedCart();
-        });
+        });        // ========== VÍ VOUCHER MODAL (Shopee Style) ==========
+        let cachedWalletVouchers = [];
 
-        // ========== VÍ VOUCHER MODAL ==========
         function openVoucherWallet() {
             const modal = document.getElementById('walletModal');
-            const list = document.getElementById('walletVoucherList');
             const loading = document.getElementById('walletLoading');
             const empty = document.getElementById('walletEmpty');
+            const content = document.getElementById('walletContent');
             if (!modal) return;
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             if (loading) loading.classList.remove('hidden');
-            if (list) list.innerHTML = '';
             if (empty) empty.classList.add('hidden');
+            if (content) content.classList.add('hidden');
 
             const calc = recalculateSelectedCart();
             const subtotal = calc ? calc.selectedSubtotal : 0;
@@ -1055,92 +1080,20 @@
                 .then(data => {
                     if (loading) loading.classList.add('hidden');
                     if (!data.success || !data.vouchers || data.vouchers.length === 0) {
+                        cachedWalletVouchers = [];
                         if (empty) empty.classList.remove('hidden');
                         return;
                     }
-
-                    data.vouchers.forEach(v => {
-                        const card = document.createElement('div');
-                        const isEligible = v.eligible && !v.expired;
-
-                        card.className = `p-space-md rounded-2xl border-2 flex items-center gap-3 transition-all ${
-                            isEligible 
-                                ? 'border-primary/30 bg-surface-container-lowest hover:shadow-md cursor-pointer hover:border-primary' 
-                                : 'border-surface-container bg-surface-container-low/50 opacity-60 cursor-not-allowed'
-                        }`;
-
-                        // Icon based on type
-                        let icon = 'payments';
-                        let isShippingType = (v.loaiGiam === 'Freeship' || v.voucherType === 'SHIPPING_DISCOUNT');
-                        if (v.loaiGiam === 'PhanTram') { icon = 'percent'; }
-                        else if (isShippingType) { icon = 'local_shipping'; }
-
-                        let discountText = '';
-                        if (v.loaiGiam === 'PhanTram') discountText = `Giảm ${v.giaTriGiam}%`;
-                        else if (v.loaiGiam === 'TienCoDinh') discountText = `Giảm ${Number(v.giaTriGiam).toLocaleString('vi-VN')}₫`;
-                        else if (isShippingType) discountText = 'Miễn phí ship';
-
-                        let conditionHtml = '';
-                        if (v.donToiThieu && v.donToiThieu > 0) {
-                            conditionHtml += `<span class="text-[10px] text-on-surface-variant">Đơn từ ${Number(v.donToiThieu).toLocaleString('vi-VN')}₫</span>`;
-                        }
-
-                        let statusHtml = '';
-                        if (v.expired) {
-                            statusHtml = `<span class="text-[10px] text-error font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">error</span>Đã hết hạn</span>`;
-                        } else if (!v.eligible && v.reason) {
-                            statusHtml = `<span class="text-[10px] text-error font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">info</span>${v.reason}</span>`;
-                        } else if (v.discountPreview) {
-                            statusHtml = `<span class="text-[10px] text-primary font-bold">Tiết kiệm ${Number(v.discountPreview).toLocaleString('vi-VN')}₫</span>`;
-                        }
-
-                        const typeBadge = isShippingType 
-                            ? `<span class="px-2 py-0.5 text-[10px] rounded-full bg-teal-100 text-teal-800 font-bold">Vận chuyển</span>`
-                            : `<span class="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary font-bold">Giảm giá đơn</span>`;
-
-                        card.innerHTML = `
-                            <div class="w-10 h-10 rounded-xl ${isEligible ? (isShippingType ? 'bg-teal-700' : 'bg-primary') : 'bg-surface-container'} flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-[20px] text-white">${icon}</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="font-headline-sm text-xs font-bold text-on-surface truncate">${discountText}</span>
-                                        ${typeBadge}
-                                    </div>
-                                    <span class="font-mono text-[10px] font-bold ${isEligible ? 'text-primary' : 'text-on-surface-variant'} uppercase shrink-0 ml-2">${v.maCode}</span>
-                                </div>
-                                <p class="text-[11px] text-on-surface-variant truncate">${v.tenKM}</p>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    ${conditionHtml}
-                                    ${statusHtml}
-                                </div>
-                            </div>
-                        `;
-
-                        if (isEligible) {
-                            card.addEventListener('click', () => {
-                                closeWalletModal();
-                                if (isShippingType) {
-                                    const codeInput = document.getElementById('voucherShippingCode');
-                                    if (codeInput) codeInput.value = v.maCode;
-                                    applyShippingVoucher();
-                                } else {
-                                    const codeInput = document.getElementById('voucherOrderCode');
-                                    if (codeInput) codeInput.value = v.maCode;
-                                    applyOrderVoucher();
-                                }
-                            });
-                        }
-
-                        list.appendChild(card);
-                    });
+                    cachedWalletVouchers = data.vouchers;
+                    if (content) content.classList.remove('hidden');
+                    renderWalletModal();
                 })
                 .catch(err => {
                     if (loading) loading.classList.add('hidden');
                     if (empty) {
                         empty.classList.remove('hidden');
-                        empty.querySelector('h3').textContent = 'Lỗi tải Ví Voucher';
+                        const h3 = empty.querySelector('h3');
+                        if (h3) h3.textContent = 'Lỗi tải Ví Voucher';
                     }
                 });
         }
@@ -1152,55 +1105,318 @@
                 modal.classList.remove('flex');
             }
         }
+
+        function renderWalletModal() {
+            const shippingList = document.getElementById('walletShippingList');
+            const orderList = document.getElementById('walletOrderList');
+            const footerShipping = document.getElementById('footerShippingStatus');
+            const footerOrder = document.getElementById('footerOrderStatus');
+            const shippingBadge = document.getElementById('walletShippingBadge');
+            const orderBadge = document.getElementById('walletOrderBadge');
+
+            if (!shippingList || !orderList) return;
+
+            shippingList.innerHTML = '';
+            orderList.innerHTML = '';
+
+            const shippingVouchers = cachedWalletVouchers.filter(v => isShippingVoucher(v));
+            const orderVouchers = cachedWalletVouchers.filter(v => !isShippingVoucher(v));
+
+            // Update footer status
+            if (footerShipping) {
+                if (activeShippingVoucher) {
+                    footerShipping.textContent = activeShippingVoucher.code;
+                    footerShipping.className = 'font-bold text-teal-800';
+                } else {
+                    footerShipping.textContent = 'Chưa chọn';
+                    footerShipping.className = 'font-normal text-on-surface-variant';
+                }
+            }
+            if (footerOrder) {
+                if (activeOrderVoucher) {
+                    footerOrder.textContent = activeOrderVoucher.code;
+                    footerOrder.className = 'font-bold text-primary';
+                } else {
+                    footerOrder.textContent = 'Chưa chọn';
+                    footerOrder.className = 'font-normal text-on-surface-variant';
+                }
+            }
+
+            // Update section badges
+            if (shippingBadge) {
+                shippingBadge.textContent = activeShippingVoucher ? `Đang chọn: ${activeShippingVoucher.code}` : 'Chọn tối đa 1';
+            }
+            if (orderBadge) {
+                orderBadge.textContent = activeOrderVoucher ? `Đang chọn: ${activeOrderVoucher.code}` : 'Chọn tối đa 1';
+            }
+
+            // Render Shipping Vouchers
+            if (shippingVouchers.length === 0) {
+                shippingList.innerHTML = `
+                    <div class="p-3 rounded-xl bg-surface-container-low/40 border border-surface-container text-center text-xs text-on-surface-variant italic">
+                        Bạn chưa có mã miễn phí vận chuyển nào trong ví.
+                    </div>
+                `;
+            } else {
+                shippingVouchers.forEach(v => {
+                    const card = createWalletVoucherCard(v, true);
+                    shippingList.appendChild(card);
+                });
+            }
+
+            // Render Order Vouchers
+            if (orderVouchers.length === 0) {
+                orderList.innerHTML = `
+                    <div class="p-3 rounded-xl bg-surface-container-low/40 border border-surface-container text-center text-xs text-on-surface-variant italic">
+                        Bạn chưa có mã giảm giá sản phẩm nào trong ví.
+                    </div>
+                `;
+            } else {
+                orderVouchers.forEach(v => {
+                    const card = createWalletVoucherCard(v, false);
+                    orderList.appendChild(card);
+                });
+            }
+        }
+
+        function createWalletVoucherCard(v, isShipping) {
+            const activeV = isShipping ? activeShippingVoucher : activeOrderVoucher;
+            const isSelected = !!(activeV && activeV.code === v.maCode);
+            const isOtherSelected = !!(activeV && activeV.code !== v.maCode);
+            const isEligible = !!(v.eligible && !v.expired);
+
+            const card = document.createElement('div');
+
+            let cardClasses = 'relative p-3.5 rounded-2xl border-2 flex items-start gap-3 transition-all select-none ';
+            if (isSelected) {
+                cardClasses += isShipping 
+                    ? 'border-teal-600 bg-teal-50/70 dark:bg-teal-950/30 ring-2 ring-teal-600/30 cursor-pointer shadow-sm'
+                    : 'border-primary bg-primary/5 ring-2 ring-primary/30 cursor-pointer shadow-sm';
+            } else if (isOtherSelected) {
+                cardClasses += 'border-surface-container bg-surface-container-low/60 opacity-40 grayscale cursor-not-allowed';
+            } else if (isEligible) {
+                cardClasses += isShipping
+                    ? 'border-surface-container bg-surface-container-lowest hover:border-teal-600/70 hover:bg-teal-50/20 cursor-pointer hover:shadow-sm'
+                    : 'border-surface-container bg-surface-container-lowest hover:border-primary/70 hover:bg-primary/5 cursor-pointer hover:shadow-sm';
+            } else {
+                cardClasses += 'border-surface-container bg-surface-container-low/40 opacity-50 cursor-not-allowed';
+            }
+            card.className = cardClasses;
+
+            let icon = isShipping ? 'local_shipping' : (v.loaiGiam === 'PhanTram' ? 'percent' : 'payments');
+            let iconBg = isSelected 
+                ? (isShipping ? 'bg-teal-700 text-white' : 'bg-primary text-on-primary')
+                : (isEligible ? (isShipping ? 'bg-teal-700/10 text-teal-800' : 'bg-primary/10 text-primary') : 'bg-surface-container text-on-surface-variant');
+
+            let discountText = '';
+            if (isShipping) {
+                discountText = (v.giaTriGiam && v.giaTriGiam > 0) 
+                    ? `Giảm ${Number(v.giaTriGiam).toLocaleString('vi-VN')}₫ ship` 
+                    : 'Miễn phí vận chuyển';
+            } else if (v.loaiGiam === 'PhanTram') {
+                discountText = `Giảm ${v.giaTriGiam}%`;
+                if (v.giamToiDa) discountText += ` (tối đa ${Number(v.giamToiDa).toLocaleString('vi-VN')}₫)`;
+            } else if (v.loaiGiam === 'TienCoDinh') {
+                discountText = `Giảm ${Number(v.giaTriGiam).toLocaleString('vi-VN')}₫`;
+            } else {
+                discountText = `Ưu đãi ${v.tenKM}`;
+            }
+
+            let conditionText = (v.donToiThieu && v.donToiThieu > 0)
+                ? `Đơn tối thiểu ${Number(v.donToiThieu).toLocaleString('vi-VN')}₫`
+                : 'Cho mọi giá trị đơn';
+
+            let statusNotice = '';
+            if (isSelected) {
+                statusNotice = `<div class="text-[11px] font-bold ${isShipping ? 'text-teal-800' : 'text-primary'} flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Đang áp dụng cho đơn này
+                </div>`;
+            } else if (isOtherSelected) {
+                statusNotice = `<div class="text-[10px] text-on-surface-variant font-medium flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[13px]">block</span>
+                    Đã chọn 1 voucher ${isShipping ? 'vận chuyển' : 'sản phẩm'} khác. Hãy bỏ chọn mã đang dùng trước.
+                </div>`;
+            } else if (v.expired) {
+                statusNotice = `<div class="text-[10px] text-error font-medium flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[13px]">error</span>
+                    Đã hết hạn sử dụng
+                </div>`;
+            } else if (!v.eligible && v.reason) {
+                statusNotice = `<div class="text-[10px] text-error font-medium flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[13px]">info</span>
+                    ${v.reason}
+                </div>`;
+            } else if (v.discountPreview) {
+                statusNotice = `<div class="text-[10px] font-bold ${isShipping ? 'text-teal-800' : 'text-primary'} flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined text-[13px]">savings</span>
+                    Tiết kiệm ${Number(v.discountPreview).toLocaleString('vi-VN')}₫
+                </div>`;
+            }
+
+            let rightControl = '';
+            if (isSelected) {
+                rightControl = `
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <span class="w-6 h-6 rounded-full ${isShipping ? 'bg-teal-700' : 'bg-primary'} text-white flex items-center justify-center shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">check</span>
+                        </span>
+                        <button type="button" class="btn-deselect text-[10px] font-bold text-error hover:underline cursor-pointer">Bỏ chọn</button>
+                    </div>
+                `;
+            } else if (isOtherSelected) {
+                rightControl = `
+                    <div class="w-6 h-6 rounded-full border-2 border-surface-container flex items-center justify-center shrink-0 opacity-40">
+                        <span class="w-2.5 h-2.5 rounded-full bg-transparent"></span>
+                    </div>
+                `;
+            } else if (isEligible) {
+                rightControl = `
+                    <div class="w-6 h-6 rounded-full border-2 ${isShipping ? 'border-teal-700/60 hover:border-teal-700' : 'border-primary/60 hover:border-primary'} flex items-center justify-center shrink-0 transition-colors">
+                        <span class="w-2.5 h-2.5 rounded-full bg-transparent"></span>
+                    </div>
+                `;
+            } else {
+                rightControl = `
+                    <div class="w-6 h-6 rounded-full border-2 border-surface-container flex items-center justify-center shrink-0 opacity-30"></div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">${icon}</span>
+                </div>
+                <div class="flex-1 min-w-0 pr-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-headline-sm text-xs sm:text-sm font-bold text-on-surface truncate">${discountText}</span>
+                        <span class="font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${isSelected ? (isShipping ? 'bg-teal-700 text-white' : 'bg-primary text-on-primary') : 'bg-surface-container text-on-surface-variant'} shrink-0">${v.maCode}</span>
+                    </div>
+                    <p class="text-[11px] text-on-surface-variant truncate mt-0.5">${v.tenKM}</p>
+                    <div class="text-[10px] text-on-surface-variant mt-0.5">${conditionText}</div>
+                    ${statusNotice}
+                </div>
+                ${rightControl}
+            `;
+
+            if (isSelected) {
+                card.addEventListener('click', () => {
+                    if (isShipping) {
+                        removeShippingVoucher();
+                    } else {
+                        removeOrderVoucher();
+                    }
+                    renderWalletModal();
+                });
+            } else if (isOtherSelected) {
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            } else if (isEligible) {
+                card.addEventListener('click', () => {
+                    if (isShipping) {
+                        applyShippingVoucher(v.maCode).then(() => renderWalletModal());
+                    } else {
+                        applyOrderVoucher(v.maCode).then(() => renderWalletModal());
+                    }
+                });
+            }
+
+            return card;
+        }
     </script>
 
-    <!-- Ví Voucher Modal -->
-    <div id="walletModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4" onclick="if(event.target===this)closeWalletModal()">
-        <div class="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-surface-container max-h-[80vh] flex flex-col">
+    <!-- Ví Voucher Modal (Shopee Style) -->
+    <div id="walletModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4" onclick="if(event.target===this)closeWalletModal()">
+        <div class="bg-surface-container-lowest rounded-3xl max-w-xl w-full shadow-2xl border border-surface-container max-h-[88vh] flex flex-col overflow-hidden">
             <!-- Header -->
-            <div class="flex items-center justify-between pb-4 border-b border-surface-container shrink-0">
-                <div>
-                    <h2 class="font-headline-lg text-lg font-bold text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary text-[24px]">account_balance_wallet</span>
-                        Ví Voucher Của Tôi
-                    </h2>
-                    <p class="text-[11px] text-on-surface-variant mt-0.5">Chọn mã đủ điều kiện để áp dụng.</p>
+            <div class="px-5 py-4 border-b border-surface-container flex items-center justify-between shrink-0 bg-surface-container-low/40">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline-sm text-base font-bold text-on-surface">Ví Voucher Của Tôi</h2>
+                        <p class="text-[11px] text-on-surface-variant">Chọn tối đa 1 mã Freeship &amp; 1 mã Giảm giá sản phẩm</p>
+                    </div>
                 </div>
-                <button onclick="closeWalletModal()" class="p-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer" type="button">
-                    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
+                <button onclick="closeWalletModal()" class="p-1.5 rounded-xl hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" type="button" title="Đóng">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
             </div>
 
-            <!-- Content -->
-            <div class="flex-1 overflow-y-auto py-4 space-y-3" id="walletVoucherList">
-                <!-- Vouchers loaded via JS -->
+            <!-- Content Container -->
+            <div id="walletContent" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 hidden">
+                <!-- Group 1: Mã Miễn Phí Vận Chuyển -->
+                <div>
+                    <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-surface-container">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-teal-700 text-[18px]">local_shipping</span>
+                            <span class="font-headline-sm text-xs sm:text-sm font-bold text-on-surface">Mã Miễn Phí Vận Chuyển</span>
+                        </div>
+                        <span class="text-[10px] text-teal-800 font-bold bg-teal-100 px-2 py-0.5 rounded-full" id="walletShippingBadge">Áp dụng tối đa 1</span>
+                    </div>
+                    <div id="walletShippingList" class="space-y-2.5">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
+
+                <!-- Group 2: Mã Giảm Giá Sản Phẩm -->
+                <div>
+                    <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-surface-container">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">sell</span>
+                            <span class="font-headline-sm text-xs sm:text-sm font-bold text-on-surface">Mã Giảm Giá Sản Phẩm</span>
+                        </div>
+                        <span class="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full" id="walletOrderBadge">Áp dụng tối đa 1</span>
+                    </div>
+                    <div id="walletOrderList" class="space-y-2.5">
+                        <!-- Loaded by JS -->
+                    </div>
+                </div>
             </div>
 
-            <!-- Loading -->
-            <div id="walletLoading" class="flex items-center justify-center py-12 hidden">
+            <!-- Loading State -->
+            <div id="walletLoading" class="flex items-center justify-center py-16 hidden">
                 <div class="flex flex-col items-center gap-2">
                     <span class="material-symbols-outlined text-[32px] text-primary animate-spin">progress_activity</span>
-                    <span class="text-xs text-on-surface-variant">Đang tải Ví Voucher...</span>
+                    <span class="text-xs text-on-surface-variant font-medium">Đang tải Ví Voucher...</span>
                 </div>
             </div>
 
             <!-- Empty State -->
-            <div id="walletEmpty" class="flex flex-col items-center justify-center py-12 hidden">
-                <span class="material-symbols-outlined text-[40px] text-on-surface-variant">confirmation_number</span>
-                <h3 class="font-headline-sm text-sm font-bold text-on-surface mt-2">Ví trống</h3>
-                <p class="text-xs text-on-surface-variant mt-1 text-center max-w-xs">Bạn chưa thu thập mã giảm giá nào. Hãy vào trang Săn Voucher!</p>
-                <a href="/san-voucher" class="mt-3 px-4 py-2 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:opacity-90 transition-all inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">confirmation_number</span>
-                    Săn Voucher
+            <div id="walletEmpty" class="flex flex-col items-center justify-center py-14 px-4 hidden text-center">
+                <div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
+                    <span class="material-symbols-outlined text-[32px]">confirmation_number</span>
+                </div>
+                <h3 class="font-headline-sm text-sm font-bold text-on-surface">Ví voucher của bạn đang trống</h3>
+                <p class="text-xs text-on-surface-variant mt-1 max-w-xs">Hãy ghé thăm trang Săn Voucher để thu thập thêm nhiều ưu đãi hấp dẫn!</p>
+                <a href="/san-voucher" class="mt-4 px-4 py-2 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:opacity-90 transition-all inline-flex items-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">confirmation_number</span>
+                    Săn Voucher Ngay
                 </a>
             </div>
 
             <!-- Footer -->
-            <div class="pt-4 border-t border-surface-container shrink-0">
-                <a href="/san-voucher" class="text-xs text-secondary font-semibold hover:underline flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">add_circle</span>
-                    Thu thập thêm mã giảm giá
-                </a>
+            <div class="p-4 border-t border-surface-container bg-surface-container-low/40 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-[11px] text-on-surface-variant w-full sm:w-auto">
+                    <div class="flex items-center gap-1">
+                        <span class="text-on-surface-variant">Vận chuyển:</span>
+                        <span id="footerShippingStatus" class="font-bold text-teal-800">Chưa chọn</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="text-on-surface-variant">Sản phẩm:</span>
+                        <span id="footerOrderStatus" class="font-bold text-primary">Chưa chọn</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                    <a href="/san-voucher" class="text-xs text-secondary font-bold hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px]">add_circle</span>
+                        <span>Tìm thêm mã</span>
+                    </a>
+                    <button type="button" onclick="closeWalletModal()" class="px-5 py-2 rounded-xl bg-primary text-on-primary font-headline-sm text-xs font-bold hover:bg-primary-container transition-all shadow-sm cursor-pointer">
+                        Đồng Ý
+                    </button>
+                </div>
             </div>
         </div>
     </div>

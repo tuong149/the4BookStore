@@ -162,6 +162,8 @@ public class VoucherController {
             item.put("maCode", km.getMaCode());
             item.put("tenKM", km.getTenKM());
             item.put("loaiGiam", km.getLoaiGiam());
+            item.put("loaiKhuyenMai", km.getLoaiKhuyenMai());
+            item.put("voucherType", km.getVoucherType());
             item.put("giaTriGiam", km.getGiaTriGiam());
             item.put("giamToiDa", km.getGiamToiDa());
             item.put("donToiThieu", km.getDonToiThieu());
@@ -190,7 +192,7 @@ public class VoucherController {
                     if (km.getGiamToiDa() != null && discount > km.getGiamToiDa()) discount = km.getGiamToiDa();
                 } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
                     discount = Math.min(subtotal, km.getGiaTriGiam());
-                } else if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
+                } else if ("Freeship".equalsIgnoreCase(km.getLoaiGiam()) || km.isShippingDiscount()) {
                     discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
                 }
                 item.put("discountPreview", discount);
@@ -231,6 +233,8 @@ public class VoucherController {
             item.put("tenKM", km.getTenKM());
             item.put("maCode", km.getMaCode());
             item.put("loaiGiam", km.getLoaiGiam());
+            item.put("loaiKhuyenMai", km.getLoaiKhuyenMai());
+            item.put("voucherType", km.getVoucherType());
             item.put("giaTriGiam", km.getGiaTriGiam());
             item.put("giamToiDa", km.getGiamToiDa());
             item.put("donToiThieu", km.getDonToiThieu());
