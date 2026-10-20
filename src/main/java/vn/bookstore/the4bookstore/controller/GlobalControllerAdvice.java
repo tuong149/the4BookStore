@@ -85,7 +85,7 @@ public class GlobalControllerAdvice {
         if (kh != null) {
             return gioHangService.getCartItemCount(kh);
         }
-        return session != null ? gioHangService.getSessionCartItemCount(session) : 0;
+        return 0;
     }
 
     /**

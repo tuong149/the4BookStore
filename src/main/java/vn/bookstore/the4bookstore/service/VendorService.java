@@ -1,7 +1,9 @@
 package vn.bookstore.the4bookstore.service;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.bookstore.the4bookstore.entity.*;
@@ -92,6 +94,28 @@ public class VendorService {
             return sanPhamRepository.findActiveByShopAndKeyword(maShop, keyword.trim(), pageable);
         }
         return sanPhamRepository.findActiveByShop(maShop, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SanPham> getShopProducts(Integer maShop, String keyword, Integer maDanhMuc, String loaiSP, String sortBy, Pageable pageable) {
+        Sort sortOrder;
+        if ("oldest".equalsIgnoreCase(sortBy)) {
+            sortOrder = Sort.by(Sort.Direction.ASC, "ngayTao", "maSP");
+        } else if ("price_asc".equalsIgnoreCase(sortBy)) {
+            sortOrder = Sort.by(Sort.Direction.ASC, "giaBan");
+        } else if ("price_desc".equalsIgnoreCase(sortBy)) {
+            sortOrder = Sort.by(Sort.Direction.DESC, "giaBan");
+        } else if ("bestseller".equalsIgnoreCase(sortBy)) {
+            sortOrder = Sort.by(Sort.Direction.DESC, "soLuongDaBan");
+        } else {
+            sortOrder = Sort.by(Sort.Direction.DESC, "ngayTao", "maSP");
+        }
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+
+        String trimmedKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        String trimmedLoaiSP = (loaiSP != null && !loaiSP.isBlank()) ? loaiSP.trim() : null;
+
+        return sanPhamRepository.filterShopProducts(maShop, trimmedKeyword, maDanhMuc, trimmedLoaiSP, sortedPageable);
     }
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)

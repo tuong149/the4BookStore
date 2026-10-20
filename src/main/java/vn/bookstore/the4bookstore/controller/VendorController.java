@@ -91,6 +91,9 @@ public class VendorController {
         if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/pending";
         }
+        if ("TuChoi".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/rejected";
+        }
         if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/blocked";
         }
@@ -130,11 +133,32 @@ public class VendorController {
         if ("HoatDong".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/dashboard";
         }
+        if ("TuChoi".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/rejected";
+        }
         if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/blocked";
         }
         model.addAttribute("shop", shop);
         return "vendor/pending";
+    }
+
+    // --- TRẠNG THÁI HỒ SƠ BỊ TỪ CHỐI ---
+    @GetMapping("/rejected")
+    public String rejectedNotice(Authentication auth, Model model) {
+        Shop shop = getCurrentShop(auth);
+        if (shop == null) return "redirect:/vendor/register";
+        if ("HoatDong".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/dashboard";
+        }
+        if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/pending";
+        }
+        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/blocked";
+        }
+        model.addAttribute("shop", shop);
+        return "vendor/rejected";
     }
 
     // --- TRẠNG THÁI GIAN HÀNG TẠM KHÓA ---
@@ -148,13 +172,17 @@ public class VendorController {
         if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/pending";
         }
+        if ("TuChoi".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/rejected";
+        }
         model.addAttribute("shop", shop);
         return "vendor/blocked";
     }
 
     // --- ĐĂNG KÝ MỞ SHOP ---
     @GetMapping("/register")
-    public String registerForm(Authentication auth, Model model) {
+    public String registerForm(@RequestParam(value = "reapply", required = false) Boolean reapply,
+                               Authentication auth, Model model) {
         TaiKhoan user = getCurrentUser(auth);
         if (user == null) return "redirect:/login";
 
@@ -163,6 +191,14 @@ public class VendorController {
             Shop s = existing.get();
             if ("ChoDuyet".equalsIgnoreCase(s.getTrangThai())) return "redirect:/vendor/pending";
             if ("BiKhoa".equalsIgnoreCase(s.getTrangThai())) return "redirect:/vendor/blocked";
+            if ("TuChoi".equalsIgnoreCase(s.getTrangThai())) {
+                if (Boolean.TRUE.equals(reapply)) {
+                    model.addAttribute("shop", s);
+                    model.addAttribute("isReapply", true);
+                    return "vendor/register";
+                }
+                return "redirect:/vendor/rejected";
+            }
             if (!"DaXoa".equalsIgnoreCase(s.getTrangThai())) {
                 return "redirect:/vendor/dashboard";
             }
@@ -255,18 +291,25 @@ public class VendorController {
     @GetMapping("/products")
     public String products(Authentication auth,
                            @RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) Integer category,
+                           @RequestParam(required = false) String loaiSP,
+                           @RequestParam(required = false, defaultValue = "newest") String sort,
                            @RequestParam(defaultValue = "0") int page,
                            Model model) {
         Shop shop = getCurrentShop(auth);
         String redirect = checkShopAccess(shop);
         if (redirect != null) return redirect;
 
-        Page<SanPham> productPage = vendorService.getShopProducts(shop.getMaShop(), keyword, 
-                PageRequest.of(page, 12, Sort.by(Sort.Direction.DESC, "maSP")));
+        Page<SanPham> productPage = vendorService.getShopProducts(shop.getMaShop(), keyword, category, loaiSP, sort,
+                PageRequest.of(page, 12));
         model.addAttribute("shop", shop);
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("page", productPage);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("category", category);
+        model.addAttribute("loaiSP", loaiSP);
+        model.addAttribute("sort", sort);
+        model.addAttribute("categories", danhMucRepository.findAll());
         return "vendor/products";
     }
 

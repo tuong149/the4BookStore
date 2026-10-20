@@ -32,6 +32,12 @@
 set -euf
 [ "${MVNW_VERBOSE-}" != debug ] || set -x
 
+if [ -d "/c/Program Files (x86)/Android/openjdk/jdk-17.0.14" ]; then
+  JAVA_HOME="/c/Program Files (x86)/Android/openjdk/jdk-17.0.14"
+elif [ -d "C:/Program Files (x86)/Android/openjdk/jdk-17.0.14" ]; then
+  JAVA_HOME="C:/Program Files (x86)/Android/openjdk/jdk-17.0.14"
+fi
+
 # OS specific support.
 native_path() { printf %s\\n "$1"; }
 case "$(uname)" in

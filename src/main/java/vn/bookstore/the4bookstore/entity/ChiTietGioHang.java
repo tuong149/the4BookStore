@@ -5,7 +5,10 @@ import lombok.*;
 @Entity
 @Table(name = "CHI_TIET_GIO_HANG")
 @IdClass(ChiTietGioHangId.class)
-@Data @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class ChiTietGioHang {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -19,4 +22,13 @@ public class ChiTietGioHang {
     
     @Column(nullable = false)
     private Integer soLuong;
+
+    public ChiTietGioHang() {
+    }
+
+    public ChiTietGioHang(GioHang gioHang, SanPham sanPham, Integer soLuong) {
+        this.gioHang = gioHang;
+        this.sanPham = sanPham;
+        this.soLuong = soLuong;
+    }
 }

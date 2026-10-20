@@ -95,7 +95,7 @@ CREATE TABLE `shop` (
     `ngay_tao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `ngay_cap_nhat` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `FK_shop_taikhoan` FOREIGN KEY (`ma_tai_khoan`) REFERENCES `tai_khoan` (`ma_tai_khoan`) ON DELETE CASCADE,
-    CONSTRAINT `CK_shop_trangthai` CHECK (`trang_thai` IN ('BiKhoa', 'HoatDong', 'ChoDuyet'))
+    CONSTRAINT `CK_shop_trangthai` CHECK (`trang_thai` IN ('BiKhoa', 'HoatDong', 'ChoDuyet', 'TuChoi', 'DaXoa'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. Bảng: danh_muc

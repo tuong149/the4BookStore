@@ -192,13 +192,13 @@ public class CartController {
                                  jakarta.servlet.http.HttpSession session,
                                  RedirectAttributes redirectAttributes) {
         KhachHang kh = getCurrentKhachHang(authentication);
+        if (kh == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để thao tác với giỏ hàng!");
+            return "redirect:/login";
+        }
 
         try {
-            if (kh != null) {
-                gioHangService.updateCartItemQuantity(kh, maSP, soLuong);
-            } else {
-                gioHangService.updateSessionCartQuantity(session, maSP, soLuong);
-            }
+            gioHangService.updateCartItemQuantity(kh, maSP, soLuong);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật giỏ hàng!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -215,13 +215,13 @@ public class CartController {
                                  jakarta.servlet.http.HttpSession session,
                                  RedirectAttributes redirectAttributes) {
         KhachHang kh = getCurrentKhachHang(authentication);
+        if (kh == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để thao tác với giỏ hàng!");
+            return "redirect:/login";
+        }
 
         try {
-            if (kh != null) {
-                gioHangService.removeFromCart(kh, maSP);
-            } else {
-                gioHangService.removeFromSessionCart(session, maSP);
-            }
+            gioHangService.removeFromCart(kh, maSP);
             redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -237,12 +237,12 @@ public class CartController {
                             jakarta.servlet.http.HttpSession session,
                             RedirectAttributes redirectAttributes) {
         KhachHang kh = getCurrentKhachHang(authentication);
-
-        if (kh != null) {
-            gioHangService.clearCart(kh);
-        } else {
-            gioHangService.clearSessionCart(session);
+        if (kh == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để thao tác với giỏ hàng!");
+            return "redirect:/login";
         }
+
+        gioHangService.clearCart(kh);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa tất cả sản phẩm trong giỏ hàng!");
 
         return "redirect:/gio-hang";
@@ -440,18 +440,19 @@ public class CartController {
         Map<String, Object> result = new HashMap<>();
         KhachHang kh = getCurrentKhachHang(authentication);
 
+        if (kh == null) {
+            result.put("success", false);
+            result.put("requireLogin", true);
+            result.put("loginUrl", "/login");
+            result.put("message", "Vui lòng đăng nhập để cập nhật giỏ hàng!");
+            return result;
+        }
+
         try {
-            int cartCount;
-            int subtotal;
-            if (kh != null) {
-                gioHangService.updateCartItemQuantity(kh, maSP, soLuong);
-                cartCount = gioHangService.getCartItemCount(kh);
-                subtotal = gioHangService.calculateSubtotal(kh);
-            } else {
-                gioHangService.updateSessionCartQuantity(session, maSP, soLuong);
-                cartCount = gioHangService.getSessionCartItemCount(session);
-                subtotal = gioHangService.calculateSessionSubtotal(session);
-            }
+            gioHangService.updateCartItemQuantity(kh, maSP, soLuong);
+            int cartCount = gioHangService.getCartItemCount(kh);
+            int subtotal = gioHangService.calculateSubtotal(kh);
+
             result.put("success", true);
             result.put("cartCount", cartCount);
             result.put("subtotal", subtotal);
@@ -472,18 +473,19 @@ public class CartController {
         Map<String, Object> result = new HashMap<>();
         KhachHang kh = getCurrentKhachHang(authentication);
 
+        if (kh == null) {
+            result.put("success", false);
+            result.put("requireLogin", true);
+            result.put("loginUrl", "/login");
+            result.put("message", "Vui lòng đăng nhập để thao tác với giỏ hàng!");
+            return result;
+        }
+
         try {
-            int cartCount;
-            int subtotal;
-            if (kh != null) {
-                gioHangService.removeFromCart(kh, maSP);
-                cartCount = gioHangService.getCartItemCount(kh);
-                subtotal = gioHangService.calculateSubtotal(kh);
-            } else {
-                gioHangService.removeFromSessionCart(session, maSP);
-                cartCount = gioHangService.getSessionCartItemCount(session);
-                subtotal = gioHangService.calculateSessionSubtotal(session);
-            }
+            gioHangService.removeFromCart(kh, maSP);
+            int cartCount = gioHangService.getCartItemCount(kh);
+            int subtotal = gioHangService.calculateSubtotal(kh);
+
             result.put("success", true);
             result.put("cartCount", cartCount);
             result.put("subtotal", subtotal);
@@ -506,7 +508,7 @@ public class CartController {
         if (kh != null) {
             result.put("cartCount", gioHangService.getCartItemCount(kh));
         } else {
-            result.put("cartCount", gioHangService.getSessionCartItemCount(session));
+            result.put("cartCount", 0);
         }
 
         return result;

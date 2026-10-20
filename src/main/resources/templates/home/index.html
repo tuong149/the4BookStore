@@ -102,7 +102,7 @@
                             <div class="pt-space-xs flex flex-wrap items-center gap-space-md">
                                 <a href="#bestsellers-grid"
                                     class="px-space-lg py-3 rounded-xl bg-primary text-on-primary font-headline-sm text-xs font-bold hover:bg-primary-container transition-all shadow-md flex items-center gap-space-xs">
-                                    <span>Khám Phá Sách Bán Chạy</span>
+                                    <span>Khám Phá Sản Phẩm Bán Chạy</span>
                                     <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                                 </a>
                                 <a th:href="@{/gio-hang}"
@@ -124,14 +124,14 @@
                                     class="flex flex-col bg-surface-container-lowest/80 backdrop-blur-sm p-3 rounded-2xl border border-surface-container/60 shadow-xs">
                                     <span
                                         class="font-headline-lg text-lg font-bold text-primary font-mono">10.000+</span>
-                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Đầu sách tuyển
+                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Sản phẩm tuyển
                                         chọn</span>
                                 </div>
                                 <div
                                     class="flex flex-col bg-surface-container-lowest/80 backdrop-blur-sm p-3 rounded-2xl border border-surface-container/60 shadow-xs">
                                     <span
                                         class="font-headline-lg text-lg font-bold text-secondary font-mono">100%</span>
-                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Sách thật chính
+                                    <span class="font-label-sm text-[11px] text-on-surface-variant">Sản phẩm chính
                                         hãng</span>
                                 </div>
                                 <div
@@ -148,7 +148,7 @@
                         <div class="lg:col-span-5 flex justify-center items-center">
                             <div class="relative group" th:if="${bookOfTheMonth != null}">
                                 <a th:href="@{'/san-pham/' + ${bookOfTheMonth.maSP}}" class="block cursor-pointer"
-                                    title="Xem chi tiết sách nổi bật tháng">
+                                    title="Xem chi tiết sản phẩm nổi bật tháng">
                                     <div
                                         class="absolute -inset-4 bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-700">
                                     </div>
@@ -162,7 +162,7 @@
                                                 <div class="min-w-0 flex-1">
                                                     <p
                                                         class="font-label-sm text-[10px] text-primary-fixed font-bold uppercase">
-                                                        Sách Nổi Bật Tháng</p>
+                                                        Sản Phẩm Nổi Bật Tháng</p>
                                                     <h4 class="font-headline-sm text-xs font-bold truncate text-white"
                                                         th:text="${bookOfTheMonth.tenSP}">The Midnight Library</h4>
                                                 </div>
@@ -189,7 +189,7 @@
                                             <div>
                                                 <p
                                                     class="font-label-sm text-[10px] text-primary-fixed font-bold uppercase">
-                                                    Sách Nổi Bật Tháng</p>
+                                                    Sản Phẩm Nổi Bật Tháng</p>
                                                 <h4 class="font-headline-sm text-xs font-bold truncate">The Midnight
                                                     Library</h4>
                                             </div>
@@ -215,14 +215,14 @@
                             <div
                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-white font-bold text-xs uppercase tracking-wider shadow-xs mb-2">
                                 <span class="material-symbols-outlined text-[16px]">trending_up</span>
-                                <span>Top Sách Bán Chạy Trên Toàn Hệ Thống Sàn (> 10 Cuốn)</span>
+                                <span>Top Sản Phẩm Bán Chạy Trên Toàn Hệ Thống Sàn (> 10 Món)</span>
                             </div>
                             <h2
                                 class="font-headline-lg text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight">
-                                🔥 Ấn Phẩm Được Mua Nhiều Nhất (Dành Cho Khách)
+                                🔥 Sản Phẩm Được Mua Nhiều Nhất (Dành Cho Khách)
                             </h2>
                             <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
-                                Tổng hợp các đầu sách có lượt bán vượt mốc 10+ cuốn từ chuỗi các Shop đối tác của
+                                Tổng hợp các sản phẩm có lượt bán vượt mốc 10+ món từ chuỗi các Shop đối tác của
                                 The4BookStore, sắp xếp theo số lượng bán giảm dần.
                             </p>
                         </div>
@@ -241,8 +241,8 @@
                     </div>
                     <div th:unless="${guestTopSold != null and !guestTopSold.isEmpty()}"
                         class="py-10 text-center text-xs text-on-surface-variant bg-surface-container-lowest rounded-2xl border border-surface-container">
-                        <p>Hệ thống đang cập nhật danh sách các đầu sách vượt mốc 10 lượt bán. Mời bạn tham khảo mục
-                            Sách Bán Chạy bên dưới!</p>
+                        <p>Hệ thống đang cập nhật danh sách các sản phẩm vượt mốc 10 lượt bán. Mời bạn tham khảo mục
+                            Sản Phẩm Bán Chạy bên dưới!</p>
                     </div>
                 </div>
             </section>
@@ -371,7 +371,7 @@
                             <span>Được Độc Giả Yêu Thích Nhất</span>
                         </div>
                         <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
-                            Sách Tuyển Chọn Bán Chạy
+                            Sản Phẩm Tuyển Chọn Bán Chạy
                         </h2>
                     </div>
                     <div class="flex items-center gap-space-xs">
@@ -381,7 +381,7 @@
                             <option value="newest">Mới phát hành</option>
                             <option value="price_asc">Giá tăng dần</option>
                             <option value="price_desc">Giá giảm dần</option>
-                            <option value="name_asc">Tên sách A-Z</option>
+                            <option value="name_asc">Tên sản phẩm A-Z</option>
                         </select>
                     </div>
                 </div>
@@ -775,10 +775,10 @@
                             <span class="material-symbols-outlined text-[24px]">verified</span>
                         </div>
                         <div>
-                            <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Ấn Bản Chọn Lọc 100%
+                            <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Sản Phẩm Chọn Lọc 100%
                             </h3>
-                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Mỗi tựa sách đều
-                                được đội ngũ The4BookStore đọc thử và kiểm định chất lượng nội dung.</p>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Mỗi sản phẩm đều
+                                được đội ngũ The4BookStore kiểm định chất lượng nghiêm ngặt trước khi đến tay bạn.</p>
                         </div>
                     </div>
 
@@ -791,8 +791,8 @@
                         <div>
                             <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Đóng Gói Chuyên Nghiệp
                             </h3>
-                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Bọc màng co và hộp
-                                carton cứng cáp 3 lớp, kèm theo bookmark độc quyền bảo vệ mép sách.</p>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Bọc màng chống sốc và hộp
+                                carton cứng cáp 3 lớp, đảm bảo bảo vệ sản phẩm luôn nguyên vẹn.</p>
                         </div>
                     </div>
 
@@ -804,8 +804,8 @@
                         </div>
                         <div>
                             <h3 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Tư Vấn Tận Tâm 24/7</h3>
-                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Đội ngũ thủ thư đam
-                                mê đọc sách sẵn sàng gợi ý tựa sách phù hợp nhất cho bạn.</p>
+                            <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">Đội ngũ hỗ trợ tận tâm
+                                luôn sẵn sàng gợi ý và tư vấn sản phẩm phù hợp nhất cho bạn.</p>
                         </div>
                     </div>
                 </div>

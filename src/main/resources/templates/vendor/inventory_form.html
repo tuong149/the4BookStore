@@ -60,12 +60,12 @@
             <div class="bg-surface-container-lowest rounded-3xl border border-surface-container shadow-sm overflow-hidden mb-6">
                 <div class="p-4 bg-surface-container-low/70 border-b border-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <span class="font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-[18px]">menu_book</span>
-                        <span>Danh Sách Sách Trong Shop Cần Kiểm Đếm (<span th:text="${#lists.size(products)}">0</span>)</span>
+                        <span class="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
+                        <span>Danh Sách Sản Phẩm Trong Shop Cần Kiểm Đếm (<span th:text="${#lists.size(products)}">0</span>)</span>
                     </span>
                     <div class="relative w-full sm:w-72">
                         <span class="material-symbols-outlined absolute left-3 top-2 text-on-surface-variant text-[18px]">search</span>
-                        <input type="text" id="quickFilterInput" placeholder="Lọc nhanh sách..." oninput="filterTable(this.value)"
+                        <input type="text" id="quickFilterInput" placeholder="Lọc nhanh sản phẩm..." oninput="filterTable(this.value)"
                                class="w-full pl-9 pr-3 py-1.5 rounded-xl border border-surface-container bg-surface-container-lowest text-xs text-on-surface focus:outline-none focus:border-primary/50 shadow-2xs"/>
                     </div>
                 </div>
@@ -75,17 +75,17 @@
                         <thead class="bg-surface-container-low text-on-surface-variant uppercase font-bold text-[11px] border-b border-surface-container">
                             <tr>
                                 <th class="p-4 w-12 text-center">STT</th>
-                                <th class="p-4">Sách</th>
+                                <th class="p-4">Sản Phẩm</th>
                                 <th class="p-4 w-28 text-center">Tồn sàn hiện tại</th>
                                 <th class="p-4 w-36 text-center">Số lượng thực tế *</th>
                                 <th class="p-4 w-28 text-center">Chênh lệch</th>
                                 <th class="p-4 w-60">Lý do điều chỉnh (nếu có)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-surface-container">
+                        <tbody class="divide-y border-surface-container">
                             <tr th:if="${products == null or products.isEmpty()}">
                                 <td colspan="6" class="p-8 text-center text-on-surface-variant">
-                                    Gian hàng chưa có sách nào đang bán để kiểm kê.
+                                    Gian hàng chưa có sản phẩm nào đang bán để kiểm kê.
                                 </td>
                             </tr>
                             <tr th:each="p, stat : ${products}" class="hover:bg-surface-container-low/50 transition-colors product-row" th:data-name="${p.tenSP.toLowerCase()}">
@@ -96,7 +96,7 @@
                                              class="w-10 h-14 object-cover rounded-lg border border-surface-container shrink-0"/>
                                         <div class="min-w-0 max-w-xs">
                                             <input type="hidden" name="productIds" th:value="${p.maSP}"/>
-                                            <p class="font-bold text-on-surface truncate" th:text="${p.tenSP}">Tên sách</p>
+                                            <p class="font-bold text-on-surface truncate" th:text="${p.tenSP}">Tên sản phẩm</p>
                                             <p class="text-[11px] text-on-surface-variant font-mono" th:text="'Mã: #' + ${p.maSP} + ' | ISBN: ' + (${p.ISBN ?: 'N/A'})"></p>
                                         </div>
                                     </div>

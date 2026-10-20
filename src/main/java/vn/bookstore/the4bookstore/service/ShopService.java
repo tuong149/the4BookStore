@@ -67,7 +67,26 @@ public class ShopService {
 
     @org.springframework.cache.annotation.CacheEvict(value = "pendingShopCount", allEntries = true)
     public Shop registerShop(TaiKhoan taiKhoan, String tenShop, String moTa, String diaChi, String soDienThoai, String email) {
-        if (shopRepository.findByTaiKhoan(taiKhoan).isPresent()) {
+        Optional<Shop> existingOpt = shopRepository.findByTaiKhoan(taiKhoan);
+        if (existingOpt.isPresent()) {
+            Shop existing = existingOpt.get();
+            // Nếu hồ sơ trước đó đã bị từ chối hoặc đã xóa, cho phép cập nhật lại thông tin và gửi lại đơn
+            if ("TuChoi".equalsIgnoreCase(existing.getTrangThai()) || "DaXoa".equalsIgnoreCase(existing.getTrangThai())) {
+                if (!existing.getTenShop().equalsIgnoreCase(tenShop.trim()) && shopRepository.existsByTenShop(tenShop.trim())) {
+                    throw new IllegalArgumentException("Tên shop đã tồn tại, vui lòng chọn tên khác!");
+                }
+                String slug = toSlug(tenShop);
+                existing.setTenShop(tenShop.trim());
+                existing.setSlug(slug);
+                existing.setMoTa(moTa);
+                existing.setDiaChiShop(diaChi);
+                existing.setSoDienThoai(soDienThoai);
+                existing.setEmailShop(email);
+                existing.setTrangThai("ChoDuyet"); // Reset trạng thái về Chờ Duyệt
+                existing.setNgayTao(LocalDateTime.now());
+                existing.setNgayCapNhat(LocalDateTime.now());
+                return shopRepository.save(existing);
+            }
             throw new IllegalArgumentException("Tài khoản này đã đăng ký mở shop!");
         }
         if (shopRepository.existsByTenShop(tenShop)) {
@@ -140,6 +159,15 @@ public class ShopService {
             taiKhoanRepository.save(tk);
         }
 
+        shopRepository.save(shop);
+    }
+
+    @org.springframework.cache.annotation.CacheEvict(value = "pendingShopCount", allEntries = true)
+    public void tuChoiShop(Integer maShop) {
+        Shop shop = shopRepository.findById(maShop)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
+        shop.setTrangThai("TuChoi");
+        shop.setNgayCapNhat(LocalDateTime.now());
         shopRepository.save(shop);
     }
 

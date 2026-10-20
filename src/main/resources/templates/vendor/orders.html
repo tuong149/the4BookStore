@@ -153,7 +153,7 @@
                         <div class="flex items-center gap-3">
                             <img th:src="${item.sanPham != null ? item.sanPham.getHinhAnh() : '/images/default-book.png'}" class="w-10 h-14 object-cover rounded shadow-sm border"/>
                             <div>
-                                <div class="font-bold text-on-surface" th:text="${item.sanPham != null ? item.sanPham.tenSP : 'Sách'}">Tên sách</div>
+                                <div class="font-bold text-on-surface" th:text="${item.sanPham != null ? item.sanPham.tenSP : 'Sản phẩm'}">Tên sản phẩm</div>
                                 <div class="text-on-surface-variant" th:text="'Số lượng: x' + ${item.soLuong}">x1</div>
                             </div>
                         </div>
@@ -229,7 +229,7 @@
 
                         <!-- Xử lý Yêu Cầu Hủy (từ khách khi đơn đã xác nhận) -->
                         <div th:if="${dh.trangThai == 'YeuCauHuy'}" class="flex items-center gap-2">
-                            <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/accept-cancel'}" method="post" onsubmit="return confirm('Đồng ý hủy đơn hàng này và giải phóng kho sách?');">
+                            <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/accept-cancel'}" method="post" onsubmit="return confirm('Đồng ý hủy đơn hàng này và giải phóng tồn kho?');">
                                 <button type="submit" class="px-3.5 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700 transition-all cursor-pointer">Đồng Ý Hủy (Nhả tồn kho)</button>
                             </form>
                             <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/reject-cancel'}" method="post" class="flex items-center gap-1">
@@ -240,8 +240,8 @@
 
                         <!-- Xử lý Trả hàng - Hoàn tiền -->
                         <div th:if="${dh.trangThai == 'TraHangHoanTien'}" class="flex items-center gap-2">
-                            <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/accept-return'}" method="post" onsubmit="return confirm('Xác nhận đã nhận lại sách và đồng ý hoàn tiền cho khách?');">
-                                <button type="submit" class="px-4 py-2 bg-purple-600 text-white font-bold text-xs rounded-xl hover:bg-purple-700 transition-all cursor-pointer">Đã Nhận Lại Sách &amp; Hoàn Tiền</button>
+                            <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/accept-return'}" method="post" onsubmit="return confirm('Xác nhận đã nhận lại sản phẩm và đồng ý hoàn tiền cho khách?');">
+                                <button type="submit" class="px-4 py-2 bg-purple-600 text-white font-bold text-xs rounded-xl hover:bg-purple-700 transition-all cursor-pointer">Đã Nhận Lại Hàng &amp; Hoàn Tiền</button>
                             </form>
                             <form th:action="@{'/vendor/orders/' + ${dh.maDH} + '/reject-return'}" method="post" class="flex items-center gap-1">
                                 <input type="text" name="lyDo" required placeholder="Lý do từ chối trả..." class="px-3 py-1.5 border rounded-lg text-xs"/>

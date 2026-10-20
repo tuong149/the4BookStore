@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/common/head :: common_head(${shop.tenShop} + ' - Gian Hàng Sách')}"></head>
+<head th:replace="~{fragments/common/head :: common_head(${shop.tenShop} + ' - Gian Hàng Sản Phẩm')}"></head>
 
 <body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
@@ -47,7 +47,7 @@
                                     <span>Gian Hàng Xác Thực</span>
                                 </span>
                             </div>
-                            <p class="text-xs text-on-surface-variant mt-2 max-w-2xl leading-relaxed" th:text="${shop.moTa ?: 'Gian hàng sách chọn lọc chính hãng trên The4BookStore'}">Mô tả gian hàng</p>
+                            <p class="text-xs text-on-surface-variant mt-2 max-w-2xl leading-relaxed" th:text="${shop.moTa ?: 'Gian hàng sản phẩm chọn lọc chính hãng trên The4BookStore'}">Mô tả gian hàng</p>
                             
                             <!-- Badges row -->
                             <div class="flex items-center gap-4 text-xs text-on-surface-variant mt-3 flex-wrap">
@@ -60,8 +60,8 @@
                                     <span th:text="${shop.soDienThoai}">SĐT</span>
                                 </span>
                                 <span class="flex items-center gap-1 font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg">
-                                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
-                                    <span th:text="${page.totalElements} + ' cuốn sách'">15 cuốn sách</span>
+                                    <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+                                    <span th:text="${page.totalElements} + ' sản phẩm'">15 sản phẩm</span>
                                 </span>
                             </div>
                         </div>
@@ -175,10 +175,10 @@
                         <div class="flex items-center gap-2">
                             <h2 class="text-base sm:text-lg font-bold text-on-surface">
                                 <span th:if="${keyword != null and !keyword.isEmpty()}">Kết Quả Tìm Kiếm</span>
-                                <span th:unless="${keyword != null and !keyword.isEmpty()}">Sách Bán Chạy Của Gian Hàng</span>
+                                <span th:unless="${keyword != null and !keyword.isEmpty()}">Sản Phẩm Bán Chạy Của Gian Hàng</span>
                             </h2>
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary" 
-                                  th:text="${page.totalElements} + ' cuốn sách'">2 cuốn sách</span>
+                                  th:text="${page.totalElements} + ' sản phẩm'">2 sản phẩm</span>
                         </div>
                         <p th:if="${keyword != null and !keyword.isEmpty()}" class="text-xs text-on-surface-variant mt-0.5" 
                            th:text="'Tìm theo từ khóa \'' + ${keyword} + '\''"></p>
@@ -191,7 +191,7 @@
                 <!-- Search form -->
                 <form method="get" th:action="@{'/shop/' + ${shop.slug}}" class="relative flex items-center w-full md:w-80 shrink-0">
                     <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">search</span>
-                    <input type="text" name="q" th:value="${keyword}" placeholder="Tìm sách trong gian hàng..."
+                    <input type="text" name="q" th:value="${keyword}" placeholder="Tìm sản phẩm trong gian hàng..."
                            class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-surface-container-low border border-surface-container text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"/>
                     <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{'/shop/' + ${shop.slug}}"
                        class="absolute right-3 text-on-surface-variant hover:text-error text-xs flex items-center" title="Xóa tìm kiếm">
@@ -205,13 +205,13 @@
                 <div class="flex items-center gap-2 overflow-x-auto pb-2 scroll-smooth horizontal-scroll-category flex-nowrap">
                     <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1.5 pr-1">
                         <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
-                        <span>Loại sách:</span>
+                        <span>Danh mục:</span>
                     </span>
                     
                     <button type="button" onclick="filterShopCategory('all', this)"
                             class="shop-cat-filter-btn shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1 cursor-pointer border-0">
                         <span class="material-symbols-outlined text-[14px]">apps</span>
-                        <span>Tất cả sách</span>
+                        <span>Tất cả sản phẩm</span>
                     </button>
 
                     <button type="button" th:each="cat : ${navbarCategoriesSach}"
@@ -235,27 +235,27 @@
             <!-- Empty Filter State -->
             <div id="shopCategoryNoMatch" class="hidden py-16 text-center bg-surface-container-lowest rounded-3xl border border-surface-container shadow-xs">
                 <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-2">filter_alt_off</span>
-                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sách trong loại này</h3>
-                <p class="text-xs text-on-surface-variant max-w-sm mx-auto">Gian hàng hiện chưa có sách thuộc thể loại này.</p>
+                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sản phẩm trong loại này</h3>
+                <p class="text-xs text-on-surface-variant max-w-sm mx-auto">Gian hàng hiện chưa có sản phẩm thuộc thể loại này.</p>
                 <button type="button" onclick="filterShopCategory('all', document.querySelector('.shop-cat-filter-btn'))"
                         class="mt-4 px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-all cursor-pointer">
-                    Xem tất cả sách của gian hàng
+                    Xem tất cả sản phẩm của gian hàng
                 </button>
             </div>
 
             <!-- Empty State -->
             <div th:if="${books.isEmpty()}" class="p-16 text-center text-on-surface-variant bg-surface-container-lowest rounded-3xl border border-surface-container shadow-xs">
-                <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-3">menu_book</span>
-                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sách nào</h3>
+                <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-3">inventory_2</span>
+                <h3 class="text-base font-bold text-on-surface mb-1">Không tìm thấy sản phẩm nào</h3>
                 <p class="text-xs text-on-surface-variant max-w-md mx-auto" th:if="${keyword != null and !keyword.isEmpty()}">
-                    Không tìm thấy sách nào phù hợp với từ khóa "<span class="font-semibold text-primary" th:text="${keyword}"></span>" trong gian hàng.
+                    Không tìm thấy sản phẩm nào phù hợp với từ khóa "<span class="font-semibold text-primary" th:text="${keyword}"></span>" trong gian hàng.
                 </p>
                 <p class="text-xs text-on-surface-variant max-w-md mx-auto" th:if="${keyword == null or keyword.isEmpty()}">
-                    Gian hàng hiện chưa có sản phẩm sách nào đang mở bán.
+                    Gian hàng hiện chưa có sản phẩm nào đang mở bán.
                 </p>
                 <a th:if="${keyword != null and !keyword.isEmpty()}" th:href="@{'/shop/' + ${shop.slug}}"
                    class="inline-block mt-4 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-all">
-                    Xem tất cả sách của shop
+                    Xem tất cả sản phẩm của shop
                 </a>
             </div>
 
@@ -283,7 +283,7 @@
                         <span class="material-symbols-outlined text-[22px]">verified</span>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-on-surface">100% Sách Thật &amp; Bản Quyền</h4>
+                        <h4 class="text-xs font-bold text-on-surface">100% Sản Phẩm Chính Hãng</h4>
                         <p class="text-[11px] text-on-surface-variant mt-0.5">Tuyển chọn từ NXB uy tín</p>
                     </div>
                 </div>
@@ -304,7 +304,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-on-surface">Đổi Trả Dễ Dàng 7 Ngày</h4>
-                        <p class="text-[11px] text-on-surface-variant mt-0.5">Nếu sách lỗi in ấn, cong vênh</p>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">Nếu sản phẩm có lỗi từ nhà sản xuất</p>
                     </div>
                 </div>
 

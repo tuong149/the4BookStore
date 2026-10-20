@@ -83,7 +83,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/api/webhooks/**", "/don-hang/api/**", "/ws/**", "/vendor/imports", "/vendor/imports/**"))
             .authorizeHttpRequests(auth -> auth
                 // Phân quyền cho Vendor Portal (Chủ shop, Quản trị, Manager)
-                .requestMatchers("/vendor", "/vendor/register", "/vendor/register/**", "/vendor/pending", "/vendor/blocked").authenticated()
+                .requestMatchers("/vendor", "/vendor/register", "/vendor/register/**", "/vendor/pending", "/vendor/blocked", "/vendor/rejected").authenticated()
                 .requestMatchers("/vendor/**").hasAnyRole("VENDOR", "ADMIN", "MANAGER")
 
                 // Phân quyền cho Quản trị Admin & Manager (4 role chính: ADMIN, MANAGER, VENDOR, KHACHHANG, QUANLY tương thích ngược)
@@ -112,7 +112,7 @@ public class SecurityConfig {
                 // Công khai (Public routes: chỉ xem web, xem sản phẩm, xem shop, tìm kiếm)
                 .requestMatchers("/shop", "/shop/**").permitAll()
                 .requestMatchers("/register", "/register/**", "/login", "/process-login", "/forgot-password", "/forgot-password/**", "/reset-password", "/reset-password/**", "/verify-otp", "/resend-otp").permitAll()
-                .requestMatchers("/", "/home", "/san-pham/**", "/products/**", "/search/**", "/css/**", "/js/**", "/images/**", "/webjars/**", "/error", "/favicon.ico", "/favicon.png").permitAll()
+                .requestMatchers("/", "/home", "/san-pham/**", "/search/**", "/css/**", "/js/**", "/images/**", "/webjars/**", "/error", "/favicon.ico", "/favicon.png").permitAll()
                 .requestMatchers("/ws", "/ws/**").permitAll()
 
                 // Fail-Close policy: Bất kỳ URL nào khác đều phải xác thực
