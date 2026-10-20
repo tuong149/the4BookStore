@@ -17,6 +17,7 @@ import vn.bookstore.the4bookstore.service.GioHangService;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class CartController {
@@ -292,19 +293,42 @@ public class CartController {
         String shippingVoucher = maVoucherShipping;
 
         try {
-            DonHang donHang = donHangService.createOrder(kh, finalDiaChi, finalSoDienThoai, phuongThuc, ghiChu, selectedProductIds, orderVoucher, shippingVoucher, maNvc);
+            List<DonHang> createdOrders = donHangService.createOrders(kh, finalDiaChi, finalSoDienThoai, phuongThuc, ghiChu, selectedProductIds, orderVoucher, shippingVoucher, maNvc);
 
-            if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
-                redirectAttributes.addFlashAttribute("successMessage",
-                        "Đặt hàng thành công! Vui lòng quét mã VietQR bên dưới để thanh toán đơn hàng #TB-" + donHang.getMaDH());
-                return "redirect:/don-hang/" + donHang.getMaDH();
+            if (createdOrders == null || createdOrders.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể tạo đơn hàng, vui lòng thử lại!");
+                return "redirect:/gio-hang";
             }
 
-            redirectAttributes.addFlashAttribute("orderSuccess", true);
-            redirectAttributes.addFlashAttribute("maDH", donHang.getMaDH());
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đặt hàng thành công! Mã đơn hàng: #TB-" + donHang.getMaDH());
-            return "redirect:/gio-hang?datHangThanhCong=true&maDH=" + donHang.getMaDH();
+            DonHang primaryOrder = createdOrders.get(0);
+            boolean isMultiShop = createdOrders.size() > 1;
+
+            if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+                if (isMultiShop) {
+                    String orderCodes = createdOrders.stream().map(d -> "#TB-" + d.getMaDH()).collect(Collectors.joining(", "));
+                    redirectAttributes.addFlashAttribute("successMessage",
+                            "Đặt hàng thành công " + createdOrders.size() + " kiện hàng từ các gian hàng: " + orderCodes + ". Vui lòng quét mã VietQR để thanh toán từng đơn.");
+                    return "redirect:/don-hang";
+                } else {
+                    redirectAttributes.addFlashAttribute("successMessage",
+                            "Đặt hàng thành công! Vui lòng quét mã VietQR bên dưới để thanh toán đơn hàng #TB-" + primaryOrder.getMaDH());
+                    return "redirect:/don-hang/" + primaryOrder.getMaDH();
+                }
+            }
+
+            if (isMultiShop) {
+                String orderCodes = createdOrders.stream().map(d -> "#TB-" + d.getMaDH()).collect(Collectors.joining(", "));
+                redirectAttributes.addFlashAttribute("orderSuccess", true);
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đặt hàng thành công! Đơn hàng được tự động phân tách thành " + createdOrders.size() + " kiện hàng theo từng Shop: " + orderCodes);
+                return "redirect:/don-hang";
+            } else {
+                redirectAttributes.addFlashAttribute("orderSuccess", true);
+                redirectAttributes.addFlashAttribute("maDH", primaryOrder.getMaDH());
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "Đặt hàng thành công! Mã đơn hàng: #TB-" + primaryOrder.getMaDH());
+                return "redirect:/gio-hang?datHangThanhCong=true&maDH=" + primaryOrder.getMaDH();
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi đặt hàng: " + e.getMessage());
             return "redirect:/gio-hang";

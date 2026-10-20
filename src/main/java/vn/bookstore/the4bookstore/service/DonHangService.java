@@ -8,9 +8,8 @@ import vn.bookstore.the4bookstore.entity.*;
 import vn.bookstore.the4bookstore.repository.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DonHangService {
@@ -88,6 +87,22 @@ public class DonHangService {
                                String maVoucherOrder,
                                String maVoucherShipping,
                                Integer maNvc) {
+        List<DonHang> orders = createOrders(khachHang, diaChiGiao, soDienThoaiGiao, phuongThuc, ghiChu,
+                selectedProductIds, maVoucherOrder, maVoucherShipping, maNvc);
+        return orders.isEmpty() ? null : orders.get(0);
+    }
+
+    /**
+     * Tự động phân tách đơn hàng theo từng Shop (Multi-Vendor Split Orders).
+     * Mỗi Shop sẽ nhận 1 đơn hàng độc lập, xử lý riêng và nhận doanh thu riêng.
+     */
+    @Transactional
+    public List<DonHang> createOrders(KhachHang khachHang, String diaChiGiao,
+                                      String soDienThoaiGiao, String phuongThuc, String ghiChu,
+                                      List<Integer> selectedProductIds,
+                                      String maVoucherOrder,
+                                      String maVoucherShipping,
+                                      Integer maNvc) {
 
         // 1. Lấy giỏ hàng
         List<ChiTietGioHang> allCartItems = gioHangService.getCartItems(khachHang);
@@ -110,7 +125,7 @@ public class DonHangService {
         }
 
         // 2. Khóa và kiểm tra tồn kho bằng Pessimistic Lock (tránh race condition)
-        List<SanPham> lockedProducts = new ArrayList<>();
+        Map<Integer, SanPham> lockedProductMap = new HashMap<>();
         for (ChiTietGioHang ct : cartItems) {
             Integer maSP = ct.getSanPham().getMaSP();
             SanPham sp = sanPhamRepository.findByIdWithLock(maSP)
@@ -128,22 +143,31 @@ public class DonHangService {
                 throw new RuntimeException("Sản phẩm \"" + sp.getTenSP() + "\" không đủ số lượng tồn kho (chỉ còn " 
                         + sp.getSoLuongTon() + " sản phẩm)!");
             }
-            lockedProducts.add(sp);
+            lockedProductMap.put(maSP, sp);
         }
 
-        // Xác định Shop của đơn hàng
-        Shop shop = null;
-        for (SanPham sp : lockedProducts) {
-            if (sp.getShop() != null) {
-                shop = sp.getShop();
-                break;
+        // 3. Nhóm các sản phẩm theo từng Shop
+        Map<Integer, List<ChiTietGioHang>> itemsByShopId = new LinkedHashMap<>();
+        for (ChiTietGioHang ct : cartItems) {
+            SanPham sp = lockedProductMap.get(ct.getSanPham().getMaSP());
+            Integer sId = (sp.getShop() != null && sp.getShop().getMaShop() != null) ? sp.getShop().getMaShop() : 1;
+            itemsByShopId.computeIfAbsent(sId, k -> new ArrayList<>()).add(ct);
+        }
+
+        // 4. Tính toán tiền hàng từng Shop và tổng tiền hàng cả giỏ
+        int totalSubtotal = 0;
+        Map<Integer, Integer> shopSubtotals = new LinkedHashMap<>();
+        for (Map.Entry<Integer, List<ChiTietGioHang>> entry : itemsByShopId.entrySet()) {
+            int sub = 0;
+            for (ChiTietGioHang ct : entry.getValue()) {
+                SanPham sp = lockedProductMap.get(ct.getSanPham().getMaSP());
+                sub += sp.getGiaBan() * ct.getSoLuong();
             }
-        }
-        if (shop == null) {
-            shop = shopRepository.findById(1).orElse(null);
+            shopSubtotals.put(entry.getKey(), sub);
+            totalSubtotal += sub;
         }
 
-        // Xác định Nhà Vận Chuyển
+        // 5. Xác định Nhà Vận Chuyển
         NhaVanChuyen nvc = null;
         if (maNvc != null) {
             nvc = nhaVanChuyenRepository.findById(maNvc).orElse(null);
@@ -154,59 +178,10 @@ public class DonHangService {
                     .findFirst().orElse(null);
         }
         int rawPhiVanChuyen = (nvc != null && nvc.getPhiCoBan() != null) ? nvc.getPhiCoBan() : 30000;
-        java.math.BigDecimal chietKhauApp = (shop != null && shop.getChietKhauPhanTram() != null) ? shop.getChietKhauPhanTram() : new java.math.BigDecimal("10.00");
 
-        // 3. Tạo đơn hàng
-        DonHang donHang = new DonHang();
-        donHang.setKhachHang(khachHang);
-        donHang.setShop(shop);
-        donHang.setNhaVanChuyen(nvc);
-        donHang.setPhiVanChuyen(rawPhiVanChuyen);
-        donHang.setChietKhauAppPhanTram(chietKhauApp);
-        donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
-        if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
-            donHang.setTrangThai("ChoThanhToan");
-            donHang.setTrangThaiThanhToan("ChuaThanhToan");
-        } else {
-            donHang.setTrangThai("ChoXuLy");
-            donHang.setTrangThaiThanhToan("ChuaThanhToan");
-        }
-        donHang.setNgayDat(LocalDateTime.now());
-        donHang.setDiaChiGiao(diaChiGiao);
-        donHang.setSoDienThoaiGiao(soDienThoaiGiao);
-        donHang.setTienGiam(0);
-
-        // Lưu đơn hàng trước để lấy maDH
-        donHang = donHangRepository.save(donHang);
-
-        // 4. Tạo chi tiết đơn hàng, trừ tồn kho an toàn và tính tổng tiền
-        int tongTien = 0;
-        List<ChiTietDonHang> chiTietList = new ArrayList<>();
-
-        for (int i = 0; i < cartItems.size(); i++) {
-            ChiTietGioHang ctGH = cartItems.get(i);
-            SanPham sp = lockedProducts.get(i);
-
-            ChiTietDonHang ctDH = new ChiTietDonHang();
-            ctDH.setDonHang(donHang);
-            ctDH.setSanPham(sp);
-            ctDH.setSoLuong(ctGH.getSoLuong());
-            ctDH.setDonGia(sp.getGiaBan());
-
-            chiTietDonHangRepository.save(ctDH);
-            chiTietList.add(ctDH);
-
-            // 5. Trừ tồn kho & cộng số lượng đã bán
-            sp.setSoLuongTon(sp.getSoLuongTon() - ctGH.getSoLuong());
-            sp.setSoLuongDaBan((sp.getSoLuongDaBan() != null ? sp.getSoLuongDaBan() : 0) + ctGH.getSoLuong());
-            sanPhamRepository.save(sp);
-
-            tongTien += sp.getGiaBan() * ctGH.getSoLuong();
-        }
-
-        // 6. Xử lý giảm giá từ mã khuyến mãi (Hỗ trợ áp dụng cùng lúc 1 ORDER_DISCOUNT và 1 SHIPPING_DISCOUNT)
-        int tienGiamSanPham = 0;
-        int tienGiamFreeship = 0;
+        // 6. Xử lý giảm giá từ mã khuyến mãi toàn sàn
+        int totalOrderDiscount = 0;
+        int totalShippingDiscount = 0;
         KhuyenMai voucherOrder = null;
         KhuyenMai voucherShipping = null;
 
@@ -240,22 +215,22 @@ public class DonHangService {
             if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
                 throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết lượt sử dụng!");
             }
-            if (km.getDonToiThieu() != null && tongTien < km.getDonToiThieu()) {
+            if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
                 throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
             }
 
             if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
-                tienGiamSanPham = (int) Math.round(tongTien * (km.getGiaTriGiam() / 100.0));
-                if (km.getGiamToiDa() != null && tienGiamSanPham > km.getGiamToiDa()) {
-                    tienGiamSanPham = km.getGiamToiDa();
+                totalOrderDiscount = (int) Math.round(totalSubtotal * (km.getGiaTriGiam() / 100.0));
+                if (km.getGiamToiDa() != null && totalOrderDiscount > km.getGiamToiDa()) {
+                    totalOrderDiscount = km.getGiamToiDa();
                 }
-                if (tienGiamSanPham > tongTien) {
-                    tienGiamSanPham = tongTien;
+                if (totalOrderDiscount > totalSubtotal) {
+                    totalOrderDiscount = totalSubtotal;
                 }
             } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
-                tienGiamSanPham = Math.min(tongTien, km.getGiaTriGiam());
+                totalOrderDiscount = Math.min(totalSubtotal, km.getGiaTriGiam());
             } else {
-                tienGiamSanPham = Math.min(tongTien, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
+                totalOrderDiscount = Math.min(totalSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
             }
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
@@ -266,15 +241,12 @@ public class DonHangService {
         }
 
         // Kiểm tra chính sách Miễn phí vận chuyển toàn sàn:
-        // Đơn hàng có tiền hàng >= 350.000 đ được tự động miễn phí vận chuyển
         final int FREE_SHIPPING_THRESHOLD = 350000;
-        int phiVanChuyen = rawPhiVanChuyen;
-        if (tongTien >= FREE_SHIPPING_THRESHOLD) {
-            // Đạt điều kiện Freeship tự động
-            tienGiamFreeship = phiVanChuyen;
+        if (totalSubtotal >= FREE_SHIPPING_THRESHOLD) {
+            totalShippingDiscount = rawPhiVanChuyen;
         }
 
-        // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT) nếu có nhập thêm voucher
+        // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT)
         if (maVoucherShipping != null && !maVoucherShipping.isBlank()) {
             String cleanCode = maVoucherShipping.trim().toUpperCase();
             KhuyenMai km = khuyenMaiRepository.findByMaCode(cleanCode)
@@ -298,12 +270,12 @@ public class DonHangService {
             if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
                 throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết lượt sử dụng!");
             }
-            if (km.getDonToiThieu() != null && tongTien < km.getDonToiThieu()) {
+            if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
                 throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
             }
 
             int maxFreeshipDiscount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
-            tienGiamFreeship = Math.max(tienGiamFreeship, Math.min(phiVanChuyen, maxFreeshipDiscount));
+            totalShippingDiscount = Math.max(totalShippingDiscount, Math.min(rawPhiVanChuyen, maxFreeshipDiscount));
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
             khuyenMaiRepository.save(km);
@@ -312,60 +284,142 @@ public class DonHangService {
             markVoucherUsedInWallet(khachHang, km);
         }
 
-        // Tổng tiền đơn hàng:
-        // (Tiền hàng - Giảm giá sản phẩm) + (Phí vận chuyển - Giảm phí vận chuyển)
-        int tienHangSauGiam = Math.max(0, tongTien - tienGiamSanPham);
-        int phiShipSauGiam = Math.max(0, phiVanChuyen - tienGiamFreeship);
-        int finalTotal = Math.max(0, tienHangSauGiam + phiShipSauGiam);
+        // 7. Tạo từng đơn hàng độc lập theo từng Shop
+        List<DonHang> createdOrders = new ArrayList<>();
+        int shopCount = itemsByShopId.size();
+        int currentShopIdx = 0;
+        int allocatedOrderDiscount = 0;
 
-        int tienPhiSan = (int) Math.round(tongTien * (chietKhauApp.doubleValue() / 100.0));
-        int tienThucNhan = Math.max(0, tienHangSauGiam - tienPhiSan);
-        donHang.setTienPhiSan(tienPhiSan);
-        donHang.setTienThucNhanShop(tienThucNhan);
-        donHang.setTongTien(finalTotal);
-        donHang.setTienGiam(tienGiamSanPham);
-        donHang.setTienGiamFreeship(tienGiamFreeship);
-        donHang.setKhuyenMai(voucherOrder);
-        donHang.setKhuyenMaiFreeship(voucherShipping);
-        donHang.setChiTietDonHangs(chiTietList);
-        donHang = donHangRepository.save(donHang);
+        for (Map.Entry<Integer, List<ChiTietGioHang>> entry : itemsByShopId.entrySet()) {
+            Integer sId = entry.getKey();
+            List<ChiTietGioHang> shopItems = entry.getValue();
+            int shopSub = shopSubtotals.get(sId);
+            Shop shop = shopRepository.findById(sId).orElse(null);
 
-        // 7. Tạo bản ghi thanh toán
-        ThanhToan thanhToan = new ThanhToan();
-        thanhToan.setDonHang(donHang);
-        thanhToan.setPhuongThuc(phuongThuc != null ? phuongThuc : "COD");
-        thanhToan.setTrangThai("ChoThanhToan");
-        thanhToan.setSoTien(finalTotal);
-        thanhToan.setNoiDung("Thanh toán đơn hàng #" + donHang.getMaDH());
-        thanhToanRepository.save(thanhToan);
+            // Phân bổ giảm giá sản phẩm theo tỷ lệ giá trị tiền hàng của từng Shop
+            int shopOrderDiscount = 0;
+            if (totalOrderDiscount > 0 && totalSubtotal > 0) {
+                if (currentShopIdx == shopCount - 1) {
+                    shopOrderDiscount = Math.max(0, totalOrderDiscount - allocatedOrderDiscount);
+                } else {
+                    shopOrderDiscount = (int) Math.round((double) shopSub / totalSubtotal * totalOrderDiscount);
+                    allocatedOrderDiscount += shopOrderDiscount;
+                }
+                if (shopOrderDiscount > shopSub) {
+                    shopOrderDiscount = shopSub;
+                }
+            }
+
+            // Phí ship và giảm giá freeship cho shop:
+            int shopShippingFee = 0;
+            int shopShippingDiscount = 0;
+            if (totalSubtotal >= FREE_SHIPPING_THRESHOLD) {
+                shopShippingFee = rawPhiVanChuyen;
+                shopShippingDiscount = rawPhiVanChuyen;
+            } else {
+                if (currentShopIdx == 0) {
+                    shopShippingFee = rawPhiVanChuyen;
+                    shopShippingDiscount = totalShippingDiscount;
+                } else {
+                    shopShippingFee = 0;
+                    shopShippingDiscount = 0;
+                }
+            }
+
+            int shopTienHangSauGiam = Math.max(0, shopSub - shopOrderDiscount);
+            int shopPhiShipSauGiam = Math.max(0, shopShippingFee - shopShippingDiscount);
+            int shopFinalTotal = Math.max(0, shopTienHangSauGiam + shopPhiShipSauGiam);
+
+            java.math.BigDecimal chietKhauApp = (shop != null && shop.getChietKhauPhanTram() != null)
+                    ? shop.getChietKhauPhanTram() : new java.math.BigDecimal("10.00");
+            int tienPhiSan = (int) Math.round(shopSub * (chietKhauApp.doubleValue() / 100.0));
+            int tienThucNhanShop = Math.max(0, shopTienHangSauGiam - tienPhiSan);
+
+            DonHang donHang = new DonHang();
+            donHang.setKhachHang(khachHang);
+            donHang.setShop(shop);
+            donHang.setNhaVanChuyen(nvc);
+            donHang.setPhiVanChuyen(shopShippingFee);
+            donHang.setTienGiamFreeship(shopShippingDiscount);
+            donHang.setChietKhauAppPhanTram(chietKhauApp);
+            donHang.setTienPhiSan(tienPhiSan);
+            donHang.setTienThucNhanShop(tienThucNhanShop);
+            donHang.setTongTien(shopFinalTotal);
+            donHang.setTienGiam(shopOrderDiscount);
+            donHang.setKhuyenMai(voucherOrder);
+            donHang.setKhuyenMaiFreeship(voucherShipping);
+            donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
+            if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+                donHang.setTrangThai("ChoThanhToan");
+                donHang.setTrangThaiThanhToan("ChuaThanhToan");
+            } else {
+                donHang.setTrangThai("ChoXuLy");
+                donHang.setTrangThaiThanhToan("ChuaThanhToan");
+            }
+            donHang.setNgayDat(LocalDateTime.now());
+            donHang.setDiaChiGiao(diaChiGiao);
+            donHang.setSoDienThoaiGiao(soDienThoaiGiao);
+
+            donHang = donHangRepository.save(donHang);
+
+            // Chi tiết đơn hàng và trừ tồn kho
+            List<ChiTietDonHang> chiTietList = new ArrayList<>();
+            for (ChiTietGioHang ctGH : shopItems) {
+                SanPham sp = lockedProductMap.get(ctGH.getSanPham().getMaSP());
+                ChiTietDonHang ctDH = new ChiTietDonHang();
+                ctDH.setDonHang(donHang);
+                ctDH.setSanPham(sp);
+                ctDH.setSoLuong(ctGH.getSoLuong());
+                ctDH.setDonGia(sp.getGiaBan());
+
+                chiTietDonHangRepository.save(ctDH);
+                chiTietList.add(ctDH);
+
+                sp.setSoLuongTon(sp.getSoLuongTon() - ctGH.getSoLuong());
+                sp.setSoLuongDaBan((sp.getSoLuongDaBan() != null ? sp.getSoLuongDaBan() : 0) + ctGH.getSoLuong());
+                sanPhamRepository.save(sp);
+            }
+            donHang.setChiTietDonHangs(chiTietList);
+            donHang = donHangRepository.save(donHang);
+            createdOrders.add(donHang);
+
+            // Bản ghi thanh toán cho đơn của shop
+            ThanhToan thanhToan = new ThanhToan();
+            thanhToan.setDonHang(donHang);
+            thanhToan.setPhuongThuc(phuongThuc != null ? phuongThuc : "COD");
+            thanhToan.setTrangThai("ChoThanhToan");
+            thanhToan.setSoTien(shopFinalTotal);
+            thanhToan.setNoiDung("Thanh toán đơn hàng #" + donHang.getMaDH() + " (" + (shop != null ? shop.getTenShop() : "Gian hàng") + ")");
+            thanhToanRepository.save(thanhToan);
+
+            // Bắn thông báo Real-time qua WebSocket
+            try {
+                OrderNotificationDTO noti = OrderNotificationDTO.builder()
+                        .maDH(donHang.getMaDH())
+                        .tenKhachHang(khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng #" + khachHang.getMaKH())
+                        .soDienThoai(donHang.getSoDienThoaiGiao())
+                        .diaChiGiao(donHang.getDiaChiGiao())
+                        .tongTien(donHang.getTongTien())
+                        .soLuongMon(shopItems.size())
+                        .trangThai(donHang.getTrangThai())
+                        .ngayDat(donHang.getNgayDat())
+                        .message("Có đơn hàng mới #" + donHang.getMaDH() + " từ " + (khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng"))
+                        .build();
+                messagingTemplate.convertAndSend("/topic/admin/orders", noti);
+                if (shop != null && shop.getMaShop() != null) {
+                    messagingTemplate.convertAndSend("/topic/vendor/" + shop.getMaShop() + "/orders", noti);
+                }
+            } catch (Exception ignored) {}
+
+            currentShopIdx++;
+        }
 
         // 8. Xóa các món đã đặt khỏi giỏ hàng
         for (ChiTietGioHang ctGH : cartItems) {
             gioHangService.removeFromCart(khachHang, ctGH.getSanPham().getMaSP());
         }
 
-        // 9. Bắn thông báo Real-time qua WebSocket cho Admin Dashboard
-        try {
-            OrderNotificationDTO noti = OrderNotificationDTO.builder()
-                    .maDH(donHang.getMaDH())
-                    .tenKhachHang(khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng #" + khachHang.getMaKH())
-                    .soDienThoai(donHang.getSoDienThoaiGiao())
-                    .diaChiGiao(donHang.getDiaChiGiao())
-                    .tongTien(donHang.getTongTien())
-                    .soLuongMon(cartItems.size())
-                    .trangThai(donHang.getTrangThai())
-                    .ngayDat(donHang.getNgayDat())
-                    .message("Có đơn hàng mới #" + donHang.getMaDH() + " từ " + (khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng"))
-                    .build();
-            messagingTemplate.convertAndSend("/topic/admin/orders", noti);
-            if (shop != null && shop.getMaShop() != null) {
-                messagingTemplate.convertAndSend("/topic/vendor/" + shop.getMaShop() + "/orders", noti);
-            }
-        } catch (Exception ignored) {
-            // Không làm gián đoạn transaction đặt hàng nếu WebSocket gặp sự cố
-        }
-
-        return donHang;
+        return createdOrders;
     }
 
     /**
