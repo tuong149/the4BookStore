@@ -26,7 +26,7 @@ class AdminPagesSmokeTest {
                         org.hamcrest.Matchers.containsString("Danh Sách Sản Phẩm Mới Trên Sàn")
                 ))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
-                        org.hamcrest.Matchers.containsString("Top Sách Bán Chạy Nhất")
+                        org.hamcrest.Matchers.containsString("Top Sản Phẩm Bán Chạy Nhất")
                 ))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
                         org.hamcrest.Matchers.containsString("Đơn Hàng Gần Đây Trên Sàn")

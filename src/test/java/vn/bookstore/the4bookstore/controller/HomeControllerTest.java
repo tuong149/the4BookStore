@@ -102,7 +102,7 @@ class HomeControllerTest {
                 .andExpect(model().attribute("catCurrentPage", 0))
                 .andExpect(model().attribute("catTotalPages", 2))
                 .andExpect(model().attribute("catTotalElements", 15L))
-                .andExpect(content().string(containsString("Sách Tuyển Chọn Bán Chạy")))
+                .andExpect(content().string(containsString("Sản Phẩm Tuyển Chọn Bán Chạy")))
                 .andExpect(content().string(containsString("Tất Cả Sản Phẩm")))
                 .andExpect(content().string(containsString("Các danh mục")));
     }
