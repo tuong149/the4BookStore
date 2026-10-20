@@ -86,7 +86,7 @@
                     </div>
 
                     <!-- Author (Chỉ hiển thị với Sản phẩm là Sách) -->
-                    <div th:if="${sanPham.loaiSP == 'Sach'}" class="flex flex-wrap items-center gap-space-md text-sm text-on-surface-variant">
+                    <div th:if="${#strings.equalsIgnoreCase(sanPham.loaiSP, 'Sach') or sanPham.loaiSP == null}" class="flex flex-wrap items-center gap-space-md text-sm text-on-surface-variant">
                         <div th:if="${sanPham.danhSachTacGia != null and !sanPham.danhSachTacGia.isEmpty()}" class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[18px] text-primary">person_edit</span>
                             <span>Tác giả: </span>
@@ -169,7 +169,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm mt-space-xs">
                         <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60">
                             <p class="text-xs text-on-surface-variant mb-0.5">Danh mục</p>
-                            <p class="text-sm font-semibold text-on-surface" th:text="${sanPham.loaiSP == 'Sach' ? 'Sách' : (sanPham.loaiSP == 'VanPhongPham' ? 'Văn Phòng Phẩm' : (sanPham.loaiSP == 'QuaTang' ? 'Quà Tặng & Trang Trí' : sanPham.loaiSP))}">Sách</p>
+                            <p class="text-sm font-semibold text-on-surface" th:text="${#strings.equalsIgnoreCase(sanPham.loaiSP, 'Sach') ? 'Sách' : (sanPham.loaiSP == 'VanPhongPham' ? 'Văn Phòng Phẩm' : (sanPham.loaiSP == 'QuaTang' ? 'Quà Tặng & Trang Trí' : sanPham.loaiSP))}">Sách</p>
                         </div>
                         <div class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-container/60" th:if="${sanPham.danhMuc != null}">
                             <p class="text-xs text-on-surface-variant mb-0.5">Loại sản phẩm</p>

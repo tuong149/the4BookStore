@@ -182,7 +182,7 @@
                                     <h3 class="font-headline-sm text-sm font-bold text-on-surface leading-tight hover:text-primary transition-colors">
                                         <a th:href="@{'/san-pham/' + ${ct.sanPham.maSP}}" th:text="${ct.sanPham.tenSP}">Tên sản phẩm</a>
                                     </h3>
-                                    <span th:if="${ct.sanPham.loaiSP == 'Sach' and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" 
+                                    <span th:if="${(#strings.equalsIgnoreCase(ct.sanPham.loaiSP, 'Sach') or ct.sanPham.loaiSP == null) and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" 
                                           class="text-xs text-on-surface-variant mt-0.5" 
                                           th:text="${ct.sanPham.danhSachTacGia}">Tác giả</span>
 

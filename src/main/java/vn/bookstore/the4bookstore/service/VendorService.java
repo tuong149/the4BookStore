@@ -31,6 +31,8 @@ public class VendorService {
     private final DanhMucRepository danhMucRepository;
     private final SanPhamService sanPhamService;
     private final ThanhToanRepository thanhToanRepository;
+    private final TacGiaRepository tacGiaRepository;
+    private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
 
     public VendorService(ShopRepository shopRepository,
                          SanPhamRepository sanPhamRepository,
@@ -38,7 +40,9 @@ public class VendorService {
                          KhuyenMaiRepository khuyenMaiRepository,
                          DanhMucRepository danhMucRepository,
                          SanPhamService sanPhamService,
-                         ThanhToanRepository thanhToanRepository) {
+                         ThanhToanRepository thanhToanRepository,
+                         TacGiaRepository tacGiaRepository,
+                         SanPhamTacGiaRepository sanPhamTacGiaRepository) {
         this.shopRepository = shopRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.donHangRepository = donHangRepository;
@@ -46,6 +50,8 @@ public class VendorService {
         this.danhMucRepository = danhMucRepository;
         this.sanPhamService = sanPhamService;
         this.thanhToanRepository = thanhToanRepository;
+        this.tacGiaRepository = tacGiaRepository;
+        this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
     }
 
     // --- DASHBOARD THỐNG KÊ CỦA SHOP ---
@@ -118,24 +124,11 @@ public class VendorService {
         return sanPhamRepository.filterShopProducts(maShop, trimmedKeyword, maDanhMuc, trimmedLoaiSP, sortedPageable);
     }
 
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
-    private TacGiaRepository tacGiaRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
-    private SanPhamTacGiaRepository sanPhamTacGiaRepository;
-
-    public void setTacGiaRepository(TacGiaRepository tacGiaRepository) {
-        this.tacGiaRepository = tacGiaRepository;
-    }
-
-    public void setSanPhamTacGiaRepository(SanPhamTacGiaRepository sanPhamTacGiaRepository) {
-        this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
-    }
-
     public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc) {
         return saveShopProduct(maShop, sanPham, maDanhMuc, (String) null);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"authors", "home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories"}, allEntries = true)
     public SanPham saveShopProduct(Integer maShop, SanPham sanPham, Integer maDanhMuc, String tenTacGia) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
@@ -168,7 +161,14 @@ public class VendorService {
             existing.setSoLuongTon(sanPham.getSoLuongTon());
             existing.setMoTa(sanPham.getMoTa());
             existing.setISBN(sanPham.getISBN());
-            existing.setLoaiSP(sanPham.getLoaiSP() != null ? sanPham.getLoaiSP() : "sach");
+            if (sanPham.getLoaiSP() != null && !sanPham.getLoaiSP().isBlank()) {
+                existing.setLoaiSP("sach".equalsIgnoreCase(sanPham.getLoaiSP()) ? "Sach" : sanPham.getLoaiSP());
+            } else if (existing.getLoaiSP() == null || "sach".equalsIgnoreCase(existing.getLoaiSP())) {
+                existing.setLoaiSP("Sach");
+            }
+            if (existing.getTrangThaiKhoa() == null || "ChoDuyet".equalsIgnoreCase(existing.getTrangThaiKhoa())) {
+                existing.setTrangThaiKhoa("BinhThuong");
+            }
             if (sanPham.getHinhAnh() != null && !sanPham.getHinhAnh().isBlank()) {
                 existing.setHinhAnh(sanPham.getHinhAnh());
             }
@@ -180,10 +180,12 @@ public class VendorService {
             saved = sanPhamRepository.save(existing);
         } else {
             sanPham.setShop(shop);
-            sanPham.setTrangThaiKhoa("ChoDuyet");
+            sanPham.setTrangThaiKhoa("BinhThuong");
             sanPham.setSoLuongDaBan(0);
             sanPham.setNgayTao(LocalDateTime.now());
-            if (sanPham.getLoaiSP() == null) sanPham.setLoaiSP("sach");
+            if (sanPham.getLoaiSP() == null || "sach".equalsIgnoreCase(sanPham.getLoaiSP())) {
+                sanPham.setLoaiSP("Sach");
+            }
             if (maDanhMuc != null) {
                 sanPham.setDanhMuc(danhMucRepository.findById(maDanhMuc).orElse(null));
             }
@@ -209,6 +211,7 @@ public class VendorService {
                                 .orElseGet(() -> {
                                     TacGia newTg = new TacGia();
                                     newTg.setTenTacGia(cleanName);
+                                    newTg.setMoTa("Tác giả sách");
                                     return tacGiaRepository.save(newTg);
                                 });
                         SanPhamTacGia sptg = new SanPhamTacGia(saved, tg, order++);
@@ -225,6 +228,7 @@ public class VendorService {
         return saved;
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"authors", "home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories"}, allEntries = true)
     public void deleteShopProduct(Integer maShop, Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));

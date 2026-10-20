@@ -135,7 +135,7 @@
 
                     <!-- Container Tác giả (Chỉ hiển thị cho Danh mục Sách) -->
                     <div id="authorGroup" class="flex items-center gap-space-sm flex-wrap"
-                         th:classappend="${loaiSP != 'Sach'} ? ' hidden' : ''">
+                         th:classappend="${!#strings.equalsIgnoreCase(loaiSP, 'Sach')} ? ' hidden' : ''">
                         <select th:if="${authors != null && !#lists.isEmpty(authors)}" name="tacGia" id="filterTacGia"
                                 class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[140px]">
                             <option value="0" th:selected="${selectedTacGia == null || selectedTacGia == 0}">Tất cả tác giả</option>

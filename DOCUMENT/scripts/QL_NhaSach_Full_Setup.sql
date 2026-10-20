@@ -330,9 +330,9 @@ ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_daban]  DEFAULT ((0)) F
 GO
 ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_tontoithieu]  DEFAULT ((5)) FOR [muc_ton_toi_thieu]
 GO
-ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_loai]  DEFAULT (N'SACH') FOR [loaisp]
+ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_loai]  DEFAULT (N'Sach') FOR [loaisp]
 GO
-ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_trangthai]  DEFAULT (N'HoatDong') FOR [trang_thai]
+ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_trangthai]  DEFAULT (N'DangBan') FOR [trang_thai]
 GO
 ALTER TABLE [dbo].[san_pham] ADD  CONSTRAINT [DF_sanpham_khoa]  DEFAULT (N'BinhThuong') FOR [trang_thai_khoa]
 GO
@@ -729,11 +729,13 @@ CREATE TABLE [dbo].[don_hang](
 	[ma_shop] [int] NOT NULL,
 	[ma_nvc] [int] NULL,
 	[makm] [int] NULL,
+	[ma_km_freeship] [int] NULL,
 	[dia_chi_giao] [nvarchar](255) COLLATE Vietnamese_CI_AS NOT NULL,
 	[so_dien_thoai_giao] [varchar](20) COLLATE Vietnamese_CI_AS NOT NULL,
 	[tong_tien] [int] NOT NULL,
 	[phi_van_chuyen] [int] NOT NULL,
 	[tien_giam] [int] NOT NULL,
+	[tien_giam_freeship] [int] NOT NULL,
 	[chiet_khau_app_phan_tram] [decimal](5, 2) NOT NULL,
 	[tien_phi_san] [int] NOT NULL,
 	[tien_thuc_nhan_shop] [int] NOT NULL,
@@ -775,9 +777,16 @@ CREATE NONCLUSTERED INDEX [idx_donhang_shop_trangthai] ON [dbo].[don_hang]
 )
 INCLUDE([tong_tien],[ngay_dat],[makh]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [idx_donhang_km_freeship] ON [dbo].[don_hang]
+(
+	[ma_km_freeship] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[don_hang] ADD  CONSTRAINT [DF_donhang_phiship]  DEFAULT ((0)) FOR [phi_van_chuyen]
 GO
 ALTER TABLE [dbo].[don_hang] ADD  CONSTRAINT [DF_donhang_tiengiam]  DEFAULT ((0)) FOR [tien_giam]
+GO
+ALTER TABLE [dbo].[don_hang] ADD  CONSTRAINT [DF_donhang_tiengiamfreeship]  DEFAULT ((0)) FOR [tien_giam_freeship]
 GO
 ALTER TABLE [dbo].[don_hang] ADD  CONSTRAINT [DF_donhang_chietkhau]  DEFAULT ((5.00)) FOR [chiet_khau_app_phan_tram]
 GO
@@ -797,6 +806,11 @@ ALTER TABLE [dbo].[don_hang]  WITH CHECK ADD  CONSTRAINT [FK_donhang_km] FOREIGN
 REFERENCES [dbo].[khuyen_mai] ([makm])
 GO
 ALTER TABLE [dbo].[don_hang] CHECK CONSTRAINT [FK_donhang_km]
+GO
+ALTER TABLE [dbo].[don_hang]  WITH CHECK ADD  CONSTRAINT [FK_donhang_km_freeship] FOREIGN KEY([ma_km_freeship])
+REFERENCES [dbo].[khuyen_mai] ([makm])
+GO
+ALTER TABLE [dbo].[don_hang] CHECK CONSTRAINT [FK_donhang_km_freeship]
 GO
 ALTER TABLE [dbo].[don_hang]  WITH CHECK ADD  CONSTRAINT [FK_donhang_khachhang] FOREIGN KEY([makh])
 REFERENCES [dbo].[khach_hang] ([makh])
@@ -1271,13 +1285,12 @@ BEGIN
         ISNULL(SUM(dh.tien_thuc_nhan_shop), 0)
     FROM shop s
     JOIN don_hang dh ON s.ma_shop = dh.ma_shop
-    WHERE dh.trang_thai IN (N'GiaoThanhCong', N'HoanTat')
+    WHERE dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat')
       AND dh.ngay_dat BETWEEN @tu_ngay AND @den_ngay
     GROUP BY s.ma_shop, s.ten_shop;
 
     RETURN;
 END;
-
 GO
 
 -- Hàm: fn_DemDonHang
@@ -1295,8 +1308,8 @@ BEGIN
     FROM don_hang dh
     WHERE dh.ngay_dat >= @startDate 
       AND dh.ngay_dat < @endDate
-      AND dh.trang_thai NOT IN ('DaHuy', 'Huy', 'YeuCauHuy', 'TranhChap', 'TraHangHoanTien', 'DaHoan', 'DaHoanTien', 'ChoThanhToan')
-      AND NOT (dh.phuong_thuc_thanh_toan != 'COD' AND dh.trang_thai_thanh_toan = 'ChuaThanhToan');
+      AND dh.trang_thai NOT IN (N'DaHuy', N'Huy', N'YeuCauHuy', N'TranhChap', N'TraHangHoanTien', N'DaHoan', N'DaHoanTien', N'ChoThanhToan')
+      AND NOT (dh.phuong_thuc_thanh_toan != N'COD' AND dh.trang_thai_thanh_toan = N'ChuaThanhToan');
     RETURN ISNULL(@dem, 0);
 END;
 
@@ -1317,7 +1330,8 @@ BEGIN
     SELECT @v_count = COUNT(*)
     FROM san_pham
     WHERE ma_shop = @p_ma_shop
-      AND (trang_thai_khoa IS NULL OR trang_thai_khoa != 'DaKhoa');
+      AND (trang_thai_khoa IS NULL OR (trang_thai_khoa != 'DaKhoa' AND trang_thai_khoa != 'BiKhoaBoiAdmin'))
+      AND (trang_thai != 'DaXoa');
     RETURN @v_count;
 END;
 
@@ -1420,8 +1434,8 @@ BEGIN
     DECLARE @tong BIGINT;
     SELECT @tong = ISNULL(SUM(CAST(dh.tong_tien AS BIGINT)), 0)
     FROM don_hang dh
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat')
-      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+    WHERE dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat')
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != N'DaHoanTien')
       AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) >= @startDate 
       AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) < @endDate;
     RETURN ISNULL(@tong, 0);
@@ -1541,7 +1555,7 @@ BEGIN
     SELECT @total = COALESCE(SUM(ct.so_luong), 0)
     FROM chi_tiet_don_hang ct
     JOIN don_hang dh ON ct.madh = dh.madh
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat');
+    WHERE dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat');
     RETURN @total;
 END;
 
@@ -1567,11 +1581,11 @@ SELECT
     YEAR(ngay_dat) AS nam,
     MONTH(ngay_dat) AS thang,
     COUNT(madh) AS tong_so_don,
-    SUM(CASE WHEN trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN 1 ELSE 0 END) AS so_don_thanh_cong,
+    SUM(CASE WHEN trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN 1 ELSE 0 END) AS so_don_thanh_cong,
     SUM(CASE WHEN trang_thai = N'DaHuy' THEN 1 ELSE 0 END) AS so_don_huy,
-    SUM(CASE WHEN trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN tong_tien ELSE 0 END) AS tong_doanh_thu_hang,
-    SUM(CASE WHEN trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN tien_phi_san ELSE 0 END) AS hoa_hong_san_thu,
-    SUM(CASE WHEN trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN tien_thuc_nhan_shop ELSE 0 END) AS tong_tien_tra_shop
+    SUM(CASE WHEN trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN tong_tien ELSE 0 END) AS tong_doanh_thu_hang,
+    SUM(CASE WHEN trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN tien_phi_san ELSE 0 END) AS hoa_hong_san_thu,
+    SUM(CASE WHEN trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN tien_thuc_nhan_shop ELSE 0 END) AS tong_tien_tra_shop
 FROM don_hang
 GROUP BY YEAR(ngay_dat), MONTH(ngay_dat);
 
@@ -1599,7 +1613,7 @@ SELECT
     END AS muc_do_canh_bao
 FROM san_pham sp
 JOIN shop s ON sp.ma_shop = s.ma_shop
-WHERE sp.so_luong_ton <= sp.muc_ton_toi_thieu AND sp.trang_thai = N'HoatDong';
+WHERE sp.so_luong_ton <= sp.muc_ton_toi_thieu AND sp.trang_thai IN (N'DangBan', N'HoatDong');
 
 GO
 
@@ -1617,10 +1631,10 @@ SELECT
     s.so_dien_thoai,
     s.chiet_khau_phan_tram,
     COUNT(dh.madh) AS tong_don_dat,
-    SUM(CASE WHEN dh.trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN 1 ELSE 0 END) AS don_hoan_thanh,
-    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN dh.tong_tien ELSE 0 END), 0) AS tong_tien_ban,
-    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN dh.tien_phi_san ELSE 0 END), 0) AS phi_san_da_nop,
-    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'GiaoThanhCong', N'HoanTat') THEN dh.tien_thuc_nhan_shop ELSE 0 END), 0) AS thuc_nhan_ve_shop
+    SUM(CASE WHEN dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN 1 ELSE 0 END) AS don_hoan_thanh,
+    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN dh.tong_tien ELSE 0 END), 0) AS tong_tien_ban,
+    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN dh.tien_phi_san ELSE 0 END), 0) AS phi_san_da_nop,
+    ISNULL(SUM(CASE WHEN dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') THEN dh.tien_thuc_nhan_shop ELSE 0 END), 0) AS thuc_nhan_ve_shop
 FROM shop s
 LEFT JOIN don_hang dh ON s.ma_shop = dh.ma_shop
 GROUP BY s.ma_shop, s.ten_shop, s.so_dien_thoai, s.chiet_khau_phan_tram;
@@ -1692,11 +1706,13 @@ CREATE   PROCEDURE sp_DatHangVaTruTonKho
     @ma_shop INT,
     @ma_nvc INT,
     @makm INT = NULL,
+    @ma_km_freeship INT = NULL,
     @dia_chi_giao NVARCHAR(255),
     @so_dien_thoai_giao VARCHAR(20),
     @tong_tien INT,
     @phi_van_chuyen INT = 0,
     @tien_giam INT = 0,
+    @tien_giam_freeship INT = 0,
     @phuong_thuc NVARCHAR(30) = N'COD',
     @new_madh INT OUTPUT
 AS
@@ -1711,24 +1727,32 @@ BEGIN
 
         -- 2. Thêm đơn hàng
         INSERT INTO don_hang (
-            makh, ma_shop, ma_nvc, makm, dia_chi_giao, so_dien_thoai_giao,
-            tong_tien, phi_van_chuyen, tien_giam, chiet_khau_app_phan_tram,
+            makh, ma_shop, ma_nvc, makm, ma_km_freeship, dia_chi_giao, so_dien_thoai_giao,
+            tong_tien, phi_van_chuyen, tien_giam, tien_giam_freeship, chiet_khau_app_phan_tram,
             phuong_thuc_thanh_toan, trang_thai
         )
         VALUES (
-            @makh, @ma_shop, @ma_nvc, @makm, @dia_chi_giao, @so_dien_thoai_giao,
-            @tong_tien, @phi_van_chuyen, @tien_giam, @chiet_khau,
+            @makh, @ma_shop, @ma_nvc, @makm, @ma_km_freeship, @dia_chi_giao, @so_dien_thoai_giao,
+            @tong_tien, @phi_van_chuyen, @tien_giam, @tien_giam_freeship, @chiet_khau,
             @phuong_thuc, N'ChoXacNhan'
         );
 
         SET @new_madh = SCOPE_IDENTITY();
 
-        -- 3. Cáº­p nháº­t lượt sá»­ dá»¥ng của voucher (nếu có)
+        -- 3. Cập nhật lượt sử dụng của voucher giảm giá (nếu có)
         IF @makm IS NOT NULL
         BEGIN
             UPDATE khuyen_mai
             SET so_luong_da_dung = so_luong_da_dung + 1
             WHERE makm = @makm;
+        END
+
+        -- 4. Cập nhật lượt sử dụng của voucher freeship (nếu có)
+        IF @ma_km_freeship IS NOT NULL
+        BEGIN
+            UPDATE khuyen_mai
+            SET so_luong_da_dung = so_luong_da_dung + 1
+            WHERE makm = @ma_km_freeship;
         END
 
         COMMIT TRANSACTION;
@@ -1765,7 +1789,7 @@ BEGIN
         COALESCE(SUM(dh.tien_thuc_nhan_shop), 0) AS thuc_nhan_shop
     FROM don_hang dh
     WHERE dh.ma_shop = @p_ma_shop
-      AND dh.trang_thai IN ('DaGiao', 'DA_GIAO', 'HoanTat')
+      AND dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat')
     GROUP BY YEAR(dh.ngay_dat), MONTH(dh.ngay_dat)
     ORDER BY nam DESC, thang DESC;
 END;
@@ -1785,10 +1809,10 @@ BEGIN
     SET NOCOUNT ON;
     SELECT YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) as nam, 
            MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) as thang, 
-           SUM(dh.tong_tien) as doanh_thu 
+           SUM(CAST(dh.tong_tien AS BIGINT)) as doanh_thu 
     FROM don_hang dh 
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat') 
-      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+    WHERE dh.trang_thai IN (N'DaGiao', N'GiaoThanhCong', N'HoanTat') 
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != N'DaHoanTien')
       AND YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) = YEAR(GETDATE())
     GROUP BY YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)), MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) 
     ORDER BY nam DESC, thang DESC;
@@ -1810,7 +1834,7 @@ GO
 SET QUOTED_IDENTIFIER OFF
 GO
 
--- Thá»§ tá»¥c 3: Hủy đơn hàng vÃ  hoÃ n tiá»n/voucher
+-- Thủ tục 3: Hủy đơn hàng và hoàn tiền/voucher
 CREATE   PROCEDURE sp_HuyDonHang
     @madh INT,
     @ly_do NVARCHAR(500)
@@ -1822,30 +1846,39 @@ BEGIN
 
         DECLARE @trang_thai_hien_tai NVARCHAR(30);
         DECLARE @makm INT;
+        DECLARE @ma_km_freeship INT;
 
-        SELECT @trang_thai_hien_tai = trang_thai, @makm = makm
+        SELECT @trang_thai_hien_tai = trang_thai, @makm = makm, @ma_km_freeship = ma_km_freeship
         FROM don_hang
         WHERE madh = @madh;
 
         IF @trang_thai_hien_tai IN (N'DangGiao', N'GiaoThanhCong', N'HoanTat')
         BEGIN
-            RAISERROR (N'ÄÆ¡n hÃ ng Ä‘ang giao hoặc đã hoàn tất, không thá»ƒ há»§y!', 16, 1);
+            RAISERROR (N'Đơn hàng đang giao hoặc đã hoàn tất, không thể hủy!', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
 
-        -- Cáº­p nháº­t trạng thái đơn sang 'DaHuy' (Trigger trg_DonHang_HoanTonKhoKhiHuy sáº½ tá»± hoÃ n tồn kho)
+        -- Cập nhật trạng thái đơn sang 'DaHuy' (Trigger trg_DonHang_HoanTonKhoKhiHuy sẽ tự hoàn tồn kho)
         UPDATE don_hang
         SET trang_thai = N'DaHuy',
             ly_do_huy = @ly_do
         WHERE madh = @madh;
 
-        -- HoÃ n láº¡i lượt dÃ¹ng voucher (nếu có)
+        -- Hoàn lại lượt dùng voucher giảm giá (nếu có)
         IF @makm IS NOT NULL
         BEGIN
             UPDATE khuyen_mai
             SET so_luong_da_dung = CASE WHEN so_luong_da_dung > 0 THEN so_luong_da_dung - 1 ELSE 0 END
             WHERE makm = @makm;
+        END
+
+        -- Hoàn lại lượt dùng voucher freeship (nếu có)
+        IF @ma_km_freeship IS NOT NULL
+        BEGIN
+            UPDATE khuyen_mai
+            SET so_luong_da_dung = CASE WHEN so_luong_da_dung > 0 THEN so_luong_da_dung - 1 ELSE 0 END
+            WHERE makm = @ma_km_freeship;
         END
 
         COMMIT TRANSACTION;
@@ -1858,7 +1891,6 @@ BEGIN
         RAISERROR (@ErrMsg, 16, 1);
     END CATCH
 END;
-
 GO
 
 -- Thủ tục: sp_ShopXacNhanDonHang
@@ -1866,7 +1898,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
-CREATE   PROCEDURE sp_ShopXacNhanDonHang @madh INT, @ma_shop INT, @ma_van_don VARCHAR(50) AS BEGIN SET NOCOUNT ON; BEGIN TRY BEGIN TRANSACTION; IF NOT EXISTS (SELECT 1 FROM don_hang WHERE madh = @madh AND ma_shop = @ma_shop AND trang_thai IN (N'ChoXacNhan', N'ChoXuLy')) BEGIN RAISERROR (N'Đơn hàng không hợp lệ hoặc không ở trạng thái Chờ xác nhận!', 16, 1); ROLLBACK TRANSACTION; RETURN; END UPDATE don_hang SET trang_thai = N'DangGiao', ngay_xac_nhan = SYSUTCDATETIME(), ma_van_don = @ma_van_don WHERE madh = @madh; COMMIT TRANSACTION; END TRY BEGIN CATCH IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION; DECLARE @ErrMsg NVARCHAR(4000) = ERROR_MESSAGE(); RAISERROR (@ErrMsg, 16, 1); END CATCH END;
+CREATE   PROCEDURE sp_ShopXacNhanDonHang @madh INT, @ma_shop INT, @ma_van_don VARCHAR(50) AS BEGIN SET NOCOUNT ON; BEGIN TRY BEGIN TRANSACTION; IF NOT EXISTS (SELECT 1 FROM don_hang WHERE madh = @madh AND ma_shop = @ma_shop AND trang_thai IN (N'ChoXacNhan', N'ChoXuLy', N'DonHangMoi')) BEGIN RAISERROR (N'Đơn hàng không hợp lệ hoặc không ở trạng thái Chờ xác nhận!', 16, 1); ROLLBACK TRANSACTION; RETURN; END UPDATE don_hang SET trang_thai = N'DangGiao', ngay_xac_nhan = SYSUTCDATETIME(), ma_van_don = @ma_van_don WHERE madh = @madh; COMMIT TRANSACTION; END TRY BEGIN CATCH IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION; DECLARE @ErrMsg NVARCHAR(4000) = ERROR_MESSAGE(); RAISERROR (@ErrMsg, 16, 1); END CATCH END;
 GO
 
 -- Thủ tục: sp_ShopXacNhanKiemKe
@@ -1888,7 +1920,7 @@ BEGIN
         -- Kiểm tra quyá»n sở hữu phiếu kiểm kê
         IF NOT EXISTS (SELECT 1 FROM phieu_kiem_ke WHERE ma_phieu_kiem_ke = @ma_phieu_kiem_ke AND ma_shop = @ma_shop)
         BEGIN
-            RAISERROR (N'Phiáº¿u kiểm kê không tá»“n táº¡i hoặc không thuộc quyá»n quản lý của Shop!', 16, 1);
+            RAISERROR (N'Phiếu kiểm kê không tồn tại hoặc không thuộc quyền quản lý của Shop!', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
@@ -1946,8 +1978,9 @@ BEGIN
         FROM san_pham sp
         JOIN shop s ON sp.ma_shop = s.ma_shop
         JOIN danh_muc dm ON sp.ma_danh_muc = dm.ma_danh_muc
-        WHERE sp.trang_thai = N'HoatDong'
-          AND s.trang_thai = N'HoatDong'
+        WHERE sp.trang_thai IN (N'DangBan', N'HoatDong')
+          AND (sp.trang_thai_khoa = N'BinhThuong' OR sp.trang_thai_khoa IS NULL)
+          AND (s.trang_thai = N'HoatDong' OR s.trang_thai IS NULL)
           AND (@tu_khoa IS NULL OR sp.tensp LIKE N'%' + @tu_khoa + N'%')
           AND (@ma_danh_muc IS NULL OR sp.ma_danh_muc = @ma_danh_muc)
           AND (@gia_tu IS NULL OR sp.gia_ban >= @gia_tu)
@@ -1961,7 +1994,6 @@ BEGIN
         RAISERROR (@ErrMsg, 16, 1);
     END CATCH
 END;
-
 GO
 
 -- Thủ tục: sp_TopSachBanChay
@@ -2150,13 +2182,13 @@ GO
 -- Dữ liệu bảng: don_hang (7 dòng)
 SET IDENTITY_INSERT [dbo].[don_hang] ON 
 
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (1, 1, 1, 1, 3, N'123 Lê Lợi, P. Bến Nghé, Q.1, TP.HCM', N'0988111222', 155000, 22000, 20000, CAST(5.00 AS Decimal(5, 2)), 7750, 147250, N'COD', N'ChuaThanhToan', N'DaGiao', N'GHTK8829102', NULL, NULL, CAST(N'2026-10-16T15:04:53.1590550' AS DateTime2), NULL, CAST(N'2026-10-16T16:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (2, 2, 2, 2, 4, N'456 VÃµ VÄƒn NgÃ¢n, TP. Thá»§ Äá»©c, TP.HCM', N'0977333444', 350000, 25000, 40000, CAST(5.00 AS Decimal(5, 2)), 17500, 332500, N'VIETQR', N'DaThanhToan', N'DaHuy', NULL, N'Khach doi y doi sach khac', NULL, CAST(N'2026-10-16T15:04:53.1590550' AS DateTime2), NULL, NULL, NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (5, 1, 1, 1, NULL, N'1 Vo Van Ngan Thu Duc', N'0987654321', 220000, 22000, 0, CAST(5.00 AS Decimal(5, 2)), 11000, 209000, N'COD', N'ChuaThanhToan', N'DangGiao', N'VNPOST_HN_005', NULL, NULL, CAST(N'2026-10-16T22:30:03.5630683' AS DateTime2), CAST(N'2026-10-16T15:31:18.7525285' AS DateTime2), NULL, NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (6, 3, 1, 1, NULL, N'462, Linh trung, TP.thủ đức, Hồ Chí minh', N')934567822', 195000, 22000, 0, CAST(5.00 AS Decimal(5, 2)), 9750, 185250, N'COD', N'DaThanhToan', N'HoanTat', N'GHTK-6-62810', NULL, NULL, CAST(N'2026-10-17T11:08:49.4405001' AS DateTime2), CAST(N'2026-10-17T11:09:22.8088482' AS DateTime2), CAST(N'2026-10-17T11:19:28.8038958' AS DateTime2), NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (7, 1, 1, 1, NULL, N'1 Võ Văn Ngân, TP. Thủ Đức', N'0912345678', 480000, 20000, 0, CAST(5.00 AS Decimal(5, 2)), 24000, 456000, N'COD', N'DaThanhToan', N'HoanTat', NULL, NULL, NULL, CAST(N'2026-08-15T10:00:00.0000000' AS DateTime2), NULL, CAST(N'2026-08-18T14:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (8, 2, 2, 1, NULL, N'Ký túc xá khu B ĐHQG, Dĩ An', N'0987654321', 620000, 25000, 0, CAST(5.00 AS Decimal(5, 2)), 31000, 589000, N'VNPAY', N'DaThanhToan', N'HoanTat', NULL, NULL, NULL, CAST(N'2026-09-10T11:30:00.0000000' AS DateTime2), NULL, CAST(N'2026-09-13T16:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
-INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (9, 3, 2, 1, NULL, N'462, Linh trung, TP.thủ đức, Hồ Chí minh', N')934567822', 89000, 22000, 0, CAST(5.00 AS Decimal(5, 2)), 4450, 84550, N'COD', N'DaThanhToan', N'DaGiao', N'GHTK-9-65979', NULL, NULL, CAST(N'2026-10-17T11:55:04.7080828' AS DateTime2), CAST(N'2026-10-17T11:56:05.9781648' AS DateTime2), NULL, NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (1, 1, 1, 1, 3, NULL, N'123 Lê Lợi, P. Bến Nghé, Q.1, TP.HCM', N'0988111222', 155000, 22000, 20000, 0, CAST(5.00 AS Decimal(5, 2)), 7750, 147250, N'COD', N'ChuaThanhToan', N'DaGiao', N'GHTK8829102', NULL, NULL, CAST(N'2026-10-16T15:04:53.1590550' AS DateTime2), NULL, CAST(N'2026-10-16T16:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (2, 2, 2, 2, 4, NULL, N'456 VÃµ VÄƒn NgÃ¢n, TP. Thá»§ Äá»©c, TP.HCM', N'0977333444', 350000, 25000, 40000, 0, CAST(5.00 AS Decimal(5, 2)), 17500, 332500, N'VIETQR', N'DaThanhToan', N'DaHuy', NULL, N'Khach doi y doi sach khac', NULL, CAST(N'2026-10-16T15:04:53.1590550' AS DateTime2), NULL, NULL, NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (5, 1, 1, 1, NULL, NULL, N'1 Vo Van Ngan Thu Duc', N'0987654321', 220000, 22000, 0, 0, CAST(5.00 AS Decimal(5, 2)), 11000, 209000, N'COD', N'ChuaThanhToan', N'DangGiao', N'VNPOST_HN_005', NULL, NULL, CAST(N'2026-10-16T22:30:03.5630683' AS DateTime2), CAST(N'2026-10-16T15:31:18.7525285' AS DateTime2), NULL, NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (6, 3, 1, 1, NULL, NULL, N'462, Linh trung, TP.thủ đức, Hồ Chí minh', N')934567822', 195000, 22000, 0, 0, CAST(5.00 AS Decimal(5, 2)), 9750, 185250, N'COD', N'DaThanhToan', N'HoanTat', N'GHTK-6-62810', NULL, NULL, CAST(N'2026-10-17T11:08:49.4405001' AS DateTime2), CAST(N'2026-10-17T11:09:22.8088482' AS DateTime2), CAST(N'2026-10-17T11:19:28.8038958' AS DateTime2), NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (7, 1, 1, 1, NULL, NULL, N'1 Võ Văn Ngân, TP. Thủ Đức', N'0912345678', 480000, 20000, 0, 0, CAST(5.00 AS Decimal(5, 2)), 24000, 456000, N'COD', N'DaThanhToan', N'HoanTat', NULL, NULL, NULL, CAST(N'2026-08-15T10:00:00.0000000' AS DateTime2), NULL, CAST(N'2026-08-18T14:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (8, 2, 2, 1, NULL, NULL, N'Ký túc xá khu B ĐHQG, Dĩ An', N'0987654321', 620000, 25000, 0, 0, CAST(5.00 AS Decimal(5, 2)), 31000, 589000, N'VNPAY', N'DaThanhToan', N'HoanTat', NULL, NULL, NULL, CAST(N'2026-09-10T11:30:00.0000000' AS DateTime2), NULL, CAST(N'2026-09-13T16:00:00.0000000' AS DateTime2), NULL, NULL, NULL)
+INSERT [dbo].[don_hang] ([madh], [makh], [ma_shop], [ma_nvc], [makm], [ma_km_freeship], [dia_chi_giao], [so_dien_thoai_giao], [tong_tien], [phi_van_chuyen], [tien_giam], [tien_giam_freeship], [chiet_khau_app_phan_tram], [tien_phi_san], [tien_thuc_nhan_shop], [phuong_thuc_thanh_toan], [trang_thai_thanh_toan], [trang_thai], [ma_van_don], [ly_do_huy], [ly_do_tu_choi], [ngay_dat], [ngay_xac_nhan], [ngay_hoan_thanh], [ly_do_tra_hang], [phan_quyet_tranh_chap], [nguoi_xu_ly_tranh_chap]) VALUES (9, 3, 2, 1, NULL, NULL, N'462, Linh trung, TP.thủ đức, Hồ Chí minh', N')934567822', 89000, 22000, 0, 0, CAST(5.00 AS Decimal(5, 2)), 4450, 84550, N'COD', N'DaThanhToan', N'DaGiao', N'GHTK-9-65979', NULL, NULL, CAST(N'2026-10-17T11:55:04.7080828' AS DateTime2), CAST(N'2026-10-17T11:56:05.9781648' AS DateTime2), NULL, NULL, NULL, NULL)
 SET IDENTITY_INSERT [dbo].[don_hang] OFF
 GO
 

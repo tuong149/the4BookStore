@@ -50,9 +50,6 @@ class VendorServiceTest {
         when(shopRepository.findById(1)).thenReturn(Optional.of(shop));
         when(danhMucRepository.findById(1)).thenReturn(Optional.of(danhMuc));
         when(sanPhamRepository.save(any(SanPham.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        vendorService.setTacGiaRepository(tacGiaRepository);
-        vendorService.setSanPhamTacGiaRepository(sanPhamTacGiaRepository);
     }
 
     @Test

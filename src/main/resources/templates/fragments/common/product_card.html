@@ -5,34 +5,34 @@
 
     <!-- Reusable Book Card Component Fragment -->
     <article th:fragment="product_card(product)"
-        th:data-category="${product.danhMuc != null ? book.danhMuc.tenDanhMuc : ''}"
+        th:data-category="${product.danhMuc != null ? product.danhMuc.tenDanhMuc : ''}"
         class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1 h-full">
         <!-- Book Cover Image Wrapper -->
         <a th:href="@{/san-pham/{id}(id=${product.maSP})}" class="aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container relative mb-space-sm shadow-xs block shrink-0">
-            <img th:if="${product.hinhAnh != null and !book.hinhAnh.isEmpty()}" 
+            <img th:if="${product.hinhAnh != null and !product.hinhAnh.isEmpty()}" 
                  th:src="${product.hinhAnh}" 
                  th:alt="${product.tenSP}"
-                 th:classappend="${product.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0} ? 'opacity-75' : ''"
+                 th:classappend="${product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0} ? 'opacity-75' : ''"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            <img th:unless="${product.hinhAnh != null and !book.hinhAnh.isEmpty()}"
+            <img th:unless="${product.hinhAnh != null and !product.hinhAnh.isEmpty()}"
                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJxhxEUoGYZXYaOldMaT7d3dcCRrYvCD-3AWG8q4nOBMKeBIhtPi1dKb9NiDZHTXWMxMULBn3rsm5dU8_IVOjwK8Bnkg8xf-IGsBbsQoLtc5D6EWqcU1KfQ1LzI9jMW8JHZBBy9sHF_7t1onS8pagaubUOfOqYifnPkQMRgKeMgWgWQ71XMqmHdC9fJzuMiB3aqbLZt8bE5qj4HVtt62KzVUKztkjut685dS6dOCMbTJ_WPnz-9N7y"
                  th:alt="${product.tenSP}"
-                 th:classappend="${product.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0} ? 'opacity-75' : ''"
+                 th:classappend="${product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0} ? 'opacity-75' : ''"
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
 
             <!-- Category Badge overlay -->
             <span th:if="${product.danhMuc != null}" th:text="${product.danhMuc.tenDanhMuc}"
-                th:classappend="${(book.trangThai != 'HetHang' and book.soLuongTon != null and book.soLuongTon <= 5 and book.soLuongTon > 0) or (book.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0)} ? 'max-w-[48%]' : 'max-w-[85%]'"
+                th:classappend="${(product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon <= 5 and product.soLuongTon > 0) or (product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0)} ? 'max-w-[48%]' : 'max-w-[85%]'"
                 class="absolute top-2 left-2 truncate px-2.5 py-0.5 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm text-[11px] font-bold text-primary shadow-xs whitespace-nowrap z-10">
                 Văn học
             </span>
 
             <!-- Stock status indicator -->
-            <span th:if="${product.trangThai != 'HetHang' and book.soLuongTon != null and book.soLuongTon <= 5 and book.soLuongTon > 0}"
+            <span th:if="${product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon <= 5 and product.soLuongTon > 0}"
                 class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold shadow-xs whitespace-nowrap z-10">
                 Chỉ còn <span th:text="${product.soLuongTon}"></span> sản phẩm
             </span>
-            <span th:if="${product.trangThai == 'HetHang' or book.soLuongTon == null or book.soLuongTon <= 0}"
+            <span th:if="${product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0}"
                 class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap z-10">
                 Hết hàng
             </span>
@@ -47,22 +47,22 @@
                         Tên Sản Phẩm
                     </h3>
                 </a>
-                <p th:if="${product.loaiSP == 'Sach' and book.danhSachTacGia != null and !book.danhSachTacGia.isEmpty()}"
+                <p th:if="${(#strings.equalsIgnoreCase(product.loaiSP, 'Sach') or product.loaiSP == null) and product.danhSachTacGia != null and !product.danhSachTacGia.isEmpty()}"
                    class="text-xs text-on-surface-variant mt-1 truncate block"
                    th:title="${product.danhSachTacGia}">
                     <span class="font-medium text-primary" th:text="${product.danhSachTacGia}">Tác giả</span>
                 </p>
 
                 <div class="flex items-center justify-between gap-1 mt-2 text-[11px] text-on-surface-variant">
-                    <a th:if="${product.shopSlug != null and !book.shopSlug.isEmpty()}" th:href="@{'/shop/' + ${product.shopSlug}}" class="text-amber-800 hover:text-amber-950 hover:underline font-semibold flex items-center gap-1 truncate max-w-[130px]" th:title="${product.tenShop}">
+                    <a th:if="${product.shopSlug != null and !product.shopSlug.isEmpty()}" th:href="@{'/shop/' + ${product.shopSlug}}" class="text-amber-800 hover:text-amber-950 hover:underline font-semibold flex items-center gap-1 truncate max-w-[130px]" th:title="${product.tenShop}">
                         <span class="material-symbols-outlined text-[13px] text-amber-700">storefront</span>
                         <span th:text="${product.tenShop}" class="truncate">The4BookStore Official</span>
                     </a>
-                    <span th:if="${product.shopSlug == null or book.shopSlug.isEmpty()}"></span>
-                    <span th:if="${product.soLuongDaBan != null and book.soLuongDaBan > 0}" class="text-on-surface-variant font-medium shrink-0 ml-auto flex items-center gap-0.5">
+                    <span th:if="${product.shopSlug == null or product.shopSlug.isEmpty()}"></span>
+                    <span th:if="${product.soLuongDaBan != null and product.soLuongDaBan > 0}" class="text-on-surface-variant font-medium shrink-0 ml-auto flex items-center gap-0.5">
                         Đã bán <span class="font-bold text-primary font-mono" th:text="${product.soLuongDaBan}">0</span>
                     </span>
-                    <span th:unless="${product.soLuongDaBan != null and book.soLuongDaBan > 0}" class="text-on-surface-variant/50 text-[10px] shrink-0 ml-auto">
+                    <span th:unless="${product.soLuongDaBan != null and product.soLuongDaBan > 0}" class="text-on-surface-variant/50 text-[10px] shrink-0 ml-auto">
                         Mới ra mắt
                     </span>
                 </div>
@@ -72,7 +72,7 @@
             <div class="pt-3 mt-3 border-t border-surface-container-low flex items-center justify-between">
                 <div>
                     <span class="text-[10px] text-outline block">Giá niêm yết</span>
-                    <span th:text="${product.giaBan != null ? #numbers.formatDecimal(book.giaBan, 0, 'POINT', 0, 'COMMA') + ' đ' : '189.000 đ'}"
+                    <span th:text="${product.giaBan != null ? #numbers.formatDecimal(product.giaBan, 0, 'POINT', 0, 'COMMA') + ' đ' : '189.000 đ'}"
                         class="font-mono font-bold text-sm text-primary">
                         189.000 đ
                     </span>
@@ -84,7 +84,7 @@
                         <span class="material-symbols-outlined text-[18px]">visibility</span>
                     </a>
                     <button type="button"
-                        th:if="${product.trangThai != 'HetHang' and (book.soLuongTon == null or book.soLuongTon > 0)}"
+                        th:if="${product.trangThai != 'HetHang' and (product.soLuongTon == null or product.soLuongTon > 0)}"
                         th:onclick="'quickAddToCart(' + ${product.maSP} + ', 1, event)'"
                         class="p-2 rounded-xl bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs flex items-center justify-center cursor-pointer border-0 active:scale-95"
                         title="Thêm vào giỏ hàng">

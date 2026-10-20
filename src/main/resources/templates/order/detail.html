@@ -231,7 +231,7 @@
                                            th:text="${ct.sanPham.tenSP}">Tên sản phẩm</a>
                                         
                                         <p class="text-xs text-on-surface-variant mt-1" 
-                                           th:if="${ct.sanPham.loaiSP == 'Sach' and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" 
+                                           th:if="${(#strings.equalsIgnoreCase(ct.sanPham.loaiSP, 'Sach') or ct.sanPham.loaiSP == null) and ct.sanPham.danhSachTacGia != null and !ct.sanPham.danhSachTacGia.isEmpty()}" 
                                            th:text="'Tác giả: ' + ${ct.sanPham.danhSachTacGia}">Tác giả</p>
 
                                         <div class="flex items-center gap-3 mt-1.5 text-xs text-on-surface-variant">
