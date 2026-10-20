@@ -1292,8 +1292,11 @@ AS
 BEGIN
     DECLARE @dem BIGINT;
     SELECT @dem = COUNT(*)
-    FROM don_hang
-    WHERE ngay_dat >= @startDate AND ngay_dat <= @endDate;
+    FROM don_hang dh
+    WHERE dh.ngay_dat >= @startDate 
+      AND dh.ngay_dat < @endDate
+      AND dh.trang_thai NOT IN ('DaHuy', 'Huy', 'YeuCauHuy', 'TranhChap', 'TraHangHoanTien', 'DaHoan', 'DaHoanTien', 'ChoThanhToan')
+      AND NOT (dh.phuong_thuc_thanh_toan != 'COD' AND dh.trang_thai_thanh_toan = 'ChuaThanhToan');
     RETURN ISNULL(@dem, 0);
 END;
 
@@ -1415,10 +1418,12 @@ RETURNS BIGINT
 AS
 BEGIN
     DECLARE @tong BIGINT;
-    SELECT @tong = ISNULL(SUM(CAST(tong_tien AS BIGINT)), 0)
-    FROM don_hang
-    WHERE ngay_dat >= @startDate AND ngay_dat <= @endDate
-      AND trang_thai NOT IN (N'DaHuy', N'Huy', N'TranhChap');
+    SELECT @tong = ISNULL(SUM(CAST(dh.tong_tien AS BIGINT)), 0)
+    FROM don_hang dh
+    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat')
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+      AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) >= @startDate 
+      AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) < @endDate;
     RETURN ISNULL(@tong, 0);
 END;
 
@@ -1778,14 +1783,14 @@ CREATE   PROCEDURE dbo.sp_DoanhThuTheoThang
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT YEAR(dh.ngay_hoan_thanh) as nam, 
-           MONTH(dh.ngay_hoan_thanh) as thang, 
+    SELECT YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) as nam, 
+           MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) as thang, 
            SUM(dh.tong_tien) as doanh_thu 
     FROM don_hang dh 
     WHERE dh.trang_thai IN ('DaGiao', 'HoanTat') 
-      AND dh.ngay_hoan_thanh IS NOT NULL 
-      AND YEAR(dh.ngay_hoan_thanh) = YEAR(GETDATE())
-    GROUP BY YEAR(dh.ngay_hoan_thanh), MONTH(dh.ngay_hoan_thanh) 
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+      AND YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) = YEAR(GETDATE())
+    GROUP BY YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)), MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) 
     ORDER BY nam DESC, thang DESC;
 END;
 

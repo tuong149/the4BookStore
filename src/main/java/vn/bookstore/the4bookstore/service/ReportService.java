@@ -46,11 +46,25 @@ public class ReportService {
     }
 
     public BigDecimal getThisMonthRevenue() {
-        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        LocalDateTime nextMonth = startOfMonth.plusMonths(1);
+        try {
+            LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+            LocalDateTime nextMonth = startOfMonth.plusMonths(1);
 
-        Long revenue = donHangRepository.getRevenueByDateRange(startOfMonth, nextMonth);
-        return revenue != null ? new BigDecimal(revenue) : BigDecimal.ZERO;
+            Long revenue = donHangRepository.getRevenueByDateRange(startOfMonth, nextMonth);
+            if (revenue != null) {
+                return new BigDecimal(revenue);
+            }
+        } catch (Exception e) {
+            try {
+                int currentMonth = LocalDate.now().getMonthValue();
+                for (MonthlyRevenueDTO dto : getRevenueByMonth()) {
+                    if (dto.getMonth().equals(String.format("Tháng %02d", currentMonth))) {
+                        return dto.getRevenue();
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+        return BigDecimal.ZERO;
     }
 
     public List<MonthlyRevenueDTO> getRevenueByMonth() {

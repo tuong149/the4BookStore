@@ -229,7 +229,8 @@ public class AdminController {
         java.time.LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
         java.time.LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
         
-        long monthlyOrders = donHangRepository.countByNgayDatBetween(startOfMonth, endOfMonth);
+        Long monthlyOrdersObj = donHangRepository.getOrderCountByDateRange(startOfMonth, endOfMonth);
+        long monthlyOrders = monthlyOrdersObj != null ? monthlyOrdersObj : 0L;
         Long revenueObj = donHangRepository.getRevenueByDateRange(startOfMonth, endOfMonth);
         long monthlyRevenue = revenueObj != null ? revenueObj : 0L;
 
