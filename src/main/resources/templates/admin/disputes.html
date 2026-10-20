@@ -71,17 +71,22 @@
                             <input type="text" name="phanQuyet" required placeholder="Nêu căn cứ phán quyết hoàn tiền hay bảo vệ shop..."
                                    class="w-full px-4 py-2 rounded-xl border border-surface-container bg-surface-container-low text-xs mb-3 focus:ring-2 focus:ring-primary"/>
                             
-                            <div class="flex items-center justify-end gap-3">
-                                <button type="submit" name="chapNhanHoanTien" value="true"
-                                        class="px-5 py-2.5 bg-purple-600 text-white font-bold text-xs rounded-xl hover:bg-purple-700 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm">assignment_return</span>
-                                    <span>Phán Quyết: Hoàn Tiền Cho Khách</span>
-                                </button>
-                                <button type="submit" name="chapNhanHoanTien" value="false"
-                                        class="px-5 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
-                                    <span class="material-symbols-outlined text-sm">verified_user</span>
-                                    <span>Bác Bỏ Khiếu Nại: Bảo Vệ Shop</span>
-                                </button>
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="text-xs text-on-surface-variant">
+                                    Số tiền phán quyết hoàn trả: <strong class="font-mono text-sm text-purple-700 font-bold" th:text="${#numbers.formatDecimal(d.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                                </div>
+                                <div class="flex items-center justify-end gap-3">
+                                    <button type="submit" name="chapNhanHoanTien" value="true"
+                                            class="px-5 py-2.5 bg-purple-600 text-white font-bold text-xs rounded-xl hover:bg-purple-700 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                                        <span class="material-symbols-outlined text-sm">assignment_return</span>
+                                        <span>Phán Quyết: Hoàn [[${#numbers.formatDecimal(d.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ']] Cho Khách</span>
+                                    </button>
+                                    <button type="submit" name="chapNhanHoanTien" value="false"
+                                            class="px-5 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                                        <span class="material-symbols-outlined text-sm">verified_user</span>
+                                        <span>Bác Bỏ Khiếu Nại: Bảo Vệ Shop</span>
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>

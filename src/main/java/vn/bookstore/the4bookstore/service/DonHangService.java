@@ -153,7 +153,7 @@ public class DonHangService {
                     .filter(c -> "HoatDong".equalsIgnoreCase(c.getTrangThai()))
                     .findFirst().orElse(null);
         }
-        int phiVanChuyen = (nvc != null && nvc.getPhiCoBan() != null) ? nvc.getPhiCoBan() : 30000;
+        int rawPhiVanChuyen = (nvc != null && nvc.getPhiCoBan() != null) ? nvc.getPhiCoBan() : 30000;
         java.math.BigDecimal chietKhauApp = (shop != null && shop.getChietKhauPhanTram() != null) ? shop.getChietKhauPhanTram() : new java.math.BigDecimal("10.00");
 
         // 3. Tạo đơn hàng
@@ -161,7 +161,7 @@ public class DonHangService {
         donHang.setKhachHang(khachHang);
         donHang.setShop(shop);
         donHang.setNhaVanChuyen(nvc);
-        donHang.setPhiVanChuyen(phiVanChuyen);
+        donHang.setPhiVanChuyen(rawPhiVanChuyen);
         donHang.setChietKhauAppPhanTram(chietKhauApp);
         donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
         if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
@@ -265,7 +265,16 @@ public class DonHangService {
             markVoucherUsedInWallet(khachHang, km);
         }
 
-        // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT)
+        // Kiểm tra chính sách Miễn phí vận chuyển toàn sàn:
+        // Đơn hàng có tiền hàng >= 350.000 đ được tự động miễn phí vận chuyển
+        final int FREE_SHIPPING_THRESHOLD = 350000;
+        int phiVanChuyen = rawPhiVanChuyen;
+        if (tongTien >= FREE_SHIPPING_THRESHOLD) {
+            // Đạt điều kiện Freeship tự động
+            tienGiamFreeship = phiVanChuyen;
+        }
+
+        // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT) nếu có nhập thêm voucher
         if (maVoucherShipping != null && !maVoucherShipping.isBlank()) {
             String cleanCode = maVoucherShipping.trim().toUpperCase();
             KhuyenMai km = khuyenMaiRepository.findByMaCode(cleanCode)
@@ -294,7 +303,7 @@ public class DonHangService {
             }
 
             int maxFreeshipDiscount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
-            tienGiamFreeship = Math.min(phiVanChuyen, maxFreeshipDiscount);
+            tienGiamFreeship = Math.max(tienGiamFreeship, Math.min(phiVanChuyen, maxFreeshipDiscount));
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
             khuyenMaiRepository.save(km);

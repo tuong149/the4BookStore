@@ -28,17 +28,20 @@ public class ShopService {
     private final SanPhamRepository sanPhamRepository;
     private final vn.bookstore.the4bookstore.repository.DonHangRepository donHangRepository;
     private final vn.bookstore.the4bookstore.repository.KhuyenMaiRepository khuyenMaiRepository;
+    private final vn.bookstore.the4bookstore.repository.CauHinhHeThongRepository cauHinhHeThongRepository;
 
     public ShopService(ShopRepository shopRepository,
                        TaiKhoanRepository taiKhoanRepository,
                        SanPhamRepository sanPhamRepository,
                        vn.bookstore.the4bookstore.repository.DonHangRepository donHangRepository,
-                       vn.bookstore.the4bookstore.repository.KhuyenMaiRepository khuyenMaiRepository) {
+                       vn.bookstore.the4bookstore.repository.KhuyenMaiRepository khuyenMaiRepository,
+                       vn.bookstore.the4bookstore.repository.CauHinhHeThongRepository cauHinhHeThongRepository) {
         this.shopRepository = shopRepository;
         this.taiKhoanRepository = taiKhoanRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.donHangRepository = donHangRepository;
         this.khuyenMaiRepository = khuyenMaiRepository;
+        this.cauHinhHeThongRepository = cauHinhHeThongRepository;
     }
 
     @Transactional(readOnly = true)
@@ -87,7 +90,16 @@ public class ShopService {
         shop.setLogo("https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150");
         shop.setBanner("https://images.unsplash.com/photo-1507842229451-7f01be45c06b?w=1200");
         shop.setTrangThai("ChoDuyet"); // Chờ Admin kiểm tra và duyệt gian hàng
-        shop.setChietKhauPhanTram(new BigDecimal("5.00")); // Mặc định 5%
+        BigDecimal defaultCommission = cauHinhHeThongRepository.findById("PHI_SAN_MAC_DINH")
+                .map(c -> {
+                    try {
+                        return new BigDecimal(c.getGiaTri());
+                    } catch (Exception e) {
+                        return new BigDecimal("5.00");
+                    }
+                })
+                .orElse(new BigDecimal("5.00"));
+        shop.setChietKhauPhanTram(defaultCommission);
         shop.setNgayTao(LocalDateTime.now());
 
         // Vai trò tài khoản vẫn giữ nguyên KHACHHANG/USER cho đến khi được Admin duyệt
