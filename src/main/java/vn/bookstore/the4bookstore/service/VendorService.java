@@ -199,11 +199,13 @@ public class VendorService {
         if (tenTacGia != null) {
             if (sanPhamTacGiaRepository != null && saved.getMaSP() != null) {
                 sanPhamTacGiaRepository.deleteBySanPhamId(saved.getMaSP());
+                sanPhamTacGiaRepository.flush();
             }
             if (!tenTacGia.trim().isEmpty() && tacGiaRepository != null && sanPhamTacGiaRepository != null) {
                 String[] authorNames = tenTacGia.split("[,;]");
                 int order = 1;
                 List<SanPhamTacGia> sptgList = new java.util.ArrayList<>();
+                java.util.Set<Integer> processedAuthorIds = new java.util.HashSet<>();
                 for (String rawName : authorNames) {
                     String cleanName = rawName.trim();
                     if (!cleanName.isEmpty()) {
@@ -212,16 +214,23 @@ public class VendorService {
                                     TacGia newTg = new TacGia();
                                     newTg.setTenTacGia(cleanName);
                                     newTg.setMoTa("Tác giả sách");
-                                    return tacGiaRepository.save(newTg);
+                                    return tacGiaRepository.saveAndFlush(newTg);
                                 });
-                        SanPhamTacGia sptg = new SanPhamTacGia(saved, tg, order++);
-                        sanPhamTacGiaRepository.save(sptg);
-                        sptgList.add(sptg);
+                        if (tg.getMaTacGia() != null && !processedAuthorIds.contains(tg.getMaTacGia())) {
+                            processedAuthorIds.add(tg.getMaTacGia());
+                            SanPhamTacGia sptg = new SanPhamTacGia(saved, tg, order++);
+                            sanPhamTacGiaRepository.save(sptg);
+                            sptgList.add(sptg);
+                        }
                     }
                 }
+                sanPhamTacGiaRepository.flush();
                 saved.setSanPhamTacGias(sptgList);
             } else {
                 saved.setSanPhamTacGias(new java.util.ArrayList<>());
+            }
+            if (entityManager != null) {
+                entityManager.flush();
             }
         }
 

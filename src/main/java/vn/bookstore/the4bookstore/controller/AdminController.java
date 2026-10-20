@@ -453,7 +453,7 @@ public class AdminController {
     // ==================== QUẢN LÝ TÁC GIẢ (CRUD) ====================
     @GetMapping({"/authors", "/tac-gia"})
     public String authors(Model model) {
-        List<TacGia> authors = tacGiaRepository.findAll();
+        List<TacGia> authors = tacGiaRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maTacGia"));
         Map<Integer, Long> bookCounts = new HashMap<>();
         for (TacGia tg : authors) {
             bookCounts.put(tg.getMaTacGia(), sanPhamTacGiaRepository.countByTacGia_MaTacGia(tg.getMaTacGia()));
@@ -468,6 +468,7 @@ public class AdminController {
         return "admin/authors";
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = "authors", allEntries = true)
     @PostMapping({"/authors/save", "/tac-gia/save"})
     public String saveAuthor(@RequestParam(value = "maTacGia", required = false) Integer maTacGia,
                              @RequestParam("tenTacGia") String tenTacGia,
@@ -491,6 +492,7 @@ public class AdminController {
         return "redirect:/admin/authors";
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = "authors", allEntries = true)
     @PostMapping({"/authors/delete/{id}", "/tac-gia/delete/{id}"})
     public String deleteAuthor(@PathVariable Integer id, RedirectAttributes ra) {
         long count = sanPhamTacGiaRepository.countByTacGia_MaTacGia(id);

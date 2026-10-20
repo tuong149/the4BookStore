@@ -127,7 +127,7 @@ CREATE TABLE `san_pham` (
     `so_luong_ton` INT NOT NULL DEFAULT 0,
     `so_luong_da_ban` INT NOT NULL DEFAULT 0,
     `muc_ton_toi_thieu` INT NOT NULL DEFAULT 5,
-    `loaisp` VARCHAR(50) NOT NULL DEFAULT 'SACH',
+    `loaisp` VARCHAR(50) NOT NULL DEFAULT 'Sach',
     `mo_ta` LONGTEXT NULL,
     `hinh_anh` VARCHAR(500) NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DangBan',
@@ -264,11 +264,13 @@ CREATE TABLE `don_hang` (
     `ma_shop` INT NOT NULL,
     `ma_nvc` INT NULL,
     `makm` INT NULL,
+    `ma_km_freeship` INT NULL,
     `dia_chi_giao` VARCHAR(255) NOT NULL,
     `so_dien_thoai_giao` VARCHAR(20) NOT NULL,
     `tong_tien` INT NOT NULL,
     `phi_van_chuyen` INT NOT NULL DEFAULT 0,
     `tien_giam` INT NOT NULL DEFAULT 0,
+    `tien_giam_freeship` INT NOT NULL DEFAULT 0,
     `chiet_khau_app_phan_tram` DECIMAL(5,2) NOT NULL DEFAULT 5.00,
     `tien_phi_san` INT NOT NULL DEFAULT 0,
     `tien_thuc_nhan_shop` INT NOT NULL DEFAULT 0,
@@ -286,7 +288,9 @@ CREATE TABLE `don_hang` (
     `nguoi_xu_ly_tranh_chap` INT NULL,
     INDEX `idx_donhang_makh_ngaydat` (`makh`, `ngay_dat`),
     INDEX `idx_donhang_shop_trangthai` (`ma_shop`, `trang_thai`),
+    INDEX `idx_donhang_km_freeship` (`ma_km_freeship`),
     CONSTRAINT `FK_donhang_km` FOREIGN KEY (`makm`) REFERENCES `khuyen_mai` (`makm`),
+    CONSTRAINT `FK_donhang_km_freeship` FOREIGN KEY (`ma_km_freeship`) REFERENCES `khuyen_mai` (`makm`),
     CONSTRAINT `FK_donhang_khachhang` FOREIGN KEY (`makh`) REFERENCES `khach_hang` (`makh`),
     CONSTRAINT `FK_donhang_nvc` FOREIGN KEY (`ma_nvc`) REFERENCES `nha_van_chuyen` (`ma_nvc`),
     CONSTRAINT `FK_donhang_nguoixuly` FOREIGN KEY (`nguoi_xu_ly_tranh_chap`) REFERENCES `tai_khoan` (`ma_tai_khoan`),
@@ -459,7 +463,8 @@ BEGIN
     SELECT COUNT(*) INTO v_count
     FROM san_pham
     WHERE ma_shop = p_ma_shop
-      AND (trang_thai_khoa IS NULL OR trang_thai_khoa != 'DaKhoa');
+      AND (trang_thai_khoa IS NULL OR (trang_thai_khoa != 'DaKhoa' AND trang_thai_khoa != 'BiKhoaBoiAdmin'))
+      AND (trang_thai != 'DaXoa');
     RETURN COALESCE(v_count, 0);
 END$$
 
@@ -473,7 +478,7 @@ BEGIN
     DECLARE v_tong BIGINT DEFAULT 0;
     SELECT SUM(dh.tong_tien) INTO v_tong
     FROM don_hang dh
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat')
+    WHERE dh.trang_thai IN ('DaGiao', 'GiaoThanhCong', 'HoanTat')
       AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
       AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) >= p_startDate 
       AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) < p_endDate;
@@ -533,7 +538,8 @@ BEGIN
     SELECT SUM(ct.so_luong) INTO v_total
     FROM chi_tiet_don_hang ct
     JOIN don_hang dh ON ct.madh = dh.madh
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat');
+    WHERE dh.trang_thai IN ('DaGiao', 'GiaoThanhCong', 'HoanTat')
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien');
     RETURN COALESCE(v_total, 0);
 END$$
 
@@ -605,13 +611,13 @@ SELECT
     YEAR(ngay_dat) AS nam,
     MONTH(ngay_dat) AS thang,
     COUNT(madh) AS tong_so_don,
-    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN 1 ELSE 0 END) AS so_don_thanh_cong,
+    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (trang_thai_thanh_toan IS NULL OR trang_thai_thanh_toan != 'DaHoanTien') THEN 1 ELSE 0 END) AS so_don_thanh_cong,
     SUM(CASE WHEN trang_thai = 'DaHuy' THEN 1 ELSE 0 END) AS so_don_huy,
-    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN tong_tien ELSE 0 END) AS tong_doanh_thu_hang,
-    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN tien_phi_san ELSE 0 END) AS hoa_hong_san_thu,
-    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN tien_thuc_nhan_shop ELSE 0 END) AS tong_tien_tra_shop
+    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (trang_thai_thanh_toan IS NULL OR trang_thai_thanh_toan != 'DaHoanTien') THEN tong_tien ELSE 0 END) AS tong_doanh_thu_hang,
+    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (trang_thai_thanh_toan IS NULL OR trang_thai_thanh_toan != 'DaHoanTien') THEN tien_phi_san ELSE 0 END) AS hoa_hong_san_thu,
+    SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (trang_thai_thanh_toan IS NULL OR trang_thai_thanh_toan != 'DaHoanTien') THEN tien_thuc_nhan_shop ELSE 0 END) AS tong_tien_tra_shop
 FROM don_hang
-GROUP BY YEAR(ngay_dat), MONTH(ngay_dat);
+GROUP BY YEAR(COALESCE(ngay_hoan_thanh, ngay_dat)), MONTH(COALESCE(ngay_hoan_thanh, ngay_dat));
 
 -- View 2: Báo cáo kết quả kinh doanh của từng Shop
 DROP VIEW IF EXISTS `vw_DoanhThuTungShop`;
@@ -622,10 +628,10 @@ SELECT
     s.so_dien_thoai,
     s.chiet_khau_phan_tram,
     COUNT(dh.madh) AS tong_don_dat,
-    SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN 1 ELSE 0 END) AS don_hoan_thanh,
-    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN dh.tong_tien ELSE 0 END), 0) AS tong_tien_ban,
-    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN dh.tien_phi_san ELSE 0 END), 0) AS phi_san_da_nop,
-    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') THEN dh.tien_thuc_nhan_shop ELSE 0 END), 0) AS thuc_nhan_ve_shop
+    SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien') THEN 1 ELSE 0 END) AS don_hoan_thanh,
+    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien') THEN dh.tong_tien ELSE 0 END), 0) AS tong_tien_ban,
+    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien') THEN dh.tien_phi_san ELSE 0 END), 0) AS phi_san_da_nop,
+    COALESCE(SUM(CASE WHEN dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien') THEN dh.tien_thuc_nhan_shop ELSE 0 END), 0) AS thuc_nhan_ve_shop
 FROM shop s
 LEFT JOIN don_hang dh ON s.ma_shop = dh.ma_shop
 GROUP BY s.ma_shop, s.ten_shop, s.so_dien_thoai, s.chiet_khau_phan_tram;
@@ -696,7 +702,7 @@ BEGIN
         MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) AS thang, 
         SUM(dh.tong_tien) AS doanh_thu 
     FROM don_hang dh 
-    WHERE dh.trang_thai IN ('DaGiao', 'HoanTat') 
+    WHERE dh.trang_thai IN ('DaGiao', 'GiaoThanhCong', 'HoanTat') 
       AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
       AND YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) = YEAR(CURRENT_DATE())
     GROUP BY YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)), MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) 
@@ -730,16 +736,17 @@ DROP PROCEDURE IF EXISTS `sp_DoanhThuShopTheoThang`$$
 CREATE PROCEDURE `sp_DoanhThuShopTheoThang`(IN p_ma_shop INT)
 BEGIN
     SELECT 
-        YEAR(dh.ngay_dat) AS nam,
-        MONTH(dh.ngay_dat) AS thang,
+        YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) AS nam,
+        MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)) AS thang,
         COUNT(dh.madh) AS tong_don_hang,
         COALESCE(SUM(dh.tong_tien), 0) AS tong_doanh_thu,
         COALESCE(SUM(dh.tien_phi_san), 0) AS tong_phi_san,
         COALESCE(SUM(dh.tien_thuc_nhan_shop), 0) AS thuc_nhan_shop
     FROM don_hang dh
     WHERE dh.ma_shop = p_ma_shop
-      AND dh.trang_thai IN ('DaGiao', 'DA_GIAO', 'HoanTat')
-    GROUP BY YEAR(dh.ngay_dat), MONTH(dh.ngay_dat)
+      AND dh.trang_thai IN ('DaGiao', 'GiaoThanhCong', 'HoanTat')
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+    GROUP BY YEAR(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat)), MONTH(COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat))
     ORDER BY nam DESC, thang DESC;
 END$$
 
@@ -749,10 +756,11 @@ CREATE PROCEDURE `sp_HuyDonHang`(IN p_madh INT, IN p_ly_do VARCHAR(500))
 proc_label: BEGIN
     DECLARE v_trang_thai VARCHAR(30);
     DECLARE v_makm INT;
+    DECLARE v_ma_km_freeship INT;
 
     START TRANSACTION;
 
-    SELECT trang_thai, makm INTO v_trang_thai, v_makm
+    SELECT trang_thai, makm, ma_km_freeship INTO v_trang_thai, v_makm, v_ma_km_freeship
     FROM don_hang
     WHERE madh = p_madh
     FOR UPDATE;
@@ -782,11 +790,18 @@ proc_label: BEGIN
         ly_do_huy = p_ly_do
     WHERE madh = p_madh;
 
-    -- Hoàn lại lượt dùng voucher
+    -- Hoàn lại lượt dùng voucher giảm giá
     IF v_makm IS NOT NULL THEN
         UPDATE khuyen_mai
         SET so_luong_da_dung = CASE WHEN so_luong_da_dung > 0 THEN so_luong_da_dung - 1 ELSE 0 END
         WHERE makm = v_makm;
+    END IF;
+
+    -- Hoàn lại lượt dùng voucher freeship
+    IF v_ma_km_freeship IS NOT NULL THEN
+        UPDATE khuyen_mai
+        SET so_luong_da_dung = CASE WHEN so_luong_da_dung > 0 THEN so_luong_da_dung - 1 ELSE 0 END
+        WHERE makm = v_ma_km_freeship;
     END IF;
 
     COMMIT;
@@ -800,7 +815,7 @@ proc_label: BEGIN
 
     IF NOT EXISTS (
         SELECT 1 FROM don_hang 
-        WHERE madh = p_madh AND ma_shop = p_ma_shop AND trang_thai IN ('ChoXacNhan', 'ChoXuLy')
+        WHERE madh = p_madh AND ma_shop = p_ma_shop AND trang_thai IN ('ChoXacNhan', 'ChoXuLy', 'DonHangMoi')
     ) THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Đơn hàng không hợp lệ hoặc không ở trạng thái Chờ xác nhận!';
@@ -853,11 +868,13 @@ CREATE PROCEDURE `sp_DatHangVaTruTonKho`(
     IN p_ma_shop INT,
     IN p_ma_nvc INT,
     IN p_makm INT,
+    IN p_ma_km_freeship INT,
     IN p_dia_chi_giao VARCHAR(255),
     IN p_so_dien_thoai_giao VARCHAR(20),
     IN p_tong_tien INT,
     IN p_phi_van_chuyen INT,
     IN p_tien_giam INT,
+    IN p_tien_giam_freeship INT,
     IN p_phuong_thuc VARCHAR(30),
     OUT p_new_madh INT
 )
@@ -873,16 +890,16 @@ BEGIN
     SET v_shop_nhan = p_tong_tien - v_phi_san;
 
     INSERT INTO don_hang (
-        makh, ma_shop, ma_nvc, makm, dia_chi_giao, so_dien_thoai_giao,
-        tong_tien, phi_van_chuyen, tien_giam, chiet_khau_app_phan_tram,
+        makh, ma_shop, ma_nvc, makm, ma_km_freeship, dia_chi_giao, so_dien_thoai_giao,
+        tong_tien, phi_van_chuyen, tien_giam, tien_giam_freeship, chiet_khau_app_phan_tram,
         tien_phi_san, tien_thuc_nhan_shop,
-        phuong_thuc_thanh_toan, trang_thai
+        phuong_thuc_thanh_toan, trang_thai, ngay_dat
     )
     VALUES (
-        p_makh, p_ma_shop, p_ma_nvc, p_makm, p_dia_chi_giao, p_so_dien_thoai_giao,
-        p_tong_tien, COALESCE(p_phi_van_chuyen, 0), COALESCE(p_tien_giam, 0), v_chiet_khau,
+        p_makh, p_ma_shop, p_ma_nvc, p_makm, p_ma_km_freeship, p_dia_chi_giao, p_so_dien_thoai_giao,
+        p_tong_tien, COALESCE(p_phi_van_chuyen, 0), COALESCE(p_tien_giam, 0), COALESCE(p_tien_giam_freeship, 0), v_chiet_khau,
         v_phi_san, v_shop_nhan,
-        COALESCE(p_phuong_thuc, 'COD'), 'ChoXacNhan'
+        COALESCE(p_phuong_thuc, 'COD'), 'ChoXacNhan', NOW()
     );
 
     SET p_new_madh = LAST_INSERT_ID();
@@ -891,6 +908,12 @@ BEGIN
         UPDATE khuyen_mai
         SET so_luong_da_dung = so_luong_da_dung + 1
         WHERE makm = p_makm;
+    END IF;
+
+    IF p_ma_km_freeship IS NOT NULL THEN
+        UPDATE khuyen_mai
+        SET so_luong_da_dung = so_luong_da_dung + 1
+        WHERE makm = p_ma_km_freeship;
     END IF;
 
     COMMIT;
@@ -938,8 +961,9 @@ BEGIN
     FROM san_pham sp
     JOIN shop s ON sp.ma_shop = s.ma_shop
     JOIN danh_muc dm ON sp.ma_danh_muc = dm.ma_danh_muc
-    WHERE sp.trang_thai = 'HoatDong'
-      AND s.trang_thai = 'HoatDong'
+    WHERE sp.trang_thai IN ('DangBan', 'HoatDong')
+      AND (sp.trang_thai_khoa = 'BinhThuong' OR sp.trang_thai_khoa IS NULL)
+      AND (s.trang_thai = 'HoatDong' OR s.trang_thai IS NULL)
       AND (p_tu_khoa IS NULL OR sp.tensp LIKE CONCAT('%', p_tu_khoa, '%'))
       AND (p_ma_danh_muc IS NULL OR sp.ma_danh_muc = p_ma_danh_muc)
       AND (p_gia_tu IS NULL OR sp.gia_ban >= p_gia_tu)
@@ -962,7 +986,8 @@ BEGIN
     FROM shop s
     JOIN don_hang dh ON s.ma_shop = dh.ma_shop
     WHERE dh.trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao')
-      AND dh.ngay_dat BETWEEN p_tu_ngay AND p_den_ngay
+      AND (dh.trang_thai_thanh_toan IS NULL OR dh.trang_thai_thanh_toan != 'DaHoanTien')
+      AND COALESCE(dh.ngay_hoan_thanh, dh.ngay_dat) BETWEEN p_tu_ngay AND p_den_ngay
     GROUP BY s.ma_shop, s.ten_shop;
 END$$
 
@@ -1158,14 +1183,14 @@ INSERT INTO `gio_hang` (`ma_gio_hang`, `makh`, `ngay_tao`, `ngay_cap_nhat`) VALU
 (2, 3, '2026-10-17 11:06:51', '2026-10-17 11:55:04');
 
 -- 15. don_hang
-INSERT INTO `don_hang` (`madh`, `makh`, `ma_shop`, `ma_nvc`, `makm`, `dia_chi_giao`, `so_dien_thoai_giao`, `tong_tien`, `phi_van_chuyen`, `tien_giam`, `chiet_khau_app_phan_tram`, `tien_phi_san`, `tien_thuc_nhan_shop`, `phuong_thuc_thanh_toan`, `trang_thai_thanh_toan`, `trang_thai`, `ma_van_don`, `ly_do_huy`, `ly_do_tu_choi`, `ngay_dat`, `ngay_xac_nhan`, `ngay_hoan_thanh`, `ly_do_tra_hang`, `phan_quyet_tranh_chap`, `nguoi_xu_ly_tranh_chap`) VALUES
-(1, 1, 1, 1, 3, '123 Lê Lợi, P. Bến Nghé, Q.1, TP.HCM', '0988111222', 155000, 22000, 20000, 5.00, 7750, 147250, 'COD', 'ChuaThanhToan', 'DaGiao', 'GHTK8829102', NULL, NULL, '2026-10-16 15:04:53', NULL, '2026-10-16 16:00:00', NULL, NULL, NULL),
-(2, 2, 2, 2, 4, '456 Võ Văn Ngân, TP. Thủ Đức, TP.HCM', '0977333444', 350000, 25000, 40000, 5.00, 17500, 332500, 'VIETQR', 'DaThanhToan', 'DaHuy', NULL, 'Khach doi y doi sach khac', NULL, '2026-10-16 15:04:53', NULL, NULL, NULL, NULL, NULL),
-(5, 1, 1, 1, NULL, '1 Vo Van Ngan Thu Duc', '0987654321', 220000, 22000, 0, 5.00, 11000, 209000, 'COD', 'ChuaThanhToan', 'DangGiao', 'VNPOST_HN_005', NULL, NULL, '2026-10-16 22:30:03', '2026-10-16 15:31:18', NULL, NULL, NULL, NULL),
-(6, 3, 1, 1, NULL, '462, Linh trung, TP.thủ đức, Hồ Chí minh', '0934567822', 195000, 22000, 0, 5.00, 9750, 185250, 'COD', 'DaThanhToan', 'HoanTat', 'GHTK-6-62810', NULL, NULL, '2026-10-17 11:08:49', '2026-10-17 11:09:22', '2026-10-17 11:19:28', NULL, NULL, NULL),
-(7, 1, 1, 1, NULL, '1 Võ Văn Ngân, TP. Thủ Đức', '0912345678', 480000, 20000, 0, 5.00, 24000, 456000, 'COD', 'DaThanhToan', 'HoanTat', NULL, NULL, NULL, '2026-08-15 10:00:00', NULL, '2026-08-18 14:00:00', NULL, NULL, NULL),
-(8, 2, 2, 1, NULL, 'Ký túc xá khu B ĐHQG, Dĩ An', '0987654321', 620000, 25000, 0, 5.00, 31000, 589000, 'VNPAY', 'DaThanhToan', 'HoanTat', NULL, NULL, NULL, '2026-09-10 11:30:00', NULL, '2026-09-13 16:00:00', NULL, NULL, NULL),
-(9, 3, 2, 1, NULL, '462, Linh trung, TP.thủ đức, Hồ Chí minh', '0934567822', 89000, 22000, 0, 5.00, 4450, 84550, 'COD', 'DaThanhToan', 'DaGiao', 'GHTK-9-65979', NULL, NULL, '2026-10-17 11:55:04', '2026-10-17 11:56:05', NULL, NULL, NULL, NULL);
+INSERT INTO `don_hang` (`madh`, `makh`, `ma_shop`, `ma_nvc`, `makm`, `ma_km_freeship`, `dia_chi_giao`, `so_dien_thoai_giao`, `tong_tien`, `phi_van_chuyen`, `tien_giam`, `tien_giam_freeship`, `chiet_khau_app_phan_tram`, `tien_phi_san`, `tien_thuc_nhan_shop`, `phuong_thuc_thanh_toan`, `trang_thai_thanh_toan`, `trang_thai`, `ma_van_don`, `ly_do_huy`, `ly_do_tu_choi`, `ngay_dat`, `ngay_xac_nhan`, `ngay_hoan_thanh`, `ly_do_tra_hang`, `phan_quyet_tranh_chap`, `nguoi_xu_ly_tranh_chap`) VALUES
+(1, 1, 1, 1, 3, NULL, '123 Lê Lợi, P. Bến Nghé, Q.1, TP.HCM', '0988111222', 155000, 22000, 20000, 0, 5.00, 7750, 147250, 'COD', 'ChuaThanhToan', 'DaGiao', 'GHTK8829102', NULL, NULL, '2026-10-16 15:04:53', NULL, '2026-10-16 16:00:00', NULL, NULL, NULL),
+(2, 2, 2, 2, 4, NULL, '456 Võ Văn Ngân, TP. Thủ Đức, TP.HCM', '0977333444', 350000, 25000, 40000, 0, 5.00, 17500, 332500, 'VIETQR', 'DaThanhToan', 'DaHuy', NULL, 'Khach doi y doi sach khac', NULL, '2026-10-16 15:04:53', NULL, NULL, NULL, NULL, NULL),
+(5, 1, 1, 1, NULL, NULL, '1 Vo Van Ngan Thu Duc', '0987654321', 220000, 22000, 0, 0, 5.00, 11000, 209000, 'COD', 'ChuaThanhToan', 'DangGiao', 'VNPOST_HN_005', NULL, NULL, '2026-10-16 22:30:03', '2026-10-16 15:31:18', NULL, NULL, NULL, NULL),
+(6, 3, 1, 1, NULL, NULL, '462, Linh trung, TP.thủ đức, Hồ Chí minh', '0934567822', 195000, 22000, 0, 0, 5.00, 9750, 185250, 'COD', 'DaThanhToan', 'HoanTat', 'GHTK-6-62810', NULL, NULL, '2026-10-17 11:08:49', '2026-10-17 11:09:22', '2026-10-17 11:19:28', NULL, NULL, NULL),
+(7, 1, 1, 1, NULL, NULL, '1 Võ Văn Ngân, TP. Thủ Đức', '0912345678', 480000, 20000, 0, 0, 5.00, 24000, 456000, 'COD', 'DaThanhToan', 'HoanTat', NULL, NULL, NULL, '2026-08-15 10:00:00', NULL, '2026-08-18 14:00:00', NULL, NULL, NULL),
+(8, 2, 2, 1, NULL, NULL, 'Ký túc xá khu B ĐHQG, Dĩ An', '0987654321', 620000, 25000, 0, 0, 5.00, 31000, 589000, 'VNPAY', 'DaThanhToan', 'HoanTat', NULL, NULL, NULL, '2026-09-10 11:30:00', NULL, '2026-09-13 16:00:00', NULL, NULL, NULL),
+(9, 3, 2, 1, NULL, NULL, '462, Linh trung, TP.thủ đức, Hồ Chí minh', '0934567822', 89000, 22000, 0, 0, 5.00, 4450, 84550, 'COD', 'DaThanhToan', 'DaGiao', 'GHTK-9-65979', NULL, NULL, '2026-10-17 11:55:04', '2026-10-17 11:56:05', NULL, NULL, NULL, NULL);
 
 -- 16. chi_tiet_don_hang
 INSERT INTO `chi_tiet_don_hang` (`madh`, `masp`, `don_gia`, `so_luong`) VALUES

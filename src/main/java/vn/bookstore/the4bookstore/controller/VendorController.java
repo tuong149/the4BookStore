@@ -41,8 +41,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Slf4j
 @Controller
 @RequestMapping("/vendor")
-@RequiredArgsConstructor
 public class VendorController {
+    public VendorController(ShopService shopService, VendorService vendorService, CloudinaryService cloudinaryService, TaiKhoanRepository taiKhoanRepository, DanhMucRepository danhMucRepository, TacGiaRepository tacGiaRepository, SanPhamRepository sanPhamRepository) {
+        this.shopService = shopService;
+        this.vendorService = vendorService;
+        this.cloudinaryService = cloudinaryService;
+        this.taiKhoanRepository = taiKhoanRepository;
+        this.danhMucRepository = danhMucRepository;
+        this.tacGiaRepository = tacGiaRepository;
+        this.sanPhamRepository = sanPhamRepository;
+    }
 
     private final ShopService shopService;
     private final VendorService vendorService;
@@ -744,3 +752,4 @@ public class VendorController {
         return "redirect:/vendor/promotions";
     }
 }
+
