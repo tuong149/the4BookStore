@@ -164,7 +164,7 @@
                             <span th:if="${sp.trangThaiKhoa == 'BinhThuong' or sp.trangThaiKhoa == null}" th:switch="${sp.trangThai}">
                                 <span th:case="'DangBan'" th:if="${sp.soLuongTon != null and sp.soLuongTon <= 5 and sp.soLuongTon > 0}"
                                       class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold shadow-xs whitespace-nowrap">
-                                    Còn <span th:text="${sp.soLuongTon}"></span> cuốn
+                                    Còn <span th:text="${sp.soLuongTon}"></span> sản phẩm
                                 </span>
                                 <span th:case="'DangBan'" th:unless="${sp.soLuongTon != null and sp.soLuongTon <= 5}"
                                       class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap">

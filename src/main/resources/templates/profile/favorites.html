@@ -21,7 +21,7 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div th:each="book : ${favorites}">
-                <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
             </div>
         </div>
 

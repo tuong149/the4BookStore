@@ -236,7 +236,7 @@
                     <div th:if="${guestTopSold != null and !guestTopSold.isEmpty()}"
                         class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                         <div th:each="book : ${guestTopSold}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </div>
                     </div>
                     <div th:unless="${guestTopSold != null and !guestTopSold.isEmpty()}"
@@ -297,7 +297,7 @@
                     <div id="user-tab-content-newest"
                         class="user-tab-pane grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                         <div th:each="book : ${top20Newest}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </div>
                         <div th:if="${top20Newest == null or top20Newest.isEmpty()}"
                             class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
@@ -308,7 +308,7 @@
                     <div id="user-tab-content-bestselling"
                         class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                         <div th:each="book : ${top20BestSelling}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </div>
                         <div th:if="${top20BestSelling == null or top20BestSelling.isEmpty()}"
                             class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
@@ -319,7 +319,7 @@
                     <div id="user-tab-content-highestRated"
                         class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                         <div th:each="book : ${top20HighestRated}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </div>
                         <div th:if="${top20HighestRated == null or top20HighestRated.isEmpty()}"
                             class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
@@ -330,7 +330,7 @@
                     <div id="user-tab-content-mostFavorited"
                         class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                         <div th:each="book : ${top20MostFavorited}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </div>
                         <div th:if="${top20MostFavorited == null or top20MostFavorited.isEmpty()}"
                             class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
@@ -357,7 +357,7 @@
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-space-sm md:gap-space-md">
                     <div th:each="book : ${recentlyViewed}" class="h-full flex flex-col">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </div>
                 </div>
             </section>
@@ -391,7 +391,7 @@
                     class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
                     <div th:each="book : ${featuredBooks}" class="featured-card-wrapper h-full flex flex-col"
                         th:attr="data-price=${book.giaBan}, data-name=${book.tenSP?.toLowerCase()}">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </div>
                 </div>
             </section>
@@ -636,7 +636,7 @@
                     <div th:if="${!#lists.isEmpty(sachPreview)}"
                         class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                         <th:block th:each="book : ${sachPreview}">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </th:block>
                     </div>
                     <div th:if="${#lists.isEmpty(sachPreview)}"
@@ -695,7 +695,7 @@
                     <div th:if="${!#lists.isEmpty(vppPreview)}"
                         class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                         <th:block th:each="book : ${vppPreview}">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </th:block>
                     </div>
                     <div th:if="${#lists.isEmpty(vppPreview)}"
@@ -754,7 +754,7 @@
                     <div th:if="${!#lists.isEmpty(quaTangPreview)}"
                         class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                         <th:block th:each="book : ${quaTangPreview}">
-                            <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                         </th:block>
                     </div>
                     <div th:if="${#lists.isEmpty(quaTangPreview)}"

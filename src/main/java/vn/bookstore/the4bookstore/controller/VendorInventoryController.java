@@ -20,6 +20,7 @@ import vn.bookstore.the4bookstore.service.ShopService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -56,17 +57,45 @@ public class VendorInventoryController {
         }
         return tk;
     }
+    private Shop getCurrentShop(Authentication auth) {
+        TaiKhoan user = getCurrentUser(auth);
+        if (user == null) return null;
+        Optional<Shop> userShop = shopService.findByTaiKhoan(user);
+        if (userShop.isPresent()) {
+            return userShop.get();
+        }
+        if ("ADMIN".equalsIgnoreCase(user.getVaiTro()) || "MANAGER".equalsIgnoreCase(user.getVaiTro()) || "QUANLY".equalsIgnoreCase(user.getVaiTro())) {
+            return shopService.findById(1).orElse(null);
+        }
+        return null;
+    }
+
+    private String checkShopAccess(Shop shop) {
+        if (shop == null) return "redirect:/vendor/register";
+        if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/pending";
+        }
+        if ("TuChoi".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/rejected";
+        }
+        if ("BiKhoa".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/blocked";
+        }
+        if ("DaXoa".equalsIgnoreCase(shop.getTrangThai())) {
+            return "redirect:/vendor/register";
+        }
+        return null;
+    }
+
 
     // --- 1. DANH SÁCH BIÊN BẢN KIỂM KÊ CỦA VENDOR ---
     @GetMapping
     public String listInventoryAudits(@RequestParam(defaultValue = "0") int page,
                                      Authentication auth,
                                      Model model) {
-        TaiKhoan tk = getCurrentUser(auth);
-        if (tk == null) return "redirect:/login";
-
-        Shop shop = shopService.findByTaiKhoan(tk).orElse(null);
-        if (shop == null) return "redirect:/vendor/register";
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
 
         Page<PhieuKiemKe> auditPage = phieuKiemKeRepository.findByShop_MaShopOrderByNgayKiemKeDesc(shop.getMaShop(), PageRequest.of(page, 10));
         long totalProducts = sanPhamRepository.countByShop_MaShop(shop.getMaShop());
@@ -82,11 +111,9 @@ public class VendorInventoryController {
     // --- 2. TRANG LẬP PHIẾU KIỂM KÊ MỚI CỦA SHOP ---
     @GetMapping("/create")
     public String showCreateAuditForm(Authentication auth, Model model) {
-        TaiKhoan tk = getCurrentUser(auth);
-        if (tk == null) return "redirect:/login";
-
-        Shop shop = shopService.findByTaiKhoan(tk).orElse(null);
-        if (shop == null) return "redirect:/vendor/register";
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
 
         List<SanPham> products = sanPhamRepository.findByShop_MaShop(shop.getMaShop());
 
@@ -104,11 +131,9 @@ public class VendorInventoryController {
                               @RequestParam(value = "lyDos", required = false) List<String> lyDos,
                               Authentication auth,
                               RedirectAttributes ra) {
-        TaiKhoan tk = getCurrentUser(auth);
-        if (tk == null) return "redirect:/login";
-
-        Shop shop = shopService.findByTaiKhoan(tk).orElse(null);
-        if (shop == null) return "redirect:/vendor/register";
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
 
         try {
             if (productIds == null || productIds.isEmpty()) {
@@ -172,11 +197,9 @@ public class VendorInventoryController {
     public String viewAuditDetail(@PathVariable Integer id,
                                   Authentication auth,
                                   Model model) {
-        TaiKhoan tk = getCurrentUser(auth);
-        if (tk == null) return "redirect:/login";
-
-        Shop shop = shopService.findByTaiKhoan(tk).orElse(null);
-        if (shop == null) return "redirect:/vendor/register";
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
 
         PhieuKiemKe pkk = phieuKiemKeRepository.findById(id).orElse(null);
         if (pkk == null || pkk.getShop() == null || !pkk.getShop().getMaShop().equals(shop.getMaShop())) {

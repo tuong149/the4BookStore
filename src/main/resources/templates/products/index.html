@@ -133,7 +133,7 @@
 
                 <div th:if="${!#lists.isEmpty(sachPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                     <th:block th:each="book : ${sachPreview}">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </th:block>
                 </div>
                 <div th:if="${#lists.isEmpty(sachPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
@@ -188,7 +188,7 @@
 
                 <div th:if="${!#lists.isEmpty(vppPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                     <th:block th:each="book : ${vppPreview}">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </th:block>
                 </div>
                 <div th:if="${#lists.isEmpty(vppPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
@@ -243,7 +243,7 @@
 
                 <div th:if="${!#lists.isEmpty(quaTangPreview)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                     <th:block th:each="book : ${quaTangPreview}">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </th:block>
                 </div>
                 <div th:if="${#lists.isEmpty(quaTangPreview)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">

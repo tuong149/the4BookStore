@@ -126,7 +126,7 @@ public class DonHangService {
 
             if (sp.getSoLuongTon() < ct.getSoLuong()) {
                 throw new RuntimeException("Sản phẩm \"" + sp.getTenSP() + "\" không đủ số lượng tồn kho (chỉ còn " 
-                        + sp.getSoLuongTon() + " cuốn)!");
+                        + sp.getSoLuongTon() + " sản phẩm)!");
             }
             lockedProducts.add(sp);
         }

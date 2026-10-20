@@ -418,7 +418,7 @@
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
                     <th:block th:each="book : ${relatedBooks}">
-                        <div th:replace="~{fragments/common/book_card :: book_card(${book})}"></div>
+                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
                     </th:block>
                 </div>
             </div>

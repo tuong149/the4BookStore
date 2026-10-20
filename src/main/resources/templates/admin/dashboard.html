@@ -46,7 +46,7 @@
                                 <span class="font-bold">Cảnh báo tồn kho vận hành:</span>
                                 <span>Hiện có </span>
                                 <strong class="text-amber-700" th:text="${lowStockCount}">0</strong>
-                                <span> sản phẩm sắp hết hàng (&lt; 10 cuốn) và </span>
+                                <span> sản phẩm sắp hết hàng (&lt; 10 sản phẩm) và </span>
                                 <strong class="text-rose-700" th:text="${outOfStockCount}">0</strong>
                                 <span> sản phẩm đã cạn kho.</span>
                             </div>
@@ -252,8 +252,8 @@
                                             </span>
                                             <span th:if="${sp.soLuongTon != null and sp.soLuongTon >= 10}"
                                                   class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                                  th:text="'Còn ' + ${sp.soLuongTon} + ' cuốn'">
-                                                Còn 50 cuốn
+                                                  th:text="'Còn ' + ${sp.soLuongTon} + ' sản phẩm'">
+                                                Còn 50 sản phẩm
                                             </span>
                                         </td>
 
@@ -406,8 +406,8 @@
                                                     <span class="font-semibold text-xs text-on-surface line-clamp-1" th:text="${book.tenSach}">Tên sản phẩm</span>
                                                     <span class="text-[10px] text-on-surface-variant" th:text="${book.giaBan != null ? #numbers.formatDecimal(book.giaBan, 0, 'POINT', 0, 'COMMA') + ' ₫' : ''}">Giá</span>
                                                 </td>
-                                                <td class="py-3 px-space-md text-right font-black text-xs text-primary tabular-nums" th:text="${book.soLuongBan} + ' cuốn'">
-                                                    50 cuốn
+                                                <td class="py-3 px-space-md text-right font-black text-xs text-primary tabular-nums" th:text="${book.soLuongBan} + ' sản phẩm'">
+                                                    50 sản phẩm
                                                 </td>
                                                 <td class="py-3 px-space-md text-right font-semibold text-xs text-emerald-700 tabular-nums"
                                                     th:text="${book.doanhThuDongGop != null ? #numbers.formatDecimal(book.doanhThuDongGop, 0, 'POINT', 0, 'COMMA') + ' ₫' : '---'}">
@@ -559,7 +559,7 @@
                                 cornerRadius: 8,
                                 callbacks: {
                                     label: function(context) {
-                                        return ` Đã bán: ${context.raw} cuốn`;
+                                        return ` Đã bán: ${context.raw} sản phẩm`;
                                     }
                                 }
                             }
