@@ -109,36 +109,30 @@ public class SanPhamService {
 
     @Cacheable(value = "categories", key = "#loaiSP")
     public List<DanhMuc> getCategoriesByLoaiSP(String loaiSP) {
-        List<DanhMuc> allActive = danhMucRepository.findAll().stream()
-                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
-                .toList();
+        if (loaiSP == null || loaiSP.isBlank() || "ALL".equalsIgnoreCase(loaiSP)) {
+            List<DanhMuc> allActive = danhMucRepository.findByTrangThaiTrueOrderByMaDanhMucAsc();
+            return allActive.isEmpty() ? danhMucRepository.findAll() : allActive;
+        }
 
-        List<DanhMuc> linked = sanPhamRepository.findDistinctDanhMucByLoaiSP(loaiSP);
+        // Truy vấn trực tiếp theo trường loaiSP trong bảng DANH_MUC
+        List<DanhMuc> categories = danhMucRepository.findByLoaiSPAndTrangThaiTrue(loaiSP);
+        if (categories != null && !categories.isEmpty()) {
+            return categories;
+        }
 
+        // Fallback an toàn (nếu DB có bản ghi cũ chưa cập nhật loaiSP)
+        List<DanhMuc> allActive = danhMucRepository.findByTrangThaiTrueOrderByMaDanhMucAsc();
         if ("Sach".equalsIgnoreCase(loaiSP)) {
             return allActive.stream()
-                    .filter(dm -> {
-                        String name = dm.getTenDanhMuc().toLowerCase();
-                        boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ") || name.contains("văn phòng phẩm");
-                        boolean isQuaTang = name.contains("túi") || name.contains("book nook") || name.contains("boardgame") || name.contains("quà tặng") || name.contains("nến");
-                        return (!isVpp && !isQuaTang) || linked.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
-                    })
+                    .filter(dm -> dm.getLoaiSP() == null || "Sach".equalsIgnoreCase(dm.getLoaiSP()))
                     .toList();
         } else if ("VanPhongPham".equalsIgnoreCase(loaiSP)) {
             return allActive.stream()
-                    .filter(dm -> {
-                        String name = dm.getTenDanhMuc().toLowerCase();
-                        boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ") || name.contains("văn phòng phẩm") || name.contains("vpp");
-                        return isVpp || linked.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
-                    })
+                    .filter(dm -> "VanPhongPham".equalsIgnoreCase(dm.getLoaiSP()))
                     .toList();
         } else if ("QuaTang".equalsIgnoreCase(loaiSP)) {
             return allActive.stream()
-                    .filter(dm -> {
-                        String name = dm.getTenDanhMuc().toLowerCase();
-                        boolean isQuaTang = name.contains("túi") || name.contains("book nook") || name.contains("boardgame") || name.contains("quà tặng") || name.contains("nến") || name.contains("decor") || name.contains("trang trí");
-                        return isQuaTang || linked.stream().anyMatch(d -> d.getMaDanhMuc().equals(dm.getMaDanhMuc()));
-                    })
+                    .filter(dm -> "QuaTang".equalsIgnoreCase(dm.getLoaiSP()))
                     .toList();
         }
         return allActive;
@@ -267,7 +261,7 @@ public class SanPhamService {
      * - Nếu chưa có đơn hàng: Hard delete (dọn dẹp sạch giỏ hàng, đánh giá, quan hệ tác giả, yêu thích... và xóa khỏi DB).
      */
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = {"home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories"}, allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories", "allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
     public void deleteProduct(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + maSP));

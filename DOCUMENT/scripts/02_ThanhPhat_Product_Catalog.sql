@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[danh_muc](
 	[ten_danh_muc] [nvarchar](100) COLLATE Vietnamese_CI_AS NOT NULL,
 	[mo_ta] [nvarchar](500) COLLATE Vietnamese_CI_AS NULL,
 	[trang_thai] [bit] NOT NULL,
+	[loaisp] [nvarchar](30) COLLATE Vietnamese_CI_AS NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[ma_danh_muc] ASC
@@ -33,6 +34,8 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[danh_muc] ADD CONSTRAINT [DF_danhmuc_trangthai] DEFAULT ((1)) FOR [trang_thai];
+GO
+ALTER TABLE [dbo].[danh_muc] ADD CONSTRAINT [DF_danhmuc_loaisp] DEFAULT (N'Sach') FOR [loaisp];
 GO
 
 -- Bảng 8: tac_gia (Thông tin tác giả viết sách)
@@ -494,13 +497,20 @@ GO
 -- ====================================================================
 
 SET IDENTITY_INSERT [dbo].[danh_muc] ON;
-INSERT [dbo].[danh_muc] ([ma_danh_muc], [ten_danh_muc], [mo_ta], [trang_thai]) VALUES 
-(1, N'Văn Học Trong Nước', N'Tiểu thuyết, truyện ngắn, phóng sự và tác phẩm văn học Việt Nam', 1),
-(2, N'Văn Học Nước Ngoài', N'Tác phẩm dịch kinh điển, văn học thế giới đạt giải Nobel, Booker', 1),
-(3, N'Kinh Tế - Khởi Nghiệp', N'Quản trị kinh doanh, đầu tư, tài chính và khởi nghiệp đổi mới', 1),
-(4, N'Công Nghệ Thông Tin', N'Lập trình, kiến trúc phần mềm, khoa học dữ liệu và an toàn thông tin', 1),
-(5, N'Thiếu Nhi & Truyện Tranh', N'Manga, comic, truyện thiếu nhi và văn học giáo dục sớm', 1),
-(6, N'Tâm Lý & Kỹ Năng Sống', N'Sách phát triển bản thân, tư duy tích cực và thấu hiểu nội tâm', 1);
+INSERT [dbo].[danh_muc] ([ma_danh_muc], [ten_danh_muc], [mo_ta], [trang_thai], [loaisp]) VALUES 
+(1, N'Văn Học Trong Nước', N'Tiểu thuyết, truyện ngắn, phóng sự và tác phẩm văn học Việt Nam', 1, N'Sach'),
+(2, N'Văn Học Nước Ngoài', N'Tác phẩm dịch kinh điển, văn học thế giới đạt giải Nobel, Booker', 1, N'Sach'),
+(3, N'Kinh Tế - Khởi Nghiệp', N'Quản trị kinh doanh, đầu tư, tài chính và khởi nghiệp đổi mới', 1, N'Sach'),
+(4, N'Công Nghệ Thông Tin', N'Lập trình, kiến trúc phần mềm, khoa học dữ liệu và an toàn thông tin', 1, N'Sach'),
+(5, N'Thiếu Nhi & Truyện Tranh', N'Manga, comic, truyện thiếu nhi và văn học giáo dục sớm', 1, N'Sach'),
+(6, N'Tâm Lý & Kỹ Năng Sống', N'Sách phát triển bản thân, tư duy tích cực và thấu hiểu nội tâm', 1, N'Sach'),
+(7, N'Sổ Tay & Vở Viết', N'Sổ tay bìa da, sổ dot grid, sổ còng và vở ghi chép cao cấp', 1, N'VanPhongPham'),
+(8, N'Bút & Dụng Cụ Viết', N'Bút máy, bút gel, bút ký và mực viết thư pháp chính hãng', 1, N'VanPhongPham'),
+(9, N'Dụng Cụ Học Tập & Văn Phòng', N'Bookmark kim loại, thước, kẹp tài liệu và dụng cụ văn phòng', 1, N'VanPhongPham'),
+(10, N'Đèn Đọc Sách & Phụ Kiện Sách', N'Đèn LED kẹp sách bảo vệ mắt, giá đỡ sách thông minh và phụ kiện', 1, N'QuaTang'),
+(11, N'Mô Hình Book Nook & Trang Trí', N'Mô hình gỗ 3D Book Nook lắp ráp trang trí giá sách tinh tế', 1, N'QuaTang'),
+(12, N'Túi Tote & Thời Trang Sách', N'Túi vải canvas thời trang, áo thun và phụ kiện phong cách mọt sách', 1, N'QuaTang'),
+(13, N'Boardgame & Hộp Quà Tặng', N'Trò chơi boardgame trí tuệ, set quà tặng độc đáo cho người yêu sách', 1, N'QuaTang');
 SET IDENTITY_INSERT [dbo].[danh_muc] OFF;
 GO
 
@@ -531,8 +541,8 @@ INSERT [dbo].[san_pham] ([masp], [ma_shop], [ma_danh_muc], [tensp], [isbn], [gia
 (10, 1, 1, N'Cho Tôi Xin Một Vé Đi Tuổi Thơ', N'9786041088899', 95000, 68, 36, 5, N'Sach', N'Tác phẩm đưa người đọc quay trở lại thế giới ngây ngô, tươi vui của tuổi ấu thơ với đầy ắp tiếng cười.', N'https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2)),
 (11, 1, 5, N'Doraemon Tuyển Tập Tranh Truyện Màu', N'9786042123456', 55000, 120, 95, 5, N'Sach', N'Tập truyện tranh màu đặc sắc kể về chú mèo máy thông minh đến từ thế kỷ 22 và nhóm bạn Nobita.', N'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1749512' AS DateTime2)),
 (12, 2, 4, N'Kiến Trúc Phần Mềm Thực Chiến', N'9786048033221', 280000, 30, 19, 5, N'Sach', N'Hướng dẫn chi tiết xây dựng hệ thống phân tán, Microservices và thiết kế CSDL chịu tải cao.', N'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1759510' AS DateTime2)),
-(13, 2, 4, N'Sổ Tay Da Cao Cấp Nhã Nam Edition', N'VPP-9001', 89000, 49, 23, 5, N'VanPhongPham', N'Sổ tay bìa da PU cao cấp, giấy chống lóa 100gsm chuyên dụng ghi chép sáng tạo.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2)),
-(14, 1, 5, N'Đèn Đọc Sách Mini Kẹp Bìa Sách LED', N'QT-8001', 65000, 37, 18, 5, N'QuaTang', N'Đèn LED kẹp sách 3 mức sáng bảo vệ mắt ban đêm, pin sạc USB tiện dụng.', N'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2));
+(13, 2, 7, N'Sổ Tay Da Cao Cấp Nhã Nam Edition', N'VPP-9001', 89000, 49, 23, 5, N'VanPhongPham', N'Sổ tay bìa da PU cao cấp, giấy chống lóa 100gsm chuyên dụng ghi chép sáng tạo.', N'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2)),
+(14, 1, 10, N'Đèn Đọc Sách Mini Kẹp Bìa Sách LED', N'QT-8001', 65000, 37, 18, 5, N'QuaTang', N'Đèn LED kẹp sách 3 mức sáng bảo vệ mắt ban đêm, pin sạc USB tiện dụng.', N'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600', N'DangBan', N'BinhThuong', CAST(N'2026-10-16T16:31:25.1769497' AS DateTime2));
 SET IDENTITY_INSERT [dbo].[san_pham] OFF;
 GO
 

@@ -102,11 +102,11 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // Seed Categories
-        DanhMuc catFiction = createCategoryIfNotFound("Tiểu Thuyết & Văn Học", "Tác phẩm tiểu thuyết trong và ngoài nước");
-        DanhMuc catSelfHelp = createCategoryIfNotFound("Phát Triển Bản Thân", "Kỹ năng sống, tư duy và phát triển cá nhân");
-        DanhMuc catEcon = createCategoryIfNotFound("Kinh Tế & Tài Chính", "Kinh doanh, đầu tư và tâm lý tài chính");
-        DanhMuc catHistory = createCategoryIfNotFound("Khoa Học & Lịch Sử", "Lịch sử nhân loại, vũ trụ và khoa học thường thức");
-        DanhMuc catSciFi = createCategoryIfNotFound("Khoa Học Viễn Tưởng", "Tiểu thuyết viễn tưởng kinh điển và hiện đại");
+        DanhMuc catFiction = createCategoryIfNotFound("Tiểu Thuyết & Văn Học", "Tác phẩm tiểu thuyết trong và ngoài nước", "Sach");
+        DanhMuc catSelfHelp = createCategoryIfNotFound("Phát Triển Bản Thân", "Kỹ năng sống, tư duy và phát triển cá nhân", "Sach");
+        DanhMuc catEcon = createCategoryIfNotFound("Kinh Tế & Tài Chính", "Kinh doanh, đầu tư và tâm lý tài chính", "Sach");
+        DanhMuc catHistory = createCategoryIfNotFound("Khoa Học & Lịch Sử", "Lịch sử nhân loại, vũ trụ và khoa học thường thức", "Sach");
+        DanhMuc catSciFi = createCategoryIfNotFound("Khoa Học Viễn Tưởng", "Tiểu thuyết viễn tưởng kinh điển và hiện đại", "Sach");
 
         // Seed Books
         createBook("The Midnight Library", "978-0525559474", 189000, 25, catFiction,
@@ -128,7 +128,7 @@ public class DataSeeder implements CommandLineRunner {
                 "https://lh3.googleusercontent.com/aida-public/AB6AXuCG70bn_Qqg9AKCp8J9XwZoQ0H8otME2a1VxaIQ9mbLAQk60DgJssT5k7D_fsGf6ttO0j-TROb1NzE4QR1_sbRLD856RV8UIFgynUd7SujhVFdhLBJkAPHxPynAmPFKFoKuLSY2tyJX9T_1SDen13Mk4MN2urDBWhtknhDsTK8-O2oLxA8yjhXNZy0YUWK2U5gHXvRhAIj2d-YivtCOD_hFsb8Qu8Z00zBpmbfcRC4at7Dd35UbsRB0");
     }
 
-    private DanhMuc createCategoryIfNotFound(String name, String desc) {
+    private DanhMuc createCategoryIfNotFound(String name, String desc, String loaiSP) {
         return danhMucRepository.findAll().stream()
                 .filter(d -> d.getTenDanhMuc().equalsIgnoreCase(name))
                 .findFirst()
@@ -136,6 +136,7 @@ public class DataSeeder implements CommandLineRunner {
                     DanhMuc dm = new DanhMuc();
                     dm.setTenDanhMuc(name);
                     dm.setMoTa(desc);
+                    dm.setLoaiSP(loaiSP != null ? loaiSP : "Sach");
                     dm.setTrangThai(true);
                     return danhMucRepository.save(dm);
                 });
@@ -158,14 +159,14 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedStationeryAndGifts() {
         // Danh mục của Văn phòng phẩm
-        DanhMuc catSoTay = createCategoryIfNotFound("Sổ Tay", "Sổ tay da, sổ ghi chép, sổ kế hoạch");
-        DanhMuc catBut = createCategoryIfNotFound("Bút", "Các loại bút viết, bút máy, bút bi cao cấp");
-        DanhMuc catDungCu = createCategoryIfNotFound("Dụng Cụ Học Tập & Làm Việc", "Kẹp sách, đèn đọc sách, thước kẻ và phụ kiện");
+        DanhMuc catSoTay = createCategoryIfNotFound("Sổ Tay & Vở Viết", "Sổ tay da, sổ ghi chép, sổ kế hoạch", "VanPhongPham");
+        DanhMuc catBut = createCategoryIfNotFound("Bút & Dụng Cụ Viết", "Các loại bút viết, bút máy, bút bi cao cấp", "VanPhongPham");
+        DanhMuc catDungCu = createCategoryIfNotFound("Dụng Cụ Học Tập & Văn Phòng", "Kẹp sách, đèn đọc sách, thước kẻ và phụ kiện", "VanPhongPham");
 
         // Danh mục của Quà tặng & Trang trí
-        DanhMuc catTuiTote = createCategoryIfNotFound("Túi Tote", "Túi vải canvas thời trang phong cách mọt sách");
-        DanhMuc catBookNook = createCategoryIfNotFound("Mô Hình Book Nook", "Mô hình gỗ 3D Book Nook trang trí giá sách");
-        DanhMuc catBoardgame = createCategoryIfNotFound("Boardgame & Quà Tặng", "Trò chơi boardgame trí tuệ và hộp quà tặng độc đáo");
+        DanhMuc catTuiTote = createCategoryIfNotFound("Túi Tote & Thời Trang Sách", "Túi vải canvas thời trang phong cách mọt sách", "QuaTang");
+        DanhMuc catBookNook = createCategoryIfNotFound("Mô Hình Book Nook & Trang Trí", "Mô hình gỗ 3D Book Nook trang trí giá sách", "QuaTang");
+        DanhMuc catBoardgame = createCategoryIfNotFound("Boardgame & Hộp Quà Tặng", "Trò chơi boardgame trí tuệ và hộp quà tặng độc đáo", "QuaTang");
 
         createProductItem("Sổ Tay Bìa Da Vintage Classic", "VPP-001", "VanPhongPham", 85000, 40, catSoTay,
                 "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80");

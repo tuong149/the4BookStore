@@ -1,6 +1,8 @@
 package vn.bookstore.the4bookstore.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +21,9 @@ public class DanhMucService {
 
     private final DanhMucRepository danhMucRepository;
 
-    @org.springframework.cache.annotation.Cacheable("allActiveCategories")
+    @Cacheable("allActiveCategories")
     public List<DanhMuc> getAllActive() {
-        List<DanhMuc> active = danhMucRepository.findAll().stream()
-                .filter(dm -> Boolean.TRUE.equals(dm.getTrangThai()))
-                .toList();
-        // Fallback: nếu chưa set trangThai thì lấy tất cả
+        List<DanhMuc> active = danhMucRepository.findByTrangThaiTrueOrderByMaDanhMucAsc();
         return active.isEmpty() ? danhMucRepository.findAll() : active;
     }
 
@@ -54,15 +53,24 @@ public class DanhMucService {
     }
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
     public DanhMuc save(DanhMuc danhMuc) {
         return danhMucRepository.save(danhMuc);
     }
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
     public void delete(Integer id) {
         danhMucRepository.deleteById(id);
     }
-}
 
+    @Transactional
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    public Optional<DanhMuc> toggleStatus(Integer id) {
+        return danhMucRepository.findById(id).map(dm -> {
+            boolean current = Boolean.TRUE.equals(dm.getTrangThai());
+            dm.setTrangThai(!current);
+            return danhMucRepository.save(dm);
+        });
+    }
+}

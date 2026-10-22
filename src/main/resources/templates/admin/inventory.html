@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{admin/fragments/admin_fragments :: admin_head('The4BookStore - Quáº£n LÃ½ Sáº£n Pháº©m & Kho HÃ ng')}">
 </head>
@@ -337,6 +337,28 @@
                 authorPublisherGroup.style.display = (val === 'Sach') ? 'grid' : 'none';
             }
         }
+
+        window.filterDrawerCategories = function(val) {
+            const catSelect = document.getElementById('modalCategory');
+            if (!catSelect) return;
+            let firstMatch = null;
+            let currentValid = false;
+            Array.from(catSelect.options).forEach(opt => {
+                const catLoai = opt.getAttribute('data-loai') || 'Sach';
+                if (!val || catLoai === val) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                    if (!firstMatch) firstMatch = opt;
+                    if (opt.selected) currentValid = true;
+                } else {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                }
+            });
+            if (!currentValid && firstMatch) {
+                catSelect.value = firstMatch.value;
+            }
+        };
 
         function filterCatalog() {
             const query = searchInput ? searchInput.value.toLowerCase().trim() : '';

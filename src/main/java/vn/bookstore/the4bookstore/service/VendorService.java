@@ -175,7 +175,13 @@ public class VendorService {
             existing.setTrangThai(sanPham.getTrangThai());
 
             if (maDanhMuc != null) {
-                existing.setDanhMuc(danhMucRepository.findById(maDanhMuc).orElse(null));
+                DanhMuc dm = danhMucRepository.findById(maDanhMuc).orElse(null);
+                if (dm != null) {
+                    existing.setDanhMuc(dm);
+                    if (dm.getLoaiSP() != null && !dm.getLoaiSP().isBlank()) {
+                        existing.setLoaiSP(dm.getLoaiSP());
+                    }
+                }
             }
             saved = sanPhamRepository.save(existing);
         } else {
@@ -183,14 +189,20 @@ public class VendorService {
             sanPham.setTrangThaiKhoa("BinhThuong");
             sanPham.setSoLuongDaBan(0);
             sanPham.setNgayTao(LocalDateTime.now());
-            if (sanPham.getLoaiSP() == null || "sach".equalsIgnoreCase(sanPham.getLoaiSP())) {
-                sanPham.setLoaiSP("Sach");
-            }
             if (maDanhMuc != null) {
-                sanPham.setDanhMuc(danhMucRepository.findById(maDanhMuc).orElse(null));
+                DanhMuc dm = danhMucRepository.findById(maDanhMuc).orElse(null);
+                if (dm != null) {
+                    sanPham.setDanhMuc(dm);
+                    if (dm.getLoaiSP() != null && !dm.getLoaiSP().isBlank()) {
+                        sanPham.setLoaiSP(dm.getLoaiSP());
+                    }
+                }
             }
             if (sanPham.getDanhMuc() == null) {
                 sanPham.setDanhMuc(danhMucRepository.findAll().stream().findFirst().orElse(null));
+            }
+            if (sanPham.getLoaiSP() == null || "sach".equalsIgnoreCase(sanPham.getLoaiSP())) {
+                sanPham.setLoaiSP(sanPham.getDanhMuc() != null && sanPham.getDanhMuc().getLoaiSP() != null ? sanPham.getDanhMuc().getLoaiSP() : "Sach");
             }
             saved = sanPhamRepository.save(sanPham);
         }

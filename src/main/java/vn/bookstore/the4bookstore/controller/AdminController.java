@@ -62,6 +62,9 @@ public class AdminController {
     @Autowired(required = false)
     private CloudinaryService cloudinaryService;
 
+    @Autowired(required = false)
+    private vn.bookstore.the4bookstore.service.DanhMucService danhMucService;
+
         public AdminController(SanPhamRepository sanPhamRepository,
                            DanhMucRepository danhMucRepository,
                            TacGiaRepository tacGiaRepository,
@@ -365,19 +368,27 @@ public class AdminController {
 
     // ==================== QUẢN LÝ DANH MỤC (CRUD) ====================
     @GetMapping("/categories")
-    public String categories(Model model) {
-        List<DanhMuc> categories = danhMucRepository.findAll();
+    public String categories(@RequestParam(value = "loaiSP", required = false) String loaiSP, Model model) {
+        List<DanhMuc> categories;
+        if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
+            categories = danhMucRepository.findByLoaiSP(loaiSP);
+        } else {
+            categories = danhMucRepository.findAll();
+        }
+
         Map<Integer, Long> productCounts = new HashMap<>();
         for (DanhMuc dm : categories) {
             productCounts.put(dm.getMaDanhMuc(), sanPhamRepository.countByDanhMuc_MaDanhMuc(dm.getMaDanhMuc()));
         }
 
-        long activeCount = categories.stream().filter(c -> Boolean.TRUE.equals(c.getTrangThai())).count();
-        long inactiveCount = categories.size() - activeCount;
+        List<DanhMuc> allCategories = danhMucRepository.findAll();
+        long activeCount = allCategories.stream().filter(c -> Boolean.TRUE.equals(c.getTrangThai())).count();
+        long inactiveCount = allCategories.size() - activeCount;
 
         model.addAttribute("categories", categories);
+        model.addAttribute("selectedLoaiSP", loaiSP != null ? loaiSP : "ALL");
         model.addAttribute("productCounts", productCounts);
-        model.addAttribute("totalCategories", categories.size());
+        model.addAttribute("totalCategories", allCategories.size());
         model.addAttribute("activeCount", activeCount);
         model.addAttribute("inactiveCount", inactiveCount);
 
@@ -385,8 +396,10 @@ public class AdminController {
     }
 
     @PostMapping("/categories/save")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
     public String saveCategory(@RequestParam(value = "maDanhMuc", required = false) Integer maDanhMuc,
                                @RequestParam("tenDanhMuc") String tenDanhMuc,
+                               @RequestParam(value = "loaiSP", defaultValue = "Sach") String loaiSP,
                                @RequestParam(value = "moTa", required = false) String moTa,
                                @RequestParam(value = "trangThai", defaultValue = "true") Boolean trangThai,
                                RedirectAttributes ra) {
@@ -400,10 +413,15 @@ public class AdminController {
                 ra.addFlashAttribute("successMessage", "Thêm mới danh mục thành công!");
             }
             dm.setTenDanhMuc(tenDanhMuc.trim());
+            dm.setLoaiSP(loaiSP != null && !loaiSP.isBlank() ? loaiSP.trim() : "Sach");
             dm.setMoTa(moTa != null ? moTa.trim() : "");
             dm.setTrangThai(trangThai != null ? trangThai : true);
 
-            danhMucRepository.save(dm);
+            if (danhMucService != null) {
+                danhMucService.save(dm);
+            } else {
+                danhMucRepository.save(dm);
+            }
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", "Lỗi lưu danh mục: Tên danh mục có thể đã tồn tại hoặc không hợp lệ!");
         }
@@ -411,6 +429,7 @@ public class AdminController {
     }
 
     @PostMapping("/categories/delete/{id}")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
     public String deleteCategory(@PathVariable Integer id, RedirectAttributes ra) {
         long count = sanPhamRepository.countByDanhMuc_MaDanhMuc(id);
         if (count > 0) {
@@ -418,7 +437,11 @@ public class AdminController {
             return "redirect:/admin/categories";
         }
         try {
-            danhMucRepository.deleteById(id);
+            if (danhMucService != null) {
+                danhMucService.delete(id);
+            } else {
+                danhMucRepository.deleteById(id);
+            }
             ra.addFlashAttribute("successMessage", "Đã xóa danh mục thành công!");
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", "Không thể xóa danh mục: " + e.getMessage());
@@ -427,13 +450,21 @@ public class AdminController {
     }
 
     @PostMapping("/categories/toggle/{id}")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
     public String toggleCategory(@PathVariable Integer id, RedirectAttributes ra) {
-        danhMucRepository.findById(id).ifPresent(dm -> {
-            boolean current = Boolean.TRUE.equals(dm.getTrangThai());
-            dm.setTrangThai(!current);
-            danhMucRepository.save(dm);
-            ra.addFlashAttribute("successMessage", "Đã " + (!current ? "kích hoạt" : "tạm khóa") + " danh mục '" + dm.getTenDanhMuc() + "'");
-        });
+        if (danhMucService != null) {
+            danhMucService.toggleStatus(id).ifPresent(dm -> {
+                boolean active = Boolean.TRUE.equals(dm.getTrangThai());
+                ra.addFlashAttribute("successMessage", "Đã " + (active ? "kích hoạt" : "tạm khóa") + " danh mục '" + dm.getTenDanhMuc() + "'");
+            });
+        } else {
+            danhMucRepository.findById(id).ifPresent(dm -> {
+                boolean current = Boolean.TRUE.equals(dm.getTrangThai());
+                dm.setTrangThai(!current);
+                danhMucRepository.save(dm);
+                ra.addFlashAttribute("successMessage", "Đã " + (!current ? "kích hoạt" : "tạm khóa") + " danh mục '" + dm.getTenDanhMuc() + "'");
+            });
+        }
         return "redirect:/admin/categories";
     }
 
@@ -444,6 +475,7 @@ public class AdminController {
                 .map(dm -> ResponseEntity.ok(Map.of(
                         "maDanhMuc", dm.getMaDanhMuc(),
                         "tenDanhMuc", dm.getTenDanhMuc(),
+                        "loaiSP", dm.getLoaiSP() != null ? dm.getLoaiSP() : "Sach",
                         "moTa", dm.getMoTa() != null ? dm.getMoTa() : "",
                         "trangThai", Boolean.TRUE.equals(dm.getTrangThai())
                 )))

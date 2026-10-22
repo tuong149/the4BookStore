@@ -17,7 +17,8 @@ CREATE TABLE [dbo].[danh_muc](
     [ma_danh_muc] INT IDENTITY(1,1) PRIMARY KEY,
     [ten_danh_muc] NVARCHAR(100) NOT NULL UNIQUE,
     [mo_ta] NVARCHAR(500) NULL,
-    [trang_thai] BIT NOT NULL DEFAULT 1
+    [trang_thai] BIT NOT NULL DEFAULT 1,
+    [loaisp] NVARCHAR(30) NOT NULL DEFAULT 'Sach'
 );
 GO
 

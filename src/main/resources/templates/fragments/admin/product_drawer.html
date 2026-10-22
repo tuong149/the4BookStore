@@ -31,7 +31,7 @@
                     <div class="flex flex-col gap-1">
                         <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalLoaiSP">Phân Loại *</label>
                         <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
-                                id="modalLoaiSP" name="loaiSP" required="" onchange="toggleBookFields(this.value)">
+                                id="modalLoaiSP" name="loaiSP" required="" onchange="toggleBookFields(this.value); if(window.filterDrawerCategories) window.filterDrawerCategories(this.value);">
                             <option value="Sach">Sách</option>
                             <option value="VanPhongPham">Văn phòng phẩm</option>
                             <option value="QuaTang">Quà tặng &amp; Trang trí</option>
@@ -41,7 +41,7 @@
                         <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalCategory">Danh Mục *</label>
                         <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
                                 id="modalCategory" name="maDanhMuc" required="">
-                            <option th:each="c : ${categories}" th:value="${c.maDanhMuc}" th:text="${c.tenDanhMuc}">Văn học</option>
+                            <option th:each="c : ${categories}" th:value="${c.maDanhMuc}" th:text="${c.tenDanhMuc}" th:attr="data-loai=${c.loaiSP ?: 'Sach'}">Văn học</option>
                         </select>
                     </div>
                 </div>
