@@ -515,6 +515,24 @@ public class VendorService {
         km.setShop(shop);
         km.setPhamVi("SHOP");
         km.setTrangThai("HoatDong");
+        if (km.getDonToiThieu() == null || km.getDonToiThieu() < 0) {
+            km.setDonToiThieu(0);
+        }
+        if (km.getSoLuongDaDung() == null || km.getSoLuongDaDung() < 0) {
+            km.setSoLuongDaDung(0);
+        }
+        if (km.getGioiHanMoiKhachHang() == null || km.getGioiHanMoiKhachHang() <= 0) {
+            km.setGioiHanMoiKhachHang(1);
+        }
+        if (km.getHienThiCongKhai() == null) {
+            km.setHienThiCongKhai(true);
+        }
+        if (km.getDoiTuongKhachHang() == null || km.getDoiTuongKhachHang().isBlank()) {
+            km.setDoiTuongKhachHang("ALL");
+        }
+        if (km.getApDungCho() == null || km.getApDungCho().isBlank()) {
+            km.setApDungCho("ALL");
+        }
         return khuyenMaiRepository.save(km);
     }
 }

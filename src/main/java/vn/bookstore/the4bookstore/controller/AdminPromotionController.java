@@ -99,10 +99,14 @@ public class AdminPromotionController {
         km.setNgayKetThuc(LocalDateTime.now().plusMonths(1).withSecond(0).withNano(0));
         km.setLoaiGiam("PhanTram");
         km.setGiaTriGiam(10);
+        km.setDonToiThieu(0);
+        km.setSoLuongDaDung(0);
         km.setGioiHanMoiKhachHang(1);
         km.setHienThiCongKhai(true);
         km.setApDungCho("ALL");
         km.setDoiTuongKhachHang("ALL");
+        km.setPhamVi("TOAN_SAN");
+        km.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
         km.setTrangThai("HoatDong");
 
         model.addAttribute("khuyenMai", km);
@@ -226,11 +230,14 @@ public class AdminPromotionController {
                 }
             });
         }
-        if (khuyenMai.getSoLuongDaDung() == null) {
+        if (khuyenMai.getDonToiThieu() == null || khuyenMai.getDonToiThieu() < 0) {
+            khuyenMai.setDonToiThieu(0);
+        }
+        if (khuyenMai.getSoLuongDaDung() == null || khuyenMai.getSoLuongDaDung() < 0) {
             khuyenMai.setSoLuongDaDung(0);
         }
         if (khuyenMai.getHienThiCongKhai() == null) {
-            khuyenMai.setHienThiCongKhai(false);
+            khuyenMai.setHienThiCongKhai(true);
         }
         if (khuyenMai.getGioiHanMoiKhachHang() == null || khuyenMai.getGioiHanMoiKhachHang() <= 0) {
             khuyenMai.setGioiHanMoiKhachHang(1);
@@ -238,16 +245,19 @@ public class AdminPromotionController {
         if (khuyenMai.getTrangThai() == null || khuyenMai.getTrangThai().trim().isEmpty()) {
             khuyenMai.setTrangThai("HoatDong");
         }
-        if (khuyenMai.getApDungCho() == null) {
+        if (khuyenMai.getApDungCho() == null || khuyenMai.getApDungCho().isBlank()) {
             khuyenMai.setApDungCho("ALL");
         }
-        if (khuyenMai.getDoiTuongKhachHang() == null) {
+        if (khuyenMai.getDoiTuongKhachHang() == null || khuyenMai.getDoiTuongKhachHang().isBlank()) {
             khuyenMai.setDoiTuongKhachHang("ALL");
+        }
+        if (khuyenMai.getPhamVi() == null || khuyenMai.getPhamVi().isBlank()) {
+            khuyenMai.setPhamVi(khuyenMai.getShop() != null ? "SHOP" : "TOAN_SAN");
+        }
         if ("Freeship".equalsIgnoreCase(khuyenMai.getLoaiGiam())) {
             khuyenMai.setLoaiKhuyenMai("MIEN_PHI_VAN_CHUYEN");
         } else if (khuyenMai.getLoaiKhuyenMai() == null || khuyenMai.getLoaiKhuyenMai().isBlank()) {
             khuyenMai.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
-        }
         }
 
         try {

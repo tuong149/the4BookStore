@@ -122,6 +122,35 @@ class VoucherSystemTest {
     }
 
     @Test
+    @DisplayName("Lưu voucher khi donToiThieu và các trường số bị null không gây lỗi SQL Server NOT NULL constraint")
+    @Transactional
+    void testSaveVoucherWithNullFieldsDefaultsSafely() {
+        String testCode = "NULL_TEST_" + System.currentTimeMillis();
+
+        KhuyenMai km = new KhuyenMai();
+        km.setMaCode(testCode);
+        km.setTenKM("Voucher thử nghiệm null donToiThieu");
+        km.setLoaiGiam("PhanTram");
+        km.setGiaTriGiam(15);
+        km.setDonToiThieu(null);
+        km.setSoLuongDaDung(null);
+        km.setGioiHanMoiKhachHang(null);
+        km.setHienThiCongKhai(null);
+        km.setNgayBatDau(LocalDateTime.now());
+        km.setNgayKetThuc(LocalDateTime.now().plusDays(7));
+
+        KhuyenMai saved = khuyenMaiRepository.saveAndFlush(km);
+
+        assertNotNull(saved.getMaKM());
+        assertEquals(0, saved.getDonToiThieu());
+        assertEquals(0, saved.getSoLuongDaDung());
+        assertEquals(1, saved.getGioiHanMoiKhachHang());
+        assertTrue(saved.getHienThiCongKhai());
+        assertEquals("HoatDong", saved.getTrangThai());
+        assertEquals("GIAM_GIA_SAN_PHAM", saved.getLoaiKhuyenMai());
+    }
+
+    @Test
     @DisplayName("Kiểm tra 2 loại mã giảm giá: 1 loại giảm tiền sản phẩm, 1 loại giảm phí vận chuyển")
     @Transactional
     void testTwoDistinctVoucherTypes() {
@@ -441,6 +470,56 @@ class VoucherSystemTest {
             khuyenMaiRepository.delete(kmOrder2);
             khachHangRepository.delete(kh);
             taiKhoanRepository.delete(tk);
+        }
+    }
+
+    @Autowired
+    private vn.bookstore.the4bookstore.service.KhuyenMaiService khuyenMaiService;
+
+    @Autowired
+    private vn.bookstore.the4bookstore.service.VendorService vendorService;
+
+    @Test
+    @DisplayName("Admin tạo voucher với donToiThieu rỗng qua KhuyenMaiService thành công và mặc định donToiThieu = 0")
+    @Transactional
+    void testAdminCreateVoucherWithNullDonToiThieu() {
+        KhuyenMai km = new KhuyenMai();
+        km.setMaCode("ADMIN_NULL_" + System.currentTimeMillis());
+        km.setTenKM("Admin voucher null donToiThieu");
+        km.setLoaiGiam("PhanTram");
+        km.setGiaTriGiam(25);
+        km.setDonToiThieu(null);
+        km.setNgayBatDau(LocalDateTime.now());
+        km.setNgayKetThuc(LocalDateTime.now().plusDays(30));
+
+        KhuyenMai saved = khuyenMaiService.save(km);
+        assertNotNull(saved.getMaKM());
+        assertEquals(0, saved.getDonToiThieu());
+        assertEquals("TOAN_SAN", saved.getPhamVi());
+        assertEquals("GIAM_GIA_SAN_PHAM", saved.getLoaiKhuyenMai());
+    }
+
+    @Test
+    @DisplayName("Vendor tạo voucher với donToiThieu rỗng qua VendorService thành công và mặc định donToiThieu = 0")
+    @Transactional
+    void testVendorCreatePromotionWithNullDonToiThieu() {
+        var shops = shopRepository.findAll();
+        if (!shops.isEmpty()) {
+            Integer maShop = shops.get(0).getMaShop();
+            KhuyenMai km = new KhuyenMai();
+            km.setMaCode("SHOP_NULL_" + System.currentTimeMillis());
+            km.setTenKM("Shop voucher null donToiThieu");
+            km.setLoaiGiam("PhanTram");
+            km.setGiaTriGiam(10);
+            km.setDonToiThieu(null);
+            km.setNgayBatDau(LocalDateTime.now());
+            km.setNgayKetThuc(LocalDateTime.now().plusDays(15));
+
+            KhuyenMai saved = vendorService.createShopPromotion(maShop, km);
+            assertNotNull(saved.getMaKM());
+            assertEquals(0, saved.getDonToiThieu());
+            assertEquals("SHOP", saved.getPhamVi());
+            assertEquals(maShop, saved.getShop().getMaShop());
         }
     }
 }

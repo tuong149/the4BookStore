@@ -73,7 +73,7 @@ class VendorServiceTest {
     @DisplayName("Vendor tự nhập Tác giả mới: Hệ thống tự động tạo TacGia và SanPhamTacGia liên kết với sách")
     void testSaveShopProduct_WithNewAuthor_CreatesTacGiaAndLinks() {
         when(tacGiaRepository.findByTenTacGiaIgnoreCase("Nguyễn Nhật Ánh")).thenReturn(Optional.empty());
-        when(tacGiaRepository.save(any(vn.bookstore.the4bookstore.entity.TacGia.class))).thenAnswer(invocation -> {
+        when(tacGiaRepository.saveAndFlush(any(vn.bookstore.the4bookstore.entity.TacGia.class))).thenAnswer(invocation -> {
             vn.bookstore.the4bookstore.entity.TacGia tg = invocation.getArgument(0);
             tg.setMaTacGia(10);
             return tg;
@@ -90,7 +90,7 @@ class VendorServiceTest {
         assertNotNull(saved.getSanPhamTacGias());
         assertEquals(1, saved.getSanPhamTacGias().size());
         assertEquals("Nguyễn Nhật Ánh", saved.getSanPhamTacGias().get(0).getTacGia().getTenTacGia());
-        verify(tacGiaRepository, times(1)).save(any(vn.bookstore.the4bookstore.entity.TacGia.class));
+        verify(tacGiaRepository, atLeastOnce()).saveAndFlush(any(vn.bookstore.the4bookstore.entity.TacGia.class));
         verify(sanPhamTacGiaRepository, times(1)).save(any(vn.bookstore.the4bookstore.entity.SanPhamTacGia.class));
     }
 
@@ -103,7 +103,7 @@ class VendorServiceTest {
         when(tacGiaRepository.findByTenTacGiaIgnoreCase("Tô Hoài")).thenReturn(Optional.of(tg1));
 
         when(tacGiaRepository.findByTenTacGiaIgnoreCase("Nam Cao")).thenReturn(Optional.empty());
-        when(tacGiaRepository.save(any(vn.bookstore.the4bookstore.entity.TacGia.class))).thenAnswer(invocation -> {
+        when(tacGiaRepository.saveAndFlush(any(vn.bookstore.the4bookstore.entity.TacGia.class))).thenAnswer(invocation -> {
             vn.bookstore.the4bookstore.entity.TacGia tg = invocation.getArgument(0);
             tg.setMaTacGia(2);
             return tg;

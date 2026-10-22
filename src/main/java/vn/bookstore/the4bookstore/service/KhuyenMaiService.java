@@ -87,7 +87,10 @@ public class KhuyenMaiService {
         if (khuyenMai.getMaCode() != null) {
             khuyenMai.setMaCode(khuyenMai.getMaCode().trim().toUpperCase());
         }
-        if (khuyenMai.getSoLuongDaDung() == null) {
+        if (khuyenMai.getDonToiThieu() == null || khuyenMai.getDonToiThieu() < 0) {
+            khuyenMai.setDonToiThieu(0);
+        }
+        if (khuyenMai.getSoLuongDaDung() == null || khuyenMai.getSoLuongDaDung() < 0) {
             khuyenMai.setSoLuongDaDung(0);
         }
         if (khuyenMai.getTrangThai() == null || khuyenMai.getTrangThai().trim().isEmpty()) {
@@ -104,6 +107,14 @@ public class KhuyenMaiService {
         }
         if (khuyenMai.getDoiTuongKhachHang() == null || khuyenMai.getDoiTuongKhachHang().trim().isEmpty()) {
             khuyenMai.setDoiTuongKhachHang("ALL");
+        }
+        if (khuyenMai.getPhamVi() == null || khuyenMai.getPhamVi().trim().isEmpty()) {
+            khuyenMai.setPhamVi(khuyenMai.getShop() != null ? "SHOP" : "TOAN_SAN");
+        }
+        if ("Freeship".equalsIgnoreCase(khuyenMai.getLoaiGiam())) {
+            khuyenMai.setLoaiKhuyenMai("MIEN_PHI_VAN_CHUYEN");
+        } else if (khuyenMai.getLoaiKhuyenMai() == null || khuyenMai.getLoaiKhuyenMai().isBlank()) {
+            khuyenMai.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
         }
         return khuyenMaiRepository.save(khuyenMai);
     }
@@ -166,7 +177,7 @@ public class KhuyenMaiService {
         clone.setLoaiGiam(source.getLoaiGiam());
         clone.setGiaTriGiam(source.getGiaTriGiam());
         clone.setGiamToiDa(source.getGiamToiDa());
-        clone.setDonToiThieu(source.getDonToiThieu());
+        clone.setDonToiThieu(source.getDonToiThieu() != null ? source.getDonToiThieu() : 0);
         clone.setSoLuongToiDa(source.getSoLuongToiDa());
         clone.setSoLuongDaDung(0);
         clone.setNgayBatDau(source.getNgayBatDau());
@@ -179,6 +190,9 @@ public class KhuyenMaiService {
         clone.setLoaiTruSanPhamIds(source.getLoaiTruSanPhamIds());
         clone.setDoiTuongKhachHang(source.getDoiTuongKhachHang());
         clone.setGioiHanMoiKhachHang(source.getGioiHanMoiKhachHang());
+        clone.setPhamVi(source.getPhamVi() != null ? source.getPhamVi() : "TOAN_SAN");
+        clone.setShop(source.getShop());
+        clone.setLoaiKhuyenMai(source.getLoaiKhuyenMai() != null ? source.getLoaiKhuyenMai() : "GIAM_GIA_SAN_PHAM");
 
         return khuyenMaiRepository.save(clone);
     }
@@ -210,7 +224,7 @@ public class KhuyenMaiService {
             km.setLoaiGiam(template.getLoaiGiam());
             km.setGiaTriGiam(template.getGiaTriGiam());
             km.setGiamToiDa(template.getGiamToiDa());
-            km.setDonToiThieu(template.getDonToiThieu());
+            km.setDonToiThieu(template.getDonToiThieu() != null ? template.getDonToiThieu() : 0);
             // Mã batch thường là mã 1 lần dùng
             km.setSoLuongToiDa(template.getSoLuongToiDa() != null ? template.getSoLuongToiDa() : 1);
             km.setSoLuongDaDung(0);
@@ -221,6 +235,9 @@ public class KhuyenMaiService {
             km.setApDungCho(template.getApDungCho() != null ? template.getApDungCho() : "ALL");
             km.setDoiTuongKhachHang(template.getDoiTuongKhachHang() != null ? template.getDoiTuongKhachHang() : "ALL");
             km.setGioiHanMoiKhachHang(1);
+            km.setPhamVi(template.getPhamVi() != null ? template.getPhamVi() : (template.getShop() != null ? "SHOP" : "TOAN_SAN"));
+            km.setShop(template.getShop());
+            km.setLoaiKhuyenMai(template.getLoaiKhuyenMai() != null ? template.getLoaiKhuyenMai() : "GIAM_GIA_SAN_PHAM");
 
             created.add(km);
         }

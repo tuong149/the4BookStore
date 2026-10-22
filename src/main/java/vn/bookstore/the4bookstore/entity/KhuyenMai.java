@@ -27,7 +27,10 @@ import java.time.LocalDateTime;
     private Integer giaTriGiam;
 
     private Integer giamToiDa;
-    private Integer donToiThieu;
+
+    @Column(name = "don_toi_thieu", nullable = false)
+    private Integer donToiThieu = 0;
+
     private Integer soLuongToiDa;
 
     @Column(nullable = false)
@@ -150,5 +153,110 @@ import java.time.LocalDateTime;
             return "PERCENTAGE";
         }
         return "FIXED_AMOUNT";
+    }
+
+    public Integer getDonToiThieu() {
+        return donToiThieu != null ? donToiThieu : 0;
+    }
+
+    public void setDonToiThieu(Integer donToiThieu) {
+        this.donToiThieu = (donToiThieu != null && donToiThieu >= 0) ? donToiThieu : 0;
+    }
+
+    public Integer getSoLuongDaDung() {
+        return soLuongDaDung != null ? soLuongDaDung : 0;
+    }
+
+    public void setSoLuongDaDung(Integer soLuongDaDung) {
+        this.soLuongDaDung = (soLuongDaDung != null && soLuongDaDung >= 0) ? soLuongDaDung : 0;
+    }
+
+    public Integer getGioiHanMoiKhachHang() {
+        return (gioiHanMoiKhachHang != null && gioiHanMoiKhachHang > 0) ? gioiHanMoiKhachHang : 1;
+    }
+
+    public void setGioiHanMoiKhachHang(Integer gioiHanMoiKhachHang) {
+        this.gioiHanMoiKhachHang = (gioiHanMoiKhachHang != null && gioiHanMoiKhachHang > 0) ? gioiHanMoiKhachHang : 1;
+    }
+
+    public Boolean getHienThiCongKhai() {
+        return hienThiCongKhai != null ? hienThiCongKhai : true;
+    }
+
+    public void setHienThiCongKhai(Boolean hienThiCongKhai) {
+        this.hienThiCongKhai = (hienThiCongKhai != null) ? hienThiCongKhai : true;
+    }
+
+    public String getTrangThai() {
+        return (trangThai != null && !trangThai.isBlank()) ? trangThai : "HoatDong";
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = (trangThai != null && !trangThai.isBlank()) ? trangThai : "HoatDong";
+    }
+
+    public String getPhamVi() {
+        if (phamVi != null && !phamVi.isBlank()) return phamVi;
+        return (shop != null) ? "SHOP" : "TOAN_SAN";
+    }
+
+    public void setPhamVi(String phamVi) {
+        this.phamVi = (phamVi != null && !phamVi.isBlank()) ? phamVi : "TOAN_SAN";
+    }
+
+    public String getDoiTuongKhachHang() {
+        return (doiTuongKhachHang != null && !doiTuongKhachHang.isBlank()) ? doiTuongKhachHang : "ALL";
+    }
+
+    public void setDoiTuongKhachHang(String doiTuongKhachHang) {
+        this.doiTuongKhachHang = (doiTuongKhachHang != null && !doiTuongKhachHang.isBlank()) ? doiTuongKhachHang : "ALL";
+    }
+
+    public String getLoaiKhuyenMai() {
+        if ("Freeship".equalsIgnoreCase(loaiGiam) || "MIEN_PHI_VAN_CHUYEN".equalsIgnoreCase(loaiKhuyenMai)) {
+            return "MIEN_PHI_VAN_CHUYEN";
+        }
+        return (loaiKhuyenMai != null && !loaiKhuyenMai.isBlank()) ? loaiKhuyenMai : "GIAM_GIA_SAN_PHAM";
+    }
+
+    public void setLoaiKhuyenMai(String loaiKhuyenMai) {
+        this.loaiKhuyenMai = (loaiKhuyenMai != null && !loaiKhuyenMai.isBlank()) ? loaiKhuyenMai : "GIAM_GIA_SAN_PHAM";
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersistOrUpdate() {
+        if (this.donToiThieu == null || this.donToiThieu < 0) {
+            this.donToiThieu = 0;
+        }
+        if (this.soLuongDaDung == null || this.soLuongDaDung < 0) {
+            this.soLuongDaDung = 0;
+        }
+        if (this.gioiHanMoiKhachHang == null || this.gioiHanMoiKhachHang <= 0) {
+            this.gioiHanMoiKhachHang = 1;
+        }
+        if (this.hienThiCongKhai == null) {
+            this.hienThiCongKhai = true;
+        }
+        if (this.trangThai == null || this.trangThai.isBlank()) {
+            this.trangThai = "HoatDong";
+        }
+        if (this.doiTuongKhachHang == null || this.doiTuongKhachHang.isBlank()) {
+            this.doiTuongKhachHang = "ALL";
+        }
+        if (this.phamVi == null || this.phamVi.isBlank()) {
+            this.phamVi = (this.shop != null) ? "SHOP" : "TOAN_SAN";
+        }
+        if ("Freeship".equalsIgnoreCase(this.loaiGiam) || "MIEN_PHI_VAN_CHUYEN".equalsIgnoreCase(this.loaiKhuyenMai)) {
+            this.loaiKhuyenMai = "MIEN_PHI_VAN_CHUYEN";
+        } else if (this.loaiKhuyenMai == null || this.loaiKhuyenMai.isBlank()) {
+            this.loaiKhuyenMai = "GIAM_GIA_SAN_PHAM";
+        }
+        if (this.ngayBatDau == null) {
+            this.ngayBatDau = LocalDateTime.now().withSecond(0).withNano(0);
+        }
+        if (this.ngayKetThuc == null) {
+            this.ngayKetThuc = this.ngayBatDau.plusMonths(1);
+        }
     }
 }
