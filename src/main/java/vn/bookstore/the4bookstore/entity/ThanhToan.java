@@ -5,8 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "THANH_TOAN")
-@Data @NoArgsConstructor @AllArgsConstructor
-public class ThanhToan {
+@Data @NoArgsConstructor public class ThanhToan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maThanhToan;
     

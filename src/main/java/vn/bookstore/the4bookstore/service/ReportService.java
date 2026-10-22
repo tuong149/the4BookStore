@@ -73,7 +73,7 @@ public class ReportService {
         Map<Integer, BigDecimal> dbMap = new HashMap<>();
 
         try {
-            String sql = "CALL sp_DoanhThuTheoThang()";
+            String sql = "EXEC dbo.sp_DoanhThuTheoThang";
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
@@ -105,7 +105,7 @@ public class ReportService {
 
     public List<TopSellingBookDTO> getTopSellingBooks() {
         try {
-            String sql = "CALL sp_TopSachBanChay(10)";
+            String sql = "EXEC dbo.sp_TopSachBanChay 10";
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
@@ -151,7 +151,7 @@ public class ReportService {
     }
 
     public List<Map<String, Object>> getShopMonthlyRevenue(Integer maShop) {
-        String sql = "CALL sp_DoanhThuShopTheoThang(:maShop)";
+        String sql = "EXEC dbo.sp_DoanhThuShopTheoThang @p_ma_shop = :maShop";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("maShop", maShop);
         List<Object[]> results = query.getResultList();

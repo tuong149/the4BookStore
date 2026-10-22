@@ -10,8 +10,7 @@ import java.util.List;
     @Index(name = "idx_pkk_ngaykiemke", columnList = "ngay_kiem_ke"),
     @Index(name = "idx_pkk_trangthai", columnList = "trang_thai")
 })
-@Data @NoArgsConstructor @AllArgsConstructor
-public class PhieuKiemKe {
+@Data @NoArgsConstructor public class PhieuKiemKe {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ma_phieu_kiem_ke")
     private Integer maPhieuKiemKe;

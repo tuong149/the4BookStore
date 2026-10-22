@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "VOUCHER_DA_LUU", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"maKH", "maKM"})
 })
-@Data @NoArgsConstructor @AllArgsConstructor
-public class VoucherDaLuu {
+@Data @NoArgsConstructor public class VoucherDaLuu {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

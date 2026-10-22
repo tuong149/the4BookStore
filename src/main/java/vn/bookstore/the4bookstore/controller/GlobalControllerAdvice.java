@@ -40,6 +40,34 @@ public class GlobalControllerAdvice {
     @Autowired(required = false)
     private ShopService shopService;
 
+    @org.springframework.web.bind.annotation.InitBinder
+    public void initBinder(org.springframework.web.bind.WebDataBinder binder) {
+        binder.registerCustomEditor(Integer.class, new java.beans.PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                if (text == null || text.trim().isEmpty()) {
+                    setValue(null);
+                    return;
+                }
+                try {
+                    String clean = text.trim();
+                    if (clean.contains(".")) {
+                        double val = Double.parseDouble(clean);
+                        setValue((int) Math.round(val));
+                    } else if (clean.contains(",")) {
+                        clean = clean.replace(",", ".");
+                        double val = Double.parseDouble(clean);
+                        setValue((int) Math.round(val));
+                    } else {
+                        setValue(Integer.parseInt(clean));
+                    }
+                } catch (Exception e) {
+                    setValue(null);
+                }
+            }
+        });
+    }
+
     public GlobalControllerAdvice() {
     }
 

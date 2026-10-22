@@ -12,8 +12,33 @@ import java.util.List;
     @Index(name = "idx_sp_ngaytao", columnList = "ngayTao"),
     @Index(name = "idx_sp_giaban", columnList = "giaBan")
 })
-@Data @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class SanPham {
+
+    public SanPham() {}
+
+    public SanPham(Integer maSP, String tenSP, DanhMuc danhMuc, String loaiSP, String ISBN, Integer giaBan, Integer soLuongTon, Integer mucTonToiThieu, String moTa, Shop shop, String trangThaiKhoa, Integer soLuongDaBan, String hinhAnh, String trangThai, LocalDateTime ngayTao, List<SanPhamTacGia> sanPhamTacGias) {
+        this.maSP = maSP;
+        this.tenSP = tenSP;
+        this.danhMuc = danhMuc;
+        this.loaiSP = loaiSP;
+        this.ISBN = ISBN;
+        this.giaBan = giaBan;
+        this.soLuongTon = soLuongTon;
+        this.mucTonToiThieu = mucTonToiThieu;
+        this.moTa = moTa;
+        this.shop = shop;
+        this.trangThaiKhoa = trangThaiKhoa;
+        this.soLuongDaBan = soLuongDaBan;
+        this.hinhAnh = hinhAnh;
+        this.trangThai = trangThai;
+        this.ngayTao = ngayTao;
+        this.sanPhamTacGias = sanPhamTacGias;
+    }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maSP;
     @Column(nullable = false, length = 200)

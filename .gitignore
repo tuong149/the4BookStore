@@ -32,3 +32,5 @@ build/
 .vscode/
 uploads/
 *.txt
+
+~$*

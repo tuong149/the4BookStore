@@ -6,8 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "KHUYEN_MAI")
-@Data @NoArgsConstructor @AllArgsConstructor
-public class KhuyenMai {
+@Data @NoArgsConstructor public class KhuyenMai {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maKM;
 

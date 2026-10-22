@@ -11,7 +11,6 @@ import java.util.List;
 @org.hibernate.annotations.BatchSize(size = 50)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Shop {
 
     @Id

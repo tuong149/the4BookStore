@@ -10,8 +10,7 @@ import java.util.List;
     @Index(name = "idx_dh_ngaydat", columnList = "ngayDat"),
     @Index(name = "idx_dh_makh", columnList = "maKH")
 })
-@Data @NoArgsConstructor @AllArgsConstructor
-public class DonHang {
+@Data @NoArgsConstructor public class DonHang {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maDH;
     @Column(nullable = false)
@@ -89,10 +88,10 @@ public class DonHang {
     @Column(name = "trang_thai_thanh_toan", nullable = false, length = 30)
     private String trangThaiThanhToan = "ChuaThanhToan"; // ChuaThanhToan, DaThanhToan, DaHoanTien
 
-    @Column(name = "lyDoTraHang", columnDefinition = "TEXT")
+    @Column(name = "ly_do_tra_hang", columnDefinition = "TEXT")
     private String lyDoTraHang;
 
-    @Column(name = "phanQuyetTranhChap", columnDefinition = "TEXT")
+    @Column(name = "phan_quyet_tranh_chap", columnDefinition = "TEXT")
     private String phanQuyetTranhChap;
 
     @ManyToOne(fetch = FetchType.LAZY)

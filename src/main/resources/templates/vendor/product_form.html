@@ -243,7 +243,7 @@
                                 Giá Bán (VNĐ) <span class="text-error font-bold text-sm">*</span>
                             </label>
                             <div class="relative">
-                                <input type="number" name="giaBan" id="inputGiaBan" th:value="${sanPham.giaBan}" required min="1000" step="1000" placeholder="89000"
+                                <input type="number" name="giaBan" id="inputGiaBan" th:value="${sanPham.giaBan}" required min="0" step="any" placeholder="89500"
                                        class="w-full pl-4 pr-12 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"/>
                                 <span class="absolute right-3.5 top-2.5 text-xs font-bold text-outline pointer-events-none">₫</span>
                             </div>
@@ -333,8 +333,8 @@
                 document.getElementById('inputTenSP').classList.remove('border-error', 'ring-1', 'ring-error');
             }
 
-            if (!giaBan || Number(giaBan) < 1000) {
-                missingFields.push('Giá Bán (phải từ 1,000 VNĐ trở lên)');
+            if (!giaBan || Number(giaBan) < 0) {
+                missingFields.push('Giá Bán (phải từ 0 VNĐ trở lên)');
                 document.getElementById('inputGiaBan').classList.add('border-error', 'ring-1', 'ring-error');
             } else {
                 document.getElementById('inputGiaBan').classList.remove('border-error', 'ring-1', 'ring-error');

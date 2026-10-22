@@ -7,8 +7,7 @@ import java.time.LocalDateTime;
 @Table(name = "TAI_KHOAN", indexes = {
     @Index(name = "idx_tk_vaitro_trangthai", columnList = "vaiTro, trangThai")
 })
-@Data @NoArgsConstructor @AllArgsConstructor
-public class TaiKhoan {
+@Data @NoArgsConstructor public class TaiKhoan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maTaiKhoan;
     @Column(unique = true, nullable = false, length = 50)

@@ -21,7 +21,7 @@ public class DanhGiaMedia {
     @EqualsAndHashCode.Exclude
     private DanhGia danhGia;
 
-    @Column(name = "loai_media", nullable = false, length = 10)
+    @Transient
     private String loaiMedia = "IMAGE"; // IMAGE, VIDEO
 
     @Column(nullable = false, length = 500)

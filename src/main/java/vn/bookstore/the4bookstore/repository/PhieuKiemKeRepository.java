@@ -21,6 +21,6 @@ public interface PhieuKiemKeRepository extends JpaRepository<PhieuKiemKe, Intege
     // ====================================================================
     @Modifying
     @Transactional
-    @Query(nativeQuery = true, value = "CALL sp_ShopXacNhanKiemKe(:maPhieuKiemKe, :maShop)")
+    @Query(nativeQuery = true, value = "EXEC sp_ShopXacNhanKiemKe :maPhieuKiemKe, :maShop")
     void executeSpShopXacNhanKiemKe(@Param("maPhieuKiemKe") Integer maPhieuKiemKe, @Param("maShop") Integer maShop);
 }
