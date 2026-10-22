@@ -138,7 +138,8 @@
                                 <label class="block font-label-md text-label-md font-semibold text-on-surface mb-2">Loại Giảm Giá <span class="text-error">*</span></label>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <!-- Phần trăm -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                    <label class="loai-giam-card relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           data-loai="PhanTram"
                                            th:classappend="${khuyenMai.loaiGiam == 'PhanTram'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
                                         <input type="radio" name="loaiGiam" value="PhanTram" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
                                         <div class="flex flex-col">
@@ -148,7 +149,8 @@
                                     </label>
 
                                     <!-- Tiền cố định -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                    <label class="loai-giam-card relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           data-loai="TienCoDinh"
                                            th:classappend="${khuyenMai.loaiGiam == 'TienCoDinh'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
                                         <input type="radio" name="loaiGiam" value="TienCoDinh" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
                                         <div class="flex flex-col">
@@ -158,7 +160,8 @@
                                     </label>
 
                                     <!-- Freeship -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                    <label class="loai-giam-card relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
+                                           data-loai="Freeship"
                                            th:classappend="${khuyenMai.loaiGiam == 'Freeship'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
                                         <input type="radio" name="loaiGiam" value="Freeship" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
                                         <div class="flex flex-col">
@@ -240,14 +243,14 @@
                             <div class="space-y-3">
                                 <label class="block font-label-md text-label-md font-semibold text-on-surface">Phạm Vi Sản Phẩm Áp Dụng</label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors">
+                                    <label class="ap-dung-card flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors" data-apdung="ALL">
                                         <input type="radio" name="apDungCho" value="ALL" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
                                         <div>
                                             <span class="text-sm font-bold block">Toàn bộ sản phẩm</span>
                                             <span class="text-[11px] text-on-surface-variant">Áp dụng cho mọi sách và văn phòng phẩm trên sàn</span>
                                         </div>
                                     </label>
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors">
+                                    <label class="ap-dung-card flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors" data-apdung="SANPHAM">
                                         <input type="radio" name="apDungCho" value="SANPHAM" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
                                         <div>
                                             <span class="text-sm font-bold block">Theo sản phẩm cụ thể</span>
@@ -384,18 +387,31 @@
                 }
             }
 
+            // Cập nhật viền và màu highlight động cho các ô lựa chọn
+            const cards = document.querySelectorAll('.loai-giam-card');
+            cards.forEach(card => {
+                const loai = card.getAttribute('data-loai');
+                if (loai === selected) {
+                    card.classList.add('border-primary', 'bg-primary/5', 'ring-2', 'ring-primary/20');
+                    card.classList.remove('border-surface-container', 'bg-surface-container-low', 'hover:bg-surface-container-high');
+                } else {
+                    card.classList.remove('border-primary', 'bg-primary/5', 'ring-2', 'ring-primary/20');
+                    card.classList.add('border-surface-container', 'bg-surface-container-low', 'hover:bg-surface-container-high');
+                }
+            });
+
             const donVi = document.getElementById('donViGiamLabel');
             const giamToiDaGroup = document.getElementById('giamToiDaGroup');
 
             if (selected === 'PhanTram') {
-                donVi.textContent = '%';
-                giamToiDaGroup.style.display = 'block';
+                if (donVi) donVi.textContent = '%';
+                if (giamToiDaGroup) giamToiDaGroup.style.display = 'block';
             } else if (selected === 'TienCoDinh') {
-                donVi.textContent = 'đ';
-                giamToiDaGroup.style.display = 'none';
+                if (donVi) donVi.textContent = 'đ';
+                if (giamToiDaGroup) giamToiDaGroup.style.display = 'none';
             } else if (selected === 'Freeship') {
-                donVi.textContent = 'đ';
-                giamToiDaGroup.style.display = 'none';
+                if (donVi) donVi.textContent = 'đ';
+                if (giamToiDaGroup) giamToiDaGroup.style.display = 'none';
             }
         }
 
@@ -405,6 +421,16 @@
             for (const r of radios) {
                 if (r.checked) { val = r.value; break; }
             }
+            const cards = document.querySelectorAll('.ap-dung-card');
+            cards.forEach(card => {
+                if (card.getAttribute('data-apdung') === val) {
+                    card.classList.add('border-primary', 'bg-primary/5', 'ring-2', 'ring-primary/20');
+                    card.classList.remove('border-surface-container', 'bg-surface-container-low');
+                } else {
+                    card.classList.remove('border-primary', 'bg-primary/5', 'ring-2', 'ring-primary/20');
+                    card.classList.add('border-surface-container', 'bg-surface-container-low');
+                }
+            });
             const spGroup = document.getElementById('sanPhamSelectGroup');
             if (val === 'SANPHAM') {
                 spGroup.classList.remove('hidden');

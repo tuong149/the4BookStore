@@ -169,7 +169,7 @@ public class VendorService {
             if (existing.getTrangThaiKhoa() == null || "ChoDuyet".equalsIgnoreCase(existing.getTrangThaiKhoa())) {
                 existing.setTrangThaiKhoa("BinhThuong");
             }
-            if (sanPham.getHinhAnh() != null && !sanPham.getHinhAnh().isBlank()) {
+            if (sanPham.getHinhAnh() != null && !sanPham.getHinhAnh().isBlank() && !"/images/default-book.png".equals(sanPham.getHinhAnh())) {
                 existing.setHinhAnh(sanPham.getHinhAnh());
             }
             existing.setTrangThai(sanPham.getTrangThai());
@@ -189,7 +189,7 @@ public class VendorService {
             sanPham.setTrangThaiKhoa("BinhThuong");
             sanPham.setSoLuongDaBan(0);
             sanPham.setNgayTao(LocalDateTime.now());
-            if (sanPham.getHinhAnh() == null || sanPham.getHinhAnh().isBlank()) {
+            if (sanPham.getHinhAnh() == null || sanPham.getHinhAnh().isBlank() || "/images/default-book.png".equals(sanPham.getHinhAnh())) {
                 sanPham.setHinhAnh("https://res.cloudinary.com/vkqtqiha/image/upload/v1791217232/the4bookstore/books/wqfgfnpkibjhi1vheb1n.png");
             }
             if (maDanhMuc != null) {

@@ -191,7 +191,7 @@
                                         <span class="material-symbols-outlined text-sm text-primary">link</span>
                                         <span>Cách 2: Dán đường dẫn liên kết ảnh trực tiếp (URL)</span>
                                     </label>
-                                    <input type="url" name="hinhAnh" id="imageUrlInput" th:value="${sanPham.hinhAnh}" placeholder="https://domain.com/path-to-cover-image.jpg"
+                                    <input type="text" name="hinhAnh" id="imageUrlInput" th:value="${sanPham.hinhAnh != null and sanPham.hinhAnh.startsWith('http') ? sanPham.hinhAnh : ''}" placeholder="https://domain.com/path-to-cover-image.jpg"
                                            oninput="previewUrlImage(this.value)"
                                            class="w-full px-4 py-2 rounded-xl border border-surface-container bg-surface-container-lowest text-xs focus:outline-none focus:ring-2 focus:ring-primary"/>
                                 </div>
@@ -321,6 +321,10 @@
 
         function previewUploadedImage(input) {
             if (input.files && input.files[0]) {
+                const urlInput = document.getElementById('imageUrlInput');
+                if (urlInput) {
+                    urlInput.value = '';
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('bookImagePreview').src = e.target.result;
@@ -332,6 +336,10 @@
         function previewUrlImage(url) {
             if (url && url.trim().startsWith('http')) {
                 document.getElementById('bookImagePreview').src = url.trim();
+                const fileInput = document.getElementById('imageFileInput');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
             }
         }
 
@@ -363,6 +371,13 @@
         });
 
         document.getElementById('productForm').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('imageFileInput');
+            const urlInput = document.getElementById('imageUrlInput');
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                if (urlInput && !urlInput.value.startsWith('http')) {
+                    urlInput.value = '';
+                }
+            }
             const giaBanInput = document.getElementById('inputGiaBan');
             if (giaBanInput && giaBanInput.value) {
                 giaBanInput.value = giaBanInput.value.replace(/[^0-9]/g, '');

@@ -276,7 +276,7 @@
                         class="vendor-table-row hover:bg-surface-container-low/50 transition-colors">
                         <td class="p-4 text-center font-bold text-outline" th:text="${page.number * page.size + iterStat.count}">1</td>
                         <td class="p-4">
-                            <img th:src="${sp.getHinhAnh()}" class="w-12 h-16 object-cover rounded-lg shadow-sm border border-surface-container"/>
+                            <img th:src="${sp.getHinhAnh() != null ? sp.getHinhAnh() : '/images/default-book.png'}" class="w-12 h-16 object-cover rounded-lg shadow-sm border border-surface-container"/>
                         </td>
                         <td class="p-4 font-bold text-on-surface">
                             <div th:text="${sp.tenSP}">Tên sản phẩm</div>

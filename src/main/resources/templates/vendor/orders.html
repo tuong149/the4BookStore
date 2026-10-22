@@ -151,7 +151,7 @@
                 <div class="py-3 divide-y divide-surface-container/50">
                     <div th:each="item : ${dh.chiTietDonHangs}" class="flex items-center justify-between py-2 text-xs">
                         <div class="flex items-center gap-3">
-                            <img th:src="${item.sanPham != null ? item.sanPham.getHinhAnh() : '/images/default-book.png'}" class="w-10 h-14 object-cover rounded shadow-sm border"/>
+                            <img th:src="${item.sanPham != null and item.sanPham.getHinhAnh() != null ? item.sanPham.getHinhAnh() : '/images/default-book.png'}" class="w-10 h-14 object-cover rounded shadow-sm border"/>
                             <div>
                                 <div class="font-bold text-on-surface" th:text="${item.sanPham != null ? item.sanPham.tenSP : 'Sản phẩm'}">Tên sản phẩm</div>
                                 <div class="text-on-surface-variant" th:text="'Số lượng: x' + ${item.soLuong}">x1</div>

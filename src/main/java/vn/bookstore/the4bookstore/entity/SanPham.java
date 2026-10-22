@@ -129,6 +129,6 @@ public class SanPham {
         if (moTa != null && moTa.startsWith("http")) {
             return moTa;
         }
-        return "/images/default-book.png";
+        return null;
     }
 }
