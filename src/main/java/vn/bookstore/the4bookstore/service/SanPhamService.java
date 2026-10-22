@@ -258,7 +258,7 @@ public class SanPhamService {
     /**
      * Xóa sản phẩm an toàn:
      * - Nếu đã có đơn hàng: Soft delete (chuyển sang 'DaXoa' để giữ tính toàn vẹn dữ liệu đơn hàng và lịch sử hóa đơn).
-     * - Nếu chưa có đơn hàng: Hard delete (dọn dẹp sạch giỏ hàng, đánh giá, quan hệ tác giả, yêu thích... và xóa khỏi DB).
+     * - Nếu chưa có đơn hàng: Dọn dẹp sạch giỏ hàng, đánh giá, media đánh giá, quan hệ tác giả, yêu thích... và xóa khỏi DB.
      */
     @Transactional
     @org.springframework.cache.annotation.CacheEvict(value = {"home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories", "allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
@@ -266,32 +266,33 @@ public class SanPhamService {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + maSP));
 
-        // 1. Kiểm tra đơn hàng liên quan
+        // 1. Dọn dẹp sản phẩm khỏi giỏ hàng của tất cả khách hàng
+        try {
+            chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
+        } catch (Exception ignored) {}
+
+        // 2. Kiểm tra đơn hàng liên quan
         long orderCount = chiTietDonHangRepository.countBySanPham_MaSP(maSP);
         if (orderCount > 0) {
             // Đã phát sinh đơn hàng: chuyển trạng thái DaXoa để bảo toàn lịch sử hóa đơn
             sp.setTrangThai("DaXoa");
             sanPhamRepository.save(sp);
-            try {
-                chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
-            } catch (Exception ignored) {}
             return;
         }
 
-        // 2. Chưa có đơn hàng: Xóa sạch toàn bộ dữ liệu phụ thuộc
-        try {
-            chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
-        } catch (Exception ignored) {}
-
+        // 3. Chưa có đơn hàng: Dọn dẹp sạch toàn bộ các liên kết khóa ngoại
         try {
             sanPhamTacGiaRepository.deleteBySanPhamId(maSP);
         } catch (Exception ignored) {}
 
-        try {
-            danhGiaRepository.deleteBySanPham_MaSP(maSP);
-        } catch (Exception ignored) {}
-
         if (entityManager != null) {
+            try {
+                // Xóa media đánh giá trước khi xóa đánh giá (FK_danhgia_media_danhgia)
+                entityManager.createNativeQuery("DELETE FROM danh_gia_media WHERE ma_danh_gia IN (SELECT ma_danh_gia FROM danh_gia WHERE masp = :id)").setParameter("id", maSP).executeUpdate();
+            } catch (Exception ignored) {}
+            try {
+                entityManager.createNativeQuery("DELETE FROM danh_gia WHERE masp = :id").setParameter("id", maSP).executeUpdate();
+            } catch (Exception ignored) {}
             try {
                 entityManager.createNativeQuery("DELETE FROM san_pham_yeu_thich WHERE masp = :id").setParameter("id", maSP).executeUpdate();
             } catch (Exception ignored) {}
@@ -299,20 +300,16 @@ public class SanPhamService {
                 entityManager.createNativeQuery("DELETE FROM san_pham_da_xem WHERE masp = :id").setParameter("id", maSP).executeUpdate();
             } catch (Exception ignored) {}
             try {
-                entityManager.createNativeQuery("DELETE FROM kho_hang WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
                 entityManager.createNativeQuery("DELETE FROM chi_tiet_kiem_ke WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM chi_tiet_phieu_nhap WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM chi_tiet_tra_hang WHERE masp = :id").setParameter("id", maSP).executeUpdate();
             } catch (Exception ignored) {}
         }
 
-        // 3. Xóa cứng sản phẩm khỏi cơ sở dữ liệu
-        sanPhamRepository.delete(sp);
+        // 4. Xóa cứng sản phẩm khỏi cơ sở dữ liệu (Fallback an toàn sang DaXoa nếu có ràng buộc khác)
+        try {
+            sanPhamRepository.delete(sp);
+        } catch (Exception ex) {
+            sp.setTrangThai("DaXoa");
+            sanPhamRepository.save(sp);
+        }
     }
 }

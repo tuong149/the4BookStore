@@ -476,6 +476,42 @@ public class VendorService {
     public KhuyenMai createShopPromotion(Integer maShop, KhuyenMai km) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
+
+        // 1. Kiểm tra ngày bắt đầu và kết thúc
+        if (km.getNgayBatDau() == null) {
+            km.setNgayBatDau(java.time.LocalDateTime.now().withSecond(0).withNano(0));
+        }
+        if (km.getNgayKetThuc() == null) {
+            km.setNgayKetThuc(java.time.LocalDateTime.now().plusMonths(1).withSecond(0).withNano(0));
+        }
+        if (!km.getNgayKetThuc().isAfter(km.getNgayBatDau())) {
+            throw new IllegalArgumentException("Thời gian kết thúc phải diễn ra sau thời gian bắt đầu!");
+        }
+
+        // 2. Giới hạn chiết khấu phần trăm của shop nghiêm ngặt dưới 50%
+        if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
+            if (km.getGiaTriGiam() == null || km.getGiaTriGiam() >= 50 || km.getGiaTriGiam() <= 0) {
+                throw new IllegalArgumentException("Chiết khấu của gian hàng phải dưới 50% (từ 1% đến 49%)!");
+            }
+        }
+
+        // 3. Xử lý mã Freeship (Miễn phí vận chuyển)
+        if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
+            km.setLoaiKhuyenMai("MIEN_PHI_VAN_CHUYEN");
+            if (km.getGiaTriGiam() == null || km.getGiaTriGiam() <= 0) {
+                km.setGiaTriGiam(30000); // Mặc định miễn giảm phí ship tối đa 30.000đ
+            }
+        } else if (km.getLoaiKhuyenMai() == null || km.getLoaiKhuyenMai().isBlank()) {
+            km.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
+        }
+
+        if (km.getMaCode() != null) {
+            km.setMaCode(km.getMaCode().trim().toUpperCase());
+        }
+        if (km.getTenKM() != null) {
+            km.setTenKM(km.getTenKM().trim());
+        }
+
         km.setShop(shop);
         km.setPhamVi("SHOP");
         km.setTrangThai("HoatDong");

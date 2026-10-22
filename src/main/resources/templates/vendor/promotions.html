@@ -34,7 +34,13 @@
                     <span>Tạo Voucher Mới Cho Shop</span>
                 </h2>
 
-                <form th:action="@{/vendor/promotions/create}" method="post" class="space-y-4 text-xs">
+                <!-- Alerts -->
+                <div th:if="${errorMessage}" class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">error</span>
+                    <span th:text="${errorMessage}"></span>
+                </div>
+
+                <form th:action="@{/vendor/promotions/create}" method="post" id="vendorPromoForm" onsubmit="return validateVendorPromo(event)" class="space-y-4 text-xs">
                     <div>
                         <label class="block font-bold text-on-surface-variant mb-1">Tên Chương Trình <span class="text-error">*</span></label>
                         <input type="text" name="tenKM" required placeholder="Ví dụ: Giảm 20k Cho Đơn Đầu"
@@ -50,15 +56,21 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-on-surface-variant mb-1">Loại Giảm</label>
-                            <select name="loaiGiam" class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary">
+                            <select name="loaiGiam" id="loaiGiamSelect" onchange="onLoaiGiamChange()"
+                                    class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary">
                                 <option value="TienCoDinh">Giảm tiền (VNĐ)</option>
                                 <option value="PhanTram">Giảm phần trăm (%)</option>
+                                <option value="Freeship">Miễn phí vận chuyển (Freeship)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Giá Trị Giảm <span class="text-error">*</span></label>
-                            <input type="number" name="giaTriGiam" required min="1" placeholder="20000"
-                                   class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary font-bold text-primary"/>
+                            <label class="block font-bold text-on-surface-variant mb-1" id="giaTriGiamLabel">Giá Trị Giảm <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <input type="number" name="giaTriGiam" id="inputGiaTriGiam" required min="1" placeholder="20000"
+                                       class="w-full px-3 py-2 pr-8 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary font-bold text-primary"/>
+                                <span id="donViLabel" class="absolute right-2.5 top-2 text-on-surface-variant font-semibold text-xs">đ</span>
+                            </div>
+                            <p class="text-[10px] text-on-surface-variant mt-1" id="giaTriGiamHint">Số tiền giảm trừ trực tiếp</p>
                         </div>
                     </div>
 
@@ -77,18 +89,18 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Bắt Đầu</label>
-                            <input type="datetime-local" name="ngayBatDau" required
+                            <label class="block font-bold text-on-surface-variant mb-1">Bắt Đầu <span class="text-error">*</span></label>
+                            <input type="datetime-local" name="ngayBatDau" id="inputNgayBatDau" required
                                    class="w-full px-2.5 py-2 rounded-xl border border-surface-container bg-surface-container-low text-[11px]"/>
                         </div>
                         <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Kết Thúc</label>
-                            <input type="datetime-local" name="ngayKetThuc" required
+                            <label class="block font-bold text-on-surface-variant mb-1">Kết Thúc <span class="text-error">*</span></label>
+                            <input type="datetime-local" name="ngayKetThuc" id="inputNgayKetThuc" required
                                    class="w-full px-2.5 py-2 rounded-xl border border-surface-container bg-surface-container-low text-[11px]"/>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container shadow-sm transition-all mt-2">
+                    <button type="submit" class="w-full py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container shadow-sm transition-all mt-2 cursor-pointer">
                         Phát Hành Voucher
                     </button>
                 </form>
@@ -107,7 +119,7 @@
                                 </div>
                                 <div class="text-xs text-on-surface-variant mt-1">
                                     <span>Giảm: </span>
-                                    <strong class="text-primary" th:text="${km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ'}"></strong>
+                                    <strong class="text-primary" th:text="${km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : (km.loaiGiam == 'Freeship' ? 'Freeship tối đa ' + #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ')}"></strong>
                                     <span th:if="${km.donToiThieu != null}" th:text="' | Đơn tối thiểu: ' + ${#numbers.formatDecimal(km.donToiThieu, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                 </div>
                                 <div class="text-[11px] text-on-surface-variant/80 mt-0.5" th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</div>
@@ -127,5 +139,76 @@
     </main>
 
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <script>
+        function onLoaiGiamChange() {
+            const select = document.getElementById('loaiGiamSelect');
+            const donVi = document.getElementById('donViLabel');
+            const hint = document.getElementById('giaTriGiamHint');
+            const input = document.getElementById('inputGiaTriGiam');
+            if (!select || !donVi || !hint || !input) return;
+
+            if (select.value === 'PhanTram') {
+                donVi.textContent = '%';
+                input.placeholder = '15';
+                input.max = 49;
+                hint.textContent = 'Chiết khấu của gian hàng tối đa 49% (dưới 50%)';
+            } else if (select.value === 'Freeship') {
+                donVi.textContent = 'đ';
+                input.placeholder = '30000';
+                input.removeAttribute('max');
+                hint.textContent = 'Mức tài trợ phí vận chuyển tối đa';
+            } else {
+                donVi.textContent = 'đ';
+                input.placeholder = '20000';
+                input.removeAttribute('max');
+                hint.textContent = 'Số tiền giảm trừ trực tiếp';
+            }
+        }
+
+        function validateVendorPromo(e) {
+            const startVal = document.getElementById('inputNgayBatDau').value;
+            const endVal = document.getElementById('inputNgayKetThuc').value;
+            if (startVal && endVal) {
+                const startDate = new Date(startVal);
+                const endDate = new Date(endVal);
+                if (startDate >= endDate) {
+                    alert('Lỗi: Thời gian kết thúc phải diễn ra sau thời gian bắt đầu!');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+
+            const loai = document.getElementById('loaiGiamSelect').value;
+            const val = parseFloat(document.getElementById('inputGiaTriGiam').value);
+            if (loai === 'PhanTram') {
+                if (val >= 50 || val <= 0) {
+                    alert('Lỗi: Chiết khấu của gian hàng phải dưới 50% (từ 1% đến 49%)!');
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onLoaiGiamChange();
+
+            // Gán ngày giờ mặc định nếu trống
+            const startInput = document.getElementById('inputNgayBatDau');
+            const endInput = document.getElementById('inputNgayKetThuc');
+            if (startInput && !startInput.value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                startInput.value = now.toISOString().slice(0, 16);
+            }
+            if (endInput && !endInput.value) {
+                const oneMonthLater = new Date();
+                oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+                oneMonthLater.setMinutes(oneMonthLater.getMinutes() - oneMonthLater.getTimezoneOffset());
+                endInput.value = oneMonthLater.toISOString().slice(0, 16);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -133,14 +133,13 @@
                                 </div>
                             </div>
 
-                            <!-- Radio Cards: Loại giảm -->
+                            <!-- Radio Cards: Loại giảm (Bỏ highlight viền lệch, chỉ giữ ô tròn native) -->
                             <div class="mb-space-md">
                                 <label class="block font-label-md text-label-md font-semibold text-on-surface mb-2">Loại Giảm Giá <span class="text-error">*</span></label>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <!-- Phần trăm -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
-                                           th:classappend="${khuyenMai.loaiGiam == 'PhanTram'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
-                                        <input type="radio" name="loaiGiam" value="PhanTram" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                    <label class="flex items-center gap-3 p-3.5 rounded-2xl border border-surface-container bg-surface-container-low hover:bg-surface-container transition cursor-pointer">
+                                        <input type="radio" name="loaiGiam" value="PhanTram" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="accent-primary text-primary focus:ring-primary w-4 h-4"/>
                                         <div class="flex flex-col">
                                             <span class="font-bold text-sm text-on-surface">Phần Trăm (%)</span>
                                             <span class="text-[11px] text-on-surface-variant">Giảm theo tỷ lệ % đơn hàng</span>
@@ -148,9 +147,8 @@
                                     </label>
 
                                     <!-- Tiền cố định -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
-                                           th:classappend="${khuyenMai.loaiGiam == 'TienCoDinh'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
-                                        <input type="radio" name="loaiGiam" value="TienCoDinh" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                    <label class="flex items-center gap-3 p-3.5 rounded-2xl border border-surface-container bg-surface-container-low hover:bg-surface-container transition cursor-pointer">
+                                        <input type="radio" name="loaiGiam" value="TienCoDinh" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="accent-primary text-primary focus:ring-primary w-4 h-4"/>
                                         <div class="flex flex-col">
                                             <span class="font-bold text-sm text-on-surface">Số Tiền Cố Định (đ)</span>
                                             <span class="text-[11px] text-on-surface-variant">Giảm trực tiếp số tiền cụ thể</span>
@@ -158,9 +156,8 @@
                                     </label>
 
                                     <!-- Freeship -->
-                                    <label class="relative flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition"
-                                           th:classappend="${khuyenMai.loaiGiam == 'Freeship'} ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-surface-container bg-surface-container-low hover:bg-surface-container-high'">
-                                        <input type="radio" name="loaiGiam" value="Freeship" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="text-primary focus:ring-primary"/>
+                                    <label class="flex items-center gap-3 p-3.5 rounded-2xl border border-surface-container bg-surface-container-low hover:bg-surface-container transition cursor-pointer">
+                                        <input type="radio" name="loaiGiam" value="Freeship" th:field="*{loaiGiam}" onchange="handleLoaiGiamChange()" class="accent-primary text-primary focus:ring-primary w-4 h-4"/>
                                         <div class="flex flex-col">
                                             <span class="font-bold text-sm text-on-surface">Miễn Phí Vận Chuyển</span>
                                             <span class="text-[11px] text-on-surface-variant">Tài trợ / Miễn trừ phí giao hàng</span>
@@ -236,28 +233,30 @@
                                 </div>
                             </div>
 
-                            <!-- Áp dụng cho: Tất cả / Danh mục / Sản phẩm -->
+                            <!-- Áp dụng cho: Toàn bộ / Danh mục (Đã bỏ tùy chọn sản phẩm cụ thể) -->
                             <div class="space-y-3">
                                 <label class="block font-label-md text-label-md font-semibold text-on-surface">Phạm Vi Sản Phẩm Áp Dụng</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
-                                        <input type="radio" name="apDungCho" value="ALL" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:bg-surface-container transition">
+                                        <input type="radio" name="apDungCho" value="ALL" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="accent-primary text-primary focus:ring-primary w-4 h-4"/>
                                         <span class="text-sm font-medium">Toàn bộ sản phẩm</span>
                                     </label>
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
-                                        <input type="radio" name="apDungCho" value="DANHMUC" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:bg-surface-container transition">
+                                        <input type="radio" name="apDungCho" value="DANHMUC" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="accent-primary text-primary focus:ring-primary w-4 h-4"/>
                                         <span class="text-sm font-medium">Theo danh mục cụ thể</span>
-                                    </label>
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
-                                        <input type="radio" name="apDungCho" value="SANPHAM" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
-                                        <span class="text-sm font-medium">Theo sản phẩm cụ thể</span>
                                     </label>
                                 </div>
 
-                                <!-- Chọn danh mục nếu apDungCho == DANHMUC -->
-                                <div id="danhMucSelectGroup" class="hidden p-3 bg-surface-container-low rounded-2xl border border-surface-container">
-                                    <label class="block text-xs font-semibold text-on-surface mb-2">Chọn Danh Mục Áp Dụng (Phân cách bằng dấu phẩy):</label>
-                                    <input type="text" th:field="*{danhSachDanhMucIds}" placeholder="VD: 1, 2, 5 (ID danh mục sản phẩm)" class="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container rounded-xl text-sm"/>
+                                <!-- Chọn danh mục dạng Listbox nếu apDungCho == DANHMUC -->
+                                <div id="danhMucSelectGroup" class="hidden p-4 bg-surface-container-low rounded-2xl border border-surface-container space-y-2">
+                                    <label class="block text-xs font-bold text-on-surface">Chọn Danh Mục Áp Dụng (Giữ phím Ctrl hoặc Command để chọn nhiều danh mục):</label>
+                                    <select id="danhMucListBox" multiple size="6" onchange="syncSelectedCategories()"
+                                            class="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container rounded-xl text-xs font-semibold focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                                        <option th:each="dm : ${danhMucs}" th:value="${dm.maDanhMuc}"
+                                                th:text="'[' + (${dm.loaiSP == 'Sach' ? 'Sách' : (dm.loaiSP == 'VanPhongPham' ? 'Văn Phòng Phẩm' : 'Quà Tặng')}) + '] ' + ${dm.tenDanhMuc}"></option>
+                                    </select>
+                                    <input type="hidden" id="danhSachDanhMucIdsHidden" th:field="*{danhSachDanhMucIds}"/>
+                                    <p class="text-[11px] text-on-surface-variant">Các sản phẩm thuộc các danh mục được chọn ở trên sẽ được hưởng ưu đãi này.</p>
                                 </div>
 
                                 <!-- Loại trừ sản phẩm -->
@@ -395,15 +394,37 @@
             const dmGroup = document.getElementById('danhMucSelectGroup');
             if (val === 'DANHMUC') {
                 dmGroup.classList.remove('hidden');
+                initSelectedCategories();
             } else {
                 dmGroup.classList.add('hidden');
             }
+        }
+
+        function syncSelectedCategories() {
+            const select = document.getElementById('danhMucListBox');
+            const hidden = document.getElementById('danhSachDanhMucIdsHidden');
+            if (!select || !hidden) return;
+            const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+            hidden.value = selectedValues.join(', ');
+        }
+
+        function initSelectedCategories() {
+            const select = document.getElementById('danhMucListBox');
+            const hidden = document.getElementById('danhSachDanhMucIdsHidden');
+            if (!select || !hidden || !hidden.value) return;
+            const ids = hidden.value.split(',').map(s => s.trim());
+            Array.from(select.options).forEach(opt => {
+                if (ids.includes(opt.value)) {
+                    opt.selected = true;
+                }
+            });
         }
 
         // Initialize state on load
         document.addEventListener('DOMContentLoaded', () => {
             handleLoaiGiamChange();
             handleApDungChoChange();
+            initSelectedCategories();
         });
     </script>
 </body>

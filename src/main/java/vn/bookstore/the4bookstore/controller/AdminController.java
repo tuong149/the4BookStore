@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import vn.bookstore.the4bookstore.entity.DanhMuc;
 import vn.bookstore.the4bookstore.entity.SanPham;
+import vn.bookstore.the4bookstore.entity.Shop;
 import vn.bookstore.the4bookstore.entity.DonHang;
 import vn.bookstore.the4bookstore.entity.TacGia;
 import vn.bookstore.the4bookstore.entity.SanPhamTacGia;
@@ -322,15 +323,68 @@ public class AdminController {
     }
 
     @PostMapping({"/products/save", "/books/save"})
-    public String saveProduct(RedirectAttributes ra) {
-        ra.addFlashAttribute("errorMessage", "Quản trị viên và Quản lý không có quyền thêm hoặc sửa sản phẩm trực tiếp. Mỗi gian hàng tự đăng bán và quản trị sản phẩm của mình qua Kênh Người Bán.");
-        return "redirect:/admin/shops";
+    public String saveProduct(@ModelAttribute SanPham sanPham,
+                              @RequestParam(value = "maDanhMuc", required = false) Integer maDanhMuc,
+                              @RequestParam(value = "maTacGia", required = false) Integer maTacGia,
+                              RedirectAttributes ra) {
+        try {
+            if (sanPham.getMaSP() != null && sanPham.getMaSP() > 0) {
+                SanPham existing = sanPhamRepository.findById(sanPham.getMaSP())
+                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm: " + sanPham.getMaSP()));
+                existing.setTenSP(sanPham.getTenSP() != null ? sanPham.getTenSP().trim() : existing.getTenSP());
+                if (sanPham.getLoaiSP() != null) existing.setLoaiSP(sanPham.getLoaiSP());
+                if (sanPham.getISBN() != null) existing.setISBN(sanPham.getISBN().trim());
+                if (sanPham.getGiaBan() != null) existing.setGiaBan(sanPham.getGiaBan());
+                if (sanPham.getSoLuongTon() != null) existing.setSoLuongTon(sanPham.getSoLuongTon());
+                if (sanPham.getTrangThai() != null) existing.setTrangThai(sanPham.getTrangThai());
+                if (sanPham.getMoTa() != null) {
+                    existing.setMoTa(sanPham.getMoTa().trim());
+                    if (sanPham.getMoTa().startsWith("http")) {
+                        existing.setHinhAnh(sanPham.getMoTa().trim());
+                    }
+                }
+                if (maDanhMuc != null) {
+                    danhMucRepository.findById(maDanhMuc).ifPresent(existing::setDanhMuc);
+                }
+                sanPhamRepository.save(existing);
+                ra.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công!");
+            } else {
+                Shop defaultShop = shopRepository != null ? shopRepository.findById(1).orElse(null) : null;
+                sanPham.setShop(defaultShop);
+                if (maDanhMuc != null) {
+                    danhMucRepository.findById(maDanhMuc).ifPresent(sanPham::setDanhMuc);
+                }
+                if (sanPham.getMoTa() != null && sanPham.getMoTa().startsWith("http")) {
+                    sanPham.setHinhAnh(sanPham.getMoTa().trim());
+                }
+                if (sanPham.getTrangThai() == null || sanPham.getTrangThai().isBlank()) {
+                    sanPham.setTrangThai("DangBan");
+                }
+                sanPhamRepository.save(sanPham);
+                ra.addFlashAttribute("successMessage", "Thêm mới sản phẩm thành công!");
+            }
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi lưu sản phẩm: " + ex.getMessage());
+        }
+        return "redirect:/admin/inventory";
     }
 
     @PostMapping({"/products/delete/{id}", "/books/delete/{id}"})
     public String deleteProduct(@PathVariable("id") Integer id, RedirectAttributes ra) {
-        ra.addFlashAttribute("errorMessage", "Quản trị viên và Quản lý không có quyền xóa sản phẩm của gian hàng. Để xử lý vi phạm, vui lòng sử dụng chức năng 'Khóa Sản Phẩm' trong danh sách sản phẩm gian hàng.");
-        return "redirect:/admin/shops";
+        try {
+            if (sanPhamService != null) {
+                sanPhamService.deleteProduct(id);
+            } else {
+                sanPhamRepository.findById(id).ifPresent(sp -> {
+                    sp.setTrangThai("DaXoa");
+                    sanPhamRepository.save(sp);
+                });
+            }
+            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa sản phẩm: " + ex.getMessage());
+        }
+        return "redirect:/admin/inventory";
     }
 
     @GetMapping("/products/{id}/json")

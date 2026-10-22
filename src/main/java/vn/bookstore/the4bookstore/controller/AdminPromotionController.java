@@ -208,6 +208,17 @@ public class AdminPromotionController {
             return "admin/promotions/form";
         }
 
+        // Giới hạn chiết khấu của gian hàng (Shop) phải dưới 50%
+        if (khuyenMai.getShop() != null || "SHOP".equalsIgnoreCase(khuyenMai.getPhamVi())) {
+            if ("PhanTram".equalsIgnoreCase(khuyenMai.getLoaiGiam()) && khuyenMai.getGiaTriGiam() >= 50) {
+                model.addAttribute("errorMessage", "Chiết khấu của gian hàng phải dưới 50% (từ 1% đến 49%)!");
+                model.addAttribute("khuyenMai", khuyenMai);
+                model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
+                model.addAttribute("danhMucs", danhMucRepository.findAll());
+                return "admin/promotions/form";
+            }
+        }
+
         if (khuyenMai.getMaKM() != null) {
             khuyenMaiService.getById(khuyenMai.getMaKM()).ifPresent(existing -> {
                 if (khuyenMai.getSoLuongDaDung() == null) {
