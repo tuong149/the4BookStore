@@ -25,6 +25,10 @@
             <span class="material-symbols-outlined">check_circle</span>
             <span th:text="${successMessage}"></span>
         </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined">error</span>
+            <span th:text="${errorMessage}"></span>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Create Promo Form -->
@@ -50,9 +54,10 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-on-surface-variant mb-1">Loại Giảm</label>
-                            <select name="loaiGiam" class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary">
+                            <select name="loaiGiam" id="vendorLoaiGiam" onchange="handleVendorLoaiGiamChange()" class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary">
                                 <option value="TienCoDinh">Giảm tiền (VNĐ)</option>
                                 <option value="PhanTram">Giảm phần trăm (%)</option>
+                                <option value="Freeship">Miễn phí vận chuyển (Freeship)</option>
                             </select>
                         </div>
                         <div>
@@ -107,7 +112,7 @@
                                 </div>
                                 <div class="text-xs text-on-surface-variant mt-1">
                                     <span>Giảm: </span>
-                                    <strong class="text-primary" th:text="${km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ'}"></strong>
+                                    <strong class="text-primary" th:text="${km.loaiGiam == 'Freeship' ? 'Miễn phí ship (tối đa ' + #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ)' : (km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ')}"></strong>
                                     <span th:if="${km.donToiThieu != null}" th:text="' | Đơn tối thiểu: ' + ${#numbers.formatDecimal(km.donToiThieu, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                 </div>
                                 <div class="text-[11px] text-on-surface-variant/80 mt-0.5" th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</div>
@@ -127,5 +132,35 @@
     </main>
 
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+    <script>
+        function handleVendorLoaiGiamChange() {
+            const select = document.getElementById('vendorLoaiGiam');
+            const inputVal = document.querySelector('input[name="giaTriGiam"]');
+            if (select && select.value === 'Freeship') {
+                if (inputVal && (!inputVal.value || inputVal.value === '20000')) {
+                    inputVal.value = '30000';
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const startInput = document.querySelector('input[name="ngayBatDau"]');
+                    const endInput = document.querySelector('input[name="ngayKetThuc"]');
+                    if (startInput && endInput && startInput.value && endInput.value) {
+                        const startDate = new Date(startInput.value);
+                        const endDate = new Date(endInput.value);
+                        if (startDate > endDate) {
+                            e.preventDefault();
+                            alert('Thời gian bắt đầu không được muộn hơn thời gian kết thúc!');
+                            endInput.focus();
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

@@ -239,6 +239,9 @@ public class ShopService {
     }
 
     public void updateChietKhau(Integer maShop, BigDecimal chietKhau) {
+        if (chietKhau == null || chietKhau.compareTo(BigDecimal.ZERO) < 0 || chietKhau.compareTo(new BigDecimal("50.0")) > 0) {
+            throw new IllegalArgumentException("Tỷ lệ chiết khấu phí sàn cho từng shop phải nằm trong khoảng từ 0% đến 50%!");
+        }
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop"));
         shop.setChietKhauPhanTram(chietKhau);

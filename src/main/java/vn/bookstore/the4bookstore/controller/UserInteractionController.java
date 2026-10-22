@@ -22,6 +22,7 @@ public class UserInteractionController {
 
     private final UserInteractionService interactionService;
     private final CurrentUserService currentUserService;
+    private final vn.bookstore.the4bookstore.service.CloudinaryService cloudinaryService;
 
     // --- DANH SÁCH YÊU THÍCH (WISHLIST) ---
     @GetMapping("/profile/favorites")
@@ -65,13 +66,32 @@ public class UserInteractionController {
                                @RequestParam Integer maDH,
                                @RequestParam int soSao,
                                @RequestParam String noiDung,
+                               @RequestParam(value = "imageFiles", required = false) org.springframework.web.multipart.MultipartFile[] imageFiles,
                                @RequestParam(required = false) String mediaUrl,
                                RedirectAttributes redirectAttributes) {
         KhachHang kh = currentUserService.getCurrentKhachHang(auth);
         if (kh == null) return "redirect:/login";
 
         try {
-            List<String> mediaUrls = (mediaUrl != null && !mediaUrl.isBlank()) ? Arrays.asList(mediaUrl.split(",")) : List.of();
+            List<String> mediaUrls = new java.util.ArrayList<>();
+            if (imageFiles != null && imageFiles.length > 0) {
+                for (org.springframework.web.multipart.MultipartFile file : imageFiles) {
+                    if (file != null && !file.isEmpty()) {
+                        String uploadedUrl = cloudinaryService.uploadImage(file, "reviews");
+                        if (uploadedUrl != null && !uploadedUrl.isBlank()) {
+                            mediaUrls.add(uploadedUrl);
+                        }
+                    }
+                }
+            }
+            if (mediaUrl != null && !mediaUrl.isBlank()) {
+                for (String url : mediaUrl.split(",")) {
+                    String trimmed = url.trim();
+                    if (!trimmed.isEmpty() && !mediaUrls.contains(trimmed)) {
+                        mediaUrls.add(trimmed);
+                    }
+                }
+            }
             interactionService.submitReview(kh, maSP, maDH, soSao, noiDung, mediaUrls);
             redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn đã gửi đánh giá chi tiết cho sản phẩm!");
         } catch (Exception ex) {

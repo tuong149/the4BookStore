@@ -119,6 +119,9 @@ public class ManagerDisputeService {
     }
 
     public void setPlatformCommissionRate(BigDecimal rate) {
+        if (rate == null || rate.compareTo(BigDecimal.ZERO) < 0 || rate.compareTo(new BigDecimal("50.0")) > 0) {
+            throw new IllegalArgumentException("Tỷ lệ phí sàn mặc định toàn sàn phải nằm trong khoảng từ 0% đến 50%!");
+        }
         CauHinhHeThong config = cauHinhHeThongRepository.findById("PHI_SAN_MAC_DINH")
                 .orElseGet(() -> new CauHinhHeThong("PHI_SAN_MAC_DINH", "5.0", "Phí sàn mặc định"));
         config.setGiaTri(rate.toString());

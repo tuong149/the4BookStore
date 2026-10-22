@@ -34,17 +34,17 @@ public class AdminPromotionController {
 
     private final KhuyenMaiService khuyenMaiService;
     private final DanhMucRepository danhMucRepository;
-    
     private final DonHangRepository donHangRepository;
+    private final SanPhamRepository sanPhamRepository;
 
     public AdminPromotionController(KhuyenMaiService khuyenMaiService,
                                     DanhMucRepository danhMucRepository,
-                                    
-                                    DonHangRepository donHangRepository) {
+                                    DonHangRepository donHangRepository,
+                                    SanPhamRepository sanPhamRepository) {
         this.khuyenMaiService = khuyenMaiService;
         this.danhMucRepository = danhMucRepository;
-        
         this.donHangRepository = donHangRepository;
+        this.sanPhamRepository = sanPhamRepository;
     }
 
     // 1. Danh sách Voucher & Thống kê tổng quan (Bento Data Table)
@@ -108,6 +108,7 @@ public class AdminPromotionController {
         model.addAttribute("khuyenMai", km);
         model.addAttribute("isEdit", false);
         model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
         return "admin/promotions/form";
     }
 
@@ -123,6 +124,7 @@ public class AdminPromotionController {
         model.addAttribute("khuyenMai", kmOpt.get());
         model.addAttribute("isEdit", true);
         model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
         return "admin/promotions/form";
     }
 
@@ -147,6 +149,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null && khuyenMai.getMaKM() > 0);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -166,6 +169,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -174,6 +178,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -189,6 +194,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -197,6 +203,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -205,6 +212,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
 
@@ -251,6 +259,7 @@ public class AdminPromotionController {
             model.addAttribute("khuyenMai", khuyenMai);
             model.addAttribute("isEdit", khuyenMai.getMaKM() != null);
             model.addAttribute("danhMucs", danhMucRepository.findAll());
+            model.addAttribute("sanPhams", sanPhamRepository.findAllActiveOrderByMaSPDesc());
             return "admin/promotions/form";
         }
     }

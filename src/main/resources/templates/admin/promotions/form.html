@@ -236,28 +236,41 @@
                                 </div>
                             </div>
 
-                            <!-- Áp dụng cho: Tất cả / Danh mục / Sản phẩm -->
+                            <!-- Áp dụng cho: Tất cả / Sản phẩm cụ thể (Đã loại bỏ danh mục và dùng Trình thả chọn nhiều) -->
                             <div class="space-y-3">
                                 <label class="block font-label-md text-label-md font-semibold text-on-surface">Phạm Vi Sản Phẩm Áp Dụng</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors">
                                         <input type="radio" name="apDungCho" value="ALL" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
-                                        <span class="text-sm font-medium">Toàn bộ sản phẩm</span>
+                                        <div>
+                                            <span class="text-sm font-bold block">Toàn bộ sản phẩm</span>
+                                            <span class="text-[11px] text-on-surface-variant">Áp dụng cho mọi sách và văn phòng phẩm trên sàn</span>
+                                        </div>
                                     </label>
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
-                                        <input type="radio" name="apDungCho" value="DANHMUC" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
-                                        <span class="text-sm font-medium">Theo danh mục cụ thể</span>
-                                    </label>
-                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer">
+                                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-surface-container bg-surface-container-low cursor-pointer hover:border-primary transition-colors">
                                         <input type="radio" name="apDungCho" value="SANPHAM" th:field="*{apDungCho}" onchange="handleApDungChoChange()" class="text-primary focus:ring-primary"/>
-                                        <span class="text-sm font-medium">Theo sản phẩm cụ thể</span>
+                                        <div>
+                                            <span class="text-sm font-bold block">Theo sản phẩm cụ thể</span>
+                                            <span class="text-[11px] text-on-surface-variant">Chọn nhiều sản phẩm bằng trình thả chọn nhiều bên dưới</span>
+                                        </div>
                                     </label>
                                 </div>
 
-                                <!-- Chọn danh mục nếu apDungCho == DANHMUC -->
-                                <div id="danhMucSelectGroup" class="hidden p-3 bg-surface-container-low rounded-2xl border border-surface-container">
-                                    <label class="block text-xs font-semibold text-on-surface mb-2">Chọn Danh Mục Áp Dụng (Phân cách bằng dấu phẩy):</label>
-                                    <input type="text" th:field="*{danhSachDanhMucIds}" placeholder="VD: 1, 2, 5 (ID danh mục sản phẩm)" class="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container rounded-xl text-sm"/>
+                                <!-- Chọn danh sách sản phẩm nếu apDungCho == SANPHAM (Trình thả chọn nhiều) -->
+                                <div id="sanPhamSelectGroup" class="hidden p-4 bg-surface-container-low rounded-2xl border border-surface-container space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-xs font-bold text-on-surface">Trình thả chọn nhiều sản phẩm áp dụng:</label>
+                                        <span class="text-[11px] text-primary font-bold" id="selectedProductsCount">0 sản phẩm đã chọn</span>
+                                    </div>
+                                    <p class="text-[11px] text-on-surface-variant">Giữ phím <strong>Ctrl</strong> (Windows) hoặc <strong>Cmd</strong> (Mac) và nhấp chuột để chọn nhiều sản phẩm.</p>
+                                    <select id="selectSanPhams" multiple size="8"
+                                            class="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container rounded-xl text-xs focus:ring-2 focus:ring-primary">
+                                        <option th:each="sp : ${sanPhams}" th:value="${sp.maSP}"
+                                                th:text="'#' + ${sp.maSP} + ' - ' + ${sp.tenSP} + (${sp.shop != null} ? ' [' + ${sp.shop.tenShop} + ']' : '')">
+                                            Sản phẩm
+                                        </option>
+                                    </select>
+                                    <input type="hidden" name="danhSachSanPhamIds" id="danhSachSanPhamIds" th:field="*{danhSachSanPhamIds}"/>
                                 </div>
 
                                 <!-- Loại trừ sản phẩm -->
@@ -392,18 +405,42 @@
             for (const r of radios) {
                 if (r.checked) { val = r.value; break; }
             }
-            const dmGroup = document.getElementById('danhMucSelectGroup');
-            if (val === 'DANHMUC') {
-                dmGroup.classList.remove('hidden');
+            const spGroup = document.getElementById('sanPhamSelectGroup');
+            if (val === 'SANPHAM') {
+                spGroup.classList.remove('hidden');
             } else {
-                dmGroup.classList.add('hidden');
+                spGroup.classList.add('hidden');
             }
+        }
+
+        function initSanPhamSelect() {
+            const select = document.getElementById('selectSanPhams');
+            const hiddenInput = document.getElementById('danhSachSanPhamIds');
+            const countLabel = document.getElementById('selectedProductsCount');
+            if (!select || !hiddenInput) return;
+
+            const currentIds = (hiddenInput.value || '').split(',').map(s => s.trim()).filter(Boolean);
+            if (currentIds.length > 0) {
+                Array.from(select.options).forEach(opt => {
+                    if (currentIds.includes(opt.value)) {
+                        opt.selected = true;
+                    }
+                });
+                countLabel.textContent = currentIds.length + ' sản phẩm đã chọn';
+            }
+
+            select.addEventListener('change', function() {
+                const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+                hiddenInput.value = selected.join(',');
+                countLabel.textContent = selected.length + ' sản phẩm đã chọn';
+            });
         }
 
         // Initialize state on load
         document.addEventListener('DOMContentLoaded', () => {
             handleLoaiGiamChange();
             handleApDungChoChange();
+            initSanPhamSelect();
         });
     </script>
 </body>

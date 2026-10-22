@@ -256,63 +256,21 @@ public class SanPhamService {
     }
 
     /**
-     * Xóa sản phẩm an toàn:
-     * - Nếu đã có đơn hàng: Soft delete (chuyển sang 'DaXoa' để giữ tính toàn vẹn dữ liệu đơn hàng và lịch sử hóa đơn).
-     * - Nếu chưa có đơn hàng: Hard delete (dọn dẹp sạch giỏ hàng, đánh giá, quan hệ tác giả, yêu thích... và xóa khỏi DB).
+     * Xóa sản phẩm: Sử dụng Soft Delete (trangThai = 'DaXoa') để đảm bảo toàn vẹn dữ liệu
+     * cho toàn bộ các quan hệ (đơn hàng, giỏ hàng, kho hàng, kiểm kê, đánh giá).
+     * Dọn dẹp sản phẩm khỏi các giỏ hàng hiện tại của khách hàng.
      */
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = {"home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories", "allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"authors", "home_featured_books", "home_preview", "guest_top_sold", "book_of_the_month", "categories", "allActiveCategories", "categoriesByLoaiSP"}, allEntries = true)
     public void deleteProduct(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + maSP));
 
-        // 1. Kiểm tra đơn hàng liên quan
-        long orderCount = chiTietDonHangRepository.countBySanPham_MaSP(maSP);
-        if (orderCount > 0) {
-            // Đã phát sinh đơn hàng: chuyển trạng thái DaXoa để bảo toàn lịch sử hóa đơn
-            sp.setTrangThai("DaXoa");
-            sanPhamRepository.save(sp);
-            try {
-                chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
-            } catch (Exception ignored) {}
-            return;
-        }
+        sp.setTrangThai("DaXoa");
+        sanPhamRepository.save(sp);
 
-        // 2. Chưa có đơn hàng: Xóa sạch toàn bộ dữ liệu phụ thuộc
         try {
             chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
         } catch (Exception ignored) {}
-
-        try {
-            sanPhamTacGiaRepository.deleteBySanPhamId(maSP);
-        } catch (Exception ignored) {}
-
-        try {
-            danhGiaRepository.deleteBySanPham_MaSP(maSP);
-        } catch (Exception ignored) {}
-
-        if (entityManager != null) {
-            try {
-                entityManager.createNativeQuery("DELETE FROM san_pham_yeu_thich WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM san_pham_da_xem WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM kho_hang WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM chi_tiet_kiem_ke WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM chi_tiet_phieu_nhap WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-            try {
-                entityManager.createNativeQuery("DELETE FROM chi_tiet_tra_hang WHERE masp = :id").setParameter("id", maSP).executeUpdate();
-            } catch (Exception ignored) {}
-        }
-
-        // 3. Xóa cứng sản phẩm khỏi cơ sở dữ liệu
-        sanPhamRepository.delete(sp);
     }
 }

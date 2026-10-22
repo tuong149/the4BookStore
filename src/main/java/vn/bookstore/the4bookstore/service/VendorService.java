@@ -189,6 +189,9 @@ public class VendorService {
             sanPham.setTrangThaiKhoa("BinhThuong");
             sanPham.setSoLuongDaBan(0);
             sanPham.setNgayTao(LocalDateTime.now());
+            if (sanPham.getHinhAnh() == null || sanPham.getHinhAnh().isBlank()) {
+                sanPham.setHinhAnh("https://res.cloudinary.com/vkqtqiha/image/upload/v1791217232/the4bookstore/books/wqfgfnpkibjhi1vheb1n.png");
+            }
             if (maDanhMuc != null) {
                 DanhMuc dm = danhMucRepository.findById(maDanhMuc).orElse(null);
                 if (dm != null) {
@@ -476,6 +479,22 @@ public class VendorService {
     public KhuyenMai createShopPromotion(Integer maShop, KhuyenMai km) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
+
+        if (km.getNgayBatDau() != null && km.getNgayKetThuc() != null) {
+            if (km.getNgayBatDau().isAfter(km.getNgayKetThuc())) {
+                throw new IllegalArgumentException("Thời gian bắt đầu không được muộn hơn thời gian kết thúc!");
+            }
+        }
+
+        if ("Freeship".equalsIgnoreCase(km.getLoaiGiam())) {
+            km.setLoaiKhuyenMai("MIEN_PHI_VAN_CHUYEN");
+            if (km.getGiaTriGiam() == null || km.getGiaTriGiam() <= 0) {
+                km.setGiaTriGiam(30000);
+            }
+        } else if (km.getLoaiKhuyenMai() == null || km.getLoaiKhuyenMai().isBlank()) {
+            km.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
+        }
+
         km.setShop(shop);
         km.setPhamVi("SHOP");
         km.setTrangThai("HoatDong");

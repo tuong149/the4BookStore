@@ -51,18 +51,18 @@ public class GlobalControllerAdvice {
                 }
                 try {
                     String clean = text.trim();
-                    if (clean.contains(".")) {
-                        double val = Double.parseDouble(clean);
-                        setValue((int) Math.round(val));
-                    } else if (clean.contains(",")) {
-                        clean = clean.replace(",", ".");
-                        double val = Double.parseDouble(clean);
-                        setValue((int) Math.round(val));
+                    String digitsOnly = clean.replaceAll("[.,\\s]", "");
+                    if (!digitsOnly.isEmpty()) {
+                        setValue(Integer.parseInt(digitsOnly));
                     } else {
-                        setValue(Integer.parseInt(clean));
+                        setValue(null);
                     }
                 } catch (Exception e) {
-                    setValue(null);
+                    try {
+                        setValue((int) Math.round(Double.parseDouble(text.trim())));
+                    } catch (Exception ex) {
+                        setValue(null);
+                    }
                 }
             }
         });
