@@ -12,7 +12,7 @@
         <div class="absolute inset-0 bg-black/10 pointer-events-none"></div>
 
         <!-- Glassmorphism Register Card (Enlarged & High-Contrast Balanced Glass) -->
-        <div class="relative z-10 w-full sm:max-w-xl lg:w-[600px] xl:w-[650px] my-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-8 sm:p-10 md:p-11 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between">
+        <div class="relative z-10 w-full sm:max-w-xl lg:w-[600px] xl:w-[650px] my-auto max-h-[94vh] overflow-y-auto bg-white/50 backdrop-blur-xl backdrop-saturate-150 rounded-[32px] sm:rounded-[40px] p-6 sm:p-9 md:p-10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border border-white/80 ring-1 ring-black/5 flex flex-col justify-between custom-scrollbar">
             
             <!-- Brand Logo Header -->
             <div class="flex items-center justify-center pt-1">
@@ -58,13 +58,19 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Password -->
-                    <div>
+                    <div class="relative">
                         <input type="password"
                                id="matKhau"
                                th:field="*{matKhau}"
                                required
+                               autocomplete="new-password"
                                placeholder="Mật khẩu *"
                                class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                        <button type="button"
+                                onclick="togglePasswordVisibility('matKhau', this)"
+                                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-primary transition-colors cursor-pointer p-1 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
                     </div>
 
                     <!-- Phone Number -->
@@ -76,6 +82,40 @@
                                placeholder="Số điện thoại *"
                                pattern="[0-9]{10,11}"
                                class="w-full px-5 py-3 rounded-full border-2 border-primary focus:ring-4 focus:ring-primary/25 bg-white text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-neutral-500 outline-none transition-all duration-200 shadow-sm" />
+                    </div>
+
+                    <!-- Password Strength & Checklist Container -->
+                    <div id="pwdStrengthBox" class="col-span-1 sm:col-span-2 hidden p-2.5 rounded-2xl bg-white/90 border border-primary/25 shadow-sm space-y-2">
+                        <div class="flex items-center justify-between text-[11px] font-bold">
+                            <span class="text-slate-600">Độ mạnh mật khẩu:</span>
+                            <span id="pwdStrengthLabel" class="text-error font-extrabold">Chưa đạt yêu cầu</span>
+                        </div>
+                        <!-- 4 Segmented Progress Bars -->
+                        <div class="grid grid-cols-4 gap-1.5 h-1.5 w-full">
+                            <div id="bar1" class="h-full rounded-full bg-slate-200 transition-colors duration-300"></div>
+                            <div id="bar2" class="h-full rounded-full bg-slate-200 transition-colors duration-300"></div>
+                            <div id="bar3" class="h-full rounded-full bg-slate-200 transition-colors duration-300"></div>
+                            <div id="bar4" class="h-full rounded-full bg-slate-200 transition-colors duration-300"></div>
+                        </div>
+                        <!-- Checklist Chips -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px] font-semibold text-slate-600">
+                            <div id="chkLen" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 transition-colors">
+                                <span class="material-symbols-outlined text-[13px] text-slate-400">cancel</span>
+                                <span>6-64 ký tự</span>
+                            </div>
+                            <div id="chkCase" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 transition-colors">
+                                <span class="material-symbols-outlined text-[13px] text-slate-400">cancel</span>
+                                <span>Hoa &amp; thường</span>
+                            </div>
+                            <div id="chkNum" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 transition-colors">
+                                <span class="material-symbols-outlined text-[13px] text-slate-400">cancel</span>
+                                <span>Ít nhất 1 số</span>
+                            </div>
+                            <div id="chkSpec" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 transition-colors">
+                                <span class="material-symbols-outlined text-[13px] text-slate-400">cancel</span>
+                                <span>Ký tự đặc biệt</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -144,5 +184,120 @@
 
     </main>
 
+    <script>
+        function togglePasswordVisibility(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        const pwdInput = document.getElementById('matKhau');
+        const pwdBox = document.getElementById('pwdStrengthBox');
+        const pwdLabel = document.getElementById('pwdStrengthLabel');
+        const bar1 = document.getElementById('bar1');
+        const bar2 = document.getElementById('bar2');
+        const bar3 = document.getElementById('bar3');
+        const bar4 = document.getElementById('bar4');
+
+        const chkLen = document.getElementById('chkLen');
+        const chkCase = document.getElementById('chkCase');
+        const chkNum = document.getElementById('chkNum');
+        const chkSpec = document.getElementById('chkSpec');
+
+        function updateCheckItem(element, isMet) {
+            const icon = element.querySelector('.material-symbols-outlined');
+            if (isMet) {
+                element.className = 'flex items-center gap-1 p-1 rounded-lg bg-emerald-50 text-emerald-800 transition-colors font-bold';
+                icon.textContent = 'check_circle';
+                icon.className = 'material-symbols-outlined text-[13px] text-emerald-600';
+            } else {
+                element.className = 'flex items-center gap-1 p-1 rounded-lg bg-slate-100 text-slate-500 transition-colors font-normal';
+                icon.textContent = 'cancel';
+                icon.className = 'material-symbols-outlined text-[13px] text-slate-400';
+            }
+        }
+
+        function evaluatePassword(val) {
+            if (!val) {
+                return { score: 0, valid: false };
+            }
+            const hasLen = val.length >= 6 && val.length <= 64;
+            const hasLower = /[a-z]/.test(val);
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSpec = /[^a-zA-Z0-9\s]/.test(val);
+            const hasNoSpace = !/\s/.test(val);
+
+            updateCheckItem(chkLen, hasLen && hasNoSpace);
+            updateCheckItem(chkCase, hasLower && hasUpper);
+            updateCheckItem(chkNum, hasNum);
+            updateCheckItem(chkSpec, hasSpec);
+
+            let score = 0;
+            if (hasLen && hasNoSpace) score++;
+            if (hasLower && hasUpper) score++;
+            if (hasNum) score++;
+            if (hasSpec) score++;
+
+            const allValid = hasLen && hasLower && hasUpper && hasNum && hasSpec && hasNoSpace;
+            return { score, valid: allValid };
+        }
+
+        if (pwdInput) {
+            pwdInput.addEventListener('focus', () => pwdBox.classList.remove('hidden'));
+            pwdInput.addEventListener('input', () => {
+                pwdBox.classList.remove('hidden');
+                const { score, valid } = evaluatePassword(pwdInput.value);
+
+                // Reset bars
+                [bar1, bar2, bar3, bar4].forEach(b => b.className = 'h-full rounded-full bg-slate-200 transition-colors duration-300');
+
+                if (score === 0) {
+                    pwdLabel.textContent = 'Chưa đạt yêu cầu';
+                    pwdLabel.className = 'text-error font-extrabold';
+                } else if (score === 1) {
+                    bar1.className = 'h-full rounded-full bg-rose-500';
+                    pwdLabel.textContent = 'Rất yếu';
+                    pwdLabel.className = 'text-rose-600 font-extrabold';
+                } else if (score === 2) {
+                    bar1.className = 'h-full rounded-full bg-amber-500';
+                    bar2.className = 'h-full rounded-full bg-amber-500';
+                    pwdLabel.textContent = 'Trung bình';
+                    pwdLabel.className = 'text-amber-600 font-extrabold';
+                } else if (score === 3) {
+                    bar1.className = 'h-full rounded-full bg-blue-500';
+                    bar2.className = 'h-full rounded-full bg-blue-500';
+                    bar3.className = 'h-full rounded-full bg-blue-500';
+                    pwdLabel.textContent = 'Khá mạnh';
+                    pwdLabel.className = 'text-blue-600 font-extrabold';
+                } else if (score === 4) {
+                    [bar1, bar2, bar3, bar4].forEach(b => b.className = 'h-full rounded-full bg-emerald-500');
+                    pwdLabel.textContent = 'Rất mạnh (Hợp lệ ✓)';
+                    pwdLabel.className = 'text-emerald-600 font-black';
+                }
+            });
+
+            // Prevent submit if password is not valid
+            const form = pwdInput.closest('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    const { valid } = evaluatePassword(pwdInput.value);
+                    if (!valid) {
+                        e.preventDefault();
+                        pwdBox.classList.remove('hidden');
+                        pwdInput.focus();
+                        pwdInput.classList.add('ring-4', 'ring-rose-500/30');
+                        setTimeout(() => pwdInput.classList.remove('ring-4', 'ring-rose-500/30'), 1500);
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 </html>

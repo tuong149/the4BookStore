@@ -32,9 +32,14 @@
                         <label class="font-label-sm text-label-sm font-bold text-on-surface" for="modalLoaiSP">Phân Loại *</label>
                         <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
                                 id="modalLoaiSP" name="loaiSP" required="" onchange="toggleBookFields(this.value); if(window.filterDrawerCategories) window.filterDrawerCategories(this.value);">
-                            <option value="Sach">Sách</option>
-                            <option value="VanPhongPham">Văn phòng phẩm</option>
-                            <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                            <th:block th:if="${!#lists.isEmpty(allMajorCategories)}">
+                                <option th:each="dml : ${allMajorCategories}" th:value="${dml.maLoai}" th:text="${dml.tenLoai}">Sách</option>
+                            </th:block>
+                            <th:block th:if="${#lists.isEmpty(allMajorCategories)}">
+                                <option value="Sach">Sách</option>
+                                <option value="VanPhongPham">Văn phòng phẩm</option>
+                                <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                            </th:block>
                         </select>
                     </div>
                     <div class="flex flex-col gap-1">

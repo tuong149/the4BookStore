@@ -9,6 +9,7 @@ import vn.bookstore.the4bookstore.entity.PasswordResetToken;
 import vn.bookstore.the4bookstore.entity.TaiKhoan;
 import vn.bookstore.the4bookstore.repository.PasswordResetTokenRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
+import vn.bookstore.the4bookstore.util.PasswordValidator;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -116,8 +117,9 @@ public class PasswordResetService {
         if (otpCode == null || otpCode.trim().length() != 6) {
             return new VerifyResult(false, "Mã OTP phải gồm đúng 6 chữ số!");
         }
-        if (newPassword == null || newPassword.length() < 6) {
-            return new VerifyResult(false, "Mật khẩu mới phải có tối thiểu 6 ký tự!");
+        PasswordValidator.ValidationResult pwdVal = PasswordValidator.validate(newPassword);
+        if (!pwdVal.isValid()) {
+            return new VerifyResult(false, pwdVal.getMessage());
         }
 
         Optional<TaiKhoan> optionalTaiKhoan = taiKhoanRepository.findByEmail(email.trim());

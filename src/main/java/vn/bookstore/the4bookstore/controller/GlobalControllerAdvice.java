@@ -202,6 +202,32 @@ public class GlobalControllerAdvice {
         return getAllActiveCategories();
     }
 
+    @ModelAttribute("allMajorCategories")
+    public List<vn.bookstore.the4bookstore.entity.DanhMucLon> getAllMajorCategories() {
+        if (danhMucService == null) return List.of();
+        return danhMucService.getActiveMajorCategories();
+    }
+
+    public record MajorCategoryGroup(
+            vn.bookstore.the4bookstore.entity.DanhMucLon major,
+            List<DanhMuc> subs
+    ) {}
+
+    @ModelAttribute("majorCategoryGroups")
+    public List<MajorCategoryGroup> getMajorCategoryGroups() {
+        if (danhMucService == null) return List.of();
+        List<vn.bookstore.the4bookstore.entity.DanhMucLon> majors = danhMucService.getActiveMajorCategories();
+        List<DanhMuc> allActive = getAllActiveCategories();
+        if (majors == null || majors.isEmpty()) return List.of();
+
+        return majors.stream().map(m -> {
+            List<DanhMuc> subs = allActive.stream()
+                    .filter(dm -> m.getMaLoai() != null && m.getMaLoai().equalsIgnoreCase(dm.getLoaiSP()))
+                    .toList();
+            return new MajorCategoryGroup(m, subs);
+        }).toList();
+    }
+
     private String getCustomAvatar(Authentication authentication, HttpServletRequest request) {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             return null;

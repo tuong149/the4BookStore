@@ -1072,13 +1072,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. tai_khoan
 INSERT INTO `tai_khoan` (`ma_tai_khoan`, `ten_dang_nhap`, `email`, `mat_khau_hash`, `vai_tro`, `trang_thai`, `auth_provider`, `provider_id`, `token_version`, `otp_code`, `otp_expiry`, `ngay_tao`) VALUES
-(1, 'admin', 'admin@the4bookstore.vn', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'ADMIN', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
-(3, 'vendor_kimdong', 'kimdong@gmail.com', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'VENDOR', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
-(4, 'vendor_nhanam', 'nhanam@gmail.com', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'VENDOR', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
-(5, 'khachhang_an', 'nguyenvanan@gmail.com', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
-(6, 'khachhang_binh', 'lethibinh@gmail.com', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
-(7, 'phat', 'thangphatnekea21333@gmail.com', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-17 10:05:28'),
-(8, 'manager', 'manager@the4bookstore.vn', '$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', 'MANAGER', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-17 03:37:45');
+(1, 'admin', 'admin@the4bookstore.vn', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'ADMIN', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
+(3, 'vendor_kimdong', 'kimdong@gmail.com', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'VENDOR', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
+(4, 'vendor_nhanam', 'nhanam@gmail.com', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'VENDOR', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
+(5, 'khachhang_an', 'nguyenvanan@gmail.com', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
+(6, 'khachhang_binh', 'lethibinh@gmail.com', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-16 15:04:53'),
+(7, 'phat', 'thangphatnekea21333@gmail.com', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'KHACHHANG', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-17 10:05:28'),
+(8, 'manager', 'manager@the4bookstore.vn', '$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', 'MANAGER', 'HoatDong', 'LOCAL', NULL, 1, NULL, NULL, '2026-10-17 03:37:45');
 
 -- 2. khach_hang
 INSERT INTO `khach_hang` (`makh`, `ma_tai_khoan`, `ho_ten`, `email`, `so_dien_thoai`, `dia_chi`, `anh_dai_dien`, `ngay_dang_ky`) VALUES

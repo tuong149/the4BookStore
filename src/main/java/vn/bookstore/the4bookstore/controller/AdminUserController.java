@@ -24,6 +24,7 @@ import vn.bookstore.the4bookstore.security.CustomUserDetails;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import vn.bookstore.the4bookstore.service.SecurityAuditService;
+import vn.bookstore.the4bookstore.util.PasswordValidator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -218,8 +219,9 @@ public class AdminUserController {
             @RequestParam String newPassword,
             Authentication auth,
             RedirectAttributes ra) {
-        if (newPassword == null || newPassword.trim().length() < 6) {
-            ra.addFlashAttribute("errorMessage", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
+        PasswordValidator.ValidationResult pwdVal = PasswordValidator.validate(newPassword != null ? newPassword.trim() : null);
+        if (!pwdVal.isValid()) {
+            ra.addFlashAttribute("errorMessage", pwdVal.getMessage());
             return "redirect:/admin/users";
         }
 

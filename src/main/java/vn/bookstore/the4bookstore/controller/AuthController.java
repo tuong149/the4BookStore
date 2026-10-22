@@ -12,6 +12,7 @@ import vn.bookstore.the4bookstore.entity.TaiKhoan;
 import vn.bookstore.the4bookstore.repository.KhachHangRepository;
 import vn.bookstore.the4bookstore.repository.TaiKhoanRepository;
 import vn.bookstore.the4bookstore.service.PasswordResetService;
+import vn.bookstore.the4bookstore.util.PasswordValidator;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -84,6 +85,12 @@ public class AuthController {
 
         if (phone != null && khachHangRepository.findBySoDienThoai(phone).isPresent()) {
             model.addAttribute("error", "Số điện thoại đã được sử dụng!");
+            return "auth/register";
+        }
+
+        PasswordValidator.ValidationResult pwdVal = PasswordValidator.validate(request.getMatKhau());
+        if (!pwdVal.isValid()) {
+            model.addAttribute("error", pwdVal.getMessage());
             return "auth/register";
         }
 
@@ -167,8 +174,9 @@ public class AuthController {
             return "auth/reset-password";
         }
 
-        if (password == null || password.length() < 6) {
-            model.addAttribute("error", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
+        PasswordValidator.ValidationResult pwdVal = PasswordValidator.validate(password);
+        if (!pwdVal.isValid()) {
+            model.addAttribute("error", pwdVal.getMessage());
             return "auth/reset-password";
         }
 

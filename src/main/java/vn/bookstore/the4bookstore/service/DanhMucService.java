@@ -9,7 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.bookstore.the4bookstore.entity.DanhMuc;
+import vn.bookstore.the4bookstore.entity.DanhMucLon;
+import vn.bookstore.the4bookstore.repository.DanhMucLonRepository;
 import vn.bookstore.the4bookstore.repository.DanhMucRepository;
+import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +23,8 @@ import java.util.Optional;
 public class DanhMucService {
 
     private final DanhMucRepository danhMucRepository;
+    private final DanhMucLonRepository danhMucLonRepository;
+    private final SanPhamRepository sanPhamRepository;
 
     @Cacheable("allActiveCategories")
     public List<DanhMuc> getAllActive() {
@@ -53,24 +58,75 @@ public class DanhMucService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public DanhMuc save(DanhMuc danhMuc) {
         return danhMucRepository.save(danhMuc);
     }
 
     @Transactional
-    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public void delete(Integer id) {
         danhMucRepository.deleteById(id);
     }
 
     @Transactional
-    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public Optional<DanhMuc> toggleStatus(Integer id) {
         return danhMucRepository.findById(id).map(dm -> {
             boolean current = Boolean.TRUE.equals(dm.getTrangThai());
             dm.setTrangThai(!current);
             return danhMucRepository.save(dm);
+        });
+    }
+
+    // =========================================================================
+    // QUẢN LÝ DANH MỤC LỚN (NGÀNH HÀNG / MAJOR CATEGORIES)
+    // =========================================================================
+
+    public List<DanhMucLon> getAllMajorCategories() {
+        return danhMucLonRepository.findAllByOrderByThuTuAscIdAsc();
+    }
+
+    @Cacheable("allActiveMajorCategories")
+    public List<DanhMucLon> getActiveMajorCategories() {
+        return danhMucLonRepository.findByTrangThaiTrueOrderByThuTuAscIdAsc();
+    }
+
+    public Optional<DanhMucLon> getMajorCategoryById(Integer id) {
+        return danhMucLonRepository.findById(id);
+    }
+
+    public Optional<DanhMucLon> getMajorCategoryByMaLoai(String maLoai) {
+        return danhMucLonRepository.findByMaLoai(maLoai);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public DanhMucLon saveMajorCategory(DanhMucLon dml, String oldMaLoai) {
+        DanhMucLon saved = danhMucLonRepository.save(dml);
+
+        // Nếu mã loại bị thay đổi, tự động cascade cập nhật cho tất cả DanhMuc và SanPham liên quan
+        if (oldMaLoai != null && !oldMaLoai.isBlank() && !oldMaLoai.equalsIgnoreCase(saved.getMaLoai())) {
+            danhMucRepository.updateLoaiSP(oldMaLoai, saved.getMaLoai());
+            sanPhamRepository.updateLoaiSP(oldMaLoai, saved.getMaLoai());
+        }
+
+        return saved;
+    }
+
+    @Transactional
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public void deleteMajorCategory(Integer id) {
+        danhMucLonRepository.deleteById(id);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public Optional<DanhMucLon> toggleMajorCategoryStatus(Integer id) {
+        return danhMucLonRepository.findById(id).map(dml -> {
+            boolean current = Boolean.TRUE.equals(dml.getTrangThai());
+            dml.setTrangThai(!current);
+            return danhMucLonRepository.save(dml);
         });
     }
 }

@@ -63,19 +63,28 @@
                             </div>
                             <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Quản Lý Danh Mục Sản Phẩm</h1>
                             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                                Thiết lập phân loại danh mục, điều khiển trạng thái hiển thị trên menu điều hướng và gán liên kết sản phẩm.
+                                Thiết lập phân loại danh mục lớn (ngành hàng), danh mục chi tiết, điều khiển trạng thái hiển thị trên menu điều hướng và gán liên kết sản phẩm.
                             </p>
                         </div>
 
                         <!-- Micro Metric Bento Strip -->
                         <div class="flex items-center gap-space-sm flex-wrap">
                             <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">layers</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">DANH MỤC LỚN</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${#lists.size(majorCategories)}">3</span>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
                                 <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
                                     <span class="material-symbols-outlined text-[20px]">category</span>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TỔNG DANH MỤC</span>
-                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${totalCategories}">12</span>
+                                    <span class="font-label-sm text-label-sm text-on-surface-variant">DANH MỤC CON</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface tabular-nums" th:text="${totalCategories}">13</span>
                                 </div>
                             </div>
                             <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
@@ -84,18 +93,138 @@
                                 </div>
                                 <div class="flex flex-col">
                                     <span class="font-label-sm text-label-sm text-on-surface-variant">ĐANG HOẠT ĐỘNG</span>
-                                    <span class="font-headline-sm text-headline-sm font-bold text-primary tabular-nums" th:text="${activeCount}">10</span>
+                                    <span class="font-headline-sm text-headline-sm font-bold text-primary tabular-nums" th:text="${activeCount}">13</span>
                                 </div>
                             </div>
-                            <div class="bg-surface-container-lowest px-space-md py-space-sm rounded-2xl shadow-sm flex items-center gap-space-sm border border-surface-container/60">
-                                <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shadow-sm">
-                                    <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================================= -->
+                    <!-- KHỐI 1: QUẢN LÝ DANH MỤC LỚN (NGÀNH HÀNG / MAJOR CATEGORIES) -->
+                    <!-- ========================================================================= -->
+                    <div class="mb-space-xl">
+                        <div class="flex items-center justify-between mb-space-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[22px]">view_agenda</span>
+                                <h2 class="font-headline-md text-headline-md font-bold text-on-surface">Danh Mục Lớn (Ngành Hàng)</h2>
+                                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary"
+                                      th:text="${#lists.size(majorCategories)} + ' nhóm hàng'">3 nhóm hàng</span>
+                            </div>
+                            <button onclick="openMajorCategoryDrawer('add')"
+                                    type="button"
+                                    class="bg-primary text-on-primary hover:bg-primary-container px-space-md py-2 rounded-xl font-label-md text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span>Thêm Danh Mục Lớn</span>
+                            </button>
+                        </div>
+
+                        <!-- Grid Cards: Danh Mục Lớn -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-md">
+                            <!-- Card cho từng danh mục lớn -->
+                            <div th:each="dml : ${majorCategories}"
+                                 class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container/70 shadow-sm hover:shadow-md hover:border-primary/40 transition-all flex flex-col justify-between group relative overflow-hidden">
+                                
+                                <div class="flex items-start justify-between gap-2 mb-3">
+                                    <div>
+                                        <h3 class="font-bold text-base text-on-surface line-clamp-1" th:text="${dml.tenLoai}">Sách</h3>
+                                        <span class="inline-block font-mono text-[11px] font-semibold text-primary bg-primary/5 px-2 py-0.5 rounded-md mt-1"
+                                              th:text="'Mã: ' + ${dml.maLoai}">Mã: Sach</span>
+                                    </div>
+                                    <span th:if="${dml.trangThai}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full shrink-0">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                        Hoạt động
+                                    </span>
+                                    <span th:if="${!dml.trangThai}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full shrink-0">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        Tạm khóa
+                                    </span>
                                 </div>
-                                <div class="flex flex-col">
-                                    <span class="font-label-sm text-label-sm text-on-surface-variant">TẠM KHÓA</span>
-                                    <span class="font-headline-sm text-headline-sm font-bold text-on-surface-variant tabular-nums" th:text="${inactiveCount}">2</span>
+
+                                <p class="text-xs text-on-surface-variant line-clamp-2 min-h-[32px] mb-3"
+                                   th:text="${dml.moTa != null && !dml.moTa.isBlank() ? dml.moTa : 'Chưa có mô tả chi tiết cho ngành hàng này.'}">
+                                    Mô tả ngành hàng
+                                </p>
+
+                                <!-- Stats & Actions Footer -->
+                                <div class="pt-3 border-t border-surface-container/60 flex items-center justify-between mt-auto">
+                                    <div class="flex items-center gap-2 text-[11px] font-semibold text-on-surface-variant">
+                                        <span class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-lg" title="Số lượng danh mục con">
+                                            <span class="material-symbols-outlined text-[14px] text-primary">folder</span>
+                                            <span th:text="(${majorCategoryCounts[dml.maLoai]} ?: 0) + ' con'">6 con</span>
+                                        </span>
+                                        <span class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-lg" title="Số lượng sản phẩm liên kết">
+                                            <span class="material-symbols-outlined text-[14px] text-secondary">inventory_2</span>
+                                            <span th:text="(${majorProductCounts[dml.maLoai]} ?: 0) + ' SP'">15 SP</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-1">
+                                        <!-- Toggle Status -->
+                                        <form th:action="@{'/admin/categories/major/toggle/' + ${dml.id}}" method="post" class="inline">
+                                            <button type="submit" 
+                                                    class="p-1 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors"
+                                                    th:title="${dml.trangThai ? 'Tạm khóa ngành hàng này' : 'Kích hoạt ngành hàng này'}">
+                                                <span class="material-symbols-outlined text-[18px]" th:text="${dml.trangThai ? 'toggle_on' : 'toggle_off'}">toggle_on</span>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit Major Category -->
+                                        <button type="button"
+                                                class="p-1 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors"
+                                                th:data-id="${dml.id}"
+                                                th:data-ten="${dml.tenLoai}"
+                                                th:data-ma="${dml.maLoai}"
+                                                th:data-icon="${dml.icon}"
+                                                th:data-desc="${dml.moTa}"
+                                                th:data-thutu="${dml.thuTu}"
+                                                th:data-status="${dml.trangThai}"
+                                                onclick="editMajorCategoryFromData(this)"
+                                                title="Chỉnh sửa danh mục lớn">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+
+                                        <!-- Delete Major Category -->
+                                        <form th:action="@{'/admin/categories/major/delete/' + ${dml.id}}"
+                                              method="post"
+                                              class="inline"
+                                              th:data-name="${dml.tenLoai}"
+                                              th:data-subcat="${majorCategoryCounts[dml.maLoai] ?: 0}"
+                                              th:data-prod="${majorProductCounts[dml.maLoai] ?: 0}"
+                                              onsubmit="return confirmDeleteMajorCategory(this);">
+                                            <button type="submit"
+                                                    class="p-1 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors"
+                                                    title="Xóa danh mục lớn">
+                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Nút Thêm Nhanh Ngành Hàng -->
+                            <button type="button"
+                                    onclick="openMajorCategoryDrawer('add')"
+                                    class="border-2 border-dashed border-surface-container hover:border-primary/60 rounded-2xl p-space-md flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-all group min-h-[160px]">
+                                <div class="w-11 h-11 rounded-2xl bg-surface-container flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                    <span class="material-symbols-outlined text-[24px]">add</span>
+                                </div>
+                                <span class="font-bold text-xs uppercase tracking-wider">Thêm Ngành Hàng Mới</span>
+                                <span class="text-[11px] opacity-75 text-center">Tạo nhóm hàng mới (Sách, VPP, Quà, Thời Trang...)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-surface-container my-space-lg"></div>
+
+                    <!-- ========================================================================= -->
+                    <!-- KHỐI 2: QUẢN LÝ DANH MỤC CHI TIẾT (DANH MỤC CON) -->
+                    <!-- ========================================================================= -->
+                    <div class="flex items-center justify-between mb-space-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-[22px]">format_list_bulleted</span>
+                            <h2 class="font-headline-md text-headline-md font-bold text-on-surface">Danh Mục Chi Tiết (Danh Mục Con)</h2>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary"
+                                  th:text="${totalCategories} + ' danh mục'">13 danh mục</span>
                         </div>
                     </div>
 
@@ -106,15 +235,17 @@
                             <!-- Live Search Field -->
                             <div class="relative flex-1 min-w-[260px] max-w-md">
                                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
-                                <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="categorySearchInput" placeholder="Tìm theo tên danh mục, mô tả..." type="text"/>
+                                <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" id="categorySearchInput" placeholder="Tìm theo tên danh mục con, mô tả..." type="text"/>
                             </div>
-                            <!-- Category Type Filter -->
+                            <!-- Category Type Filter (Dynamic from major categories) -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="loaiFilter">
-                                    <option value="all">Tất cả phân loại</option>
-                                    <option value="Sach">Sách</option>
-                                    <option value="VanPhongPham">Văn Phòng Phẩm</option>
-                                    <option value="QuaTang">Quà Tặng &amp; Trang Trí</option>
+                                    <option value="all">Tất cả ngành hàng</option>
+                                    <option th:each="dml : ${majorCategories}"
+                                            th:value="${dml.maLoai}"
+                                            th:text="${dml.tenLoai}">
+                                        Sách
+                                    </option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
@@ -137,7 +268,7 @@
                         <div class="flex items-center gap-space-sm flex-wrap self-end xl:self-auto">
                             <button class="bg-primary-container text-on-primary hover:bg-primary px-space-md py-2.5 rounded-xl font-label-md text-label-md font-bold flex items-center gap-space-xs shadow-sm transition-all transform active:scale-95" onclick="openCategoryDrawer('add')" type="button">
                                 <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                                <span>Thêm Danh Mục Mới</span>
+                                <span>Thêm Danh Mục Con</span>
                             </button>
                         </div>
                     </div>
@@ -149,8 +280,8 @@
                                 <thead class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
                                     <tr>
                                         <th class="py-3 px-space-md w-24" scope="col">MÃ DM</th>
-                                        <th class="py-3 px-space-md" scope="col">TÊN DANH MỤC</th>
-                                        <th class="py-3 px-space-md w-40" scope="col">PHÂN LOẠI</th>
+                                        <th class="py-3 px-space-md" scope="col">TÊN DANH MỤC CON</th>
+                                        <th class="py-3 px-space-md w-48" scope="col">THUỘC NGÀNH HÀNG</th>
                                         <th class="py-3 px-space-md" scope="col">MÔ TẢ</th>
                                         <th class="py-3 px-space-md text-center w-36" scope="col">SẢN PHẨM</th>
                                         <th class="py-3 px-space-md text-center w-36" scope="col">TRẠNG THÁI</th>
@@ -163,7 +294,7 @@
                                     <tr th:if="${#lists.isEmpty(categories)}">
                                         <td colspan="7" class="py-12 text-center text-on-surface-variant">
                                             <span class="material-symbols-outlined text-[36px] text-on-surface-variant/50 mb-2 block">folder_off</span>
-                                            Chưa có danh mục nào trong hệ thống. Nhấp "Thêm Danh Mục Mới" để tạo.
+                                            Chưa có danh mục con nào trong hệ thống. Nhấp "Thêm Danh Mục Con" để tạo.
                                         </td>
                                     </tr>
 
@@ -186,17 +317,18 @@
                                         </td>
 
                                         <td class="py-3 px-space-md">
-                                            <span th:if="${cat.loaiSP == 'Sach' or cat.loaiSP == null}" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shadow-sm">
-                                                <span class="material-symbols-outlined text-[14px]">menu_book</span>
-                                                Sách
+                                            <span th:if="${cat.loaiSP == 'Sach' or cat.loaiSP == null}" class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full">
+                                                <span>Sách</span>
                                             </span>
-                                            <span th:if="${cat.loaiSP == 'VanPhongPham'}" class="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full shadow-sm">
-                                                <span class="material-symbols-outlined text-[14px]">edit_note</span>
-                                                Văn Phòng Phẩm
+                                            <span th:if="${cat.loaiSP == 'VanPhongPham'}" class="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full">
+                                                <span>Văn Phòng Phẩm</span>
                                             </span>
-                                            <span th:if="${cat.loaiSP == 'QuaTang'}" class="inline-flex items-center gap-1 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-full shadow-sm">
-                                                <span class="material-symbols-outlined text-[14px]">redeem</span>
-                                                Quà Tặng
+                                            <span th:if="${cat.loaiSP == 'QuaTang'}" class="inline-flex items-center text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-full">
+                                                <span>Quà Tặng &amp; Trang Trí</span>
+                                            </span>
+                                            <span th:if="${cat.loaiSP != 'Sach' and cat.loaiSP != 'VanPhongPham' and cat.loaiSP != 'QuaTang' and cat.loaiSP != null}" 
+                                                  class="inline-flex items-center text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200/80 px-2.5 py-1 rounded-full">
+                                                <span th:text="${cat.loaiSP}">Khác</span>
                                             </span>
                                         </td>
 
@@ -242,7 +374,7 @@
                                                         th:data-desc="${cat.moTa ?: ''}"
                                                         th:data-status="${cat.trangThai}"
                                                         onclick="editCategoryFromData(this)" 
-                                                        title="Chỉnh sửa danh mục" 
+                                                        title="Chỉnh sửa danh mục con" 
                                                         type="button">
                                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                                 </button>
@@ -253,7 +385,7 @@
                                                       class="inline" 
                                                       th:attr="data-count=${productCounts[cat.maDanhMuc] ?: 0}"
                                                       onsubmit="return confirmDeleteCategory(this);">
-                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Xóa danh mục" type="submit">
+                                                    <button class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-surface-container transition-colors" title="Xóa danh mục con" type="submit">
                                                         <span class="material-symbols-outlined text-[18px]">delete</span>
                                                     </button>
                                                 </form>
@@ -269,13 +401,105 @@
 
             </div>
 
-            <!-- Slide-over Drawer / Modal for Category Details (Add / Edit) -->
+            <!-- ========================================================================= -->
+            <!-- MODAL / DRAWER: THÊM / SỬA DANH MỤC LỚN (MAJOR CATEGORY) -->
+            <!-- ========================================================================= -->
+            <div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="majorCategoryDrawerModal">
+                <div class="w-full max-w-lg bg-surface-container-lowest h-full shadow-2xl flex flex-col p-space-lg overflow-y-auto animate-in slide-in-from-right duration-200 rounded-l-3xl border-l border-surface-container">
+                    <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
+                        <div class="flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-primary text-[24px]">view_agenda</span>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="majorCategoryModalTitle">Thêm Danh Mục Lớn Mới</h2>
+                        </div>
+                        <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closeMajorCategoryDrawer()" type="button">
+                            <span class="material-symbols-outlined text-[22px]">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Major Category Form -->
+                    <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/categories/major/save}" method="post">
+                        <input type="hidden" name="id" id="majorFormId"/>
+
+                        <!-- Tên Danh Mục Lớn -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="majorFormTenLoai">Tên Danh Mục Lớn (Ngành Hàng) *</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="majorFormTenLoai" 
+                                   name="tenLoai" 
+                                   placeholder="Ví dụ: Thời Trang, Đồ Chơi, Manga..." 
+                                   required="" 
+                                   oninput="autoGenMaLoai(this.value)"
+                                   type="text"/>
+                        </div>
+
+                        <!-- Mã Định Danh / Code -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="majorFormMaLoai">Mã Định Danh (Code không dấu, viết liền) *</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-mono text-xs text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="majorFormMaLoai" 
+                                   name="maLoai" 
+                                   placeholder="Ví dụ: ThoiTrang, DoChoi, Manga" 
+                                   required="" 
+                                   type="text"/>
+                            <p class="text-[11px] text-on-surface-variant">Dùng để phân loại nhóm hàng trong cơ sở dữ liệu và URL liên kết.</p>
+                        </div>
+
+                        <input type="hidden" id="majorFormIcon" name="icon" value="category"/>
+
+                        <!-- Thứ tự hiển thị -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="majorFormThuTu">Thứ Tự Sắp Xếp</label>
+                            <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
+                                   id="majorFormThuTu" 
+                                   name="thuTu" 
+                                   value="0"
+                                   min="0"
+                                   type="number"/>
+                        </div>
+
+                        <!-- Mô Tả -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="majorFormMoTa">Mô Tả Ngành Hàng</label>
+                            <textarea class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30 resize-none" 
+                                      id="majorFormMoTa" 
+                                      name="moTa" 
+                                      rows="3" 
+                                      placeholder="Mô tả thông tin chi tiết về nhóm ngành hàng này..."></textarea>
+                        </div>
+
+                        <!-- Trạng Thái -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="majorFormTrangThai">Trạng Thái *</label>
+                            <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
+                                    id="majorFormTrangThai" 
+                                    name="trangThai">
+                                <option value="true">Hoạt động (Hiển thị trên hệ thống menu và bộ lọc)</option>
+                                <option value="false">Tạm khóa (Ẩn khỏi menu và không cho tạo danh mục con mới)</option>
+                            </select>
+                        </div>
+
+                        <!-- Drawer Action Controls -->
+                        <div class="mt-auto pt-space-lg flex items-center justify-end gap-space-sm">
+                            <button class="px-space-md py-2.5 bg-surface-container rounded-xl font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors" onclick="closeMajorCategoryDrawer()" type="button">
+                                Hủy
+                            </button>
+                            <button class="px-space-lg py-2.5 bg-primary-container text-on-primary rounded-xl font-label-md text-label-md font-bold hover:bg-primary transition-colors shadow-sm" type="submit">
+                                Lưu Danh Mục Lớn
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- MODAL / DRAWER: THÊM / SỬA DANH MỤC CON (SUBCATEGORY) -->
+            <!-- ========================================================================= -->
             <div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden flex justify-end" id="categoryDrawerModal">
                 <div class="w-full max-w-lg bg-surface-container-lowest h-full shadow-2xl flex flex-col p-space-lg overflow-y-auto animate-in slide-in-from-right duration-200 rounded-l-3xl border-l border-surface-container">
                     <div class="flex items-center justify-between pb-space-md border-b border-surface-container">
                         <div class="flex items-center gap-space-xs">
                             <span class="material-symbols-outlined text-primary text-[24px]">category</span>
-                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="categoryModalTitle">Thêm Danh Mục Mới</h2>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="categoryModalTitle">Thêm Danh Mục Con Mới</h2>
                         </div>
                         <button class="p-1.5 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" onclick="closeCategoryDrawer()" type="button">
                             <span class="material-symbols-outlined text-[22px]">close</span>
@@ -286,22 +510,24 @@
                     <form class="flex flex-col gap-space-md mt-space-md flex-1" th:action="@{/admin/categories/save}" method="post">
                         <input type="hidden" name="maDanhMuc" id="formMaDanhMuc"/>
 
-                        <!-- Phân Loại Nhóm Hàng -->
+                        <!-- Phân Loại Thuộc Danh Mục Lớn (Dynamic options) -->
                         <div class="flex flex-col gap-1">
-                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formLoaiSP">Phân Loại Nhóm Hàng *</label>
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formLoaiSP">Thuộc Danh Mục Lớn (Ngành Hàng) *</label>
                             <select class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm cursor-pointer border border-transparent focus:border-primary/30" 
                                     id="formLoaiSP" 
                                     name="loaiSP" 
                                     required="">
-                                <option value="Sach">📚 Sách (Ấn bản, tác phẩm, văn học, giáo trình...)</option>
-                                <option value="VanPhongPham">✏️ Văn Phòng Phẩm (Sổ tay, bút viết, bookmark, dụng cụ...)</option>
-                                <option value="QuaTang">🎁 Quà Tặng &amp; Trang Trí (Đèn đọc sách, mô hình book nook, túi tote, boardgame...)</option>
+                                <option th:each="dml : ${majorCategories}"
+                                        th:value="${dml.maLoai}"
+                                        th:text="${dml.tenLoai + ' (' + dml.maLoai + ')'}">
+                                    Sách (Sach)
+                                </option>
                             </select>
-                            <p class="text-[11px] text-on-surface-variant">Quyết định danh mục này sẽ xuất hiện ở cột nhóm hàng nào trong menu tìm kiếm header.</p>
+                            <p class="text-[11px] text-on-surface-variant">Quyết định danh mục con này sẽ xuất hiện ở cột ngành hàng nào trong menu tìm kiếm header.</p>
                         </div>
 
                         <div class="flex flex-col gap-1">
-                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formTenDanhMuc">Tên Danh Mục *</label>
+                            <label class="font-label-sm text-label-sm font-bold text-on-surface" for="formTenDanhMuc">Tên Danh Mục Con *</label>
                             <input class="bg-surface-container-low px-space-sm py-2.5 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
                                     id="formTenDanhMuc" 
                                     name="tenDanhMuc" 
@@ -343,7 +569,7 @@
                                 Hủy
                             </button>
                             <button class="px-space-lg py-2.5 bg-primary-container text-on-primary rounded-xl font-label-md text-label-md font-bold hover:bg-primary transition-colors shadow-sm" type="submit">
-                                Lưu Danh Mục
+                                Lưu Danh Mục Con
                             </button>
                         </div>
                     </form>
@@ -359,6 +585,8 @@
         const loaiFilter = document.getElementById('loaiFilter');
         const statusFilter = document.getElementById('statusFilter');
         const categoryRows = document.querySelectorAll('#categoryTableBody tr');
+        
+        // Modal subcategory
         const categoryDrawerModal = document.getElementById('categoryDrawerModal');
         const categoryModalTitle = document.getElementById('categoryModalTitle');
         const formMaDanhMuc = document.getElementById('formMaDanhMuc');
@@ -366,6 +594,17 @@
         const formTenDanhMuc = document.getElementById('formTenDanhMuc');
         const formMoTa = document.getElementById('formMoTa');
         const formTrangThai = document.getElementById('formTrangThai');
+
+        // Modal major category
+        const majorCategoryDrawerModal = document.getElementById('majorCategoryDrawerModal');
+        const majorCategoryModalTitle = document.getElementById('majorCategoryModalTitle');
+        const majorFormId = document.getElementById('majorFormId');
+        const majorFormTenLoai = document.getElementById('majorFormTenLoai');
+        const majorFormMaLoai = document.getElementById('majorFormMaLoai');
+        const majorFormIcon = document.getElementById('majorFormIcon');
+        const majorFormThuTu = document.getElementById('majorFormThuTu');
+        const majorFormMoTa = document.getElementById('majorFormMoTa');
+        const majorFormTrangThai = document.getElementById('majorFormTrangThai');
 
         function filterCategories() {
             const query = categorySearchInput.value.toLowerCase().trim();
@@ -380,7 +619,7 @@
 
                 const matchesSearch = query === '' || name.includes(query) || desc.includes(query);
                 const matchesStatus = statusVal === 'all' || rowStatus === statusVal;
-                const matchesLoai = loaiVal === 'all' || rowLoai === loaiVal;
+                const matchesLoai = loaiVal === 'all' || rowLoai.toLowerCase() === loaiVal.toLowerCase();
 
                 if (matchesSearch && matchesStatus && matchesLoai) {
                     row.classList.remove('hidden');
@@ -401,11 +640,12 @@
             filterCategories();
         }
 
+        // Subcategory Modal Functions
         function openCategoryDrawer(mode) {
             if (mode === 'add') {
-                categoryModalTitle.textContent = 'Thêm Danh Mục Mới';
+                categoryModalTitle.textContent = 'Thêm Danh Mục Con Mới';
                 formMaDanhMuc.value = '';
-                if (formLoaiSP) formLoaiSP.value = 'Sach';
+                if (formLoaiSP && formLoaiSP.options.length > 0) formLoaiSP.selectedIndex = 0;
                 formTenDanhMuc.value = '';
                 formMoTa.value = '';
                 formTrangThai.value = 'true';
@@ -420,7 +660,7 @@
             const desc = btn.getAttribute('data-desc');
             const status = btn.getAttribute('data-status');
 
-            categoryModalTitle.textContent = 'Chỉnh Sửa Danh Mục: ' + name;
+            categoryModalTitle.textContent = 'Chỉnh Sửa Danh Mục Con: ' + name;
             formMaDanhMuc.value = id;
             if (formLoaiSP) formLoaiSP.value = loai;
             formTenDanhMuc.value = name;
@@ -440,7 +680,69 @@
                 alert(`Không thể xóa danh mục này vì đang có ${count} sản phẩm liên kết! Vui lòng chuyển hoặc xóa các sản phẩm đó trước.`);
                 return false;
             }
-            return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này?');
+            return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn danh mục con này?');
+        }
+
+        // Major Category Modal Functions
+        function openMajorCategoryDrawer(mode) {
+            if (mode === 'add') {
+                majorCategoryModalTitle.textContent = 'Thêm Danh Mục Lớn (Ngành Hàng) Mới';
+                majorFormId.value = '';
+                majorFormTenLoai.value = '';
+                majorFormMaLoai.value = '';
+                majorFormMaLoai.readOnly = false;
+                if (majorFormIcon) majorFormIcon.value = 'category';
+                majorFormThuTu.value = '0';
+                majorFormMoTa.value = '';
+                majorFormTrangThai.value = 'true';
+            }
+            majorCategoryDrawerModal.classList.remove('hidden');
+        }
+
+        function editMajorCategoryFromData(btn) {
+            const id = btn.getAttribute('data-id');
+            const ten = btn.getAttribute('data-ten');
+            const ma = btn.getAttribute('data-ma');
+            const icon = btn.getAttribute('data-icon') || 'category';
+            const desc = btn.getAttribute('data-desc') || '';
+            const thutu = btn.getAttribute('data-thutu') || '0';
+            const status = btn.getAttribute('data-status');
+
+            majorCategoryModalTitle.textContent = 'Chỉnh Sửa Danh Mục Lớn: ' + ten;
+            majorFormId.value = id;
+            majorFormTenLoai.value = ten;
+            majorFormMaLoai.value = ma;
+            if (majorFormIcon) majorFormIcon.value = icon;
+            majorFormThuTu.value = thutu;
+            majorFormMoTa.value = desc;
+            majorFormTrangThai.value = (status === 'true' || status === true) ? 'true' : 'false';
+
+            majorCategoryDrawerModal.classList.remove('hidden');
+        }
+
+        function closeMajorCategoryDrawer() {
+            majorCategoryDrawerModal.classList.add('hidden');
+        }
+
+        function autoGenMaLoai(val) {
+            if (!majorFormId.value) { // Chỉ auto-generate khi thêm mới
+                let clean = val.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                clean = clean.replace(/đ/g, 'd').replace(/Đ/g, 'D');
+                clean = clean.replace(/[^a-zA-Z0-9]/g, '');
+                majorFormMaLoai.value = clean;
+            }
+        }
+
+        function confirmDeleteMajorCategory(form) {
+            const name = form.getAttribute('data-name') || 'ngành hàng';
+            const subcat = parseInt(form.getAttribute('data-subcat') || '0', 10);
+            const prod = parseInt(form.getAttribute('data-prod') || '0', 10);
+
+            if (subcat > 0 || prod > 0) {
+                alert(`Không thể xóa danh mục lớn '${name}' vì đang có ${subcat} danh mục con và ${prod} sản phẩm liên kết!\n\nVui lòng chuyển hoặc xóa các danh mục con và sản phẩm đó trước.`);
+                return false;
+            }
+            return confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn danh mục lớn '${name}'?`);
         }
     </script>
 </body>

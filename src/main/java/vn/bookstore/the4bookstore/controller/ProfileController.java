@@ -2,6 +2,7 @@ package vn.bookstore.the4bookstore.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import vn.bookstore.the4bookstore.util.PasswordValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -334,9 +335,10 @@ public class ProfileController {
             return "redirect:/profile?pwdError=mismatch";
         }
 
-        if (matKhauMoi.length() < 6) {
-            redirectAttributes.addFlashAttribute("pwdError", "Mật khẩu mới phải có tối thiểu 6 ký tự!");
-            return "redirect:/profile?pwdError=short";
+        PasswordValidator.ValidationResult pwdCheck = PasswordValidator.validate(matKhauMoi);
+        if (!pwdCheck.isValid()) {
+            redirectAttributes.addFlashAttribute("pwdError", pwdCheck.getMessage());
+            return "redirect:/profile?pwdError=weak";
         }
 
         tk.setMatKhauHash(passwordEncoder.encode(matKhauMoi));

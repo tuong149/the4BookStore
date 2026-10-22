@@ -49,12 +49,12 @@
                         <div class="relative min-w-[220px]">
                             <select name="searchType" id="searchTypeSelect" onchange="updatePlaceholder()"
                                     class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold text-on-surface focus:ring-2 focus:ring-primary appearance-none cursor-pointer">
-                                <option value="all" th:selected="${searchType == 'all' or searchType == null}">🔍 Tất cả tiêu chí</option>
-                                <option value="shopName" th:selected="${searchType == 'shopName'}">🏬 Tên gian hàng</option>
-                                <option value="productName" th:selected="${searchType == 'productName'}">📚 Tên sản phẩm gian hàng bán</option>
-                                <option value="owner" th:selected="${searchType == 'owner'}">👤 Chủ gian hàng / Username</option>
-                                <option value="phone" th:selected="${searchType == 'phone'}">📞 Số điện thoại shop</option>
-                                <option value="email" th:selected="${searchType == 'email'}">✉️ Email gian hàng</option>
+                                <option value="all" th:selected="${searchType == 'all' or searchType == null}">Tất cả tiêu chí</option>
+                                <option value="shopName" th:selected="${searchType == 'shopName'}">Tên gian hàng</option>
+                                <option value="productName" th:selected="${searchType == 'productName'}">Tên sản phẩm gian hàng bán</option>
+                                <option value="owner" th:selected="${searchType == 'owner'}">Chủ gian hàng / Username</option>
+                                <option value="phone" th:selected="${searchType == 'phone'}">Số điện thoại shop</option>
+                                <option value="email" th:selected="${searchType == 'email'}">Email gian hàng</option>
                             </select>
                             <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
                         </div>

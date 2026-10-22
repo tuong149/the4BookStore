@@ -52,6 +52,10 @@ public class DanhMuc {
             return "/san-pham/sach?danhMuc=" + maDanhMuc;
         }
 
+        if (loaiSP != null && !loaiSP.isBlank()) {
+            return "/san-pham?loaiSP=" + loaiSP + "&danhMuc=" + maDanhMuc;
+        }
+
         // Fallback theo tên nếu loaiSP chưa được set
         if (tenDanhMuc != null) {
             String name = tenDanhMuc.toLowerCase();
@@ -62,7 +66,7 @@ public class DanhMuc {
                 return "/san-pham/qua-tang?danhMuc=" + maDanhMuc;
             }
         }
-        return "/san-pham/sach?danhMuc=" + maDanhMuc;
+        return "/san-pham?danhMuc=" + maDanhMuc;
     }
 
     @Transient

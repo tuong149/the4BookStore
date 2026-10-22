@@ -108,26 +108,26 @@
                                 <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
                                 <input class="w-full bg-surface-container-low pl-9 pr-space-md py-2 rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-primary/30" 
                                        id="catalogSearchInput" 
-                                       placeholder="TÃ¬m theo tÃªn sáº£n pháº©m, mÃ£ ISBN..." 
+                                       placeholder="Tìm theo tên sản phẩm, mã ISBN..." 
                                        type="text"/>
                             </div>
 
-                            <!-- Product Type Filter -->
+                            <!-- Product Type Filter (Danh mục lớn) -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="loaiSPFilter">
-                                    <option value="all">Táº¥t cáº£ phÃ¢n loáº¡i</option>
-                                    <option value="Sach">SÃ¡ch</option>
-                                    <option value="VanPhongPham">VÄƒn phÃ²ng pháº©m</option>
-                                    <option value="QuaTang">QuÃ  táº·ng &amp; Trang trÃ­</option>
+                                    <option value="all">Tất cả danh mục</option>
+                                    <option value="Sach">Sách</option>
+                                    <option value="VanPhongPham">Văn phòng phẩm</option>
+                                    <option value="QuaTang">Quà tặng &amp; Trang trí</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
 
-                            <!-- Category Dropdown Filter -->
+                            <!-- Category Dropdown Filter (Danh mục con) -->
                             <div class="relative">
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="categoryFilter">
-                                    <option value="all">Táº¥t cáº£ danh má»¥c</option>
-                                    <option th:each="cat : ${categories}" th:value="${cat.maDanhMuc}" th:text="${cat.tenDanhMuc}">VÄƒn há»c</option>
+                                    <option value="all">Tất cả loại sản phẩm</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.maDanhMuc}" th:attr="data-group=${cat.loaiSP}" th:text="${cat.tenDanhMuc}">Văn học</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
                             </div>
@@ -387,14 +387,43 @@
         }
 
         if (searchInput) searchInput.addEventListener('input', filterCatalog);
-        if (loaiSPFilter) loaiSPFilter.addEventListener('change', filterCatalog);
+        if (loaiSPFilter) {
+            loaiSPFilter.addEventListener('change', function() {
+                if (categoryFilter) {
+                    const loai = this.value;
+                    const options = categoryFilter.querySelectorAll('option[data-group]');
+                    let hasCurrentSelected = false;
+                    options.forEach(opt => {
+                        const group = opt.getAttribute('data-group');
+                        if (loai === 'all' || !group || group === loai) {
+                            opt.hidden = false;
+                            opt.style.display = '';
+                            if (opt.value === categoryFilter.value) hasCurrentSelected = true;
+                        } else {
+                            opt.hidden = true;
+                            opt.style.display = 'none';
+                        }
+                    });
+                    if (loai !== 'all' && !hasCurrentSelected && categoryFilter.value !== 'all') {
+                        categoryFilter.value = 'all';
+                    }
+                }
+                filterCatalog();
+            });
+        }
         if (categoryFilter) categoryFilter.addEventListener('change', filterCatalog);
         if (stockFilter) stockFilter.addEventListener('change', filterCatalog);
 
         function resetFilters() {
             if (searchInput) searchInput.value = '';
             if (loaiSPFilter) loaiSPFilter.value = 'all';
-            if (categoryFilter) categoryFilter.value = 'all';
+            if (categoryFilter) {
+                categoryFilter.value = 'all';
+                categoryFilter.querySelectorAll('option[data-group]').forEach(opt => {
+                    opt.hidden = false;
+                    opt.style.display = '';
+                });
+            }
             if (stockFilter) stockFilter.value = 'all';
             filterCatalog();
         }

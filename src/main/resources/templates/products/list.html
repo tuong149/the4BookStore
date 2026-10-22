@@ -107,8 +107,8 @@
                             th:disabled="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL')}"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[170px] disabled:opacity-50 disabled:cursor-not-allowed">
                         <option value="0" id="defaultCatOption"
-                                th:text="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL') ? '-- Chọn danh mục trước --' : (loaiSP == 'Sach' ? 'Tất cả loại sách' : (loaiSP == 'VanPhongPham' ? 'Tất cả loại VPP' : (loaiSP == 'QuaTang' ? 'Tất cả loại quà tặng' : 'Tất cả loại')))}">
-                            -- Chọn danh mục trước --
+                                th:text="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL') ? '-- Tất cả loại sản phẩm --' : (loaiSP == 'Sach' ? 'Tất cả loại sách' : (loaiSP == 'VanPhongPham' ? 'Tất cả loại VPP' : (loaiSP == 'QuaTang' ? 'Tất cả loại quà tặng' : 'Tất cả loại sản phẩm')))}">
+                            -- Tất cả loại sản phẩm --
                         </option>
                         <option th:each="cat : ${categoriesSach}"
                                 data-group="Sach"
@@ -268,7 +268,7 @@
                 // 1. Chưa chọn danh mục cha -> Khóa dropdown loại sản phẩm
                 catSelect.disabled = true;
                 catSelect.value = '0';
-                defaultCatOpt.textContent = '-- Chọn danh mục trước --';
+                defaultCatOpt.textContent = '-- Tất cả loại sản phẩm --';
                 defaultCatOpt.selected = true;
 
                 // Ẩn toàn bộ options loại con

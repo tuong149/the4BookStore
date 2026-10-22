@@ -57,20 +57,23 @@
                                class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
                                placeholder="Tìm theo tên sản phẩm, tác giả, ISBN..."/>
                     </div>
-                    <!-- Dropdown: Danh mục (Phân loại chính) -->
-                    <select name="loaiSP"
+                    <!-- Dropdown: Danh mục (Phân loại chính / Danh mục lớn) -->
+                    <select name="loaiSP" id="prodIndexLoaiSPFilter"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
                         <option value="">Tất cả danh mục</option>
                         <option value="Sach">Sách</option>
                         <option value="VanPhongPham">Văn phòng phẩm</option>
                         <option value="QuaTang">Quà tặng &amp; Trang trí</option>
                     </select>
-                    <!-- Dropdown: Loại sản phẩm -->
-                    <select name="danhMuc"
+                    <!-- Dropdown: Loại sản phẩm (Danh mục con) -->
+                    <select name="danhMuc" id="prodIndexDanhMucFilter"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
                         <option value="0">Tất cả loại sản phẩm</option>
-                        <option th:each="cat : ${categories}"
-                                th:value="${cat.maDanhMuc}"
+                        <option th:each="cat : ${categoriesSach}" th:value="${cat.maDanhMuc}" data-group="Sach"
+                                th:text="${cat.tenDanhMuc}">Loại</option>
+                        <option th:each="cat : ${categoriesVpp}" th:value="${cat.maDanhMuc}" data-group="VanPhongPham"
+                                th:text="${cat.tenDanhMuc}">Loại</option>
+                        <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang"
                                 th:text="${cat.tenDanhMuc}">Loại</option>
                     </select>
                     <!-- Dropdown Sắp xếp -->
@@ -257,5 +260,39 @@
 
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
+    <script>
+        (function initProdIndexCategoryToolbar() {
+            const loaiSPSelect = document.getElementById('prodIndexLoaiSPFilter');
+            const dmSelect = document.getElementById('prodIndexDanhMucFilter');
+            if (!loaiSPSelect || !dmSelect) return;
+
+            const allDmOptions = Array.from(dmSelect.querySelectorAll('option[data-group]'));
+            function filterOptions(isInit) {
+                const val = loaiSPSelect.value;
+                let hasCurrentSelected = false;
+
+                allDmOptions.forEach(opt => {
+                    const group = opt.getAttribute('data-group');
+                    if (!val || val === 'ALL' || group === val) {
+                        opt.hidden = false;
+                        opt.style.display = '';
+                        if (opt.value === dmSelect.value) {
+                            hasCurrentSelected = true;
+                        }
+                    } else {
+                        opt.hidden = true;
+                        opt.style.display = 'none';
+                    }
+                });
+
+                if (!isInit && val && !hasCurrentSelected) {
+                    dmSelect.value = '0';
+                }
+            }
+
+            loaiSPSelect.addEventListener('change', () => filterOptions(false));
+            filterOptions(true);
+        })();
+    </script>
 </body>
 </html>

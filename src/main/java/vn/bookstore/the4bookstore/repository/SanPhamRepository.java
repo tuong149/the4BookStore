@@ -295,4 +295,12 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                                           Pageable pageable);
 
     long countByShop_MaShopAndTrangThaiKhoa(Integer maShop, String trangThaiKhoa);
+
+    @Query("SELECT COUNT(s) FROM SanPham s WHERE LOWER(s.loaiSP) = LOWER(:loaiSP)")
+    long countByLoaiSPIgnoreCase(@Param("loaiSP") String loaiSP);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("UPDATE SanPham s SET s.loaiSP = :newLoai WHERE LOWER(s.loaiSP) = LOWER(:oldLoai)")
+    int updateLoaiSP(@Param("oldLoai") String oldLoai, @Param("newLoai") String newLoai);
 }

@@ -230,11 +230,31 @@
             <p class="text-xs text-on-surface-variant mb-4">Đặt mật khẩu mới cho tài khoản <strong id="resetPwdUser" class="text-primary">@username</strong></p>
             <form id="resetPwdForm" method="post" action="">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-on-surface mb-1.5">Mật khẩu mới (tối thiểu 6 ký tự)</label>
-                    <input type="password" name="newPassword" required minlength="6" placeholder="Nhập mật khẩu mới..."
-                           class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary"/>
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-on-surface mb-1.5">Mật khẩu mới (tối thiểu 6 ký tự) *</label>
+                    <div class="relative">
+                        <input type="password" id="adminNewPassword" name="newPassword" required minlength="6" placeholder="Nhập mật khẩu mới..."
+                               class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs focus:outline-none focus:ring-2 focus:ring-primary"/>
+                        <button type="button" onclick="toggleAdminPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
+                            <span id="adminPwdEyeIcon" class="material-symbols-outlined text-[16px]">visibility</span>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Helper checklist & meter -->
+                <div id="adminPwdHint" class="mb-4 p-2.5 rounded-xl bg-surface-container-low border border-surface-container text-[11px] space-y-1.5">
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="text-on-surface-variant">Độ mạnh:</span>
+                        <span id="adminPwdLabel" class="text-error">Chưa đạt yêu cầu</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 h-1.5 w-full">
+                        <div id="admBar1" class="h-full rounded-full bg-surface-container-high transition-colors"></div>
+                        <div id="admBar2" class="h-full rounded-full bg-surface-container-high transition-colors"></div>
+                        <div id="admBar3" class="h-full rounded-full bg-surface-container-high transition-colors"></div>
+                        <div id="admBar4" class="h-full rounded-full bg-surface-container-high transition-colors"></div>
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-end gap-2">
                     <button type="button" onclick="closeResetPwdModal()" class="px-4 py-2 rounded-xl bg-surface-container text-xs font-bold hover:bg-surface-container-high transition-all">Hủy</button>
                     <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-all">Đặt Mật Khẩu</button>
@@ -254,9 +274,82 @@
             document.getElementById('roleModal').classList.add('hidden');
         }
 
+        function toggleAdminPasswordVisibility() {
+            const input = document.getElementById('adminNewPassword');
+            const icon = document.getElementById('adminPwdEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        const admPwdInput = document.getElementById('adminNewPassword');
+        const admLabel = document.getElementById('adminPwdLabel');
+        const admBars = [document.getElementById('admBar1'), document.getElementById('admBar2'), document.getElementById('admBar3'), document.getElementById('admBar4')];
+
+        function checkAdmPassword(val) {
+            if (!val) return false;
+            const hasLen = val.length >= 6 && val.length <= 64;
+            const hasLower = /[a-z]/.test(val);
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSpec = /[^a-zA-Z0-9\s]/.test(val);
+            const hasNoSpace = !/\s/.test(val);
+
+            let score = 0;
+            if (hasLen && hasNoSpace) score++;
+            if (hasLower && hasUpper) score++;
+            if (hasNum) score++;
+            if (hasSpec) score++;
+
+            admBars.forEach(b => b.className = 'h-full rounded-full bg-surface-container-high transition-colors');
+            if (score <= 1) {
+                if (admBars[0]) admBars[0].className = 'h-full rounded-full bg-rose-500';
+                admLabel.textContent = 'Yếu';
+                admLabel.className = 'text-rose-600 font-bold';
+            } else if (score === 2) {
+                admBars[0].className = 'h-full rounded-full bg-amber-500';
+                admBars[1].className = 'h-full rounded-full bg-amber-500';
+                admLabel.textContent = 'Trung bình';
+                admLabel.className = 'text-amber-600 font-bold';
+            } else if (score === 3) {
+                admBars[0].className = 'h-full rounded-full bg-blue-500';
+                admBars[1].className = 'h-full rounded-full bg-blue-500';
+                admBars[2].className = 'h-full rounded-full bg-blue-500';
+                admLabel.textContent = 'Khá mạnh';
+                admLabel.className = 'text-blue-600 font-bold';
+            } else if (score === 4) {
+                admBars.forEach(b => b.className = 'h-full rounded-full bg-emerald-500');
+                admLabel.textContent = 'Mạnh (Hợp lệ ✓)';
+                admLabel.className = 'text-emerald-600 font-bold';
+            }
+            return hasLen && hasLower && hasUpper && hasNum && hasSpec && hasNoSpace;
+        }
+
+        if (admPwdInput) {
+            admPwdInput.addEventListener('input', () => checkAdmPassword(admPwdInput.value));
+        }
+
+        const resetPwdForm = document.getElementById('resetPwdForm');
+        if (resetPwdForm) {
+            resetPwdForm.addEventListener('submit', function(e) {
+                if (!checkAdmPassword(admPwdInput.value)) {
+                    e.preventDefault();
+                    admPwdInput.focus();
+                    admPwdInput.classList.add('ring-2', 'ring-rose-500');
+                    setTimeout(() => admPwdInput.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                }
+            });
+        }
+
         function openResetPwdModal(id, user) {
             document.getElementById('resetPwdUser').textContent = '@' + user;
             document.getElementById('resetPwdForm').action = '/admin/users/' + id + '/reset-password';
+            document.getElementById('adminNewPassword').value = '';
+            checkAdmPassword('');
             document.getElementById('resetPwdModal').classList.remove('hidden');
         }
         function closeResetPwdModal() {

@@ -385,18 +385,31 @@ public class AdminController {
         long activeCount = allCategories.stream().filter(c -> Boolean.TRUE.equals(c.getTrangThai())).count();
         long inactiveCount = allCategories.size() - activeCount;
 
+        List<vn.bookstore.the4bookstore.entity.DanhMucLon> majorCategories = (danhMucService != null) 
+                ? danhMucService.getAllMajorCategories() 
+                : List.of();
+        Map<String, Long> majorCategoryCounts = new HashMap<>();
+        Map<String, Long> majorProductCounts = new HashMap<>();
+        for (vn.bookstore.the4bookstore.entity.DanhMucLon dml : majorCategories) {
+            majorCategoryCounts.put(dml.getMaLoai(), danhMucRepository.countByLoaiSPIgnoreCase(dml.getMaLoai()));
+            majorProductCounts.put(dml.getMaLoai(), sanPhamRepository.countByLoaiSPIgnoreCase(dml.getMaLoai()));
+        }
+
         model.addAttribute("categories", categories);
         model.addAttribute("selectedLoaiSP", loaiSP != null ? loaiSP : "ALL");
         model.addAttribute("productCounts", productCounts);
         model.addAttribute("totalCategories", allCategories.size());
         model.addAttribute("activeCount", activeCount);
         model.addAttribute("inactiveCount", inactiveCount);
+        model.addAttribute("majorCategories", majorCategories);
+        model.addAttribute("majorCategoryCounts", majorCategoryCounts);
+        model.addAttribute("majorProductCounts", majorProductCounts);
 
         return "admin/categories";
     }
 
     @PostMapping("/categories/save")
-    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public String saveCategory(@RequestParam(value = "maDanhMuc", required = false) Integer maDanhMuc,
                                @RequestParam("tenDanhMuc") String tenDanhMuc,
                                @RequestParam(value = "loaiSP", defaultValue = "Sach") String loaiSP,
@@ -429,7 +442,7 @@ public class AdminController {
     }
 
     @PostMapping("/categories/delete/{id}")
-    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public String deleteCategory(@PathVariable Integer id, RedirectAttributes ra) {
         long count = sanPhamRepository.countByDanhMuc_MaDanhMuc(id);
         if (count > 0) {
@@ -450,7 +463,7 @@ public class AdminController {
     }
 
     @PostMapping("/categories/toggle/{id}")
-    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview"}, allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public String toggleCategory(@PathVariable Integer id, RedirectAttributes ra) {
         if (danhMucService != null) {
             danhMucService.toggleStatus(id).ifPresent(dm -> {
@@ -463,6 +476,105 @@ public class AdminController {
                 dm.setTrangThai(!current);
                 danhMucRepository.save(dm);
                 ra.addFlashAttribute("successMessage", "Đã " + (!current ? "kích hoạt" : "tạm khóa") + " danh mục '" + dm.getTenDanhMuc() + "'");
+            });
+        }
+        return "redirect:/admin/categories";
+    }
+
+    // ==================== QUẢN LÝ DANH MỤC LỚN (NGÀNH HÀNG / MAJOR CATEGORIES) ====================
+    @PostMapping("/categories/major/save")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public String saveMajorCategory(@RequestParam(value = "id", required = false) Integer id,
+                                    @RequestParam("tenLoai") String tenLoai,
+                                    @RequestParam("maLoai") String maLoai,
+                                    @RequestParam(value = "icon", defaultValue = "category") String icon,
+                                    @RequestParam(value = "moTa", required = false) String moTa,
+                                    @RequestParam(value = "thuTu", defaultValue = "0") Integer thuTu,
+                                    @RequestParam(value = "trangThai", defaultValue = "true") Boolean trangThai,
+                                    RedirectAttributes ra) {
+        if (danhMucService == null) {
+            ra.addFlashAttribute("errorMessage", "Dịch vụ DanhMucService chưa sẵn sàng!");
+            return "redirect:/admin/categories";
+        }
+        try {
+            if (tenLoai == null || tenLoai.isBlank()) {
+                ra.addFlashAttribute("errorMessage", "Tên danh mục lớn không được để trống!");
+                return "redirect:/admin/categories";
+            }
+            if (maLoai == null || maLoai.isBlank()) {
+                ra.addFlashAttribute("errorMessage", "Mã nhóm hàng (code) không được để trống!");
+                return "redirect:/admin/categories";
+            }
+
+            String cleanMaLoai = maLoai.trim().replaceAll("[^a-zA-Z0-9_]", "");
+            if (cleanMaLoai.isEmpty()) {
+                cleanMaLoai = "NganhHang_" + System.currentTimeMillis();
+            }
+
+            vn.bookstore.the4bookstore.entity.DanhMucLon dml;
+            String oldMaLoai = null;
+            if (id != null && id > 0) {
+                dml = danhMucService.getMajorCategoryById(id).orElse(new vn.bookstore.the4bookstore.entity.DanhMucLon());
+                oldMaLoai = dml.getMaLoai();
+                ra.addFlashAttribute("successMessage", "Cập nhật danh mục lớn '" + tenLoai.trim() + "' thành công!");
+            } else {
+                dml = new vn.bookstore.the4bookstore.entity.DanhMucLon();
+                ra.addFlashAttribute("successMessage", "Thêm mới danh mục lớn '" + tenLoai.trim() + "' thành công!");
+            }
+
+            dml.setTenLoai(tenLoai.trim());
+            dml.setMaLoai(cleanMaLoai);
+            dml.setIcon(icon != null && !icon.isBlank() ? icon.trim() : "category");
+            dml.setMoTa(moTa != null ? moTa.trim() : "");
+            dml.setThuTu(thuTu != null ? thuTu : 0);
+            dml.setTrangThai(trangThai != null ? trangThai : true);
+
+            danhMucService.saveMajorCategory(dml, oldMaLoai);
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi lưu danh mục lớn: Mã hoặc tên có thể đã tồn tại! " + e.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/categories/major/delete/{id}")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public String deleteMajorCategory(@PathVariable Integer id, RedirectAttributes ra) {
+        if (danhMucService == null) {
+            ra.addFlashAttribute("errorMessage", "Dịch vụ DanhMucService chưa sẵn sàng!");
+            return "redirect:/admin/categories";
+        }
+        var opt = danhMucService.getMajorCategoryById(id);
+        if (opt.isEmpty()) {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy danh mục lớn cần xóa!");
+            return "redirect:/admin/categories";
+        }
+        var dml = opt.get();
+        long subCatCount = danhMucRepository.countByLoaiSPIgnoreCase(dml.getMaLoai());
+        long prodCount = sanPhamRepository.countByLoaiSPIgnoreCase(dml.getMaLoai());
+
+        if (subCatCount > 0 || prodCount > 0) {
+            ra.addFlashAttribute("errorMessage", String.format(
+                    "Không thể xóa danh mục lớn '%s' vì đang có %d danh mục con và %d sản phẩm liên kết! Vui lòng chuyển hoặc xóa các mục liên quan trước.",
+                    dml.getTenLoai(), subCatCount, prodCount));
+            return "redirect:/admin/categories";
+        }
+
+        try {
+            danhMucService.deleteMajorCategory(id);
+            ra.addFlashAttribute("successMessage", "Đã xóa danh mục lớn '" + dml.getTenLoai() + "' thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Không thể xóa danh mục lớn: " + e.getMessage());
+        }
+        return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/categories/major/toggle/{id}")
+    @org.springframework.cache.annotation.CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
+    public String toggleMajorCategory(@PathVariable Integer id, RedirectAttributes ra) {
+        if (danhMucService != null) {
+            danhMucService.toggleMajorCategoryStatus(id).ifPresent(dml -> {
+                boolean active = Boolean.TRUE.equals(dml.getTrangThai());
+                ra.addFlashAttribute("successMessage", "Đã " + (active ? "kích hoạt" : "tạm khóa") + " danh mục lớn '" + dml.getTenLoai() + "'");
             });
         }
         return "redirect:/admin/categories";

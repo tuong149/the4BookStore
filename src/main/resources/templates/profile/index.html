@@ -671,18 +671,73 @@
                 </button>
             </div>
 
-            <form th:action="@{/profile/change-password}" method="post" class="mt-4 space-y-4">
+            <form id="profileChangePwdForm" th:action="@{/profile/change-password}" method="post" class="mt-4 space-y-3.5">
                 <div>
                     <label class="block font-label-md text-xs font-semibold text-on-surface mb-1.5">Mật khẩu hiện tại *</label>
-                    <input type="password" name="matKhauCu" required class="w-full h-11 px-4 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Nhập mật khẩu cũ"/>
+                    <div class="relative">
+                        <input type="password" id="profileMatKhauCu" name="matKhauCu" required class="w-full h-11 pl-4 pr-11 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Nhập mật khẩu cũ"/>
+                        <button type="button" onclick="togglePasswordVisibility('profileMatKhauCu', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block font-label-md text-xs font-semibold text-on-surface mb-1.5">Mật khẩu mới *</label>
-                    <input type="password" name="matKhauMoi" required minlength="6" class="w-full h-11 px-4 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Tối thiểu 6 ký tự"/>
+                    <div class="relative">
+                        <input type="password" id="profileMatKhauMoi" name="matKhauMoi" required minlength="6" class="w-full h-11 pl-4 pr-11 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Nhập mật khẩu mới..."/>
+                        <button type="button" onclick="togglePasswordVisibility('profileMatKhauMoi', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Password Strength & Checklist Container -->
+                <div id="profilePwdStrengthBox" class="hidden p-2.5 rounded-xl bg-surface-container-low border border-surface-container space-y-2">
+                    <div class="flex items-center justify-between text-[11px] font-bold">
+                        <span class="text-on-surface-variant">Độ mạnh mật khẩu:</span>
+                        <span id="profilePwdStrengthLabel" class="text-error font-bold">Chưa đạt yêu cầu</span>
+                    </div>
+                    <!-- 4 Segmented Progress Bars -->
+                    <div class="grid grid-cols-4 gap-1.5 h-1.5 w-full">
+                        <div id="profBar1" class="h-full rounded-full bg-surface-container-high transition-colors duration-300"></div>
+                        <div id="profBar2" class="h-full rounded-full bg-surface-container-high transition-colors duration-300"></div>
+                        <div id="profBar3" class="h-full rounded-full bg-surface-container-high transition-colors duration-300"></div>
+                        <div id="profBar4" class="h-full rounded-full bg-surface-container-high transition-colors duration-300"></div>
+                    </div>
+                    <!-- Checklist Chips -->
+                    <div class="grid grid-cols-2 gap-1 text-[10px] font-medium text-on-surface-variant">
+                        <div id="profChkLen" class="flex items-center gap-1 p-1 rounded-lg bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-[13px] text-on-surface-variant/60">cancel</span>
+                            <span>6-64 ký tự</span>
+                        </div>
+                        <div id="profChkCase" class="flex items-center gap-1 p-1 rounded-lg bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-[13px] text-on-surface-variant/60">cancel</span>
+                            <span>Hoa &amp; thường</span>
+                        </div>
+                        <div id="profChkNum" class="flex items-center gap-1 p-1 rounded-lg bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-[13px] text-on-surface-variant/60">cancel</span>
+                            <span>Ít nhất 1 số</span>
+                        </div>
+                        <div id="profChkSpec" class="flex items-center gap-1 p-1 rounded-lg bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-[13px] text-on-surface-variant/60">cancel</span>
+                            <span>Ký tự đặc biệt</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block font-label-md text-xs font-semibold text-on-surface mb-1.5">Xác nhận mật khẩu mới *</label>
-                    <input type="password" name="xacNhanMatKhau" required minlength="6" class="w-full h-11 px-4 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Nhập lại mật khẩu mới"/>
+                    <div class="relative">
+                        <input type="password" id="profileXacNhanMatKhau" name="xacNhanMatKhau" required minlength="8" class="w-full h-11 pl-4 pr-11 rounded-xl bg-surface-container-low font-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all border border-surface-container" placeholder="Nhập lại mật khẩu mới"/>
+                        <button type="button" onclick="togglePasswordVisibility('profileXacNhanMatKhau', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="profilePwdMismatch" class="hidden px-3 py-1.5 rounded-lg bg-error/10 text-error text-xs font-bold flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">warning</span>
+                    <span>Xác nhận mật khẩu mới không trùng khớp!</span>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-surface-container">
@@ -744,6 +799,133 @@
                 }
             });
         });
+
+        // Profile Password Logic
+        function togglePasswordVisibility(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        const profPwdMoi = document.getElementById('profileMatKhauMoi');
+        const profConfirmPwd = document.getElementById('profileXacNhanMatKhau');
+        const profBox = document.getElementById('profilePwdStrengthBox');
+        const profLabel = document.getElementById('profilePwdStrengthLabel');
+        const profBar1 = document.getElementById('profBar1');
+        const profBar2 = document.getElementById('profBar2');
+        const profBar3 = document.getElementById('profBar3');
+        const profBar4 = document.getElementById('profBar4');
+
+        const profChkLen = document.getElementById('profChkLen');
+        const profChkCase = document.getElementById('profChkCase');
+        const profChkNum = document.getElementById('profChkNum');
+        const profChkSpec = document.getElementById('profChkSpec');
+        const profMismatch = document.getElementById('profilePwdMismatch');
+
+        function updateProfCheckItem(element, isMet) {
+            const icon = element.querySelector('.material-symbols-outlined');
+            if (isMet) {
+                element.className = 'flex items-center gap-1 p-1 rounded-lg bg-emerald-50 text-emerald-800 transition-colors font-bold';
+                icon.textContent = 'check_circle';
+                icon.className = 'material-symbols-outlined text-[13px] text-emerald-600';
+            } else {
+                element.className = 'flex items-center gap-1 p-1 rounded-lg bg-surface-container text-on-surface-variant/60 transition-colors font-medium';
+                icon.textContent = 'cancel';
+                icon.className = 'material-symbols-outlined text-[13px] text-on-surface-variant/50';
+            }
+        }
+
+        function evaluateProfPassword(val) {
+            if (!val) return { score: 0, valid: false };
+            const hasLen = val.length >= 6 && val.length <= 64;
+            const hasLower = /[a-z]/.test(val);
+            const hasUpper = /[A-Z]/.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSpec = /[^a-zA-Z0-9\s]/.test(val);
+            const hasNoSpace = !/\s/.test(val);
+
+            updateProfCheckItem(profChkLen, hasLen && hasNoSpace);
+            updateProfCheckItem(profChkCase, hasLower && hasUpper);
+            updateProfCheckItem(profChkNum, hasNum);
+            updateProfCheckItem(profChkSpec, hasSpec);
+
+            let score = 0;
+            if (hasLen && hasNoSpace) score++;
+            if (hasLower && hasUpper) score++;
+            if (hasNum) score++;
+            if (hasSpec) score++;
+
+            const allValid = hasLen && hasLower && hasUpper && hasNum && hasSpec && hasNoSpace;
+            return { score, valid: allValid };
+        }
+
+        if (profPwdMoi) {
+            profPwdMoi.addEventListener('focus', () => profBox.classList.remove('hidden'));
+            profPwdMoi.addEventListener('input', () => {
+                profBox.classList.remove('hidden');
+                const { score } = evaluateProfPassword(profPwdMoi.value);
+                [profBar1, profBar2, profBar3, profBar4].forEach(b => b.className = 'h-full rounded-full bg-surface-container-high transition-colors duration-300');
+
+                if (score === 0) {
+                    profLabel.textContent = 'Chưa đạt yêu cầu';
+                    profLabel.className = 'text-error font-bold';
+                } else if (score === 1) {
+                    profBar1.className = 'h-full rounded-full bg-rose-500';
+                    profLabel.textContent = 'Rất yếu';
+                    profLabel.className = 'text-rose-600 font-bold';
+                } else if (score === 2) {
+                    profBar1.className = 'h-full rounded-full bg-amber-500';
+                    profBar2.className = 'h-full rounded-full bg-amber-500';
+                    profLabel.textContent = 'Trung bình';
+                    profLabel.className = 'text-amber-600 font-bold';
+                } else if (score === 3) {
+                    profBar1.className = 'h-full rounded-full bg-blue-500';
+                    profBar2.className = 'h-full rounded-full bg-blue-500';
+                    profBar3.className = 'h-full rounded-full bg-blue-500';
+                    profLabel.textContent = 'Khá mạnh';
+                    profLabel.className = 'text-blue-600 font-bold';
+                } else if (score === 4) {
+                    [profBar1, profBar2, profBar3, profBar4].forEach(b => b.className = 'h-full rounded-full bg-emerald-500');
+                    profLabel.textContent = 'Rất mạnh (Hợp lệ ✓)';
+                    profLabel.className = 'text-emerald-600 font-black';
+                }
+            });
+        }
+
+        const changePwdForm = document.getElementById('profileChangePwdForm');
+        if (changePwdForm) {
+            changePwdForm.addEventListener('submit', function(e) {
+                const { valid } = evaluateProfPassword(profPwdMoi.value);
+                if (!valid) {
+                    e.preventDefault();
+                    profBox.classList.remove('hidden');
+                    profPwdMoi.focus();
+                    profPwdMoi.classList.add('ring-2', 'ring-rose-500');
+                    setTimeout(() => profPwdMoi.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                    return;
+                }
+
+                if (profPwdMoi.value !== profConfirmPwd.value) {
+                    e.preventDefault();
+                    profMismatch.classList.remove('hidden');
+                    profConfirmPwd.focus();
+                } else {
+                    profMismatch.classList.add('hidden');
+                }
+            });
+
+            profConfirmPwd.addEventListener('input', function() {
+                if (profPwdMoi.value === profConfirmPwd.value) {
+                    profMismatch.classList.add('hidden');
+                }
+            });
+        }
     </script>
 
 </body>

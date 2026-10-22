@@ -27,6 +27,7 @@ public class ProductController {
     private final UserInteractionService userInteractionService;
     private final vn.bookstore.the4bookstore.service.ShopService shopService;
     private final vn.bookstore.the4bookstore.service.CurrentUserService currentUserService;
+    private final DanhMucService danhMucService;
 
     private KhachHang getCurrentKhachHang(Authentication auth, jakarta.servlet.http.HttpServletRequest request) {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) return null;
@@ -290,6 +291,11 @@ public class ProductController {
         if ("Sach".equalsIgnoreCase(loaiSP)) return "Sách";
         if ("VanPhongPham".equalsIgnoreCase(loaiSP)) return "Văn Phòng Phẩm";
         if ("QuaTang".equalsIgnoreCase(loaiSP)) return "Quà Tặng & Trang Trí";
+        if (danhMucService != null && loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
+            return danhMucService.getMajorCategoryByMaLoai(loaiSP)
+                    .map(vn.bookstore.the4bookstore.entity.DanhMucLon::getTenLoai)
+                    .orElse("Tất Cả Sản Phẩm");
+        }
         return "Tất Cả Sản Phẩm";
     }
 }

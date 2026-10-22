@@ -3,7 +3,7 @@
 -- PHẦN 1: XÁC THỰC, TÀI KHOẢN, HỒ SƠ, GIAN HÀNG, VẬN CHUYỂN & BẢO MẬT RBAC
 -- SINH VIÊN PHỤ TRÁCH: NGUYỄN ĐẶNG CAO TƯỜNG (MSSV: 24110375)
 -- HỆ QUẢN TRỊ CSDL: MICROSOFT SQL SERVER 2022/2025 (T-SQL)
--- MẬT KHẨU MẶC ĐỊNH TẤT CẢ TÀI KHOẢN SEED DATA: 123456
+-- MẬT KHẨU MẶC ĐỊNH TẤT CẢ TÀI KHOẢN SEED DATA: Abc@123
 -- ====================================================================
 
 USE master;
@@ -559,13 +559,13 @@ GO
 SET IDENTITY_INSERT [dbo].[tai_khoan] ON;
 INSERT [dbo].[tai_khoan] ([ma_tai_khoan], [ten_dang_nhap], [email], [mat_khau_hash], [vai_tro], [trang_thai], [auth_provider], [provider_id], [token_version], [otp_code], [otp_expiry], [ngay_tao]) 
 VALUES 
-(1, N'admin', N'admin@the4bookstore.vn', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'ADMIN', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
-(3, N'vendor_kimdong', N'kimdong@gmail.com', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'VENDOR', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
-(4, N'vendor_nhanam', N'nhanam@gmail.com', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'VENDOR', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
-(5, N'khachhang_an', N'nguyenvanan@gmail.com', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
-(6, N'khachhang_binh', N'lethibinh@gmail.com', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
-(7, N'phat', N'thangphatnekea21333@gmail.com', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-17T10:05:28' AS DateTime2)),
-(8, N'manager', N'manager@the4bookstore.vn', N'$2a$10$3QaVEi2S62h8gVvIg3JHfuTDnLvXvD4RV7kU6bwvOg9lsD.3CeTEG', N'MANAGER', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-17T03:37:45' AS DateTime2));
+(1, N'admin', N'admin@the4bookstore.vn', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'ADMIN', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
+(3, N'vendor_kimdong', N'kimdong@gmail.com', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'VENDOR', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
+(4, N'vendor_nhanam', N'nhanam@gmail.com', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'VENDOR', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
+(5, N'khachhang_an', N'nguyenvanan@gmail.com', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
+(6, N'khachhang_binh', N'lethibinh@gmail.com', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-16T15:04:53' AS DateTime2)),
+(7, N'phat', N'thangphatnekea21333@gmail.com', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'KHACHHANG', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-17T10:05:28' AS DateTime2)),
+(8, N'manager', N'manager@the4bookstore.vn', N'$2a$10$SCy7moQtkixA39J791LR3.EGHlLW.xjKMz/uSmCt20n1mWHOnYd0y', N'MANAGER', N'HoatDong', N'LOCAL', NULL, 1, NULL, NULL, CAST(N'2026-10-17T03:37:45' AS DateTime2));
 SET IDENTITY_INSERT [dbo].[tai_khoan] OFF;
 GO
 

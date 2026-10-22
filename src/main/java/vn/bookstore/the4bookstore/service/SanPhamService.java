@@ -120,22 +120,33 @@ public class SanPhamService {
             return categories;
         }
 
-        // Fallback an toàn (nếu DB có bản ghi cũ chưa cập nhật loaiSP)
+        // Fallback an toàn (nếu DB có bản ghi cũ chưa cập nhật loaiSP hoặc bị rỗng)
         List<DanhMuc> allActive = danhMucRepository.findByTrangThaiTrueOrderByMaDanhMucAsc();
-        if ("Sach".equalsIgnoreCase(loaiSP)) {
-            return allActive.stream()
-                    .filter(dm -> dm.getLoaiSP() == null || "Sach".equalsIgnoreCase(dm.getLoaiSP()))
-                    .toList();
-        } else if ("VanPhongPham".equalsIgnoreCase(loaiSP)) {
-            return allActive.stream()
-                    .filter(dm -> "VanPhongPham".equalsIgnoreCase(dm.getLoaiSP()))
-                    .toList();
-        } else if ("QuaTang".equalsIgnoreCase(loaiSP)) {
-            return allActive.stream()
-                    .filter(dm -> "QuaTang".equalsIgnoreCase(dm.getLoaiSP()))
-                    .toList();
-        }
-        return allActive;
+        return allActive.stream()
+                .filter(dm -> {
+                    String actualLoai = dm.getLoaiSP();
+                    if (actualLoai != null && !actualLoai.isBlank()) {
+                        return actualLoai.equalsIgnoreCase(loaiSP);
+                    }
+                    String name = dm.getTenDanhMuc() != null ? dm.getTenDanhMuc().toLowerCase() : "";
+                    if ("VanPhongPham".equalsIgnoreCase(loaiSP)) {
+                        return name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ")
+                                || name.contains("văn phòng phẩm") || name.contains("vpp");
+                    } else if ("QuaTang".equalsIgnoreCase(loaiSP)) {
+                        return name.contains("túi") || name.contains("book nook") || name.contains("boardgame")
+                                || name.contains("quà tặng") || name.contains("nến") || name.contains("decor")
+                                || name.contains("trang trí") || name.contains("đèn");
+                    } else if ("Sach".equalsIgnoreCase(loaiSP)) {
+                        boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ")
+                                || name.contains("văn phòng phẩm") || name.contains("vpp");
+                        boolean isQt = name.contains("túi") || name.contains("book nook") || name.contains("boardgame")
+                                || name.contains("quà tặng") || name.contains("nến") || name.contains("decor")
+                                || name.contains("trang trí") || name.contains("đèn");
+                        return !isVpp && !isQt;
+                    }
+                    return false;
+                })
+                .toList();
     }
 
     // Tìm kiếm + lọc theo nhóm loạiSP (hoặc toàn bộ nếu loaiSP null/rỗng/"ALL")

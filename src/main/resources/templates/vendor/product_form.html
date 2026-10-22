@@ -275,9 +275,15 @@
                                 <label class="block text-xs font-bold uppercase text-on-surface-variant mb-1.5" for="inputLoaiSP">Nhóm Hàng *</label>
                                 <select name="loaiSP" id="inputLoaiSP" onchange="filterProductCategories(this.value)"
                                         class="w-full px-4 py-2.5 rounded-xl border border-surface-container bg-surface-container-low text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
-                                    <option value="Sach" th:selected="${sanPham.loaiSP == 'Sach' or sanPham.loaiSP == null}">📚 Sách</option>
-                                    <option value="VanPhongPham" th:selected="${sanPham.loaiSP == 'VanPhongPham'}">✏️ Văn Phòng Phẩm</option>
-                                    <option value="QuaTang" th:selected="${sanPham.loaiSP == 'QuaTang'}">🎁 Quà Tặng &amp; Trang Trí</option>
+                                    <option th:each="major : ${allMajorCategories}"
+                                            th:value="${major.maLoai}"
+                                            th:text="${major.tenLoai}"
+                                            th:selected="${sanPham.loaiSP == major.maLoai or (sanPham.loaiSP == null and majorStat.first)}"></option>
+                                    <th:block th:if="${allMajorCategories == null or #lists.isEmpty(allMajorCategories)}">
+                                        <option value="Sach" th:selected="${sanPham.loaiSP == 'Sach' or sanPham.loaiSP == null}">Sách</option>
+                                        <option value="VanPhongPham" th:selected="${sanPham.loaiSP == 'VanPhongPham'}">Văn Phòng Phẩm</option>
+                                        <option value="QuaTang" th:selected="${sanPham.loaiSP == 'QuaTang'}">Quà Tặng &amp; Trang Trí</option>
+                                    </th:block>
                                 </select>
                             </div>
 

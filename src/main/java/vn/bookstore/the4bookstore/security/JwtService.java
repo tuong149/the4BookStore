@@ -132,7 +132,7 @@ public class JwtService {
         try {
             extractAllClaims(token);
             return true;
-        } catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
             return false;
         }
     }

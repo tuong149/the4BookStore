@@ -57,7 +57,7 @@ public class DataSeeder implements CommandLineRunner {
             } catch (Exception ignored) {}
         }
 
-        String defaultPassword = passwordEncoder.encode("123456");
+        String defaultPassword = passwordEncoder.encode("Abc@123");
 
         // 1. Tạo tài khoản mẫu nếu chưa tồn tại trong cơ sở dữ liệu
         createAccountIfNotFound("admin", "ADMIN", defaultPassword, "admin@the4bookstore.vn");

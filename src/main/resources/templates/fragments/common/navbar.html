@@ -74,81 +74,113 @@
                                 </a>
                             </div>
 
-                            <!-- DANH MỤC 1: SÁCH -->
-                            <div class="mb-space-md">
-                                <div class="flex items-center justify-between mb-space-xs">
-                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-[18px] text-primary">menu_book</span>
-                                        <span>Sách</span>
-                                    </p>
-                                    <a th:href="@{/san-pham/sach}" onclick="closeNavCat()"
-                                       class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
-                                        <span>Xem tất cả sách</span>
-                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                                    </a>
-                                </div>
-                                <div class="flex flex-wrap gap-space-xs mt-1.5">
-                                    <a th:each="cat : ${navbarCategoriesSach}"
-                                       th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
-                                       th:text="${cat.tenDanhMuc}"
-                                       onclick="closeNavCat()"
-                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all cursor-pointer">
-                                        Tiểu Thuyết &amp; Văn Học
-                                    </a>
-                                </div>
-                            </div>
+                            <!-- DYNAMIC MAJOR CATEGORIES LOOP -->
+                            <th:block th:if="${majorCategoryGroups != null and !majorCategoryGroups.isEmpty()}">
+                                <th:block th:each="group, iterStat : ${majorCategoryGroups}">
+                                    <div th:class="${!iterStat.last ? 'mb-space-md' : ''}">
+                                        <div class="flex items-center justify-between mb-space-xs">
+                                            <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                                <span class="material-symbols-outlined text-[18px] text-primary" th:text="${group.major.icon ?: 'category'}">category</span>
+                                                <span th:text="${group.major.tenLoai}">Tên Ngành Hàng</span>
+                                            </p>
+                                            <a th:href="@{${group.major.slugUrl}}" onclick="closeNavCat()"
+                                               class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                                                <span th:text="'Xem tất cả ' + ${group.major.tenLoai}">Xem tất cả</span>
+                                                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                            </a>
+                                        </div>
+                                        <div class="flex flex-wrap gap-space-xs mt-1.5" th:if="${group.subs != null and !group.subs.isEmpty()}">
+                                            <a th:each="cat : ${group.subs}"
+                                               th:href="@{${cat.targetUrl}}"
+                                               th:text="${cat.tenDanhMuc}"
+                                               onclick="closeNavCat()"
+                                               class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                                Tiểu Thuyết &amp; Văn Học
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div th:if="${!iterStat.last}" class="h-px bg-surface-container my-space-sm"></div>
+                                </th:block>
+                            </th:block>
 
-                            <div class="h-px bg-surface-container my-space-sm"></div>
+                            <!-- FALLBACK (Nếu chưa có dữ liệu danh mục lớn động) -->
+                            <th:block th:unless="${majorCategoryGroups != null and !majorCategoryGroups.isEmpty()}">
+                                <!-- DANH MỤC 1: SÁCH -->
+                                <div class="mb-space-md">
+                                    <div class="flex items-center justify-between mb-space-xs">
+                                        <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[18px] text-primary">menu_book</span>
+                                            <span>Sách</span>
+                                        </p>
+                                        <a th:href="@{/san-pham/sach}" onclick="closeNavCat()"
+                                           class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+                                            <span>Xem tất cả sách</span>
+                                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                        </a>
+                                    </div>
+                                    <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                        <a th:each="cat : ${navbarCategoriesSach}"
+                                           th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
+                                           th:text="${cat.tenDanhMuc}"
+                                           onclick="closeNavCat()"
+                                           class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                            Tiểu Thuyết &amp; Văn Học
+                                        </a>
+                                    </div>
+                                </div>
 
-                            <!-- DANH MỤC 2: VĂN PHÒNG PHẨM -->
-                            <div class="mb-space-md">
-                                <div class="flex items-center justify-between mb-space-xs">
-                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-[18px] text-secondary">edit_note</span>
-                                        <span>Văn Phòng Phẩm</span>
-                                    </p>
-                                    <a th:href="@{/san-pham/van-phong-pham}" onclick="closeNavCat()"
-                                       class="text-xs text-secondary font-bold hover:underline flex items-center gap-0.5">
-                                        <span>Xem tất cả VPP</span>
-                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                                    </a>
-                                </div>
-                                <div class="flex flex-wrap gap-space-xs mt-1.5">
-                                    <a th:each="cat : ${navbarCategoriesVpp}"
-                                       th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
-                                       th:text="${cat.tenDanhMuc}"
-                                       onclick="closeNavCat()"
-                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all cursor-pointer">
-                                        Sổ Tay
-                                    </a>
-                                </div>
-                            </div>
+                                <div class="h-px bg-surface-container my-space-sm"></div>
 
-                            <div class="h-px bg-surface-container my-space-sm"></div>
+                                <!-- DANH MỤC 2: VĂN PHÒNG PHẨM -->
+                                <div class="mb-space-md">
+                                    <div class="flex items-center justify-between mb-space-xs">
+                                        <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[18px] text-secondary">edit_note</span>
+                                            <span>Văn Phòng Phẩm</span>
+                                        </p>
+                                        <a th:href="@{/san-pham/van-phong-pham}" onclick="closeNavCat()"
+                                           class="text-xs text-secondary font-bold hover:underline flex items-center gap-0.5">
+                                            <span>Xem tất cả VPP</span>
+                                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                        </a>
+                                    </div>
+                                    <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                        <a th:each="cat : ${navbarCategoriesVpp}"
+                                           th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
+                                           th:text="${cat.tenDanhMuc}"
+                                           onclick="closeNavCat()"
+                                           class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                            Sổ Tay
+                                        </a>
+                                    </div>
+                                </div>
 
-                            <!-- DANH MỤC 3: QUÀ TẶNG & TRANG TRÍ -->
-                            <div>
-                                <div class="flex items-center justify-between mb-space-xs">
-                                    <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-[18px] text-tertiary">redeem</span>
-                                        <span>Quà Tặng &amp; Trang Trí</span>
-                                    </p>
-                                    <a th:href="@{/san-pham/qua-tang}" onclick="closeNavCat()"
-                                       class="text-xs text-tertiary font-bold hover:underline flex items-center gap-0.5">
-                                        <span>Xem tất cả Quà tặng</span>
-                                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                                    </a>
+                                <div class="h-px bg-surface-container my-space-sm"></div>
+
+                                <!-- DANH MỤC 3: QUÀ TẶNG & TRANG TRÍ -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-space-xs">
+                                        <p class="font-label-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-[18px] text-tertiary">redeem</span>
+                                            <span>Quà Tặng &amp; Trang Trí</span>
+                                        </p>
+                                        <a th:href="@{/san-pham/qua-tang}" onclick="closeNavCat()"
+                                           class="text-xs text-tertiary font-bold hover:underline flex items-center gap-0.5">
+                                            <span>Xem tất cả Quà tặng</span>
+                                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                        </a>
+                                    </div>
+                                    <div class="flex flex-wrap gap-space-xs mt-1.5">
+                                        <a th:each="cat : ${navbarCategoriesQuaTang}"
+                                           th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}"
+                                           th:text="${cat.tenDanhMuc}"
+                                           onclick="closeNavCat()"
+                                           class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all cursor-pointer">
+                                            Túi Tote
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="flex flex-wrap gap-space-xs mt-1.5">
-                                    <a th:each="cat : ${navbarCategoriesQuaTang}"
-                                       th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}"
-                                       th:text="${cat.tenDanhMuc}"
-                                       onclick="closeNavCat()"
-                                       class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all cursor-pointer">
-                                        Túi Tote
-                                    </a>
-                                </div>
-                            </div>
+                            </th:block>
 
                             <!-- Footer link -->
                             <div class="mt-space-md pt-space-sm border-t border-surface-container flex items-center justify-between">
