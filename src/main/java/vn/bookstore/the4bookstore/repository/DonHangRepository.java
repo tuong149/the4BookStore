@@ -44,6 +44,8 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
 
     Long countByKhuyenMai(KhuyenMai khuyenMai);
 
+    Long countByKhuyenMaiFreeship(KhuyenMai khuyenMaiFreeship);
+
     @Query(value = "SELECT dbo.fn_TinhTienGiamKhuyenMai(:#{#km.maKM})", nativeQuery = true)
     Long sumTienGiamByKhuyenMai(@Param("km") KhuyenMai km);
 

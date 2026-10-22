@@ -230,7 +230,7 @@ CREATE TABLE `voucher_da_luu` (
     `ngay_luu` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `ngay_su_dung` DATETIME NULL,
     UNIQUE KEY `UQ_voucherdaluu` (`makh`, `makm`),
-    CONSTRAINT `FK_voucherdaluu_km` FOREIGN KEY (`makm`) REFERENCES `khuyen_mai` (`makm`),
+    CONSTRAINT `FK_voucherdaluu_km` FOREIGN KEY (`makm`) REFERENCES `khuyen_mai` (`makm`) ON DELETE CASCADE,
     CONSTRAINT `FK_voucherdaluu_khachhang` FOREIGN KEY (`makh`) REFERENCES `khach_hang` (`makh`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

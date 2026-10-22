@@ -228,6 +228,12 @@ public class AdminPromotionController {
                 if (khuyenMai.getSoLuongDaDung() == null) {
                     khuyenMai.setSoLuongDaDung(existing.getSoLuongDaDung());
                 }
+                if (khuyenMai.getShop() == null && existing.getShop() != null) {
+                    khuyenMai.setShop(existing.getShop());
+                }
+                if ((khuyenMai.getPhamVi() == null || khuyenMai.getPhamVi().isBlank()) && existing.getPhamVi() != null) {
+                    khuyenMai.setPhamVi(existing.getPhamVi());
+                }
             });
         }
         if (khuyenMai.getDonToiThieu() == null || khuyenMai.getDonToiThieu() < 0) {
@@ -306,10 +312,12 @@ public class AdminPromotionController {
     @PostMapping("/{id}/xoa")
     public String delete(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            khuyenMaiService.delete(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa mã khuyến mãi thành công!");
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("warningMessage", e.getMessage());
+            String msg = khuyenMaiService.delete(id);
+            if (msg.contains("Vô Hiệu Hóa")) {
+                redirectAttributes.addFlashAttribute("warningMessage", msg);
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", msg);
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xóa mã: " + e.getMessage());
         }

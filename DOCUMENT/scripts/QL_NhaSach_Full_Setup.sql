@@ -1326,7 +1326,7 @@ GO
 ALTER TABLE [dbo].[voucher_da_luu] CHECK CONSTRAINT [FK_vdl_khach_hang];
 GO
 ALTER TABLE [dbo].[voucher_da_luu] WITH CHECK ADD CONSTRAINT [FK_vdl_khuyen_mai] FOREIGN KEY([makm])
-REFERENCES [dbo].[khuyen_mai] ([makm]);
+REFERENCES [dbo].[khuyen_mai] ([makm]) ON DELETE CASCADE;
 GO
 ALTER TABLE [dbo].[voucher_da_luu] CHECK CONSTRAINT [FK_vdl_khuyen_mai];
 GO

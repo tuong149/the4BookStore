@@ -23,12 +23,16 @@ public class KhuyenMaiService {
 
     private final KhuyenMaiRepository khuyenMaiRepository;
     private final DonHangRepository donHangRepository;
+    private final vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository;
     private static final String CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    public KhuyenMaiService(KhuyenMaiRepository khuyenMaiRepository, DonHangRepository donHangRepository) {
+    public KhuyenMaiService(KhuyenMaiRepository khuyenMaiRepository,
+                            DonHangRepository donHangRepository,
+                            vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository) {
         this.khuyenMaiRepository = khuyenMaiRepository;
         this.donHangRepository = donHangRepository;
+        this.voucherDaLuuRepository = voucherDaLuuRepository;
     }
 
     public List<KhuyenMai> getAllPromotions(String keyword, String loaiGiam, String trangThai, LocalDate fromDate, LocalDate toDate) {
@@ -142,17 +146,30 @@ public class KhuyenMaiService {
     }
 
     @org.springframework.cache.annotation.CacheEvict(value = "public_vouchers", allEntries = true)
-    public void delete(Integer id) {
+    public String delete(Integer id) {
         KhuyenMai km = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi #" + id));
-        Long orderCount = donHangRepository.countByKhuyenMai(km);
-        if (orderCount != null && orderCount > 0) {
-            // Nếu đã có đơn dùng thì vô hiệu hóa thay vì xóa vật lý để giữ toàn vẹn đối soát
+
+        long orderUsage = (donHangRepository.countByKhuyenMai(km) != null ? donHangRepository.countByKhuyenMai(km) : 0)
+                + (donHangRepository.countByKhuyenMaiFreeship(km) != null ? donHangRepository.countByKhuyenMaiFreeship(km) : 0);
+
+        if (orderUsage > 0) {
+            // Đã có đơn hàng sử dụng mã: bảo toàn dữ liệu bằng cách vô hiệu hóa và ẩn mã
             km.setTrangThai("VoHieuHoa");
+            km.setHienThiCongKhai(false);
             khuyenMaiRepository.save(km);
-            throw new IllegalStateException("Mã khuyến mãi đã có " + orderCount + " đơn hàng sử dụng nên hệ thống đã tự động chuyển sang trạng thái Vô Hiệu Hóa thay vì xóa hẳn.");
+            // Dọn dẹp các mã chưa sử dụng trong ví khách hàng
+            try {
+                voucherDaLuuRepository.deleteByKhuyenMaiAndTrangThai(km, "ChuaDung");
+            } catch (Exception ignored) {}
+            return "Mã khuyến mãi [" + km.getMaCode() + "] đã có " + orderUsage + " đơn hàng sử dụng nên hệ thống đã tự động chuyển sang trạng thái Vô Hiệu Hóa (ẩn khỏi hệ thống) để bảo toàn đối soát lịch sử đơn hàng.";
         } else {
+            // Chưa có đơn hàng nào dùng: Xóa an toàn toàn bộ dữ liệu trong ví trước, sau đó xóa mã
+            try {
+                voucherDaLuuRepository.deleteByKhuyenMai(km);
+            } catch (Exception ignored) {}
             khuyenMaiRepository.delete(km);
+            return "Đã xóa vĩnh viễn mã khuyến mãi [" + km.getMaCode() + "] thành công!";
         }
     }
 

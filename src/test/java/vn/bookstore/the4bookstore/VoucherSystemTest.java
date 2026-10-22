@@ -522,5 +522,110 @@ class VoucherSystemTest {
             assertEquals(maShop, saved.getShop().getMaShop());
         }
     }
+
+    @Test
+    @DisplayName("Xóa mã voucher đã được khách hàng lưu vào ví (voucher_da_luu) không bị lỗi FK constraint")
+    @Transactional
+    void testDeleteVoucherWithSavedCustomerWalletEntries() {
+        // 1. Tạo voucher mới
+        KhuyenMai km = new KhuyenMai();
+        km.setMaCode("DEL_TEST_" + System.currentTimeMillis());
+        km.setTenKM("Voucher test xóa an toàn");
+        km.setLoaiGiam("PhanTram");
+        km.setGiaTriGiam(10);
+        km.setDonToiThieu(0);
+        km.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        km.setNgayKetThuc(LocalDateTime.now().plusDays(10));
+        km.setTrangThai("HoatDong");
+        km = khuyenMaiRepository.save(km);
+
+        // 2. Tạo khách hàng và lưu voucher vào ví
+        vn.bookstore.the4bookstore.entity.TaiKhoan tk = new vn.bookstore.the4bookstore.entity.TaiKhoan();
+        tk.setTenDangNhap("del_user_" + System.currentTimeMillis());
+        tk.setEmail(tk.getTenDangNhap() + "@gmail.com");
+        tk.setMatKhauHash("123456");
+        tk.setVaiTro("KHACHHANG");
+        tk.setTrangThai("HoatDong");
+        tk = taiKhoanRepository.save(tk);
+
+        vn.bookstore.the4bookstore.entity.KhachHang kh = new vn.bookstore.the4bookstore.entity.KhachHang();
+        kh.setHoTen("Nguyễn Văn Test Delete");
+        kh.setEmail(tk.getEmail());
+        kh.setTaiKhoan(tk);
+        kh = khachHangRepository.save(kh);
+
+        vn.bookstore.the4bookstore.entity.VoucherDaLuu vdl = new vn.bookstore.the4bookstore.entity.VoucherDaLuu();
+        vdl.setKhachHang(kh);
+        vdl.setKhuyenMai(km);
+        vdl.setTrangThai("ChuaDung");
+        vdl.setNgayLuu(LocalDateTime.now());
+        voucherDaLuuRepository.saveAndFlush(vdl);
+
+        Integer kmId = km.getMaKM();
+
+        // 3. Thực hiện xóa: phải thành công, không ném ngoại lệ FK_vdl_khuyen_mai
+        assertDoesNotThrow(() -> {
+            String result = khuyenMaiService.delete(kmId);
+            assertTrue(result.contains("thành công"));
+        });
+
+        // 4. Kiểm tra: voucher đã bị xóa hoàn toàn khỏi DB
+        assertFalse(khuyenMaiRepository.existsById(kmId));
+    }
+
+    @Test
+    @DisplayName("Xóa mã voucher đã có đơn hàng sử dụng: Tự động chuyển Vô Hiệu Hóa an toàn, không ném lỗi")
+    @Transactional
+    void testDeleteVoucherWithOrderUsageSafelyDeactivates() {
+        KhuyenMai km = new KhuyenMai();
+        km.setMaCode("DEACT_TEST_" + System.currentTimeMillis());
+        km.setTenKM("Voucher test deactivation");
+        km.setLoaiGiam("PhanTram");
+        km.setGiaTriGiam(10);
+        km.setDonToiThieu(0);
+        km.setNgayBatDau(LocalDateTime.now().minusDays(1));
+        km.setNgayKetThuc(LocalDateTime.now().plusDays(10));
+        km.setTrangThai("HoatDong");
+        km = khuyenMaiRepository.save(km);
+
+        vn.bookstore.the4bookstore.entity.TaiKhoan tk = new vn.bookstore.the4bookstore.entity.TaiKhoan();
+        tk.setTenDangNhap("order_user_" + System.currentTimeMillis());
+        tk.setEmail(tk.getTenDangNhap() + "@gmail.com");
+        tk.setMatKhauHash("123456");
+        tk.setVaiTro("KHACHHANG");
+        tk.setTrangThai("HoatDong");
+        tk = taiKhoanRepository.save(tk);
+
+        vn.bookstore.the4bookstore.entity.KhachHang kh = new vn.bookstore.the4bookstore.entity.KhachHang();
+        kh.setHoTen("Nguyễn Khách Mua Hàng");
+        kh.setEmail(tk.getEmail());
+        kh.setTaiKhoan(tk);
+        kh = khachHangRepository.save(kh);
+
+        vn.bookstore.the4bookstore.entity.DonHang dh = new vn.bookstore.the4bookstore.entity.DonHang();
+        dh.setKhachHang(kh);
+        dh.setKhuyenMai(km);
+        dh.setDiaChiGiao("Hà Nội");
+        dh.setSoDienThoaiGiao("0912345678");
+        dh.setTongTien(100000);
+        dh.setPhiVanChuyen(20000);
+        dh.setTienGiam(10000);
+        dh.setTienGiamFreeship(0);
+        dh.setPhuongThucThanhToan("COD");
+        dh.setTrangThai("ChoXacNhan");
+        dh.setNgayDat(LocalDateTime.now());
+        donHangRepository.save(dh);
+
+        Integer kmId = km.getMaKM();
+
+        // Thực hiện xóa voucher: Hệ thống phải tự động chuyển VoHieuHoa mà không gây lỗi FK
+        String result = khuyenMaiService.delete(kmId);
+        assertTrue(result.contains("Vô Hiệu Hóa"));
+
+        // Kiểm tra trong DB: mã vẫn còn tồn tại nhưng trạng thái là VoHieuHoa và hienThiCongKhai = false
+        KhuyenMai updated = khuyenMaiRepository.findById(kmId).orElseThrow();
+        assertEquals("VoHieuHoa", updated.getTrangThai());
+        assertFalse(updated.getHienThiCongKhai());
+    }
 }
 
