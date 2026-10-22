@@ -39,13 +39,13 @@
                             <span>Quay Lại</span>
                         </a>
 
-                        <!-- Nút Admin Xác nhận đã nhận tiền (khi đơn chưa thanh toán hoặc đang chờ duyệt) -->
-                        <form th:if="${donHang.trangThaiThanhToan != 'DaThanhToan' and donHang.trangThaiThanhToan != 'DaHoanTien'}" 
+                        <!-- Nút Admin Xác nhận đã nhận tiền (chỉ dành cho đơn chuyển khoản/VietQR) -->
+                        <form th:if="${donHang.trangThaiThanhToan != 'DaThanhToan' and donHang.trangThaiThanhToan != 'DaHoanTien' and (donHang.phuongThucThanhToan == 'VIETQR' or donHang.phuongThucThanhToan == 'ChuyenKhoan')}" 
                               th:action="@{'/don-hang/' + ${donHang.maDH} + '/xac-nhan-thanh-toan'}" method="post" class="inline">
-                            <button type="submit" onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản cho đơn hàng này?');" 
+                            <button type="submit" onclick="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản VietQR cho đơn hàng này?');" 
                                     class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
                                 <span class="material-symbols-outlined text-[18px]">verified</span>
-                                <span>[Admin/Shop] Xác Nhận Đã Nhận Tiền</span>
+                                <span>[Admin/Shop] Xác Nhận Đã Nhận Tiền VietQR</span>
                             </button>
                         </form>
 

@@ -216,8 +216,8 @@
                                 </div>
 
                                 <div class="p-2.5 border-t border-surface-container/60 text-center bg-surface-container-low/30">
-                                    <a th:href="@{/profile#orders-section}" class="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1">
-                                        <span>Xem lịch sử đơn mua</span>
+                                    <a th:href="${currentShop != null ? '/vendor/orders' : '/profile#orders-section'}" class="text-xs font-semibold text-primary hover:underline flex items-center justify-center gap-1">
+                                        <span th:text="${currentShop != null ? 'Xem đơn hàng của Shop' : 'Xem lịch sử đơn mua'}">Xem lịch sử đơn mua</span>
                                         <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                                     </a>
                                 </div>
@@ -459,8 +459,9 @@
 
                 listEl.innerHTML = window.clientNotifs.map(n => {
                     const formatVND = n.tongTien ? new Intl.NumberFormat('vi-VN').format(n.tongTien) + ' ₫' : '';
+                    const notifLink = n.link || '/profile#orders-section';
                     return `
-                        <a href="/profile#orders-section" class="flex items-start gap-3 p-3 hover:bg-surface-container transition-colors text-left block group">
+                        <a href="${notifLink}" class="flex items-start gap-3 p-3 hover:bg-surface-container transition-colors text-left block group">
                             <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <span class="material-symbols-outlined text-[18px]">receipt_long</span>
                             </div>
@@ -475,6 +476,112 @@
                         </a>
                     `;
                 }).join('');
+            };
+
+            // Hàm phát chuông âm thanh nhẹ khi có đơn hàng mới (Web Audio API)
+            window.playOrderNotificationChime = function() {
+                try {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextClass) return;
+                    const ctx = new AudioContextClass();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.45);
+                } catch (e) {}
+            };
+
+            // Hàm hiển thị Popup Toast thông báo đơn hàng cho Vendor
+            window.showVendorOrderGlobalToast = function(noti) {
+                let container = document.getElementById('vendor-ws-toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'vendor-ws-toast-container';
+                    container.className = 'fixed top-24 right-4 sm:right-8 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full';
+                    document.body.appendChild(container);
+                }
+
+                window.playOrderNotificationChime();
+
+                const toast = document.createElement('div');
+                toast.className = 'pointer-events-auto bg-surface-container-lowest text-on-surface border-2 border-emerald-500 shadow-2xl rounded-2xl p-4 flex items-start gap-3.5 transform transition-all duration-300 translate-y-4 opacity-0 ring-4 ring-emerald-500/20';
+
+                const formatVND = noti.tongTien ? new Intl.NumberFormat('vi-VN').format(noti.tongTien) + ' ₫' : '';
+
+                toast.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 shadow-sm animate-bounce">
+                        <span class="material-symbols-outlined text-[24px]">notifications_active</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-sm text-emerald-800">🎉 ĐƠN HÀNG MỚI #${noti.maDH}</span>
+                            <span class="text-[11px] text-on-surface-variant font-medium">Vừa xong</span>
+                        </div>
+                        <p class="text-xs text-on-surface mt-1 font-semibold">Khách: <span class="text-on-surface">${noti.tenKhachHang || 'Khách hàng'}</span> - <strong class="text-emerald-700 text-sm">${formatVND}</strong></p>
+                        <p class="text-[11px] text-on-surface-variant truncate max-w-[220px] mt-0.5">${noti.diaChiGiao || ''}</p>
+                        <div class="mt-2.5 flex items-center gap-2">
+                            <a href="/vendor/orders" class="inline-flex items-center gap-1 text-xs bg-emerald-700 text-white px-3 py-1 rounded-lg font-bold hover:bg-emerald-800 transition-colors shadow-xs">
+                                <span>Xem & Xử lý đơn</span>
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                    <button type="button" class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors" onclick="this.parentElement.remove()">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-0');
+                });
+
+                setTimeout(() => {
+                    toast.classList.add('translate-y-4', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 10000);
+            };
+
+            // Hàm xử lý dữ liệu đơn hàng nhận qua WebSocket
+            window.handleIncomingOrderNotif = function(noti, isVendor) {
+                window.clientUnreadCount = (window.clientUnreadCount || 0) + 1;
+                window.clientNotifs.unshift({
+                    maDH: noti.maDH,
+                    tongTien: noti.tongTien,
+                    trangThai: noti.trangThai || 'ChoXuLy',
+                    moTa: noti.message || (isVendor ? ('Đơn hàng mới từ ' + (noti.tenKhachHang || 'Khách')) : 'Cập nhật trạng thái đơn hàng'),
+                    ngayDat: 'Vừa xong',
+                    link: isVendor ? '/vendor/orders' : ('/don-hang/' + noti.maDH)
+                });
+                if (window.clientNotifs.length > 15) window.clientNotifs.pop();
+
+                window.renderClientNotifList();
+
+                const badge = document.getElementById('client-ws-badge');
+                const countEl = document.getElementById('client-notif-count');
+                if (badge) {
+                    badge.classList.remove('hidden');
+                    badge.textContent = window.clientUnreadCount;
+                }
+                if (countEl) countEl.textContent = window.clientUnreadCount;
+
+                if (isVendor) {
+                    window.showVendorOrderGlobalToast(noti);
+
+                    // Cập nhật tab Đơn hàng của thanh điều hướng Vendor (nếu có trên trang)
+                    const vendorBadge = document.getElementById('vendor-order-badge');
+                    if (vendorBadge) {
+                        let currentCount = parseInt(vendorBadge.textContent || '0', 10);
+                        vendorBadge.textContent = (currentCount + 1);
+                        vendorBadge.classList.remove('hidden');
+                    }
+                }
             };
 
             // Tải thông báo gần nhất của người dùng
@@ -514,39 +621,37 @@
                     })
                     .catch(() => window.renderClientNotifList());
 
-                // Khởi tạo WebSocket lắng nghe cập nhật đơn hàng cho Client
+                // Khởi tạo WebSocket lắng nghe cập nhật đơn hàng cho Client / Shop
                 try {
                     const currentUserId = /*[[${session.user?.maKH}]]*/ null;
-                    if (typeof SockJS !== 'undefined' && typeof Stomp !== 'undefined' && currentUserId) {
+                    const currentVendorShopId = /*[[${currentShop != null ? currentShop.maShop : (shop != null ? shop.maShop : null)}]]*/ null;
+
+                    if (typeof SockJS !== 'undefined' && typeof Stomp !== 'undefined' && (currentUserId || currentVendorShopId)) {
                         const socket = new SockJS('/ws');
                         const stompClient = Stomp.over(socket);
                         stompClient.debug = null;
 
                         stompClient.connect({}, function () {
-                            stompClient.subscribe('/topic/user/' + currentUserId + '/orders', function (message) {
-                                try {
-                                    const noti = JSON.parse(message.body);
-                                    window.clientUnreadCount = (window.clientUnreadCount || 0) + 1;
-                                    window.clientNotifs.unshift({
-                                        maDH: noti.maDH,
-                                        tongTien: noti.tongTien,
-                                        trangThai: noti.trangThai,
-                                        moTa: noti.message || 'Cập nhật trạng thái đơn hàng',
-                                        ngayDat: 'Vừa xong'
-                                    });
-                                    if (window.clientNotifs.length > 15) window.clientNotifs.pop();
+                            // 1. Kênh cho Khách mua hàng
+                            if (currentUserId) {
+                                stompClient.subscribe('/topic/user/' + currentUserId + '/orders', function (message) {
+                                    try {
+                                        const noti = JSON.parse(message.body);
+                                        window.handleIncomingOrderNotif(noti, false);
+                                    } catch (e) {}
+                                });
+                            }
 
-                                    window.renderClientNotifList();
-
-                                    const badge = document.getElementById('client-ws-badge');
-                                    const countEl = document.getElementById('client-notif-count');
-                                    if (badge) {
-                                        badge.classList.remove('hidden');
-                                        badge.textContent = window.clientUnreadCount;
-                                    }
-                                    if (countEl) countEl.textContent = window.clientUnreadCount;
-                                } catch (e) {}
-                            });
+                            // 2. Kênh cho Gian hàng (Vendor Shop)
+                            if (currentVendorShopId) {
+                                window.vendorWsSubscribed = true;
+                                stompClient.subscribe('/topic/vendor/' + currentVendorShopId + '/orders', function (message) {
+                                    try {
+                                        const noti = JSON.parse(message.body);
+                                        window.handleIncomingOrderNotif(noti, true);
+                                    } catch (e) {}
+                                });
+                            }
                         });
                     }
                 } catch (e) {}

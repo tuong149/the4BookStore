@@ -178,10 +178,15 @@
                                 <span class="material-symbols-outlined text-[12px]">check</span>
                                 <span>Đã thanh toán</span>
                             </span>
-                            <span th:if="${dh.trangThaiThanhToan == 'ChoThanhToan' or dh.trangThaiThanhToan == 'ChoDuyetThanhToan'}" 
+                            <span th:if="${(dh.phuongThucThanhToan == 'VIETQR' or dh.phuongThucThanhToan == 'ChuyenKhoan') and (dh.trangThaiThanhToan == 'ChoThanhToan' or dh.trangThaiThanhToan == 'ChoDuyetThanhToan' or dh.trangThaiThanhToan == 'ChuaThanhToan') and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}" 
                                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold">
                                 <span class="material-symbols-outlined text-[12px]">hourglass_top</span>
                                 <span>Chờ thanh toán</span>
+                            </span>
+                            <span th:if="${dh.phuongThucThanhToan == 'COD' and dh.trangThaiThanhToan != 'DaThanhToan' and dh.trangThai != 'DaHuy' and dh.trangThai != 'Huy'}" 
+                                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold">
+                                <span class="material-symbols-outlined text-[12px]">payments</span>
+                                <span>Thanh toán khi nhận hàng</span>
                             </span>
 
                             <!-- Badge Trạng thái đơn -->

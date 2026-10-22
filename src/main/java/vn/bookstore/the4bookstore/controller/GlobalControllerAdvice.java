@@ -278,8 +278,30 @@ public class GlobalControllerAdvice {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             return null;
         }
+        if (shopService == null) return null;
+
+        TaiKhoan tk = null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            tk = userDetails.getTaiKhoan();
+        } else if (principal instanceof CustomOAuth2User oAuth2User) {
+            tk = oAuth2User.getTaiKhoan();
+        } else if (principal instanceof CustomOidcUser oidcUser) {
+            tk = oidcUser.getTaiKhoan();
+        }
+        if (tk == null && authentication.getName() != null) {
+            String name = authentication.getName();
+            tk = taiKhoanRepository.findByEmail(name).or(() -> taiKhoanRepository.findByTenDangNhap(name)).orElse(null);
+        }
+        if (tk != null) {
+            Optional<vn.bookstore.the4bookstore.entity.Shop> userShop = shopService.findByTaiKhoan(tk);
+            if (userShop.isPresent()) {
+                return userShop.get();
+            }
+        }
+
         KhachHang kh = getCachedKhachHang(authentication, request);
-        if (kh != null && kh.getTaiKhoan() != null && shopService != null) {
+        if (kh != null && kh.getTaiKhoan() != null) {
             Optional<vn.bookstore.the4bookstore.entity.Shop> userShop = shopService.findByTaiKhoan(kh.getTaiKhoan());
             if (userShop.isPresent()) {
                 return userShop.get();
@@ -287,6 +309,7 @@ public class GlobalControllerAdvice {
         }
         return null;
     }
+
 
     @ModelAttribute("userDisplayName")
     public String getUserDisplayName(Authentication authentication, HttpServletRequest request) {

@@ -1068,6 +1068,23 @@
             const modalCount = document.getElementById('modalSelectedCount');
             if (modalCount) modalCount.textContent = calc.selectedItemCount + ' sản phẩm';
 
+            // Đảm bảo phương thức thanh toán luôn chọn COD mặc định nếu chưa chọn
+            const checkedRadio = document.querySelector('.payment-label input[type="radio"]:checked');
+            if (!checkedRadio) {
+                const codRadio = document.querySelector('.payment-label input[type="radio"][value="COD"]');
+                if (codRadio) codRadio.checked = true;
+            }
+            document.querySelectorAll('.payment-label').forEach(label => {
+                const r = label.querySelector('input[type="radio"]');
+                if (r && r.checked) {
+                    label.classList.add('border-primary', 'bg-primary/5');
+                    label.classList.remove('border-surface-container');
+                } else {
+                    label.classList.remove('border-primary', 'bg-primary/5');
+                    label.classList.add('border-surface-container');
+                }
+            });
+
             const modal = document.getElementById('checkoutModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');

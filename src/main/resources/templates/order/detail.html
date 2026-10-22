@@ -389,10 +389,17 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-on-surface-variant">Trạng thái:</span>
-                                    <span class="font-bold inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px]"
-                                          th:classappend="${donHang.trangThaiThanhToan == 'DaThanhToan'} ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
-                                        <span class="material-symbols-outlined text-[13px]" th:text="${donHang.trangThaiThanhToan == 'DaThanhToan' ? 'check_circle' : 'pending'}">pending</span>
-                                        <span th:text="${donHang.trangThaiThanhToan == 'DaThanhToan' ? 'Đã thanh toán' : 'Chưa thanh toán'}">Chưa thanh toán</span>
+                                    <span th:if="${donHang.trangThaiThanhToan == 'DaThanhToan'}" class="font-bold inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-100 text-emerald-800">
+                                        <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                                        <span>Đã thanh toán</span>
+                                    </span>
+                                    <span th:if="${donHang.trangThaiThanhToan != 'DaThanhToan' and donHang.phuongThucThanhToan == 'COD'}" class="font-bold inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] bg-blue-100 text-blue-800">
+                                        <span class="material-symbols-outlined text-[13px]">payments</span>
+                                        <span>Thanh toán khi nhận hàng</span>
+                                    </span>
+                                    <span th:if="${donHang.trangThaiThanhToan != 'DaThanhToan' and donHang.phuongThucThanhToan != 'COD'}" class="font-bold inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-800">
+                                        <span class="material-symbols-outlined text-[13px]">pending</span>
+                                        <span>Chờ thanh toán</span>
                                     </span>
                                 </div>
                             </div>

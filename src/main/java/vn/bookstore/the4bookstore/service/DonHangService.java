@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@lombok.extern.slf4j.Slf4j
 @Service
 public class DonHangService {
 
@@ -150,7 +151,20 @@ public class DonHangService {
         Map<Integer, List<ChiTietGioHang>> itemsByShopId = new LinkedHashMap<>();
         for (ChiTietGioHang ct : cartItems) {
             SanPham sp = lockedProductMap.get(ct.getSanPham().getMaSP());
-            Integer sId = (sp.getShop() != null && sp.getShop().getMaShop() != null) ? sp.getShop().getMaShop() : 1;
+            Shop spShop = sp.getShop();
+            Integer sId = (spShop != null && spShop.getMaShop() != null) ? spShop.getMaShop() : null;
+            if (sId == null) {
+                Shop defShop = shopRepository.findAll().stream()
+                        .filter(s -> "HoatDong".equalsIgnoreCase(s.getTrangThai()))
+                        .findFirst().orElse(null);
+                if (defShop != null) {
+                    sId = defShop.getMaShop();
+                    sp.setShop(defShop);
+                    sanPhamRepository.save(sp);
+                } else {
+                    sId = 1;
+                }
+            }
             itemsByShopId.computeIfAbsent(sId, k -> new ArrayList<>()).add(ct);
         }
 
@@ -387,7 +401,8 @@ public class DonHangService {
             ThanhToan thanhToan = new ThanhToan();
             thanhToan.setDonHang(donHang);
             thanhToan.setPhuongThuc(phuongThuc != null ? phuongThuc : "COD");
-            thanhToan.setTrangThai("ChoThanhToan");
+            boolean isOnlinePayment = "VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc);
+            thanhToan.setTrangThai(isOnlinePayment ? "ChoThanhToan" : "ChuaThanhToan");
             thanhToan.setSoTien(shopFinalTotal);
             thanhToan.setNoiDung("Thanh toán đơn hàng #" + donHang.getMaDH() + " (" + (shop != null ? shop.getTenShop() : "Gian hàng") + ")");
             thanhToanRepository.save(thanhToan);
@@ -403,13 +418,22 @@ public class DonHangService {
                         .soLuongMon(shopItems.size())
                         .trangThai(donHang.getTrangThai())
                         .ngayDat(donHang.getNgayDat())
+                        .maShop(shop != null ? shop.getMaShop() : null)
+                        .tenShop(shop != null ? shop.getTenShop() : null)
                         .message("Có đơn hàng mới #" + donHang.getMaDH() + " từ " + (khachHang.getHoTen() != null ? khachHang.getHoTen() : "Khách hàng"))
                         .build();
-                messagingTemplate.convertAndSend("/topic/admin/orders", noti);
                 if (shop != null && shop.getMaShop() != null) {
                     messagingTemplate.convertAndSend("/topic/vendor/" + shop.getMaShop() + "/orders", noti);
+                    if (shop.getTaiKhoan() != null && shop.getTaiKhoan().getMaTaiKhoan() != null) {
+                        messagingTemplate.convertAndSend("/topic/user/" + shop.getTaiKhoan().getMaTaiKhoan() + "/orders", noti);
+                    }
+                    log.info(">>> Đã gửi WebSocket thông báo đơn hàng #{} tới Shop #{} ({})", donHang.getMaDH(), shop.getMaShop(), shop.getTenShop());
+                } else {
+                    messagingTemplate.convertAndSend("/topic/admin/orders", noti);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                log.error("Lỗi gửi WebSocket thông báo đơn hàng #{}: ", donHang.getMaDH(), e);
+            }
 
             currentShopIdx++;
         }

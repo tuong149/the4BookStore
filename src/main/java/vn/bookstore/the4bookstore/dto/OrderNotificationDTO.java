@@ -38,4 +38,6 @@ public class OrderNotificationDTO {
 
     private LocalDateTime ngayDat;
     private String message;
+    private Integer maShop;
+    private String tenShop;
 }

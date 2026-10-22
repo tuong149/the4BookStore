@@ -21,7 +21,7 @@ import java.util.Optional;
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT s FROM SanPham s WHERE s.maSP = :id")
+    @Query("SELECT s FROM SanPham s LEFT JOIN FETCH s.shop WHERE s.maSP = :id")
     Optional<SanPham> findByIdWithLock(@Param("id") Integer id);
 
     @Modifying

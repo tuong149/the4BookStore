@@ -126,11 +126,20 @@ public class OrderService {
                     .tongTien(dh.getTongTien())
                     .trangThai(dh.getTrangThai())
                     .ngayDat(dh.getNgayDat())
+                    .maShop(dh.getShop() != null ? dh.getShop().getMaShop() : null)
+                    .tenShop(dh.getShop() != null ? dh.getShop().getTenShop() : null)
                     .message("Đơn hàng #" + dh.getMaDH() + " " + statusText)
                     .build();
 
-            // Broadcast tới kênh chung admin và kênh riêng của khách hàng
-            messagingTemplate.convertAndSend("/topic/admin/orders", noti);
+            // Broadcast tới kênh riêng của shop nếu có, fallback admin nếu không gán shop
+            if (dh.getShop() != null && dh.getShop().getMaShop() != null) {
+                messagingTemplate.convertAndSend("/topic/vendor/" + dh.getShop().getMaShop() + "/orders", noti);
+                if (dh.getShop().getTaiKhoan() != null && dh.getShop().getTaiKhoan().getMaTaiKhoan() != null) {
+                    messagingTemplate.convertAndSend("/topic/user/" + dh.getShop().getTaiKhoan().getMaTaiKhoan() + "/orders", noti);
+                }
+            } else {
+                messagingTemplate.convertAndSend("/topic/admin/orders", noti);
+            }
             if (dh.getKhachHang() != null && dh.getKhachHang().getMaKH() != null) {
                 messagingTemplate.convertAndSend("/topic/user/" + dh.getKhachHang().getMaKH() + "/orders", noti);
             }

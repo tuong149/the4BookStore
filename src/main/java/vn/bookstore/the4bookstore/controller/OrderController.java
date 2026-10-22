@@ -538,10 +538,42 @@ public class OrderController {
         }
     }
 
-    // ==================== API Lấy thông báo của người dùng ====================
+    // ==================== API Lấy thông báo của người dùng & Gian hàng ====================
     @GetMapping("/api/thong-bao")
     @ResponseBody
     public ResponseEntity<?> getClientNotifications(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        // 1. Nếu là Vendor có Shop, trả về thông báo các đơn hàng mới của Shop cần xử lý
+        Shop shop = getCurrentShop(authentication);
+        TaiKhoan tk = getCurrentTaiKhoan(authentication);
+        if (shop != null && tk != null && "VENDOR".equalsIgnoreCase(tk.getVaiTro())) {
+            org.springframework.data.domain.Page<DonHang> shopOrders =
+                    donHangRepository.findByShop_MaShopOrderByNgayDatDesc(shop.getMaShop(), org.springframework.data.domain.PageRequest.of(0, 8));
+            List<Map<String, Object>> notifs = shopOrders.getContent().stream().map(dh -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("maDH", dh.getMaDH());
+                map.put("tongTien", dh.getTongTien());
+                map.put("trangThai", dh.getTrangThai());
+                map.put("ngayDat", dh.getNgayDat() != null ? dh.getNgayDat().toString() : "");
+                String statusDesc = switch (dh.getTrangThai()) {
+                    case "ChoXuLy" -> "Đơn hàng mới chờ bạn xác nhận!";
+                    case "DaXacNhan" -> "Đã xác nhận, chờ giao hàng";
+                    case "DaLayHang" -> "Đã giao cho đơn vị vận chuyển";
+                    case "DangGiao" -> "Shipper đang giao hàng";
+                    case "DaGiao" -> "Giao hàng thành công";
+                    case "DaHuy", "Huy" -> "Đơn hàng đã hủy";
+                    default -> "Trạng thái đơn: " + dh.getTrangThai();
+                };
+                map.put("moTa", "Shop: " + statusDesc + " (" + (dh.getKhachHang() != null ? dh.getKhachHang().getHoTen() : "Khách") + ")");
+                map.put("link", "/vendor/orders");
+                return map;
+            }).toList();
+            return ResponseEntity.ok(notifs);
+        }
+
         KhachHang kh = getCurrentKhachHang(authentication);
         if (kh == null) {
             return ResponseEntity.ok(List.of());
@@ -554,7 +586,7 @@ public class OrderController {
             map.put("tongTien", dh.getTongTien());
             map.put("trangThai", dh.getTrangThai());
             map.put("ngayDat", dh.getNgayDat() != null ? dh.getNgayDat().toString() : "");
-            
+
             String statusDesc = switch (dh.getTrangThai()) {
                 case "ChoXuLy" -> "Đơn hàng đang chờ xử lý";
                 case "DaXacNhan" -> "Đã được người bán xác nhận";
@@ -564,6 +596,7 @@ public class OrderController {
                 default -> "Cập nhật trạng thái đơn";
             };
             map.put("moTa", statusDesc);
+            map.put("link", "/don-hang/" + dh.getMaDH());
             return map;
         }).toList();
 

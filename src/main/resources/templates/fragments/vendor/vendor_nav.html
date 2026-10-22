@@ -80,6 +80,7 @@
         <!-- WEBSOCKET STOMP SCRIPT CHO VENDOR -->
         <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', function () {
+                if (window.vendorWsSubscribed) return; // Đã được navbar đăng ký WebSocket toàn cục
                 const currentShopId = /*[[${shop != null ? shop.maShop : (currentShop != null ? currentShop.maShop : null)}]]*/ null;
                 if (!currentShopId) return;
 
