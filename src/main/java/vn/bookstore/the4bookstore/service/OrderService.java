@@ -134,9 +134,6 @@ public class OrderService {
             // Broadcast tới kênh riêng của shop nếu có, fallback admin nếu không gán shop
             if (dh.getShop() != null && dh.getShop().getMaShop() != null) {
                 messagingTemplate.convertAndSend("/topic/vendor/" + dh.getShop().getMaShop() + "/orders", noti);
-                if (dh.getShop().getTaiKhoan() != null && dh.getShop().getTaiKhoan().getMaTaiKhoan() != null) {
-                    messagingTemplate.convertAndSend("/topic/user/" + dh.getShop().getTaiKhoan().getMaTaiKhoan() + "/orders", noti);
-                }
             } else {
                 messagingTemplate.convertAndSend("/topic/admin/orders", noti);
             }

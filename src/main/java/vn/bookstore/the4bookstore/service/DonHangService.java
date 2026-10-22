@@ -424,9 +424,6 @@ public class DonHangService {
                         .build();
                 if (shop != null && shop.getMaShop() != null) {
                     messagingTemplate.convertAndSend("/topic/vendor/" + shop.getMaShop() + "/orders", noti);
-                    if (shop.getTaiKhoan() != null && shop.getTaiKhoan().getMaTaiKhoan() != null) {
-                        messagingTemplate.convertAndSend("/topic/user/" + shop.getTaiKhoan().getMaTaiKhoan() + "/orders", noti);
-                    }
                     log.info(">>> Đã gửi WebSocket thông báo đơn hàng #{} tới Shop #{} ({})", donHang.getMaDH(), shop.getMaShop(), shop.getTenShop());
                 } else {
                     messagingTemplate.convertAndSend("/topic/admin/orders", noti);

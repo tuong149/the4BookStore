@@ -550,6 +550,17 @@
 
             // Hàm xử lý dữ liệu đơn hàng nhận qua WebSocket
             window.handleIncomingOrderNotif = function(noti, isVendor) {
+                if (!noti || !noti.maDH) return;
+
+                // Khóa chống lặp thông báo (Deduplication) cho cùng 1 đơn hàng
+                window.handledNotifKeys = window.handledNotifKeys || new Set();
+                const notifKey = (isVendor ? 'V_' : 'U_') + noti.maDH + '_' + (noti.trangThai || '');
+                if (window.handledNotifKeys.has(notifKey)) {
+                    return;
+                }
+                window.handledNotifKeys.add(notifKey);
+                setTimeout(() => window.handledNotifKeys.delete(notifKey), 15000);
+
                 window.clientUnreadCount = (window.clientUnreadCount || 0) + 1;
                 window.clientNotifs.unshift({
                     maDH: noti.maDH,
