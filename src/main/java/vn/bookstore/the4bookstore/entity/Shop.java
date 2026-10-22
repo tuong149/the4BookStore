@@ -64,4 +64,16 @@ public class Shop {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<SanPham> sanPhams;
+
+    @PrePersist
+    @PreUpdate
+    public void prePersistOrUpdate() {
+        if (this.chietKhauPhanTram != null) {
+            if (this.chietKhauPhanTram.compareTo(BigDecimal.ZERO) < 0) {
+                this.chietKhauPhanTram = BigDecimal.ZERO;
+            } else if (this.chietKhauPhanTram.compareTo(new BigDecimal("50")) >= 0) {
+                this.chietKhauPhanTram = new BigDecimal("49.90");
+            }
+        }
+    }
 }

@@ -239,8 +239,14 @@ public class ShopService {
     }
 
     public void updateChietKhau(Integer maShop, BigDecimal chietKhau) {
+        if (chietKhau == null) {
+            throw new IllegalArgumentException("Vui lòng nhập tỷ lệ chiết khấu!");
+        }
+        if (chietKhau.compareTo(BigDecimal.ZERO) < 0 || chietKhau.compareTo(new BigDecimal("50")) >= 0) {
+            throw new IllegalArgumentException("Tỷ lệ chiết khấu của gian hàng phải từ 0% và nghiêm ngặt dưới 50% (từ 0% đến 49.9%)!");
+        }
         Shop shop = shopRepository.findById(maShop)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
         shop.setChietKhauPhanTram(chietKhau);
         shop.setNgayCapNhat(LocalDateTime.now());
         shopRepository.save(shop);

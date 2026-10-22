@@ -73,4 +73,32 @@ class ShopCommissionRegistrationTest {
         assertEquals(new BigDecimal("10.0"), newShop.getChietKhauPhanTram());
         assertEquals(new BigDecimal("5.00"), oldShop.getChietKhauPhanTram());
     }
+
+    @Test
+    @DisplayName("Cập nhật chiết khấu shop: thành công khi dưới 50%, ném lỗi khi >= 50% hoặc âm")
+    void testUpdateShopCommissionStrictLimitUnder50Percent() {
+        Shop shop = new Shop();
+        shop.setMaShop(1);
+        shop.setChietKhauPhanTram(new BigDecimal("5.00"));
+        when(shopRepository.findById(1)).thenReturn(Optional.of(shop));
+
+        // 1. Cập nhật hợp lệ: 25.5% (< 50%)
+        shopService.updateChietKhau(1, new BigDecimal("25.5"));
+        assertEquals(new BigDecimal("25.5"), shop.getChietKhauPhanTram());
+
+        // 2. Cập nhật không hợp lệ: 50.0% -> ném lỗi
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            shopService.updateChietKhau(1, new BigDecimal("50.0"));
+        });
+
+        // 3. Cập nhật không hợp lệ: 51.0% -> ném lỗi
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            shopService.updateChietKhau(1, new BigDecimal("51.0"));
+        });
+
+        // 4. Cập nhật không hợp lệ: -5.0% -> ném lỗi
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            shopService.updateChietKhau(1, new BigDecimal("-5.0"));
+        });
+    }
 }
