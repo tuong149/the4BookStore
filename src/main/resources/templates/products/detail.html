@@ -143,6 +143,7 @@
                         <button type="button" 
                                 id="btnWishlist"
                                 th:data-masp="${sanPham.maSP}"
+                                th:data-authenticated="${#authorization.expression('isAuthenticated()') ? 'true' : 'false'}"
                                 onclick="toggleWishlist(this)"
                                 class="px-space-lg py-3 rounded-xl border border-surface-container font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:bg-surface-container"
                                 th:classappend="${isFavorite} ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-surface-container-lowest text-on-surface'">
@@ -457,20 +458,37 @@
     <script>
         // WISHLIST TOGGLE AJAX
         function toggleWishlist(btn) {
+            if (btn.getAttribute('data-authenticated') === 'false') {
+                window.location.href = '/login';
+                return;
+            }
+
             const maSP = btn.getAttribute('data-masp');
             if (!maSP) return;
 
-            fetch('/api/favorites/toggle/' + maSP, { method: 'POST' })
+            fetch('/api/favorites/toggle/' + maSP, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(res => {
+                    if (res.redirected) {
+                        window.location.href = res.url || '/login';
+                        return null;
+                    }
                     if (res.status === 401) {
-                        showWishlistToast('Vui lòng đăng nhập để yêu thích sản phẩm!', false);
-                        setTimeout(() => window.location.href = '/login', 1200);
+                        window.location.href = '/login';
                         return null;
                     }
                     return res.json();
                 })
                 .then(data => {
                     if (!data) return;
+                    if (data.requireLogin) {
+                        window.location.href = '/login';
+                        return;
+                    }
                     if (data.success) {
                         const icon = document.getElementById('iconWishlist');
                         const text = document.getElementById('textWishlist');
@@ -493,7 +511,7 @@
                 })
                 .catch(err => {
                     console.error('Error toggling wishlist:', err);
-                    showWishlistToast('Không thể kết nối máy chủ!', false);
+                    window.location.href = '/login';
                 });
         }
 

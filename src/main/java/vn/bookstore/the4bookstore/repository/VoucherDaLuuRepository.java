@@ -38,4 +38,7 @@ public interface VoucherDaLuuRepository extends JpaRepository<VoucherDaLuu, Long
     /** Lấy danh sách maKM mà user đã lưu (để filter nhanh trên homepage) */
     @Query("SELECT v.khuyenMai.maKM FROM VoucherDaLuu v WHERE v.khachHang = :kh")
     List<Integer> findSavedVoucherIdsByKhachHang(@Param("kh") KhachHang kh);
+
+    /** Xóa các bản ghi đã lưu voucher này khi xóa khuyến mãi */
+    void deleteByKhuyenMai(KhuyenMai khuyenMai);
 }

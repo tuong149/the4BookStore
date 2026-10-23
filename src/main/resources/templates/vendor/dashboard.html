@@ -75,20 +75,20 @@
 
         <!-- 2. KPI Financial Cards (3 Thẻ tài chính & quy mô đồng đều) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Thẻ 1: Doanh Thu -->
+            <!-- Thẻ 1: Doanh Thu Tháng Này -->
             <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Doanh Thu Thực Nhận</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Doanh Thu Tháng Này</span>
                         <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                             <span class="material-symbols-outlined text-[22px]">payments</span>
                         </div>
                     </div>
-                    <div class="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    <div class="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.thisMonthRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
                 </div>
                 <div class="pt-4 mt-4 border-t border-surface-container/60 text-[11px] text-on-surface-variant flex items-center gap-1">
                     <span class="material-symbols-outlined text-[14px] text-emerald-600">check_circle</span>
-                    <span>Đã khấu trừ phí sàn từ các đơn hoàn tất</span>
+                    <span th:text="'Đơn hoàn tất trong tháng ' + ${stats.currentMonth} + ' (đã trừ phí sàn)'">Đã khấu trừ phí sàn từ các đơn hoàn tất</span>
                 </div>
             </div>
 

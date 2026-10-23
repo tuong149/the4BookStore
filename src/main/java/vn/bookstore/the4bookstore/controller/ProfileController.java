@@ -286,6 +286,9 @@ public class ProfileController {
                                 @RequestParam("hoTen") String hoTen,
                                 @RequestParam(value = "soDienThoai", required = false) String soDienThoai,
                                 @RequestParam(value = "diaChi", required = false) String diaChi,
+                                @RequestParam(value = "ngaySinh", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate ngaySinh,
+                                @RequestParam(value = "gioiTinh", required = false) String gioiTinh,
+                                @RequestParam(value = "theLoaiYeuThich", required = false) String theLoaiYeuThich,
                                 RedirectAttributes redirectAttributes) {
         TaiKhoan tk = getCurrentTaiKhoan(authentication);
         if (tk == null) {
@@ -303,10 +306,38 @@ public class ProfileController {
         kh.setHoTen(hoTen != null ? hoTen.trim() : tk.getTenDangNhap());
         kh.setSoDienThoai(soDienThoai != null && !soDienThoai.isBlank() ? soDienThoai.trim() : null);
         kh.setDiaChi(diaChi != null && !diaChi.isBlank() ? diaChi.trim() : null);
+        kh.setNgaySinh(ngaySinh);
+        kh.setGioiTinh(gioiTinh != null && !gioiTinh.isBlank() ? gioiTinh.trim() : null);
+        if (theLoaiYeuThich != null) {
+            kh.setTheLoaiYeuThich(theLoaiYeuThich.trim());
+        }
         khachHangRepository.save(kh);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ cá nhân thành công!");
         return "redirect:/profile?updated=true";
+    }
+
+    @PostMapping("/save-genres")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public java.util.Map<String, Object> saveFavoriteGenres(Authentication authentication,
+                                                            @RequestParam(value = "theLoaiYeuThich", required = false) String theLoaiYeuThich) {
+        TaiKhoan tk = getCurrentTaiKhoan(authentication);
+        if (tk == null) {
+            return java.util.Map.of("success", false, "message", "Vui lòng đăng nhập để lưu sở thích.");
+        }
+
+        KhachHang kh = khachHangRepository.findByTaiKhoan(tk).orElseGet(() -> {
+            KhachHang newKh = new KhachHang();
+            newKh.setTaiKhoan(tk);
+            newKh.setEmail(tk.getEmail());
+            newKh.setNgayDangKy(LocalDateTime.now());
+            return newKh;
+        });
+
+        kh.setTheLoaiYeuThich(theLoaiYeuThich != null ? theLoaiYeuThich.trim() : "");
+        khachHangRepository.save(kh);
+
+        return java.util.Map.of("success", true, "message", "Đã lưu thể loại yêu thích thành công!");
     }
 
     @PostMapping("/change-password")

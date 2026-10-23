@@ -67,6 +67,15 @@
                         </div>
                     </div>
 
+                    <!-- Giảm tối đa bao nhiêu tiền (Chống lỗ khi giảm %) -->
+                    <div id="vendorGiamToiDaGroup">
+                        <label class="block font-bold text-on-surface-variant mb-1">
+                            Giảm Tối Đa (VNĐ) <span class="text-on-surface-variant font-normal text-[11px]">(Để trống = không giới hạn)</span>
+                        </label>
+                        <input type="number" name="giamToiDa" min="0" placeholder="VD: 50000 (Chống lỗ khi giảm %)"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-on-surface-variant mb-1">Đơn Tối Thiểu (đ)</label>
@@ -113,13 +122,36 @@
                                 <div class="text-xs text-on-surface-variant mt-1">
                                     <span>Giảm: </span>
                                     <strong class="text-primary" th:text="${km.loaiGiam == 'Freeship' ? 'Miễn phí ship (tối đa ' + #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ)' : (km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ')}"></strong>
+                                    <span th:if="${km.loaiGiam == 'PhanTram' and km.giamToiDa != null}" th:text="' (tối đa ' + ${#numbers.formatDecimal(km.giamToiDa, 0, 'COMMA', 0, 'POINT')} + ' đ)'" class="text-primary font-semibold"></span>
                                     <span th:if="${km.donToiThieu != null}" th:text="' | Đơn tối thiểu: ' + ${#numbers.formatDecimal(km.donToiThieu, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                 </div>
                                 <div class="text-[11px] text-on-surface-variant/80 mt-0.5" th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</div>
                             </div>
-                            <div class="text-right">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Hoạt Động</span>
-                                <div class="text-[11px] text-on-surface-variant mt-1" th:text="'Đã dùng: ' + ${km.soLuongDaDung} + '/' + ${km.soLuongToiDa != null ? km.soLuongToiDa : '∞'}">Đã dùng</div>
+                            <div class="text-right flex items-center gap-3">
+                                <div class="flex flex-col items-end">
+                                    <span th:if="${km.trangThai == 'HoatDong'}" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Hoạt Động</span>
+                                    <span th:unless="${km.trangThai == 'HoatDong'}" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant">Vô Hiệu Hóa</span>
+                                    <div class="text-[11px] text-on-surface-variant mt-1" th:text="'Đã dùng: ' + ${km.soLuongDaDung} + '/' + ${km.soLuongToiDa != null ? km.soLuongToiDa : '∞'}">Đã dùng</div>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <form th:action="@{'/vendor/promotions/' + ${km.maKM} + '/toggle'}" method="post" class="inline">
+                                        <button type="submit"
+                                                th:title="${km.trangThai == 'HoatDong' ? 'Tạm dừng voucher' : 'Kích hoạt lại voucher'}"
+                                                class="p-2 rounded-xl border border-surface-container hover:bg-surface-container text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]"
+                                                  th:text="${km.trangThai == 'HoatDong' ? 'pause_circle' : 'play_circle'}"
+                                                  th:classappend="${km.trangThai == 'HoatDong' ? 'text-amber-600' : 'text-emerald-600'}"></span>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{'/vendor/promotions/' + ${km.maKM} + '/delete'}" method="post" class="inline"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa voucher này không?');">
+                                        <button type="submit"
+                                                title="Xóa voucher"
+                                                class="p-2 rounded-xl border border-error/20 bg-error/5 hover:bg-error/10 text-error transition-colors flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <div th:if="${promotions.isEmpty()}" class="py-8 text-center text-xs text-on-surface-variant">
@@ -136,10 +168,21 @@
         function handleVendorLoaiGiamChange() {
             const select = document.getElementById('vendorLoaiGiam');
             const inputVal = document.querySelector('input[name="giaTriGiam"]');
-            if (select && select.value === 'Freeship') {
+            const giamToiDaInput = document.querySelector('input[name="giamToiDa"]');
+            if (!select) return;
+
+            if (select.value === 'Freeship') {
                 if (inputVal && (!inputVal.value || inputVal.value === '20000')) {
                     inputVal.value = '30000';
                 }
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 30000 (Tối đa)';
+            } else if (select.value === 'PhanTram') {
+                if (inputVal && parseInt(inputVal.value) > 100) {
+                    inputVal.value = '10';
+                }
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 50000 (Chống lỗ khi giảm %)';
+            } else {
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'Không cần thiết khi giảm tiền cố định';
             }
         }
         document.addEventListener('DOMContentLoaded', function() {

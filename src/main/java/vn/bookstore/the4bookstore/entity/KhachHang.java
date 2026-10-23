@@ -1,6 +1,7 @@
 package vn.bookstore.the4bookstore.entity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,6 +19,14 @@ import java.time.LocalDateTime;
     private String diaChi;
     @Column(length = 500)
     private String anhDaiDien;
+
+    private LocalDate ngaySinh;
+
+    @Column(length = 20)
+    private String gioiTinh;
+
+    @Column(length = 500)
+    private String theLoaiYeuThich;
     
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maTaiKhoan", unique = true)

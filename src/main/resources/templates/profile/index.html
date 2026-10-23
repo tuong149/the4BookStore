@@ -187,11 +187,15 @@
                                     <div class="flex flex-col">
                                         <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Đơn hàng thành công</span>
                                         <span class="font-display-lg text-display-lg font-bold text-on-surface mt-1"
-                                              th:text="${(completedOrders != null and completedOrders > 0) ? (completedOrders < 10 ? '0' + completedOrders : completedOrders) : ((totalOrders != null and totalOrders > 0) ? (totalOrders < 10 ? '0' + totalOrders : totalOrders) : '00')}">
-                                            04
+                                              th:text="${(completedOrders != null and completedOrders > 0) ? (completedOrders < 10 ? '0' + completedOrders : completedOrders) : '00'}">
+                                            00
                                         </span>
-                                        <span class="font-body-sm text-body-sm text-tertiary font-semibold flex items-center gap-0.5">
-                                            <span class="material-symbols-outlined text-[14px]">check_circle</span> 100% hoàn thành
+                                        <span class="font-body-sm text-body-sm text-tertiary font-semibold flex items-center gap-0.5" th:if="${completedOrders != null and completedOrders > 0}">
+                                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                            <span th:text="${(completedOrders * 100 / (totalOrders > 0 ? totalOrders : 1)) + '% hoàn thành'}">100% hoàn thành</span>
+                                        </span>
+                                        <span class="font-body-sm text-body-sm text-on-surface-variant" th:if="${completedOrders == null or completedOrders == 0}">
+                                            Chưa có đơn hoàn tất
                                         </span>
                                     </div>
                                     <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-secondary">
@@ -291,7 +295,8 @@
                                             <div class="relative flex items-center">
                                                 <span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute left-3">calendar_today</span>
                                                 <input class="w-full h-11 pl-10 pr-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                                       id="birthDate" type="date" value="2000-01-01"/>
+                                                       id="birthDate" name="ngaySinh" type="date"
+                                                       th:value="${khachHang?.ngaySinh != null ? khachHang.ngaySinh : ''}"/>
                                             </div>
                                         </div>
 
@@ -299,15 +304,18 @@
                                             <span class="font-label-md text-label-md font-semibold text-on-surface">Giới tính</span>
                                             <div class="flex items-center gap-space-lg pt-1">
                                                 <label class="flex items-center gap-2 cursor-pointer font-body-md text-body-md">
-                                                    <input checked="" class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gender" type="radio" value="female"/>
+                                                    <input class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gioiTinh" type="radio" value="female"
+                                                           th:checked="${khachHang?.gioiTinh == 'female'}"/>
                                                     <span>Nữ</span>
                                                 </label>
                                                 <label class="flex items-center gap-2 cursor-pointer font-body-md text-body-md">
-                                                    <input class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gender" type="radio" value="male"/>
+                                                    <input class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gioiTinh" type="radio" value="male"
+                                                           th:checked="${khachHang?.gioiTinh == 'male'}"/>
                                                     <span>Nam</span>
                                                 </label>
                                                 <label class="flex items-center gap-2 cursor-pointer font-body-md text-body-md">
-                                                    <input class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gender" type="radio" value="other"/>
+                                                    <input class="w-4 h-4 text-primary focus:ring-primary accent-primary" name="gioiTinh" type="radio" value="other"
+                                                           th:checked="${khachHang?.gioiTinh == 'other'}"/>
                                                     <span>Khác</span>
                                                 </label>
                                             </div>
@@ -315,28 +323,28 @@
 
                                         <!-- Favorite Genres / Chips -->
                                         <div class="flex flex-col gap-space-xs sm:col-span-2 pt-2">
-                                            <div class="flex items-center justify-between">
-                                                <label class="font-label-md text-label-md font-semibold text-on-surface">Thể loại / Danh mục yêu thích (Gợi ý cá nhân hóa)</label>
-                                                <span class="text-body-sm font-body-sm text-on-surface-variant">Chọn 3 - 5 thể loại</span>
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <div>
+                                                    <label class="font-label-md text-label-md font-semibold text-on-surface">Thể loại / Danh mục yêu thích (Gợi ý cá nhân hóa)</label>
+                                                    <span class="text-body-sm font-body-sm text-on-surface-variant block">Chọn 3 - 5 thể loại bạn quan tâm</span>
+                                                </div>
+                                                <button id="btnSaveGenres" type="button"
+                                                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-secondary text-on-secondary hover:bg-secondary-container font-label-md text-xs font-bold transition-all shadow-xs cursor-pointer">
+                                                    <span class="material-symbols-outlined text-[16px]">bookmark_heart</span>
+                                                    <span id="btnSaveGenresText">Lưu sở thích</span>
+                                                </button>
                                             </div>
-                                            <div class="flex flex-wrap gap-2 pt-1" id="genreContainer">
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-primary text-on-primary font-medium transition-colors cursor-pointer" data-selected="true" type="button">
-                                                    Văn học kinh điển
-                                                </button>
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-primary text-on-primary font-medium transition-colors cursor-pointer" data-selected="true" type="button">
-                                                    Tâm lý học ứng dụng
-                                                </button>
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-surface-container text-on-surface font-medium hover:bg-surface-container-high transition-colors cursor-pointer" data-selected="false" type="button">
-                                                    Khoa học viễn tưởng
-                                                </button>
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-primary text-on-primary font-medium transition-colors cursor-pointer" data-selected="true" type="button">
-                                                    Phát triển bản thân
-                                                </button>
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-surface-container text-on-surface font-medium hover:bg-surface-container-high transition-colors cursor-pointer" data-selected="false" type="button">
-                                                    Triết học phương Đông
-                                                </button>
-                                                <button class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-surface-container text-on-surface font-medium hover:bg-surface-container-high transition-colors cursor-pointer" data-selected="false" type="button">
-                                                    Kinh tế &amp; Tài chính
+                                            <input type="hidden" id="theLoaiYeuThichInput" name="theLoaiYeuThich" th:value="${khachHang?.theLoaiYeuThich ?: ''}"/>
+                                            <div class="flex flex-wrap gap-2 pt-1" id="genreContainer"
+                                                 th:with="userGenres=${khachHang?.theLoaiYeuThich ?: ''},
+                                                          allGenres=${ {'Văn học kinh điển', 'Tâm lý học ứng dụng', 'Khoa học viễn tưởng', 'Phát triển bản thân', 'Triết học phương Đông', 'Kinh tế & Tài chính', 'Truyện tranh & Manga', 'Kỹ năng sống', 'Lịch sử & Địa lý', 'Tiểu thuyết thiếu nhi', 'Công nghệ thông tin', 'Ngoại ngữ & Từ điển'} }">
+                                                <button th:each="g : ${allGenres}"
+                                                        type="button"
+                                                        class="genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs font-medium transition-colors cursor-pointer"
+                                                        th:attr="data-genre=${g}, data-selected=${#strings.contains(userGenres, g) ? 'true' : 'false'}"
+                                                        th:classappend="${#strings.contains(userGenres, g)} ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
+                                                        th:text="${g}">
+                                                    Thể loại
                                                 </button>
                                             </div>
                                         </div>
@@ -449,82 +457,18 @@
                                     </div>
                                 </th:block>
 
-                                <!-- SAMPLE ORDER CARD (Shown if no orders placed yet) -->
-                                <th:block th:if="${donHangs == null or donHangs.isEmpty()}">
-                                    <div class="bg-surface-container-low rounded-2xl p-space-md flex flex-col gap-space-md border border-surface-container/60">
-                                        <!-- Order Header Meta -->
-                                        <div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-sm border-b border-surface-container">
-                                            <div class="flex items-center gap-space-md flex-wrap">
-                                                <span class="font-headline-sm text-headline-sm font-bold text-on-surface">#TB-8842</span>
-                                                <span class="text-on-surface-variant text-body-sm font-body-sm">• Đơn hàng tuyển chọn minh họa</span>
-                                                <span class="text-on-surface-variant text-body-sm font-body-sm">• Hình thức: Giao hỏa tốc</span>
-                                            </div>
-                                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-sm font-label-sm font-semibold">
-                                                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                                                <span>Đang giao hàng (Kho TP.HCM)</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Order Books List -->
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                                            <div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/40">
-                                                <div class="w-12 h-16 bg-primary/10 rounded flex items-center justify-center text-primary shrink-0">
-                                                    <span class="material-symbols-outlined text-[24px]">menu_book</span>
-                                                </div>
-                                                <div class="min-w-0 flex-1">
-                                                    <h3 class="font-headline-sm text-sm font-bold text-on-surface truncate">The Midnight Library (Thư Viện Nửa Đêm)</h3>
-                                                    <p class="font-body-sm text-xs text-on-surface-variant">Tác giả: Matt Haig</p>
-                                                    <p class="font-label-md text-xs font-semibold text-primary mt-1">210.000₫ <span class="font-normal text-on-surface-variant">x 1</span></p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-xl shadow-sm border border-surface-container/40">
-                                                <div class="w-12 h-16 bg-secondary/10 rounded flex items-center justify-center text-secondary shrink-0">
-                                                    <span class="material-symbols-outlined text-[24px]">auto_stories</span>
-                                                </div>
-                                                <div class="min-w-0 flex-1">
-                                                    <h3 class="font-headline-sm text-sm font-bold text-on-surface truncate">Atomic Habits (Thói Quen Nguyên Tử)</h3>
-                                                    <p class="font-body-sm text-xs text-on-surface-variant">Tác giả: James Clear</p>
-                                                    <p class="font-label-md text-xs font-semibold text-primary mt-1">385.000₫ <span class="font-normal text-on-surface-variant">x 1</span></p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Logistics Track Progress Mini Bar -->
-                                        <div class="bg-surface-container-lowest p-space-md rounded-xl flex flex-col gap-space-xs border border-surface-container/40">
-                                            <div class="flex items-center justify-between text-body-sm font-body-sm">
-                                                <span class="flex items-center gap-1 font-semibold text-primary">
-                                                    <span class="material-symbols-outlined text-[18px]">inventory_2</span>
-                                                    Đã xuất kho
-                                                </span>
-                                                <span class="flex items-center gap-1 font-semibold text-primary">
-                                                    <span class="material-symbols-outlined text-[18px]">local_shipping</span>
-                                                    Đang trung chuyển
-                                                </span>
-                                                <span class="flex items-center gap-1 text-on-surface-variant">
-                                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                                    Dự kiến hôm nay
-                                                </span>
-                                            </div>
-                                            <div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
-                                                <div class="bg-primary h-full rounded-full" style="width: 70%"></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Footer with total and CTA -->
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md pt-space-xs">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-body-md text-body-md text-on-surface-variant">Tổng giá trị đơn hàng (2 sản phẩm):</span>
-                                                <span class="font-headline-lg text-lg sm:text-xl font-bold text-secondary">595.000₫</span>
-                                            </div>
-                                            <div class="flex items-center gap-space-sm self-end sm:self-auto">
-                                                <a th:href="@{/}" class="px-space-md py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1">
-                                                    <span class="material-symbols-outlined text-[16px]">shopping_bag</span>
-                                                    <span>Khám phá sản phẩm mới</span>
-                                                </a>
-                                            </div>
-                                        </div>
+                                <!-- Empty State when no orders placed yet -->
+                                <div th:if="${donHangs == null or donHangs.isEmpty()}" class="py-10 px-4 text-center flex flex-col items-center justify-center bg-surface-container-low rounded-2xl border border-dashed border-surface-container-high">
+                                    <div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant mb-3">
+                                        <span class="material-symbols-outlined text-[28px] text-primary">receipt_long</span>
                                     </div>
-                                </th:block>
+                                    <h3 class="font-headline-sm text-base font-bold text-on-surface mb-1">Bạn chưa có đơn hàng nào</h3>
+                                    <p class="font-body-sm text-xs text-on-surface-variant max-w-sm mb-4">Các đơn hàng bạn đặt sẽ được lưu và hiển thị chi tiết tại đây để tiện theo dõi hành trình.</p>
+                                    <a th:href="@{/san-pham}" class="px-space-md py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors inline-flex items-center gap-1 shadow-xs">
+                                        <span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+                                        <span>Khám phá sách ngay</span>
+                                    </a>
+                                </div>
                             </section>
 
                             <!-- SECTION 4: Available Vouchers -->
@@ -787,6 +731,16 @@
             }
         }
 
+        function updateGenreHiddenInput() {
+            const selected = [];
+            document.querySelectorAll('.genre-pill[data-selected="true"]').forEach(p => {
+                const g = p.getAttribute('data-genre') || p.textContent.trim();
+                if (g) selected.push(g);
+            });
+            const input = document.getElementById('theLoaiYeuThichInput');
+            if (input) input.value = selected.join(',');
+        }
+
         document.querySelectorAll('.genre-pill').forEach(pill => {
             pill.addEventListener('click', () => {
                 const isSelected = pill.getAttribute('data-selected') === 'true';
@@ -797,8 +751,54 @@
                     pill.setAttribute('data-selected', 'true');
                     pill.className = 'genre-pill px-3.5 py-1.5 rounded-full font-label-md text-xs bg-primary text-on-primary font-medium transition-colors cursor-pointer';
                 }
+                updateGenreHiddenInput();
             });
         });
+
+        const btnSaveGenres = document.getElementById('btnSaveGenres');
+        if (btnSaveGenres) {
+            btnSaveGenres.addEventListener('click', async () => {
+                updateGenreHiddenInput();
+                const inputVal = document.getElementById('theLoaiYeuThichInput') ? document.getElementById('theLoaiYeuThichInput').value : '';
+                const form = document.querySelector('form[action*="/profile/update"]');
+                const csrfInput = form ? form.querySelector('input[name="_csrf"]') : null;
+                const csrfToken = csrfInput ? csrfInput.value : '';
+
+                const origHtml = btnSaveGenres.innerHTML;
+                btnSaveGenres.disabled = true;
+                btnSaveGenres.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span><span>Đang lưu...</span>';
+
+                const formData = new URLSearchParams();
+                formData.append('theLoaiYeuThich', inputVal);
+                if (csrfToken) formData.append('_csrf', csrfToken);
+
+                try {
+                    const resp = await fetch('/profile/save-genres', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData.toString()
+                    });
+                    const data = await resp.json();
+                    if (data && data.success) {
+                        btnSaveGenres.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-label-md text-xs font-bold transition-all shadow-xs cursor-pointer';
+                        btnSaveGenres.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Đã lưu thành công!</span>';
+                        setTimeout(() => {
+                            btnSaveGenres.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-secondary text-on-secondary hover:bg-secondary-container font-label-md text-xs font-bold transition-all shadow-xs cursor-pointer';
+                            btnSaveGenres.innerHTML = origHtml;
+                            btnSaveGenres.disabled = false;
+                        }, 2000);
+                    } else {
+                        alert((data && data.message) ? data.message : 'Không thể lưu thể loại yêu thích.');
+                        btnSaveGenres.innerHTML = origHtml;
+                        btnSaveGenres.disabled = false;
+                    }
+                } catch (e) {
+                    btnSaveGenres.innerHTML = origHtml;
+                    btnSaveGenres.disabled = false;
+                    alert('Có lỗi xảy ra khi lưu sở thích.');
+                }
+            });
+        }
 
         // Profile Password Logic
         function togglePasswordVisibility(fieldId, btn) {

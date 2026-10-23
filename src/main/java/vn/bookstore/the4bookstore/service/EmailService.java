@@ -15,9 +15,19 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
     @Value("${spring.mail.username:}")
     private String mailUsername;
+
+    @Value("${app.brevo.api-key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
+
+    @Value("${app.brevo.sender-email:${BREVO_SENDER_EMAIL:hoabui1709@gmail.com}}")
+    private String brevoSenderEmail;
+
+    @Value("${app.brevo.sender-name:${BREVO_SENDER_NAME:The4BookStore Support}}")
+    private String brevoSenderName;
 
     public EmailService(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -25,38 +35,102 @@ public class EmailService {
 
     /**
      * Gửi email mã OTP đặt lại mật khẩu với giao diện HTML chuẩn nhận diện The4BookStore.
-     * Hỗ trợ tự động fallback in ra Console nếu chưa cấu hình SMTP.
+     * Thứ tự ưu tiên:
+     * 1. Brevo REST API (Cổng HTTPS 443 - không bao giờ bị chặn trên Render/Cloud, không cần domain riêng).
+     * 2. JavaMailSender SMTP (Nếu được cấu hình và cổng không bị chặn).
+     * 3. Fallback in mã OTP ra Console / Render Logs để tiện test.
      */
     public boolean sendOtpEmail(String toEmail, String otpCode) {
-        if (mailSender == null || mailUsername == null || mailUsername.trim().isEmpty()) {
-            log.warn("[EMAIL SERVICE] Chưa cấu hình SMTP hoặc MAIL_USERNAME. Đang kích hoạt chế độ DEV FALLBACK.");
-            printDevOtp(toEmail, otpCode);
-            return false;
+        String subject = "The4BookStore - Mã OTP đặt lại mật khẩu: " + otpCode;
+        String htmlContent = buildOtpEmailHtml(otpCode);
+
+        // 1. Ưu tiên gửi qua Brevo REST API (HTTPS port 443 - hoạt động tốt trên Render, không cần domain riêng)
+        if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
+            boolean sent = sendViaBrevo(toEmail.trim(), subject, htmlContent);
+            if (sent) {
+                return true;
+            }
+            log.warn("[EMAIL SERVICE] Gửi qua Brevo API không thành công, thử phương thức tiếp theo...");
         }
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        // 2. Gửi qua SMTP
+        if (mailSender != null && mailUsername != null && !mailUsername.trim().isEmpty()) {
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(mailUsername.trim(), "The4BookStore Support");
-            helper.setTo(toEmail.trim());
-            helper.setSubject("The4BookStore - Mã OTP đặt lại mật khẩu: " + otpCode);
+                helper.setFrom(mailUsername.trim(), "The4BookStore Support");
+                helper.setTo(toEmail.trim());
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
 
-            String htmlContent = buildOtpEmailHtml(otpCode);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            log.info("[EMAIL SERVICE] Đã gửi mã OTP đặt lại mật khẩu thành công tới: {}", toEmail);
-            return true;
-        } catch (Exception e) {
-            log.error("[EMAIL SERVICE] Lỗi khi gửi email qua SMTP: {}", e.getMessage());
-            if (e.getMessage() != null && (e.getMessage().contains("535") || e.getMessage().contains("AuthenticationFailedException") || e.getMessage().contains("Username and Password not accepted"))) {
-                log.error("[EMAIL SERVICE HƯỚNG DẪN] Xác thực Gmail thất bại. Do Google đã chặn mật khẩu thông thường:");
-                log.error("  1. Hãy chắc chắn tài khoản Google của bạn đã BẬT 'Xác minh 2 bước' (2-Step Verification).");
-                log.error("  2. Vào https://myaccount.google.com/apppasswords tạo 'Mật khẩu ứng dụng' 16 chữ cái.");
-                log.error("  3. Dán 16 chữ cái đó vào biến MAIL_PASSWORD trong file .env (không dùng mật khẩu đăng nhập cá nhân).");
+                mailSender.send(message);
+                log.info("[EMAIL SERVICE / SMTP] Đã gửi mã OTP đặt lại mật khẩu thành công tới: {}", toEmail);
+                return true;
+            } catch (Exception e) {
+                log.error("[EMAIL SERVICE / SMTP] Lỗi khi gửi email qua SMTP: {}", e.getMessage());
+                if (e.getMessage() != null && (e.getMessage().contains("535") || e.getMessage().contains("AuthenticationFailedException") || e.getMessage().contains("Username and Password not accepted"))) {
+                    log.error("[EMAIL SERVICE HƯỚNG DẪN] Xác thực Gmail thất bại. Do Google đã chặn mật khẩu thông thường:");
+                    log.error("  1. Hãy chắc chắn tài khoản Google của bạn đã BẬT 'Xác minh 2 bước' (2-Step Verification).");
+                    log.error("  2. Vào https://myaccount.google.com/apppasswords tạo 'Mật khẩu ứng dụng' 16 chữ cái.");
+                    log.error("  3. Dán 16 chữ cái đó vào biến MAIL_PASSWORD trong file .env (không dùng mật khẩu đăng nhập cá nhân).");
+                }
             }
-            printDevOtp(toEmail, otpCode);
+        } else if (brevoApiKey == null || brevoApiKey.trim().isEmpty()) {
+            log.warn("[EMAIL SERVICE] Chưa cấu hình BREVO_API_KEY hoặc SMTP. Đang kích hoạt chế độ DEV FALLBACK.");
+        }
+
+        // 3. Fallback in ra console/log
+        printDevOtp(toEmail, otpCode);
+        return false;
+    }
+
+    /**
+     * Gửi email thông qua Brevo (Sendinblue) REST API qua cổng HTTPS 443 (chuẩn Cloud/Render)
+     * Endpoint: POST https://api.brevo.com/v3/smtp/email
+     */
+    private boolean sendViaBrevo(String toEmail, String subject, String htmlContent) {
+        try {
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+
+            java.util.Map<String, String> sender = new java.util.HashMap<>();
+            sender.put("name", (brevoSenderName != null && !brevoSenderName.trim().isEmpty()) ? brevoSenderName.trim() : "The4BookStore Support");
+            sender.put("email", (brevoSenderEmail != null && !brevoSenderEmail.trim().isEmpty()) ? brevoSenderEmail.trim() : "hoabui1709@gmail.com");
+
+            java.util.Map<String, String> recipient = new java.util.HashMap<>();
+            recipient.put("email", toEmail);
+
+            payload.put("sender", sender);
+            payload.put("to", java.util.List.of(recipient));
+            payload.put("subject", subject);
+            payload.put("htmlContent", htmlContent);
+
+            String jsonBody = objectMapper.writeValueAsString(payload);
+
+            java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                    .connectTimeout(java.time.Duration.ofSeconds(10))
+                    .build();
+
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("accept", "application/json")
+                    .header("api-key", brevoApiKey.trim())
+                    .header("content-type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody, java.nio.charset.StandardCharsets.UTF_8))
+                    .timeout(java.time.Duration.ofSeconds(15))
+                    .build();
+
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("[EMAIL SERVICE / BREVO API] Đã gửi email thành công tới: {}", toEmail);
+                return true;
+            } else {
+                log.error("[EMAIL SERVICE / BREVO API] Gửi thất bại (HTTP {}): {}", response.statusCode(), response.body());
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("[EMAIL SERVICE / BREVO API] Ngoại lệ khi gọi Brevo: {}", e.getMessage());
             return false;
         }
     }

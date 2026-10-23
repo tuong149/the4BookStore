@@ -751,5 +751,41 @@ public class VendorController {
         }
         return "redirect:/vendor/promotions";
     }
+
+    @PostMapping("/promotions/{id}/delete")
+    public String deletePromotion(Authentication auth,
+                                  @PathVariable("id") Integer id,
+                                  RedirectAttributes redirectAttributes) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+
+        try {
+            vendorService.deleteShopPromotion(shop.getMaShop(), id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa voucher của shop thành công!");
+        } catch (IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa voucher: " + ex.getMessage());
+        }
+        return "redirect:/vendor/promotions";
+    }
+
+    @PostMapping("/promotions/{id}/toggle")
+    public String togglePromotion(Authentication auth,
+                                  @PathVariable("id") Integer id,
+                                  RedirectAttributes redirectAttributes) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+
+        try {
+            vendorService.toggleShopPromotionStatus(shop.getMaShop(), id);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái voucher thành công!");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vendor/promotions";
+    }
 }
 
