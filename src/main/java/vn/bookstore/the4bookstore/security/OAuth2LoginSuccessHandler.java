@@ -54,9 +54,17 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
             });
         }
 
-        // 2. Phát hành JWT Token và ghi vào HttpOnly Cookie
-        String token = jwtService.generateToken(authentication, tk, displayName);
-        ResponseCookie jwtCookie = jwtService.createJwtCookie(token);
+        // 2. Kiểm tra tham số "Ghi nhớ đăng nhập" (Remember-me)
+        String rememberMeParam = request.getParameter("remember-me");
+        boolean rememberMe = rememberMeParam != null && (
+                "true".equalsIgnoreCase(rememberMeParam)
+                || "on".equalsIgnoreCase(rememberMeParam)
+                || "1".equals(rememberMeParam)
+        );
+
+        // Phát hành JWT Token và ghi vào HttpOnly Cookie (Thời hạn 7 ngày nếu rememberMe, 24h nếu không)
+        String token = jwtService.generateToken(authentication, tk, displayName, rememberMe);
+        ResponseCookie jwtCookie = jwtService.createJwtCookie(token, rememberMe);
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
         // 3. Phân luồng điều hướng theo vai trò

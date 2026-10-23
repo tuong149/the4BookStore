@@ -45,9 +45,18 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 p-4 rounded-2xl bg-surface-container-low text-xs">
                             <div>
-                                <span class="font-bold uppercase tracking-wider text-primary block mb-1">Khách Hàng (Người Mua)</span>
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="font-bold uppercase tracking-wider text-primary">Khách Hàng (Người Mua)</span>
+                                    <span th:if="${d.isKhachHangBiKhoa()}" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-white bg-rose-600 px-1.5 py-0.5 rounded shadow-xs" title="Tài khoản người mua đã bị khóa">
+                                        <span class="material-symbols-outlined text-[11px]">lock</span> Tài khoản đã bị khóa
+                                    </span>
+                                </div>
                                 <div class="font-bold text-on-surface" th:text="${d.khachHang != null ? d.khachHang.hoTen : 'Khách'}">Tên</div>
                                 <div class="text-on-surface-variant" th:text="'SĐT: ' + ${d.soDienThoaiGiao}">SĐT</div>
+                                <div th:if="${d.isKhachHangBiKhoa()}" class="mt-2 p-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-800 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-rose-600 text-sm">warning</span>
+                                    <span>Lưu ý trọng tài: Tài khoản người mua hiện đang bị khóa trên sàn.</span>
+                                </div>
                                 <div class="mt-2 p-2.5 rounded-xl bg-surface-container border text-rose-700">
                                     <strong>Lý do yêu cầu trả hàng:</strong>
                                     <p th:text="${d.lyDoTraHang != null ? d.lyDoTraHang : 'Sản phẩm bị lỗi, hỏng hóc hoặc không đúng như mô tả'}"></p>

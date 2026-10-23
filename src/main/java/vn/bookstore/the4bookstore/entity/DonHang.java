@@ -104,4 +104,20 @@ import java.util.List;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<ChiTietDonHang> chiTietDonHangs;
+
+    public boolean isKhachHangBiKhoa() {
+        try {
+            return khachHang != null && khachHang.getTaiKhoan() != null
+                    && "BiKhoa".equalsIgnoreCase(khachHang.getTaiKhoan().getTrangThai());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String getTenDangNhapKhachHang() {
+        if (khachHang != null && khachHang.getTaiKhoan() != null) {
+            return khachHang.getTaiKhoan().getTenDangNhap();
+        }
+        return null;
+    }
 }

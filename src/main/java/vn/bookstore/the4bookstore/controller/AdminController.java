@@ -308,6 +308,7 @@ public class AdminController {
                     map.put("diaChiGiao", dh.getDiaChiGiao() != null ? dh.getDiaChiGiao() : "");
                     map.put("soDienThoaiGiao", dh.getSoDienThoaiGiao() != null ? dh.getSoDienThoaiGiao() : "");
                     map.put("khachHang", dh.getKhachHang() != null ? dh.getKhachHang().getHoTen() : "");
+                    map.put("isKhachHangBiKhoa", dh.isKhachHangBiKhoa());
                     return ResponseEntity.ok(map);
                 })
                 .orElse(ResponseEntity.notFound().build());

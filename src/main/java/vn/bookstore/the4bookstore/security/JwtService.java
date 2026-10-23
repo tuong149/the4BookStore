@@ -41,6 +41,9 @@ public class JwtService {
     @Value("${jwt.expiration-ms:86400000}")
     private long jwtExpirationMs;
 
+    @Value("${jwt.remember-me-expiration-ms:604800000}")
+    private long jwtRememberMeExpirationMs;
+
     @Value("${jwt.cookie-name:the4book_jwt}")
     private String cookieName;
 
@@ -55,6 +58,10 @@ public class JwtService {
     }
 
     public String generateToken(Authentication authentication, TaiKhoan taiKhoan, String displayName) {
+        return generateToken(authentication, taiKhoan, displayName, false);
+    }
+
+    public String generateToken(Authentication authentication, TaiKhoan taiKhoan, String displayName, boolean rememberMe) {
         String username = (taiKhoan != null && taiKhoan.getTenDangNhap() != null)
                 ? taiKhoan.getTenDangNhap()
                 : authentication.getName();
@@ -65,8 +72,9 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        long expiration = rememberMe ? jwtRememberMeExpirationMs : jwtExpirationMs;
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(username)
@@ -75,6 +83,7 @@ public class JwtService {
                 .claim("userId", userId)
                 .claim("tokenVersion", taiKhoan != null ? taiKhoan.getTokenVersion() : 1)
                 .claim("displayName", displayName != null ? displayName : username)
+                .claim("rememberMe", rememberMe)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -142,13 +151,22 @@ public class JwtService {
     }
 
     public int getCookieMaxAgeSeconds() {
-        return (int) (jwtExpirationMs / 1000);
+        return getCookieMaxAgeSeconds(false);
+    }
+
+    public int getCookieMaxAgeSeconds(boolean rememberMe) {
+        long expiration = rememberMe ? jwtRememberMeExpirationMs : jwtExpirationMs;
+        return (int) (expiration / 1000);
     }
 
     public ResponseCookie createJwtCookie(String token) {
+        return createJwtCookie(token, false);
+    }
+
+    public ResponseCookie createJwtCookie(String token, boolean rememberMe) {
         return ResponseCookie.from(cookieName, token)
                 .path("/")
-                .maxAge(getCookieMaxAgeSeconds())
+                .maxAge(getCookieMaxAgeSeconds(rememberMe))
                 .httpOnly(true)
                 .sameSite("Lax")
                 .secure(cookieSecure)

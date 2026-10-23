@@ -160,18 +160,27 @@
                                 <tr th:if="${orders == null || #lists.isEmpty(orders)}">
                                     <td colspan="7" class="py-12 text-center text-on-surface-variant">Không tìm thấy đơn hàng nào.</td>
                                 </tr>
-                                <tr th:each="dh : ${orders}" class="order-row hover:bg-surface-container-low/60 transition-colors"
-                                    th:classappend="${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'} ? 'opacity-75' : ''"
+                                <tr th:each="dh : ${orders}" class="order-row transition-colors"
+                                    th:classappend="${dh.isKhachHangBiKhoa()} ? 'bg-rose-50/50 hover:bg-rose-50/80 border-l-4 border-l-rose-500' : ((${dh.trangThai == 'DaHuy' or dh.trangThai == 'Huy'}) ? 'opacity-75 hover:bg-surface-container-low/60' : 'hover:bg-surface-container-low/60')"
                                     th:attr="data-id=${dh.maDH}, data-customer=${dh.khachHang != null ? dh.khachHang.hoTen?.toLowerCase() : ''}, data-phone=${dh.soDienThoaiGiao}">
                                     <td class="py-4 px-4">
                                         <span class="font-mono font-bold text-primary text-sm" th:text="'#TB-' + ${#numbers.formatInteger(dh.maDH, 4)}">#TB-—</span>
+                                        <span th:if="${dh.isKhachHangBiKhoa()}" class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-300 mt-1" title="Tài khoản mua hàng này đã bị khóa">
+                                            <span class="material-symbols-outlined text-[12px]">warning</span> TK Khóa
+                                        </span>
                                     </td>
                                     <td class="py-4 px-3">
                                         <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-full bg-primary-fixed text-primary font-bold text-xs flex items-center justify-center flex-shrink-0"
+                                            <div class="w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0"
+                                                 th:classappend="${dh.isKhachHangBiKhoa()} ? 'bg-rose-100 text-rose-700 ring-2 ring-rose-400' : 'bg-primary-fixed text-primary'"
                                                  th:text="${dh.khachHang != null and dh.khachHang.hoTen != null and !#strings.isEmpty(dh.khachHang.hoTen) ? #strings.toUpperCase(#strings.substring(dh.khachHang.hoTen, 0, 1)) : '?'}">?</div>
                                             <div>
-                                                <div class="font-semibold text-on-surface" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Khách hàng</div>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="font-semibold text-on-surface" th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách vãng lai'}">Khách hàng</span>
+                                                    <span th:if="${dh.isKhachHangBiKhoa()}" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-white bg-rose-600 px-1.5 py-0.5 rounded shadow-xs" title="Tài khoản mua hàng này hiện đã bị khóa trên hệ thống">
+                                                        <span class="material-symbols-outlined text-[11px]">lock</span> Bị khóa
+                                                    </span>
+                                                </div>
                                                 <div class="text-[11px] text-on-surface-variant font-mono" th:text="${dh.soDienThoaiGiao}">—</div>
                                             </div>
                                         </div>

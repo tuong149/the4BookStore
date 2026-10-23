@@ -102,12 +102,13 @@
 
                 <!-- Remember Me & Forgot Password Row -->
                 <div class="flex items-center justify-between text-xs sm:text-sm px-2 pt-1">
-                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none" title="Duy trì trạng thái đăng nhập trong 7 ngày">
                         <input type="checkbox"
                                name="remember-me"
                                id="remember-me"
+                               value="true"
                                class="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-primary text-primary focus:ring-primary/30 cursor-pointer accent-primary" />
-                        <span class="font-bold text-slate-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">Ghi nhớ đăng nhập</span>
+                        <span class="font-bold text-slate-900 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">Ghi nhớ đăng nhập (7 ngày)</span>
                     </label>
                     <a th:href="@{/forgot-password}"
                        class="font-bold text-slate-900 hover:text-primary transition-colors drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
@@ -159,5 +160,34 @@
         </div>
 
     </main>
+
+    <!-- Client-side Remember-Me UX Helper -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const usernameInput = document.getElementById('username');
+            const rememberMeCheckbox = document.getElementById('remember-me');
+            const loginForm = rememberMeCheckbox ? rememberMeCheckbox.closest('form') : null;
+
+            // Nạp username đã lưu nếu trước đó đã chọn Ghi nhớ
+            const savedUsername = localStorage.getItem('the4book_remembered_username');
+            if (savedUsername && usernameInput && !usernameInput.value) {
+                usernameInput.value = savedUsername;
+                if (rememberMeCheckbox) {
+                    rememberMeCheckbox.checked = true;
+                }
+            }
+
+            // Lưu hoặc xóa username vào localStorage khi submit
+            if (loginForm && usernameInput && rememberMeCheckbox) {
+                loginForm.addEventListener('submit', function () {
+                    if (rememberMeCheckbox.checked) {
+                        localStorage.setItem('the4book_remembered_username', usernameInput.value.trim());
+                    } else {
+                        localStorage.removeItem('the4book_remembered_username');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

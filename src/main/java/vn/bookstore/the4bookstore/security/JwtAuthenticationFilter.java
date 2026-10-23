@@ -88,12 +88,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    if (request.getSession(false) != null) {
-                        request.getSession(false).setAttribute(
-                                org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                                SecurityContextHolder.getContext()
-                        );
-                    }
+                    try {
+                        jakarta.servlet.http.HttpSession session = request.getSession(true);
+                        if (session != null) {
+                            session.setAttribute(
+                                    org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                                    SecurityContextHolder.getContext()
+                            );
+                        }
+                    } catch (Exception ignored) {}
                 }
             } else if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var authorities = roles.stream()
@@ -104,6 +107,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                try {
+                    jakarta.servlet.http.HttpSession session = request.getSession(true);
+                    if (session != null) {
+                        session.setAttribute(
+                                org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                                SecurityContextHolder.getContext()
+                        );
+                    }
+                } catch (Exception ignored) {}
             }
         }
 

@@ -58,7 +58,8 @@
 
         <!-- Orders List -->
         <div class="space-y-4">
-            <div th:each="dh : ${orders}" class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm">
+            <div th:each="dh : ${orders}" class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm"
+                 th:classappend="${dh.isKhachHangBiKhoa()} ? 'border-rose-400 ring-2 ring-rose-200/60' : ''">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-surface-container gap-2">
                     <div class="flex items-center gap-3 flex-wrap">
                         <span class="font-bold text-sm text-on-surface" th:text="'Mã đơn: #' + ${dh.maDH}">#1</span>
@@ -68,7 +69,13 @@
                             <span th:text="'Mã VĐ: ' + ${dh.maVanDon}">GHN-12345</span>
                         </span>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- Warning badge: Tài khoản mua đã bị khóa -->
+                        <span th:if="${dh.isKhachHangBiKhoa()}" class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-300 flex items-center gap-1 animate-pulse" title="Tài khoản mua hàng này hiện đã bị khóa trên hệ thống">
+                            <span class="material-symbols-outlined text-[14px]">lock_person</span>
+                            <span>Tài Khoản Đã Bị Khóa</span>
+                        </span>
+
                         <!-- Trạng thái badge -->
                         <span th:switch="${dh.trangThai}">
                             <span th:case="'ChoThanhToan'" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 flex items-center gap-1">
@@ -95,7 +102,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 text-xs text-on-surface-variant border-b border-surface-container">
                     <div>
                         <span class="font-bold text-on-surface">Người nhận:</span>
-                        <div th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách hàng'}">Tên</div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách hàng'}">Tên</span>
+                            <span th:if="${dh.isKhachHangBiKhoa()}" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-300">
+                                <span class="material-symbols-outlined text-[11px]">lock</span> Đã bị khóa
+                            </span>
+                        </div>
                         <div th:text="${dh.soDienThoaiGiao}">SĐT</div>
                     </div>
                     <div>
@@ -126,6 +138,19 @@
                 </div>
 
                 <!-- Notification Banners for Special States -->
+                <div th:if="${dh.isKhachHangBiKhoa()}" class="my-3 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-xs text-rose-950 flex items-start gap-3 shadow-xs">
+                    <span class="material-symbols-outlined text-rose-600 text-2xl shrink-0 mt-0.5">no_accounts</span>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-bold text-[10px] uppercase tracking-wider">Cảnh Báo Rủi Ro</span>
+                            <p class="font-bold text-rose-900 text-sm">Tài khoản người mua đơn hàng này hiện ĐÃ BỊ KHÓA!</p>
+                        </div>
+                        <p class="text-[12px] text-rose-800 mt-1 leading-relaxed">
+                            Người mua (<strong th:text="${dh.khachHang != null ? dh.khachHang.hoTen : 'Khách hàng'}"></strong> - Tài khoản: <strong th:text="${dh.khachHang != null and dh.khachHang.taiKhoan != null ? dh.khachHang.taiKhoan.tenDangNhap : 'N/A'}"></strong>) đã bị quản trị viên khóa do vi phạm chính sách hoặc rủi ro tài khoản. Shop vui lòng kiểm tra kỹ trạng thái thanh toán, cân nhắc trước khi xuất hàng/giao shipper hoặc liên hệ Ban Quản Trị để được hỗ trợ.
+                        </p>
+                    </div>
+                </div>
+
                 <div th:if="${dh.trangThai == 'YeuCauHuy'}" class="my-3 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2.5">
                     <span class="material-symbols-outlined text-rose-600 text-lg shrink-0">warning</span>
                     <div>
