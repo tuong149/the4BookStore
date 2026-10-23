@@ -33,6 +33,7 @@ public class VendorService {
     private final ThanhToanRepository thanhToanRepository;
     private final TacGiaRepository tacGiaRepository;
     private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
+    private final vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository;
 
     public VendorService(ShopRepository shopRepository,
                          SanPhamRepository sanPhamRepository,
@@ -42,7 +43,8 @@ public class VendorService {
                          SanPhamService sanPhamService,
                          ThanhToanRepository thanhToanRepository,
                          TacGiaRepository tacGiaRepository,
-                         SanPhamTacGiaRepository sanPhamTacGiaRepository) {
+                         SanPhamTacGiaRepository sanPhamTacGiaRepository,
+                         vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository) {
         this.shopRepository = shopRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.donHangRepository = donHangRepository;
@@ -52,6 +54,7 @@ public class VendorService {
         this.thanhToanRepository = thanhToanRepository;
         this.tacGiaRepository = tacGiaRepository;
         this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
+        this.voucherDaLuuRepository = voucherDaLuuRepository;
     }
 
     // --- DASHBOARD THỐNG KÊ CỦA SHOP ---
@@ -510,5 +513,42 @@ public class VendorService {
         km.setPhamVi("SHOP");
         km.setTrangThai("HoatDong");
         return khuyenMaiRepository.save(km);
+    }
+
+    @Transactional
+    public void deleteShopPromotion(Integer maShop, Integer maKM) {
+        KhuyenMai km = khuyenMaiRepository.findById(maKM)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi #" + maKM));
+
+        if (km.getShop() == null || !km.getShop().getMaShop().equals(maShop)) {
+            throw new IllegalArgumentException("Bạn không có quyền thao tác với voucher của shop khác!");
+        }
+
+        Long orderCount = donHangRepository.countByKhuyenMai(km);
+        if (orderCount != null && orderCount > 0) {
+            km.setTrangThai("VoHieuHoa");
+            khuyenMaiRepository.save(km);
+            throw new IllegalStateException("Voucher đã có " + orderCount + " đơn hàng sử dụng nên hệ thống đã tự động chuyển sang trạng thái Vô Hiệu Hóa thay vì xóa hẳn.");
+        }
+
+        voucherDaLuuRepository.deleteByKhuyenMai(km);
+        khuyenMaiRepository.delete(km);
+    }
+
+    @Transactional
+    public void toggleShopPromotionStatus(Integer maShop, Integer maKM) {
+        KhuyenMai km = khuyenMaiRepository.findById(maKM)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi #" + maKM));
+
+        if (km.getShop() == null || !km.getShop().getMaShop().equals(maShop)) {
+            throw new IllegalArgumentException("Bạn không có quyền thao tác với voucher của shop khác!");
+        }
+
+        if ("HoatDong".equalsIgnoreCase(km.getTrangThai())) {
+            km.setTrangThai("VoHieuHoa");
+        } else {
+            km.setTrangThai("HoatDong");
+        }
+        khuyenMaiRepository.save(km);
     }
 }

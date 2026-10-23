@@ -127,9 +127,31 @@
                                 </div>
                                 <div class="text-[11px] text-on-surface-variant/80 mt-0.5" th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</div>
                             </div>
-                            <div class="text-right">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Hoạt Động</span>
-                                <div class="text-[11px] text-on-surface-variant mt-1" th:text="'Đã dùng: ' + ${km.soLuongDaDung} + '/' + ${km.soLuongToiDa != null ? km.soLuongToiDa : '∞'}">Đã dùng</div>
+                            <div class="text-right flex items-center gap-3">
+                                <div class="flex flex-col items-end">
+                                    <span th:if="${km.trangThai == 'HoatDong'}" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Hoạt Động</span>
+                                    <span th:unless="${km.trangThai == 'HoatDong'}" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant">Vô Hiệu Hóa</span>
+                                    <div class="text-[11px] text-on-surface-variant mt-1" th:text="'Đã dùng: ' + ${km.soLuongDaDung} + '/' + ${km.soLuongToiDa != null ? km.soLuongToiDa : '∞'}">Đã dùng</div>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <form th:action="@{'/vendor/promotions/' + ${km.maKM} + '/toggle'}" method="post" class="inline">
+                                        <button type="submit"
+                                                th:title="${km.trangThai == 'HoatDong' ? 'Tạm dừng voucher' : 'Kích hoạt lại voucher'}"
+                                                class="p-2 rounded-xl border border-surface-container hover:bg-surface-container text-on-surface-variant transition-colors flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]"
+                                                  th:text="${km.trangThai == 'HoatDong' ? 'pause_circle' : 'play_circle'}"
+                                                  th:classappend="${km.trangThai == 'HoatDong' ? 'text-amber-600' : 'text-emerald-600'}"></span>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{'/vendor/promotions/' + ${km.maKM} + '/delete'}" method="post" class="inline"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa voucher này không?');">
+                                        <button type="submit"
+                                                title="Xóa voucher"
+                                                class="p-2 rounded-xl border border-error/20 bg-error/5 hover:bg-error/10 text-error transition-colors flex items-center justify-center cursor-pointer">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <div th:if="${promotions.isEmpty()}" class="py-8 text-center text-xs text-on-surface-variant">
