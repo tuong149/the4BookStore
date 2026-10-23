@@ -90,10 +90,17 @@ public class ProductController {
         List<DanhMuc> categoriesVpp = sanPhamService.getCategoriesByLoaiSP("VanPhongPham");
         List<DanhMuc> categoriesQuaTang = sanPhamService.getCategoriesByLoaiSP("QuaTang");
 
+        if (tacGia != null && tacGia > 0 && danhMuc != null && danhMuc > 0) {
+            if (!tacGiaService.isAuthorInCategory(tacGia, danhMuc)) {
+                tacGia = null;
+            }
+        }
+
         model.addAttribute("categoriesSach",    categoriesSach);
         model.addAttribute("categoriesVpp",     categoriesVpp);
         model.addAttribute("categoriesQuaTang", categoriesQuaTang);
-        model.addAttribute("authors",           tacGiaService.getAll());
+        model.addAttribute("authors",           tacGiaService.getAuthorsByLoaiSP("Sach"));
+        model.addAttribute("authorCategoryMap", tacGiaService.getAuthorCategoryMap());
         model.addAttribute("publishers",        List.of());
 
         if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
@@ -150,6 +157,12 @@ public class ProductController {
             if (!valid) validDanhMuc = null;
         }
 
+        if (tacGia != null && tacGia > 0 && validDanhMuc != null && validDanhMuc > 0) {
+            if (!tacGiaService.isAuthorInCategory(tacGia, validDanhMuc)) {
+                tacGia = null;
+            }
+        }
+
         int pageSize = 12;
         Page<SanPham> productPage = sanPhamService.searchAndFilter("Sach", q, validDanhMuc, tacGia, nxb, sort, page, pageSize);
         List<vn.bookstore.the4bookstore.entity.Shop> matchedShops = List.of();
@@ -170,7 +183,8 @@ public class ProductController {
         model.addAttribute("categoriesSach",  sanPhamService.getCategoriesByLoaiSP("Sach"));
         model.addAttribute("categoriesVpp",   sanPhamService.getCategoriesByLoaiSP("VanPhongPham"));
         model.addAttribute("categoriesQuaTang", sanPhamService.getCategoriesByLoaiSP("QuaTang"));
-        model.addAttribute("authors",         tacGiaService.getAll());
+        model.addAttribute("authors",         tacGiaService.getAuthorsByLoaiSP("Sach"));
+        model.addAttribute("authorCategoryMap", tacGiaService.getAuthorCategoryMap());
         model.addAttribute("publishers",      List.of());
         model.addAttribute("selectedDanhMuc", validDanhMuc);
         model.addAttribute("selectedTacGia",  tacGia);

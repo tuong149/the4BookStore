@@ -200,6 +200,15 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     @Query("SELECT DISTINCT s FROM SanPham s JOIN s.sanPhamTacGias sptg WHERE sptg.tacGia.maTacGia = :maTacGia AND s.trangThai IN ('DangBan', 'HetHang')")
     Page<SanPham> findByTacGiaId(@Param("maTacGia") Integer maTacGia, Pageable pageable);
 
+    @Query("SELECT DISTINCT s FROM SanPham s JOIN s.sanPhamTacGias sptg WHERE sptg.tacGia.maTacGia = :maTacGia AND s.danhMuc.maDanhMuc = :maDanhMuc AND s.trangThai IN ('DangBan', 'HetHang')")
+    Page<SanPham> findByTacGiaIdAndDanhMucId(@Param("maTacGia") Integer maTacGia, @Param("maDanhMuc") Integer maDanhMuc, Pageable pageable);
+
+    @Query("SELECT DISTINCT s FROM SanPham s JOIN s.sanPhamTacGias sptg WHERE sptg.tacGia.maTacGia = :maTacGia AND s.danhMuc.maDanhMuc = :maDanhMuc AND LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND s.trangThai IN ('DangBan', 'HetHang')")
+    Page<SanPham> findByTacGiaIdAndDanhMucIdAndKeyword(@Param("maTacGia") Integer maTacGia, @Param("maDanhMuc") Integer maDanhMuc, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT DISTINCT s FROM SanPham s JOIN s.sanPhamTacGias sptg WHERE sptg.tacGia.maTacGia = :maTacGia AND LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND s.trangThai IN ('DangBan', 'HetHang')")
+    Page<SanPham> findByTacGiaIdAndKeyword(@Param("maTacGia") Integer maTacGia, @Param("keyword") String keyword, Pageable pageable);
+
     // --- MARKETPLACE QUERIES ---
 
     // --- SPOTLIGHT ALGORITHM CANDIDATES ---

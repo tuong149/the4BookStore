@@ -59,4 +59,39 @@ public class TacGiaService {
         }
         return tacGiaRepository.findByTenTacGiaContainingIgnoreCase(keyword.trim());
     }
+
+    public List<TacGia> getAuthorsByDanhMuc(Integer maDanhMuc) {
+        if (maDanhMuc == null || maDanhMuc <= 0) {
+            return getAuthorsByLoaiSP("Sach");
+        }
+        return tacGiaRepository.findByDanhMucId(maDanhMuc);
+    }
+
+    public List<TacGia> getAuthorsByLoaiSP(String loaiSP) {
+        if (loaiSP == null || loaiSP.isBlank()) {
+            return tacGiaRepository.findAll();
+        }
+        return tacGiaRepository.findByLoaiSP(loaiSP);
+    }
+
+    public java.util.Map<Integer, String> getAuthorCategoryMap() {
+        List<Object[]> rows = tacGiaRepository.findAuthorCategoryMappingsForSach();
+        java.util.Map<Integer, java.util.List<String>> map = new java.util.HashMap<>();
+        for (Object[] row : rows) {
+            Integer authorId = (Integer) row[0];
+            Integer catId = (Integer) row[1];
+            map.computeIfAbsent(authorId, k -> new java.util.ArrayList<>()).add(String.valueOf(catId));
+        }
+        java.util.Map<Integer, String> result = new java.util.HashMap<>();
+        for (java.util.Map.Entry<Integer, java.util.List<String>> entry : map.entrySet()) {
+            result.put(entry.getKey(), String.join(",", entry.getValue()));
+        }
+        return result;
+    }
+
+    public boolean isAuthorInCategory(Integer maTacGia, Integer maDanhMuc) {
+        if (maTacGia == null || maDanhMuc == null) return false;
+        return tacGiaRepository.findByDanhMucId(maDanhMuc).stream()
+                .anyMatch(tg -> tg.getMaTacGia().equals(maTacGia));
+    }
 }

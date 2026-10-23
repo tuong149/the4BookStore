@@ -41,7 +41,7 @@ public class UserInteractionController {
     public ResponseEntity<?> toggleFavorite(Authentication auth, @PathVariable Integer maSP) {
         KhachHang kh = currentUserService.getCurrentKhachHang(auth);
         if (kh == null) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập để yêu thích sản phẩm"));
+            return ResponseEntity.status(401).body(Map.of("success", false, "requireLogin", true, "message", "Vui lòng đăng nhập để yêu thích sản phẩm"));
         }
         boolean isFav = interactionService.toggleFavorite(kh, maSP);
         return ResponseEntity.ok(Map.of("success", true, "isFavorite", isFav));

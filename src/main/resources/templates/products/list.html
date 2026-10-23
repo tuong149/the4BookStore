@@ -103,7 +103,7 @@
                     </select>
 
                     <!-- Dropdown: Loại sản phẩm (Cấp 2) - Bắt buộc chọn Danh mục trước -->
-                    <select name="danhMuc" id="filterDanhMuc"
+                    <select name="danhMuc" id="filterDanhMuc" onchange="onDanhMucFilterChange(this.value)"
                             th:disabled="${baseUrl == '/san-pham' && (loaiSP == null || loaiSP == '' || loaiSP == 'ALL')}"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[170px] disabled:opacity-50 disabled:cursor-not-allowed">
                         <option value="0" id="defaultCatOption"
@@ -142,6 +142,10 @@
                             <option th:each="tg : ${authors}"
                                     th:value="${tg.maTacGia}"
                                     th:text="${tg.tenTacGia}"
+                                    th:attr="data-categories=${authorCategoryMap != null ? authorCategoryMap[tg.maTacGia] : ''}"
+                                    th:style="${selectedDanhMuc != null && selectedDanhMuc > 0 && (authorCategoryMap == null || !#strings.contains(',' + (authorCategoryMap[tg.maTacGia] ?: '') + ',', ',' + selectedDanhMuc + ','))} ? 'display:none;' : ''"
+                                    th:disabled="${selectedDanhMuc != null && selectedDanhMuc > 0 && (authorCategoryMap == null || !#strings.contains(',' + (authorCategoryMap[tg.maTacGia] ?: '') + ',', ',' + selectedDanhMuc + ','))}"
+                                    th:hidden="${selectedDanhMuc != null && selectedDanhMuc > 0 && (authorCategoryMap == null || !#strings.contains(',' + (authorCategoryMap[tg.maTacGia] ?: '') + ',', ',' + selectedDanhMuc + ','))}"
                                     th:selected="${selectedTacGia != null && selectedTacGia == tg.maTacGia}">Tác giả</option>
                         </select>
                     </div>
@@ -316,6 +320,7 @@
             if (authorGroup) {
                 if (group === 'Sach') {
                     authorGroup.classList.remove('hidden');
+                    onDanhMucFilterChange(catSelect ? catSelect.value : '0');
                 } else {
                     authorGroup.classList.add('hidden');
                     if (tacGiaSelect) tacGiaSelect.value = '0';
@@ -323,13 +328,48 @@
             }
         }
 
+        function onDanhMucFilterChange(catId) {
+            const tacGiaSelect = document.getElementById('filterTacGia');
+            if (!tacGiaSelect) return;
+
+            const catIdStr = String(catId || '0');
+            let selectedStillValid = false;
+
+            Array.from(tacGiaSelect.options).forEach(function (opt) {
+                if (opt.value === '0') return; // Option "Tất cả tác giả"
+                const rawCats = opt.getAttribute('data-categories') || '';
+                const cats = rawCats.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+
+                const match = (catIdStr === '0' || cats.includes(catIdStr));
+                if (match) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                    opt.style.display = '';
+                    if (opt.selected) selectedStillValid = true;
+                } else {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                    opt.style.display = 'none';
+                    if (opt.selected) opt.selected = false;
+                }
+            });
+
+            if (!selectedStillValid && tacGiaSelect.value !== '0') {
+                tacGiaSelect.value = '0';
+            }
+        }
+
         function initCategoryFilter() {
             const loaiSPSelect = document.getElementById('filterLoaiSP');
             const form = document.getElementById('filterForm');
+            const catSelect = document.getElementById('filterDanhMuc');
             if (loaiSPSelect) {
                 onCategoryGroupChange(loaiSPSelect.value, true);
             } else if (form && form.dataset.currentLoai) {
                 onCategoryGroupChange(form.dataset.currentLoai, true);
+            }
+            if (catSelect) {
+                onDanhMucFilterChange(catSelect.value);
             }
         }
 

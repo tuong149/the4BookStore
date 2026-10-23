@@ -204,6 +204,15 @@ public class SanPhamService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         if (maTacGia != null && maTacGia > 0) {
+            boolean hasKeyword = keyword != null && !keyword.isBlank();
+            boolean hasCategory = maDanhMuc != null && maDanhMuc > 0;
+            if (hasKeyword && hasCategory) {
+                return sanPhamRepository.findByTacGiaIdAndDanhMucIdAndKeyword(maTacGia, maDanhMuc, keyword.trim(), pageable);
+            } else if (hasCategory) {
+                return sanPhamRepository.findByTacGiaIdAndDanhMucId(maTacGia, maDanhMuc, pageable);
+            } else if (hasKeyword) {
+                return sanPhamRepository.findByTacGiaIdAndKeyword(maTacGia, keyword.trim(), pageable);
+            }
             return sanPhamRepository.findByTacGiaId(maTacGia, pageable);
         }
 

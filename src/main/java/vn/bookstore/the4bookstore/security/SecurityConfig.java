@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .requestMatchers("/khach-hang/**").hasAnyRole("KHACHHANG", "USER", "ADMIN", "MANAGER")
 
                 // Yêu cầu xác thực tài khoản (Hồ sơ, địa chỉ, đơn hàng, giỏ hàng, voucher)
-                .requestMatchers("/profile", "/profile/**", "/dia-chi/**", "/api/dia-chi/**", "/api/favorites/**", "/api/danh-gia/**").authenticated()
+                .requestMatchers("/profile", "/profile/**", "/dia-chi/**", "/api/dia-chi/**", "/api/danh-gia/**").authenticated()
                 .requestMatchers("/don-hang", "/don-hang/**", "/thanh-toan/**").authenticated()
                 .requestMatchers("/gio-hang", "/gio-hang/**").authenticated()
                 .requestMatchers("/san-voucher", "/san-voucher/**", "/vouchers/**", "/khuyen-mai/**", "/api/voucher/**").authenticated()
@@ -106,8 +106,8 @@ public class SecurityConfig {
                 // Webhook và API kiểm tra trạng thái thanh toán công khai
                 .requestMatchers("/don-hang/api/vietqr-webhook", "/don-hang/api/webhooks/**", "/don-hang/api/*/trang-thai-thanh-toan", "/api/webhooks/**").permitAll()
 
-                // API giỏ hàng hỗ trợ AJAX (trả requireLogin: true nếu chưa đăng nhập)
-                .requestMatchers("/api/gio-hang/**").permitAll()
+                // API giỏ hàng và tương tác hỗ trợ AJAX (trả requireLogin: true nếu chưa đăng nhập)
+                .requestMatchers("/api/gio-hang/**", "/api/favorites/**").permitAll()
 
                 // Công khai (Public routes: chỉ xem web, xem sản phẩm, xem shop, tìm kiếm)
                 .requestMatchers("/shop", "/shop/**").permitAll()
