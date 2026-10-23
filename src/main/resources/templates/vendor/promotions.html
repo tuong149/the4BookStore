@@ -67,6 +67,15 @@
                         </div>
                     </div>
 
+                    <!-- Giảm tối đa bao nhiêu tiền (Chống lỗ khi giảm %) -->
+                    <div id="vendorGiamToiDaGroup">
+                        <label class="block font-bold text-on-surface-variant mb-1">
+                            Giảm Tối Đa (VNĐ) <span class="text-on-surface-variant font-normal text-[11px]">(Để trống = không giới hạn)</span>
+                        </label>
+                        <input type="number" name="giamToiDa" min="0" placeholder="VD: 50000 (Chống lỗ khi giảm %)"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-on-surface-variant mb-1">Đơn Tối Thiểu (đ)</label>
@@ -113,6 +122,7 @@
                                 <div class="text-xs text-on-surface-variant mt-1">
                                     <span>Giảm: </span>
                                     <strong class="text-primary" th:text="${km.loaiGiam == 'Freeship' ? 'Miễn phí ship (tối đa ' + #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ)' : (km.loaiGiam == 'PhanTram' ? km.giaTriGiam + '%' : #numbers.formatDecimal(km.giaTriGiam, 0, 'COMMA', 0, 'POINT') + ' đ')}"></strong>
+                                    <span th:if="${km.loaiGiam == 'PhanTram' and km.giamToiDa != null}" th:text="' (tối đa ' + ${#numbers.formatDecimal(km.giamToiDa, 0, 'COMMA', 0, 'POINT')} + ' đ)'" class="text-primary font-semibold"></span>
                                     <span th:if="${km.donToiThieu != null}" th:text="' | Đơn tối thiểu: ' + ${#numbers.formatDecimal(km.donToiThieu, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                 </div>
                                 <div class="text-[11px] text-on-surface-variant/80 mt-0.5" th:text="'HSD: ' + ${#temporals.format(km.ngayKetThuc, 'dd/MM/yyyy HH:mm')}">HSD</div>
@@ -136,10 +146,21 @@
         function handleVendorLoaiGiamChange() {
             const select = document.getElementById('vendorLoaiGiam');
             const inputVal = document.querySelector('input[name="giaTriGiam"]');
-            if (select && select.value === 'Freeship') {
+            const giamToiDaInput = document.querySelector('input[name="giamToiDa"]');
+            if (!select) return;
+
+            if (select.value === 'Freeship') {
                 if (inputVal && (!inputVal.value || inputVal.value === '20000')) {
                     inputVal.value = '30000';
                 }
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 30000 (Tối đa)';
+            } else if (select.value === 'PhanTram') {
+                if (inputVal && parseInt(inputVal.value) > 100) {
+                    inputVal.value = '10';
+                }
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 50000 (Chống lỗ khi giảm %)';
+            } else {
+                if (giamToiDaInput) giamToiDaInput.placeholder = 'Không cần thiết khi giảm tiền cố định';
             }
         }
         document.addEventListener('DOMContentLoaded', function() {

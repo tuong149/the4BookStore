@@ -502,6 +502,10 @@ public class VendorService {
             km.setLoaiKhuyenMai("GIAM_GIA_SAN_PHAM");
         }
 
+        if (km.getGiamToiDa() != null && km.getGiamToiDa() <= 0) {
+            km.setGiamToiDa(null);
+        }
+
         km.setShop(shop);
         km.setPhamVi("SHOP");
         km.setTrangThai("HoatDong");
