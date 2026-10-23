@@ -36,6 +36,7 @@ public class VendorInventoryController {
     private final PhieuKiemKeRepository phieuKiemKeRepository;
     private final ChiTietKiemKeRepository chiTietKiemKeRepository;
     private final TaiKhoanRepository taiKhoanRepository;
+    private final vn.bookstore.the4bookstore.service.InventoryService inventoryService;
 
     private TaiKhoan getCurrentUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) return null;
@@ -124,7 +125,6 @@ public class VendorInventoryController {
 
     // --- 3. LƯU & CÂN BẰNG TỒN KHO CHO GIAN HÀNG ---
     @PostMapping("/create")
-    @Transactional
     public String submitAudit(@RequestParam(required = false) String ghiChu,
                               @RequestParam("productIds") List<Integer> productIds,
                               @RequestParam("soLuongThucTes") List<Integer> soLuongThucTes,
@@ -136,54 +136,8 @@ public class VendorInventoryController {
         if (redirect != null) return redirect;
 
         try {
-            if (productIds == null || productIds.isEmpty()) {
-                ra.addFlashAttribute("errorMessage", "Không có sản phẩm nào được chọn để kiểm kê!");
-                return "redirect:/vendor/inventory/create";
-            }
-
-            // Tạo phiếu kiểm kê cho Shop
-            PhieuKiemKe pkk = new PhieuKiemKe();
-            pkk.setShop(shop);
-            pkk.setNgayKiemKe(LocalDateTime.now());
-            pkk.setNgayPheDuyet(LocalDateTime.now());
-            pkk.setTrangThai("DaCanHang"); // Vendor tự chủ kiểm kê và cân bằng ngay
-            pkk.setGhiChu(ghiChu != null && !ghiChu.isBlank() ? ghiChu.trim() : "Biên bản kiểm kê định kỳ gian hàng");
-            pkk = phieuKiemKeRepository.save(pkk);
-
-            List<ChiTietKiemKe> chiTiets = new ArrayList<>();
-            int countUpdated = 0;
-
-            for (int i = 0; i < productIds.size(); i++) {
-                Integer pid = productIds.get(i);
-                Integer actualQty = (soLuongThucTes != null && i < soLuongThucTes.size()) ? soLuongThucTes.get(i) : null;
-                String reason = (lyDos != null && i < lyDos.size()) ? lyDos.get(i) : "";
-
-                if (pid != null && actualQty != null && actualQty >= 0) {
-                    SanPham sp = sanPhamRepository.findById(pid).orElse(null);
-                    if (sp != null && sp.getShop() != null && sp.getShop().getMaShop().equals(shop.getMaShop())) {
-                        int systemQty = sp.getSoLuongTon() != null ? sp.getSoLuongTon() : 0;
-
-                        ChiTietKiemKe ct = new ChiTietKiemKe();
-                        ct.setPhieuKiemKe(pkk);
-                        ct.setSanPham(sp);
-                        ct.setSoLuongHeThong(systemQty);
-                        ct.setSoLuongThucTe(actualQty);
-                        ct.setLyDo(reason != null && !reason.isBlank() ? reason.trim() : (actualQty != systemQty ? "Cân bằng theo kiểm đếm thực tế" : "Khớp số lượng"));
-                        chiTiets.add(ct);
-
-                        // Cân bằng trực tiếp vào số lượng tồn của sản phẩm thuộc Shop
-                        sp.setSoLuongTon(actualQty);
-                        sanPhamRepository.save(sp);
-                        countUpdated++;
-                    }
-                }
-            }
-
-            if (!chiTiets.isEmpty()) {
-                chiTietKiemKeRepository.saveAll(chiTiets);
-            }
-
-            ra.addFlashAttribute("successMessage", "Lập phiếu kiểm kê #" + pkk.getMaPhieuKiemKe() + " và cân bằng " + countUpdated + " sản phẩm thành công!");
+            PhieuKiemKe pkk = inventoryService.createInventoryAudit(shop, ghiChu, productIds, soLuongThucTes, lyDos);
+            ra.addFlashAttribute("successMessage", "Lập phiếu kiểm kê #" + pkk.getMaPhieuKiemKe() + " và cân bằng tồn kho thành công!");
             return "redirect:/vendor/inventory";
         } catch (Exception e) {
             log.error("Loi lap phieu kiem ke vendor: ", e);

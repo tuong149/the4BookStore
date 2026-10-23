@@ -1,28 +1,34 @@
 package vn.bookstore.the4bookstore.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "CHI_TIET_KIEM_KE")
+@Table(name = "chi_tiet_kiem_ke")
 @IdClass(ChiTietKiemKeId.class)
-@Data @NoArgsConstructor @AllArgsConstructor
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChiTietKiemKe {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "maPhieuKiemKe")
+    @JoinColumn(name = "ma_phieu_kiem_ke", nullable = false)
     private PhieuKiemKe phieuKiemKe;
-    
+
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "maSP")
+    @JoinColumn(name = "masp", nullable = false)
     private SanPham sanPham;
-    
-    @Column(nullable = false)
+
+    @Column(name = "so_luong_he_thong", nullable = false)
     private Integer soLuongHeThong;
-    @Column(nullable = false)
+
+    @Column(name = "so_luong_thuc_te", nullable = false)
     private Integer soLuongThucTe;
-    @Column(name = "chenh_lech")
+
+    @Column(name = "chenh_lech", nullable = false)
     private Integer chenhLech = 0;
-    @Column(length = 500)
+
+    @Column(name = "ly_do", length = 500)
     private String lyDo;
 }
