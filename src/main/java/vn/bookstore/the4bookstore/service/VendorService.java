@@ -71,6 +71,11 @@ public class VendorService {
         long returnRefundOrders = donHangRepository.countByShop_MaShopAndTrangThai(maShop, "TraHangHoanTien");
         long disputeOrders = donHangRepository.countByShop_MaShopAndTrangThai(maShop, "TranhChap");
 
+        java.time.LocalDate now = java.time.LocalDate.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
+
+        Long thisMonthRevenue = donHangRepository.getShopRevenueByDateRange(maShop, startOfMonth, endOfMonth);
         Long totalRevenue = donHangRepository.getShopRevenue(maShop);
         Long platformFee = donHangRepository.getShopPlatformFeePaid(maShop);
 
@@ -86,9 +91,11 @@ public class VendorService {
         stats.put("returnRefundOrders", returnRefundOrders);
         stats.put("disputeOrders", disputeOrders);
 
+        stats.put("thisMonthRevenue", thisMonthRevenue != null ? thisMonthRevenue : 0L);
         stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0L);
         stats.put("platformFee", platformFee != null ? platformFee : 0L);
         stats.put("netPayout", (totalRevenue != null ? totalRevenue : 0L));
+        stats.put("currentMonth", now.getMonthValue());
 
         return stats;
     }
