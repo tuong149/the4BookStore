@@ -44,10 +44,14 @@ public class EmailService {
         String subject = "The4BookStore - Mã OTP đặt lại mật khẩu: " + otpCode;
         String htmlContent = buildOtpEmailHtml(otpCode);
 
+        // Luôn in mã OTP ra console để tiện debug/test trên Render
+        printDevOtp(toEmail, otpCode);
+
         // 1. Ưu tiên gửi qua Brevo REST API (HTTPS port 443 - hoạt động tốt trên Render, không cần domain riêng)
         if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
             boolean sent = sendViaBrevo(toEmail.trim(), subject, htmlContent);
             if (sent) {
+                log.info("[EMAIL SERVICE / BREVO API] Đã gửi mã OTP [{}] thành công tới: {}", otpCode, toEmail);
                 return true;
             }
             log.warn("[EMAIL SERVICE] Gửi qua Brevo API không thành công, thử phương thức tiếp theo...");
