@@ -20,11 +20,14 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String mailUsername;
 
-    @Value("${app.resend.api-key:${RESEND_API_KEY:}}")
-    private String resendApiKey;
+    @Value("${app.brevo.api-key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
 
-    @Value("${app.resend.from:${RESEND_FROM_EMAIL:The4BookStore <onboarding@resend.dev>}}")
-    private String resendFromEmail;
+    @Value("${app.brevo.sender-email:${BREVO_SENDER_EMAIL:hoabui1709@gmail.com}}")
+    private String brevoSenderEmail;
+
+    @Value("${app.brevo.sender-name:${BREVO_SENDER_NAME:The4BookStore Support}}")
+    private String brevoSenderName;
 
     public EmailService(@Autowired(required = false) JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -33,7 +36,7 @@ public class EmailService {
     /**
      * Gửi email mã OTP đặt lại mật khẩu với giao diện HTML chuẩn nhận diện The4BookStore.
      * Thứ tự ưu tiên:
-     * 1. Resend REST API (Cổng HTTPS 443 - không bao giờ bị chặn trên Render/Cloud).
+     * 1. Brevo REST API (Cổng HTTPS 443 - không bao giờ bị chặn trên Render/Cloud, không cần domain riêng).
      * 2. JavaMailSender SMTP (Nếu được cấu hình và cổng không bị chặn).
      * 3. Fallback in mã OTP ra Console / Render Logs để tiện test.
      */
@@ -41,13 +44,13 @@ public class EmailService {
         String subject = "The4BookStore - Mã OTP đặt lại mật khẩu: " + otpCode;
         String htmlContent = buildOtpEmailHtml(otpCode);
 
-        // 1. Ưu tiên gửi qua Resend REST API (HTTPS port 443 - hoạt động tốt trên Render)
-        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
-            boolean sent = sendViaResend(toEmail.trim(), subject, htmlContent);
+        // 1. Ưu tiên gửi qua Brevo REST API (HTTPS port 443 - hoạt động tốt trên Render, không cần domain riêng)
+        if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
+            boolean sent = sendViaBrevo(toEmail.trim(), subject, htmlContent);
             if (sent) {
                 return true;
             }
-            log.warn("[EMAIL SERVICE] Gửi qua Resend API không thành công, thử phương thức tiếp theo...");
+            log.warn("[EMAIL SERVICE] Gửi qua Brevo API không thành công, thử phương thức tiếp theo...");
         }
 
         // 2. Gửi qua SMTP
@@ -73,8 +76,8 @@ public class EmailService {
                     log.error("  3. Dán 16 chữ cái đó vào biến MAIL_PASSWORD trong file .env (không dùng mật khẩu đăng nhập cá nhân).");
                 }
             }
-        } else if (resendApiKey == null || resendApiKey.trim().isEmpty()) {
-            log.warn("[EMAIL SERVICE] Chưa cấu hình RESEND_API_KEY hoặc SMTP. Đang kích hoạt chế độ DEV FALLBACK.");
+        } else if (brevoApiKey == null || brevoApiKey.trim().isEmpty()) {
+            log.warn("[EMAIL SERVICE] Chưa cấu hình BREVO_API_KEY hoặc SMTP. Đang kích hoạt chế độ DEV FALLBACK.");
         }
 
         // 3. Fallback in ra console/log
@@ -83,18 +86,24 @@ public class EmailService {
     }
 
     /**
-     * Gửi email thông qua Resend REST API qua cổng HTTPS 443 (chuẩn Cloud/Render)
+     * Gửi email thông qua Brevo (Sendinblue) REST API qua cổng HTTPS 443 (chuẩn Cloud/Render)
+     * Endpoint: POST https://api.brevo.com/v3/smtp/email
      */
-    private boolean sendViaResend(String toEmail, String subject, String htmlContent) {
+    private boolean sendViaBrevo(String toEmail, String subject, String htmlContent) {
         try {
             java.util.Map<String, Object> payload = new java.util.HashMap<>();
-            String from = (resendFromEmail != null && !resendFromEmail.trim().isEmpty())
-                    ? resendFromEmail.trim()
-                    : "The4BookStore <onboarding@resend.dev>";
-            payload.put("from", from);
-            payload.put("to", java.util.List.of(toEmail));
+
+            java.util.Map<String, String> sender = new java.util.HashMap<>();
+            sender.put("name", (brevoSenderName != null && !brevoSenderName.trim().isEmpty()) ? brevoSenderName.trim() : "The4BookStore Support");
+            sender.put("email", (brevoSenderEmail != null && !brevoSenderEmail.trim().isEmpty()) ? brevoSenderEmail.trim() : "hoabui1709@gmail.com");
+
+            java.util.Map<String, String> recipient = new java.util.HashMap<>();
+            recipient.put("email", toEmail);
+
+            payload.put("sender", sender);
+            payload.put("to", java.util.List.of(recipient));
             payload.put("subject", subject);
-            payload.put("html", htmlContent);
+            payload.put("htmlContent", htmlContent);
 
             String jsonBody = objectMapper.writeValueAsString(payload);
 
@@ -103,9 +112,10 @@ public class EmailService {
                     .build();
 
             java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                    .uri(java.net.URI.create("https://api.resend.com/emails"))
-                    .header("Authorization", "Bearer " + resendApiKey.trim())
-                    .header("Content-Type", "application/json")
+                    .uri(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("accept", "application/json")
+                    .header("api-key", brevoApiKey.trim())
+                    .header("content-type", "application/json")
                     .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody, java.nio.charset.StandardCharsets.UTF_8))
                     .timeout(java.time.Duration.ofSeconds(15))
                     .build();
@@ -113,14 +123,14 @@ public class EmailService {
             java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                log.info("[EMAIL SERVICE / RESEND API] Đã gửi email thành công tới: {}", toEmail);
+                log.info("[EMAIL SERVICE / BREVO API] Đã gửi email thành công tới: {}", toEmail);
                 return true;
             } else {
-                log.error("[EMAIL SERVICE / RESEND API] Gửi thất bại (HTTP {}): {}", response.statusCode(), response.body());
+                log.error("[EMAIL SERVICE / BREVO API] Gửi thất bại (HTTP {}): {}", response.statusCode(), response.body());
                 return false;
             }
         } catch (Exception e) {
-            log.error("[EMAIL SERVICE / RESEND API] Ngoại lệ khi gọi Resend: {}", e.getMessage());
+            log.error("[EMAIL SERVICE / BREVO API] Ngoại lệ khi gọi Brevo: {}", e.getMessage());
             return false;
         }
     }
