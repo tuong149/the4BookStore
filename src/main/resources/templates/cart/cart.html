@@ -323,10 +323,10 @@
                             <span class="font-mono font-semibold" id="summaryOrderDiscount">-0 đ</span>
                         </div>
 
-                        <!-- Phí vận chuyển gốc -->
+                        <!-- Phí vận chuyển -->
                         <div class="flex justify-between text-xs md:text-sm text-on-surface-variant">
-                            <span>Phí vận chuyển gốc</span>
-                            <span class="font-mono font-semibold text-on-surface" id="summaryShippingFee">0 đ</span>
+                            <span>Phí vận chuyển</span>
+                            <span class="text-xs text-on-surface-variant font-medium italic" id="summaryShippingFee">Sẽ được tính sau</span>
                         </div>
 
                         <!-- Giảm phí ship row -->
@@ -822,8 +822,16 @@
 
             if (summaryItemCountEl) summaryItemCountEl.textContent = `Đã chọn (${selectedItemCount} món)`;
             if (summarySubtotalEl) summarySubtotalEl.textContent = formatVND(selectedSubtotal);
-            if (summaryShippingEl) summaryShippingEl.textContent = formatVND(originalShippingFee);
-            if (summaryTotalEl) summaryTotalEl.textContent = formatVND(finalTotal);
+            if (summaryShippingEl) {
+                if (selectedSubtotal >= FREE_SHIPPING_THRESHOLD) {
+                    summaryShippingEl.innerHTML = '<span class="text-teal-700 font-bold">Miễn Phí</span>';
+                } else {
+                    summaryShippingEl.innerHTML = '<span class="text-xs text-on-surface-variant font-medium italic">Sẽ được tính sau</span>';
+                }
+            }
+            if (summaryTotalEl) {
+                summaryTotalEl.textContent = formatVND(productTotalAfterDiscount);
+            }
 
             if (orderDiscountRow) {
                 if (orderDiscountAmount > 0) {

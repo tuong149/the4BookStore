@@ -86,27 +86,70 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2">
+                    <!-- Dòng ví dụ mẫu nổi bật cho người dùng theo chuẩn 34 tỉnh/thành mới -->
+                    <div class="p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-on-surface flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-primary shrink-0 mt-0.5">lightbulb</span>
                         <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Tỉnh / Thành <span class="text-error">*</span></label>
-                            <input type="text" name="tinhThanh" required placeholder="Hồ Chí Minh"
-                                   class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Quận / Huyện</label>
-                            <input type="text" name="quanHuyen" placeholder="TP. Thủ Đức"
-                                   class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-on-surface-variant mb-1">Phường / Xã</label>
-                            <input type="text" name="phuongXa" placeholder="Linh Trung"
-                                   class="w-full px-3 py-2 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
+                            <div class="font-bold text-primary">Cấu trúc địa chỉ chuẩn mới: <span class="font-normal text-on-surface">số nhà + tên đường, phường, tỉnh (34 Tỉnh/Thành)</span></div>
+                            <div class="text-on-surface-variant text-[11px] mt-0.5">
+                                Ví dụ mẫu: <strong class="text-on-surface font-mono">1 Võ Văn Ngân, Phường Linh Chiểu, TP. Hồ Chí Minh</strong>
+                            </div>
                         </div>
                     </div>
 
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-on-surface-variant mb-1">Tỉnh / Thành Phố <span class="text-error">*</span></label>
+                            <input list="vietnamProvincesProfile" name="tinhThanh" required placeholder="Chọn trong 34 tỉnh/thành..."
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
+                            <datalist id="vietnamProvincesProfile">
+                                <option value="TP. Hồ Chí Minh"></option>
+                                <option value="TP. Hà Nội"></option>
+                                <option value="TP. Hải Phòng"></option>
+                                <option value="TP. Đà Nẵng"></option>
+                                <option value="TP. Cần Thơ"></option>
+                                <option value="TP. Huế"></option>
+                                <option value="An Giang"></option>
+                                <option value="Bắc Ninh"></option>
+                                <option value="Cà Mau"></option>
+                                <option value="Cao Bằng"></option>
+                                <option value="Đắk Lắk"></option>
+                                <option value="Điện Biên"></option>
+                                <option value="Đồng Nai"></option>
+                                <option value="Đồng Tháp"></option>
+                                <option value="Gia Lai"></option>
+                                <option value="Hà Tĩnh"></option>
+                                <option value="Hưng Yên"></option>
+                                <option value="Khánh Hòa"></option>
+                                <option value="Lai Châu"></option>
+                                <option value="Lâm Đồng"></option>
+                                <option value="Lạng Sơn"></option>
+                                <option value="Lào Cai"></option>
+                                <option value="Nghệ An"></option>
+                                <option value="Ninh Bình"></option>
+                                <option value="Phú Thọ"></option>
+                                <option value="Quảng Ngãi"></option>
+                                <option value="Quảng Ninh"></option>
+                                <option value="Quảng Trị"></option>
+                                <option value="Sơn La"></option>
+                                <option value="Tây Ninh"></option>
+                                <option value="Thái Nguyên"></option>
+                                <option value="Thanh Hóa"></option>
+                                <option value="Tuyên Quang"></option>
+                                <option value="Vĩnh Long"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-on-surface-variant mb-1">Phường / Xã <span class="text-error">*</span></label>
+                            <input type="text" name="phuongXa" required placeholder="Ví dụ: Phường Linh Chiểu"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
+                        </div>
+                    </div>
+                    <input type="hidden" name="quanHuyen" value=""/>
+
                     <div>
-                        <label class="block font-bold text-on-surface-variant mb-1">Địa Chỉ Chi Tiết (Số nhà, Tên đường) <span class="text-error">*</span></label>
-                        <input type="text" name="diaChiChiTiet" required placeholder="Số 1 Võ Văn Ngân"
+                        <label class="block font-bold text-on-surface-variant mb-1">Số nhà + Tên đường <span class="text-error">*</span></label>
+                        <input type="text" name="diaChiChiTiet" required placeholder="Ví dụ: 1 Võ Văn Ngân (hoặc 123 Nguyễn Trãi)"
                                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low focus:ring-2 focus:ring-primary"/>
                     </div>
 
