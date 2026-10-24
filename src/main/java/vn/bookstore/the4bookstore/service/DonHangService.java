@@ -25,6 +25,7 @@ public class DonHangService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ShopRepository shopRepository;
     private final NhaVanChuyenRepository nhaVanChuyenRepository;
+    private final ShippingCalculationService shippingCalculationService;
 
     public DonHangService(DonHangRepository donHangRepository,
                           ChiTietDonHangRepository chiTietDonHangRepository,
@@ -35,7 +36,8 @@ public class DonHangService {
                           VoucherDaLuuRepository voucherDaLuuRepository,
                           SimpMessagingTemplate messagingTemplate,
                           ShopRepository shopRepository,
-                          NhaVanChuyenRepository nhaVanChuyenRepository) {
+                          NhaVanChuyenRepository nhaVanChuyenRepository,
+                          ShippingCalculationService shippingCalculationService) {
         this.donHangRepository = donHangRepository;
         this.chiTietDonHangRepository = chiTietDonHangRepository;
         this.sanPhamRepository = sanPhamRepository;
@@ -46,6 +48,7 @@ public class DonHangService {
         this.messagingTemplate = messagingTemplate;
         this.shopRepository = shopRepository;
         this.nhaVanChuyenRepository = nhaVanChuyenRepository;
+        this.shippingCalculationService = shippingCalculationService;
     }
 
     /**
@@ -191,7 +194,18 @@ public class DonHangService {
                     .filter(c -> "HoatDong".equalsIgnoreCase(c.getTrangThai()))
                     .findFirst().orElse(null);
         }
-        int rawPhiVanChuyen = (nvc != null && nvc.getPhiCoBan() != null) ? nvc.getPhiCoBan() : 30000;
+
+        // Tính cước vận chuyển riêng cho từng Shop theo khoảng cách địa lý (Haversine)
+        Map<Integer, ShippingCalculationService.ShippingEstimate> shopShippingEstimates = new HashMap<>();
+        int totalCalculatedShippingFee = 0;
+        for (Integer sId : itemsByShopId.keySet()) {
+            Shop s = shopRepository.findById(sId).orElse(null);
+            String sAddr = (s != null && s.getDiaChiShop() != null && !s.getDiaChiShop().isBlank())
+                    ? s.getDiaChiShop() : "Quận 1, TP. Hồ Chí Minh";
+            ShippingCalculationService.ShippingEstimate est = shippingCalculationService.calculateFee(sAddr, diaChiGiao, nvc);
+            shopShippingEstimates.put(sId, est);
+            totalCalculatedShippingFee += est.getShippingFee();
+        }
 
         // 6. Xử lý giảm giá từ mã khuyến mãi toàn sàn
         int totalOrderDiscount = 0;
@@ -257,7 +271,7 @@ public class DonHangService {
         // Kiểm tra chính sách Miễn phí vận chuyển toàn sàn:
         final int FREE_SHIPPING_THRESHOLD = 350000;
         if (totalSubtotal >= FREE_SHIPPING_THRESHOLD) {
-            totalShippingDiscount = rawPhiVanChuyen;
+            totalShippingDiscount = totalCalculatedShippingFee;
         }
 
         // Xử lý mã miễn phí vận chuyển (SHIPPING_DISCOUNT)
@@ -289,7 +303,7 @@ public class DonHangService {
             }
 
             int maxFreeshipDiscount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
-            totalShippingDiscount = Math.max(totalShippingDiscount, Math.min(rawPhiVanChuyen, maxFreeshipDiscount));
+            totalShippingDiscount = Math.max(totalShippingDiscount, Math.min(totalCalculatedShippingFee, maxFreeshipDiscount));
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
             khuyenMaiRepository.save(km);
@@ -303,6 +317,7 @@ public class DonHangService {
         int shopCount = itemsByShopId.size();
         int currentShopIdx = 0;
         int allocatedOrderDiscount = 0;
+        int allocatedShippingDiscount = 0;
 
         for (Map.Entry<Integer, List<ChiTietGioHang>> entry : itemsByShopId.entrySet()) {
             Integer sId = entry.getKey();
@@ -324,19 +339,18 @@ public class DonHangService {
                 }
             }
 
-            // Phí ship và giảm giá freeship cho shop:
-            int shopShippingFee = 0;
+            // Phí ship và giảm giá freeship cho shop theo khoảng cách:
+            ShippingCalculationService.ShippingEstimate est = shopShippingEstimates.get(sId);
+            int shopShippingFee = (est != null) ? est.getShippingFee() : 25000;
             int shopShippingDiscount = 0;
             if (totalSubtotal >= FREE_SHIPPING_THRESHOLD) {
-                shopShippingFee = rawPhiVanChuyen;
-                shopShippingDiscount = rawPhiVanChuyen;
-            } else {
-                if (currentShopIdx == 0) {
-                    shopShippingFee = rawPhiVanChuyen;
-                    shopShippingDiscount = totalShippingDiscount;
+                shopShippingDiscount = shopShippingFee;
+            } else if (totalShippingDiscount > 0 && totalCalculatedShippingFee > 0) {
+                if (currentShopIdx == shopCount - 1) {
+                    shopShippingDiscount = Math.min(shopShippingFee, Math.max(0, totalShippingDiscount - allocatedShippingDiscount));
                 } else {
-                    shopShippingFee = 0;
-                    shopShippingDiscount = 0;
+                    shopShippingDiscount = Math.min(shopShippingFee, (int) Math.round((double) shopShippingFee / totalCalculatedShippingFee * totalShippingDiscount));
+                    allocatedShippingDiscount += shopShippingDiscount;
                 }
             }
 

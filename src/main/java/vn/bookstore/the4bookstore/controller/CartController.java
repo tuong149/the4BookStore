@@ -14,6 +14,8 @@ import vn.bookstore.the4bookstore.security.CustomOidcUser;
 import vn.bookstore.the4bookstore.security.CustomUserDetails;
 import vn.bookstore.the4bookstore.service.DonHangService;
 import vn.bookstore.the4bookstore.service.GioHangService;
+import vn.bookstore.the4bookstore.service.ShippingCalculationService;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,6 +31,7 @@ public class CartController {
     private final KhuyenMaiRepository khuyenMaiRepository;
     private final DiaChiGiaoHangRepository diaChiGiaoHangRepository;
     private final NhaVanChuyenRepository nhaVanChuyenRepository;
+    private final ShippingCalculationService shippingCalculationService;
 
     public CartController(GioHangService gioHangService,
                           DonHangService donHangService,
@@ -36,7 +39,8 @@ public class CartController {
                           TaiKhoanRepository taiKhoanRepository,
                           KhuyenMaiRepository khuyenMaiRepository,
                           DiaChiGiaoHangRepository diaChiGiaoHangRepository,
-                          NhaVanChuyenRepository nhaVanChuyenRepository) {
+                          NhaVanChuyenRepository nhaVanChuyenRepository,
+                          ShippingCalculationService shippingCalculationService) {
         this.gioHangService = gioHangService;
         this.donHangService = donHangService;
         this.khachHangRepository = khachHangRepository;
@@ -44,6 +48,7 @@ public class CartController {
         this.khuyenMaiRepository = khuyenMaiRepository;
         this.diaChiGiaoHangRepository = diaChiGiaoHangRepository;
         this.nhaVanChuyenRepository = nhaVanChuyenRepository;
+        this.shippingCalculationService = shippingCalculationService;
     }
 
     // ==================== Helper: Lấy TaiKhoan từ Authentication ====================
@@ -536,5 +541,89 @@ public class CartController {
         }
 
         return result;
+    }
+
+    // ==================== REST API: Tính phí ship theo khoảng cách từng Shop ====================
+
+    @PostMapping("/api/gio-hang/tinh-phi-ship")
+    @ResponseBody
+    public ResponseEntity<?> apiCalculateShippingFee(
+            @RequestParam(value = "maDiaChi", required = false) Integer maDiaChi,
+            @RequestParam(value = "diaChiGiao", required = false) String diaChiGiao,
+            @RequestParam(value = "maNvc", required = false) Integer maNvc,
+            @RequestParam(value = "selectedProductIds", required = false) List<Integer> selectedProductIds,
+            @RequestParam(value = "maVoucherShipping", required = false) String maVoucherShipping,
+            Authentication authentication,
+            jakarta.servlet.http.HttpSession session) {
+
+        KhachHang kh = getCurrentKhachHang(authentication);
+        List<ChiTietGioHang> allItems;
+        if (kh != null) {
+            allItems = gioHangService.getCartItems(kh);
+        } else {
+            allItems = gioHangService.getSessionCartItems(session);
+        }
+        if (allItems == null) allItems = Collections.emptyList();
+
+        // Lọc sản phẩm được chọn
+        List<ChiTietGioHang> targetItems = allItems;
+        if (selectedProductIds != null && !selectedProductIds.isEmpty()) {
+            Set<Integer> idSet = new HashSet<>(selectedProductIds);
+            targetItems = allItems.stream()
+                    .filter(i -> i.getSanPham() != null && idSet.contains(i.getSanPham().getMaSP()))
+                    .collect(Collectors.toList());
+        }
+
+        // Xác định địa chỉ giao hàng
+        String finalAddress = diaChiGiao;
+        if (maDiaChi != null) {
+            DiaChiGiaoHang dc = diaChiGiaoHangRepository.findById(maDiaChi).orElse(null);
+            if (dc != null) {
+                finalAddress = dc.getDiaChiDayDu();
+            }
+        }
+        if (finalAddress == null || finalAddress.isBlank()) {
+            if (kh != null && kh.getDiaChi() != null && !kh.getDiaChi().isBlank()) {
+                finalAddress = kh.getDiaChi();
+            } else {
+                finalAddress = "Quận 1, TP. Hồ Chí Minh";
+            }
+        }
+
+        // Xác định Nhà Vận Chuyển
+        NhaVanChuyen nvc = null;
+        if (maNvc != null) {
+            nvc = nhaVanChuyenRepository.findById(maNvc).orElse(null);
+        }
+        if (nvc == null) {
+            nvc = nhaVanChuyenRepository.findAll().stream()
+                    .filter(c -> "HoatDong".equalsIgnoreCase(c.getTrangThai()))
+                    .findFirst().orElse(null);
+        }
+
+        // Xác định giảm giá voucher Freeship (nếu có)
+        int voucherShippingDiscount = 0;
+        if (maVoucherShipping != null && !maVoucherShipping.isBlank()) {
+            Optional<KhuyenMai> kmOpt = khuyenMaiRepository.findByMaCode(maVoucherShipping.trim().toUpperCase());
+            if (kmOpt.isPresent() && kmOpt.get().isShippingDiscount() && "HoatDong".equalsIgnoreCase(kmOpt.get().getTrangThai())) {
+                voucherShippingDiscount = kmOpt.get().getGiaTriGiam() != null ? kmOpt.get().getGiaTriGiam() : 30000;
+            }
+        }
+
+        final int FREE_SHIPPING_THRESHOLD = 350000;
+        ShippingCalculationService.CartShippingCalculationResult calcResult = shippingCalculationService.calculateCartShipping(
+                targetItems, finalAddress, nvc, FREE_SHIPPING_THRESHOLD, voucherShippingDiscount
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("destinationAddress", finalAddress);
+        response.put("totalOriginalShippingFee", calcResult.getTotalOriginalShippingFee());
+        response.put("totalShippingDiscount", calcResult.getTotalShippingDiscount());
+        response.put("finalShippingFee", calcResult.getFinalShippingFee());
+        response.put("packageCount", calcResult.getShopBreakdowns().size());
+        response.put("packages", calcResult.getShopBreakdowns());
+
+        return ResponseEntity.ok(response);
     }
 }
