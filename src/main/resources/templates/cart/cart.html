@@ -1196,6 +1196,10 @@
         }
 
         function updateCustomCombinedAddress() {
+            const customRadio = document.getElementById('addr_custom');
+            if (customRadio && !customRadio.checked) {
+                customRadio.checked = true;
+            }
             const tinh = document.getElementById('customTinhThanh') ? document.getElementById('customTinhThanh').value.trim() : '';
             const phuong = document.getElementById('customPhuongXa') ? document.getElementById('customPhuongXa').value.trim() : '';
             const soNha = document.getElementById('customSoNhaTenDuong') ? document.getElementById('customSoNhaTenDuong').value.trim() : '';
