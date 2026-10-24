@@ -105,4 +105,60 @@ public class ShippingCalculationServiceTest {
         assertEquals(54000, result.getTotalOriginalShippingFee(), "Tổng tiền ship 2 kiện phải là 54.000 đ");
         assertEquals(54000, result.getFinalShippingFee(), "Tổng thanh toán ship phải là 54.000 đ khi chưa có voucher");
     }
+
+    @Test
+    void testAbbreviatedAddressVvnLtTdHcm() {
+        String userAbbrAddress = "1 VVN, LT, TD, HCM";
+        ShippingCalculationService.GeoPoint geo = shippingService.resolveGeoPoint(userAbbrAddress);
+        assertEquals("TP. Thủ Đức, TP.HCM", geo.getDisplayName(), "Phải nhận diện chính xác TP. Thủ Đức từ '1 VVN, LT, TD, HCM'");
+
+        // Vendor ở Quận 1, TP.HCM (khoảng cách ~12km)
+        String shopQ1 = "123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh";
+        ShippingCalculationService.ShippingEstimate estQ1 = shippingService.calculateFee(shopQ1, userAbbrAddress, nvc);
+        assertTrue(estQ1.getDistanceKm() > 8.0 && estQ1.getDistanceKm() < 20.0, "Khoảng cách Thủ Đức -> Quận 1 phải khoảng 10-15 km");
+        assertEquals(20000, estQ1.getShippingFee(), "Cước nội thành/tỉnh phải là 20.000 đ");
+
+        // Vendor ở Thủ Đức (siêu gần < 5km)
+        String shopTD = "Đường số 9, Phường Linh Tây, TP. Thủ Đức, TP.HCM";
+        ShippingCalculationService.ShippingEstimate estTD = shippingService.calculateFee(shopTD, userAbbrAddress, nvc);
+        assertTrue(estTD.getDistanceKm() <= 5.0, "Khoảng cách cùng Thủ Đức phải <= 5 km");
+        assertEquals(16000, estTD.getShippingFee(), "Cước nội thành siêu gần phải là 16.000 đ");
+
+        // Vendor ở Hà Nội (liên miền > 1000km)
+        String shopHN = "Cầu Giấy, Hà Nội";
+        ShippingCalculationService.ShippingEstimate estHN = shippingService.calculateFee(shopHN, userAbbrAddress, nvc);
+        assertTrue(estHN.getDistanceKm() > 1000.0, "Khoảng cách Hà Nội -> Thủ Đức phải > 1000 km");
+        assertEquals(38000, estHN.getShippingFee(), "Cước liên miền phải là 38.000 đ");
+    }
+
+    @Test
+    void testFullVietnameseWithDiacritics() {
+        String fullAddressHCM = "Số 1, Đường Võ Văn Ngân, Phường Linh Chiểu, Thành phố Thủ Đức, Thành phố Hồ Chí Minh";
+        ShippingCalculationService.GeoPoint geoHCM = shippingService.resolveGeoPoint(fullAddressHCM);
+        assertEquals("TP. Thủ Đức, TP.HCM", geoHCM.getDisplayName(), "Phải nhận diện đúng Thủ Đức từ địa chỉ tiếng Việt có dấu đầy đủ");
+
+        String fullAddressHN = "Số 15, Phố Duy Tân, Phường Dịch Vọng Hậu, Quận Cầu Giấy, Thành phố Hà Nội";
+        ShippingCalculationService.GeoPoint geoHN = shippingService.resolveGeoPoint(fullAddressHN);
+        assertEquals("Quận Cầu Giấy, Hà Nội", geoHN.getDisplayName(), "Phải nhận diện đúng Cầu Giấy từ địa chỉ tiếng Việt có dấu đầy đủ");
+
+        String fullAddressHue = "Số 20, Đường Hùng Vương, Phường Phú Hội, Thành phố Huế, Tỉnh Thừa Thiên Huế";
+        ShippingCalculationService.GeoPoint geoHue = shippingService.resolveGeoPoint(fullAddressHue);
+        assertEquals("Thừa Thiên Huế", geoHue.getDisplayName(), "Phải nhận diện đúng Huế từ địa chỉ tiếng Việt có dấu đầy đủ");
+    }
+
+    @Test
+    void testThreePartAddressFormat() {
+        // Cấu trúc 3 cấp mới: số nhà + tên đường, phường, tỉnh
+        String sampleAddr = "1 Võ Văn Ngân, Phường Linh Chiểu, TP. Hồ Chí Minh";
+        ShippingCalculationService.GeoPoint geo = shippingService.resolveGeoPoint(sampleAddr);
+        assertEquals("TP. Thủ Đức, TP.HCM", geo.getDisplayName());
+
+        String sampleHN = "15 Duy Tân, Phường Dịch Vọng Hậu, TP. Hà Nội";
+        ShippingCalculationService.GeoPoint geoHN = shippingService.resolveGeoPoint(sampleHN);
+        assertTrue(geoHN.getDisplayName().contains("Hà Nội"));
+
+        String sampleLamDong = "50 Lê Lợi, Phường 1, Lâm Đồng";
+        ShippingCalculationService.GeoPoint geoLD = shippingService.resolveGeoPoint(sampleLamDong);
+        assertEquals("Lâm Đồng", geoLD.getDisplayName());
+    }
 }

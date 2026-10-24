@@ -208,6 +208,63 @@ public class ShippingCalculationService {
         GEO_DATABASE.put("yen bai", new GeoPoint(21.7168, 104.9113, "Yên Bái"));
     }
 
+    // Bảng ánh xạ từ viết tắt quận/huyện phổ biến
+    private static final Map<String, String> ABBR_DISTRICT_MAP = new LinkedHashMap<>();
+    // Bảng ánh xạ từ viết tắt tỉnh/thành phố phổ biến
+    private static final Map<String, String> ABBR_PROVINCE_MAP = new LinkedHashMap<>();
+
+    static {
+        // Viết tắt các quận/huyện TP.HCM
+        ABBR_DISTRICT_MAP.put("td", "thu duc");
+        ABBR_DISTRICT_MAP.put("tptd", "thu duc");
+        ABBR_DISTRICT_MAP.put("vvn", "thu duc");      // Đường Võ Văn Ngân (HCMUTE / Linh Chiểu)
+        ABBR_DISTRICT_MAP.put("lt", "thu duc");       // Phường Linh Chiểu / Linh Trung
+        ABBR_DISTRICT_MAP.put("linh chieu", "thu duc");
+        ABBR_DISTRICT_MAP.put("linh trung", "thu duc");
+        ABBR_DISTRICT_MAP.put("linh tay", "thu duc");
+        ABBR_DISTRICT_MAP.put("linh dong", "thu duc");
+        ABBR_DISTRICT_MAP.put("tang nhon phu", "thu duc");
+        ABBR_DISTRICT_MAP.put("hcmute", "thu duc");
+
+        for (int i = 1; i <= 12; i++) {
+            ABBR_DISTRICT_MAP.put("q" + i, "quan " + i);
+            ABBR_DISTRICT_MAP.put("q " + i, "quan " + i);
+        }
+        ABBR_DISTRICT_MAP.put("bt", "binh thanh");
+        ABBR_DISTRICT_MAP.put("bth", "binh thanh");
+        ABBR_DISTRICT_MAP.put("pn", "phu nhuan");
+        ABBR_DISTRICT_MAP.put("gv", "go vap");
+        ABBR_DISTRICT_MAP.put("tb", "tan binh");
+        ABBR_DISTRICT_MAP.put("bc", "binh chanh");
+        ABBR_DISTRICT_MAP.put("hm", "hoc mon");
+        ABBR_DISTRICT_MAP.put("nb", "nha be");
+        ABBR_DISTRICT_MAP.put("cc", "cu chi");
+        ABBR_DISTRICT_MAP.put("cg", "can gio");
+
+        // Viết tắt các quận/huyện Hà Nội
+        ABBR_DISTRICT_MAP.put("hk", "hoan kiem");
+        ABBR_DISTRICT_MAP.put("tx", "thanh xuan");
+        ABBR_DISTRICT_MAP.put("hd", "ha dong");
+        ABBR_DISTRICT_MAP.put("lb", "long bien");
+        ABBR_DISTRICT_MAP.put("ntl", "nam tu liem");
+        ABBR_DISTRICT_MAP.put("btl", "bac tu liem");
+        ABBR_DISTRICT_MAP.put("dd", "dong da");
+        ABBR_DISTRICT_MAP.put("hbt", "hai ba trung");
+
+        // Viết tắt tỉnh / thành phố
+        ABBR_PROVINCE_MAP.put("hcm", "ho chi minh");
+        ABBR_PROVINCE_MAP.put("tphcm", "ho chi minh");
+        ABBR_PROVINCE_MAP.put("sg", "ho chi minh");
+        ABBR_PROVINCE_MAP.put("hn", "ha noi");
+        ABBR_PROVINCE_MAP.put("tphn", "ha noi");
+        ABBR_PROVINCE_MAP.put("dn", "da nang");
+        ABBR_PROVINCE_MAP.put("hp", "hai phong");
+        ABBR_PROVINCE_MAP.put("ct", "can tho");
+        ABBR_PROVINCE_MAP.put("bd", "binh duong");
+        ABBR_PROVINCE_MAP.put("vt", "vung tau");
+        ABBR_PROVINCE_MAP.put("brvt", "ba ria vung tau");
+    }
+
     /**
      * Chuẩn hóa chuỗi tiếng Việt: Bỏ dấu, chữ thường, loại bỏ ký tự lạ
      */
@@ -233,20 +290,35 @@ public class ShippingCalculationService {
             return GEO_DATABASE.get("ho chi minh");
         }
 
-        // 1. Quét tìm quận/huyện cụ thể trước (ưu tiên các quận thuộc HCM hoặc HN)
+        // 1. Quét tìm quận/huyện đầy đủ từ database trước
         for (Map.Entry<String, GeoPoint> entry : GEO_DATABASE.entrySet()) {
             String key = entry.getKey();
-            // Nếu là quận huyện (chứa 'quan ', 'huyen ', 'binh thanh',...)
             if (isDistrictKey(key) && containsWordOrPhrase(normalized, key)) {
                 return entry.getValue();
             }
         }
 
-        // 2. Quét tìm tỉnh/thành phố
+        // 2. Quét tìm từ viết tắt quận/huyện / địa danh đặc trưng (td, vvn, lt, q1..q12, tx, cg,...)
+        for (Map.Entry<String, String> entry : ABBR_DISTRICT_MAP.entrySet()) {
+            if (containsWordOrPhrase(normalized, entry.getKey())) {
+                GeoPoint pt = GEO_DATABASE.get(entry.getValue());
+                if (pt != null) return pt;
+            }
+        }
+
+        // 3. Quét tìm tên tỉnh/thành phố đầy đủ
         for (Map.Entry<String, GeoPoint> entry : GEO_DATABASE.entrySet()) {
             String key = entry.getKey();
             if (!isDistrictKey(key) && containsWordOrPhrase(normalized, key)) {
                 return entry.getValue();
+            }
+        }
+
+        // 4. Quét tìm từ viết tắt tỉnh/thành phố (hcm, hn, dn, ct, hp, bd, vt,...)
+        for (Map.Entry<String, String> entry : ABBR_PROVINCE_MAP.entrySet()) {
+            if (containsWordOrPhrase(normalized, entry.getKey())) {
+                GeoPoint pt = GEO_DATABASE.get(entry.getValue());
+                if (pt != null) return pt;
             }
         }
 

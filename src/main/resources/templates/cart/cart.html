@@ -395,7 +395,7 @@
                     </div>
                 </div>
 
-                <form th:action="@{/gio-hang/dat-hang}" method="post" class="space-y-4" id="orderSubmitForm">
+                <form th:action="@{/gio-hang/dat-hang}" method="post" class="space-y-4" id="orderSubmitForm" onsubmit="return validateCheckoutAddressForm();">
                     <!-- Hidden container for selected products -->
                     <div id="modalSelectedProductsContainer"></div>
                     <!-- Hidden inputs for applied vouchers -->
@@ -458,13 +458,76 @@
                                            placeholder="0912 345 678" pattern="[0-9]{10,11}" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
                                 </div>
                             </div>
-                            <div>
-                                <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Địa chỉ giao hàng chi tiết</label>
-                                <input name="diaChiGiao" type="text" 
-                                       th:value="${khachHang?.diaChi}"
-                                       oninput="debounceShippingEstimate()"
-                                       placeholder="123 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM" class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                            <!-- Dòng ví dụ mẫu nổi bật cho người dùng -->
+                            <div class="p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-on-surface flex items-start gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-primary shrink-0 mt-0.5">lightbulb</span>
+                                <div>
+                                    <div class="font-bold text-primary">Cấu trúc địa chỉ chuẩn mới: <span class="font-normal text-on-surface">số nhà + tên đường, phường, tỉnh (34 Tỉnh/Thành)</span></div>
+                                    <div class="text-on-surface-variant text-[11px] mt-0.5">
+                                        Ví dụ mẫu: <strong class="text-on-surface font-mono">1 Võ Văn Ngân, Phường Linh Chiểu, TP. Hồ Chí Minh</strong>
+                                    </div>
+                                </div>
                             </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Tỉnh / Thành phố <span class="text-error">*</span></label>
+                                    <input list="vietnamProvinces" id="customTinhThanh" placeholder="Chọn trong 34 tỉnh/thành..." 
+                                           class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                           oninput="updateCustomCombinedAddress()" />
+                                    <datalist id="vietnamProvinces">
+                                        <option value="TP. Hồ Chí Minh"></option>
+                                        <option value="TP. Hà Nội"></option>
+                                        <option value="TP. Hải Phòng"></option>
+                                        <option value="TP. Đà Nẵng"></option>
+                                        <option value="TP. Cần Thơ"></option>
+                                        <option value="TP. Huế"></option>
+                                        <option value="An Giang"></option>
+                                        <option value="Bắc Ninh"></option>
+                                        <option value="Cà Mau"></option>
+                                        <option value="Cao Bằng"></option>
+                                        <option value="Đắk Lắk"></option>
+                                        <option value="Điện Biên"></option>
+                                        <option value="Đồng Nai"></option>
+                                        <option value="Đồng Tháp"></option>
+                                        <option value="Gia Lai"></option>
+                                        <option value="Hà Tĩnh"></option>
+                                        <option value="Hưng Yên"></option>
+                                        <option value="Khánh Hòa"></option>
+                                        <option value="Lai Châu"></option>
+                                        <option value="Lâm Đồng"></option>
+                                        <option value="Lạng Sơn"></option>
+                                        <option value="Lào Cai"></option>
+                                        <option value="Nghệ An"></option>
+                                        <option value="Ninh Bình"></option>
+                                        <option value="Phú Thọ"></option>
+                                        <option value="Quảng Ngãi"></option>
+                                        <option value="Quảng Ninh"></option>
+                                        <option value="Quảng Trị"></option>
+                                        <option value="Sơn La"></option>
+                                        <option value="Tây Ninh"></option>
+                                        <option value="Thái Nguyên"></option>
+                                        <option value="Thanh Hóa"></option>
+                                        <option value="Tuyên Quang"></option>
+                                        <option value="Vĩnh Long"></option>
+                                    </datalist>
+                                </div>
+                                <div>
+                                    <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Phường / Xã <span class="text-error">*</span></label>
+                                    <input type="text" id="customPhuongXa" placeholder="Ví dụ: Phường Linh Chiểu"
+                                           class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                           oninput="updateCustomCombinedAddress()" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-label-md text-xs font-semibold text-on-surface mb-1">Số nhà + Tên đường <span class="text-error">*</span></label>
+                                <input type="text" id="customSoNhaTenDuong" 
+                                       th:value="${khachHang?.diaChi}"
+                                       placeholder="Ví dụ: 1 Võ Văn Ngân (hoặc 123 Nguyễn Trãi)" 
+                                       class="w-full bg-surface-container-low px-3.5 py-2.5 rounded-xl font-body-md text-xs sm:text-sm text-on-surface border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                       oninput="updateCustomCombinedAddress()" />
+                            </div>
+                            <input type="hidden" name="diaChiGiao" id="hiddenFinalDiaChiGiao" th:value="${khachHang?.diaChi}" />
                         </div>
                     </div>
 
@@ -1122,6 +1185,41 @@
             const modal = document.getElementById('checkoutModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        function updateCustomCombinedAddress() {
+            const tinh = document.getElementById('customTinhThanh') ? document.getElementById('customTinhThanh').value.trim() : '';
+            const phuong = document.getElementById('customPhuongXa') ? document.getElementById('customPhuongXa').value.trim() : '';
+            const soNha = document.getElementById('customSoNhaTenDuong') ? document.getElementById('customSoNhaTenDuong').value.trim() : '';
+
+            const parts = [];
+            if (soNha) parts.push(soNha);
+            if (phuong) parts.push(phuong);
+            if (tinh) parts.push(tinh);
+
+            const fullAddr = parts.join(', ');
+            const hiddenInput = document.getElementById('hiddenFinalDiaChiGiao');
+            if (hiddenInput) {
+                hiddenInput.value = fullAddr;
+            }
+            debounceShippingEstimate();
+        }
+
+        function validateCheckoutAddressForm() {
+            const customAddrRadio = document.getElementById('addr_custom');
+            const checkedAddr = document.querySelector('input[name="maDiaChi"]:checked');
+            const isCustom = !checkedAddr || (customAddrRadio && customAddrRadio.checked) || checkedAddr.value === '';
+            if (isCustom) {
+                const tinh = document.getElementById('customTinhThanh') ? document.getElementById('customTinhThanh').value.trim() : '';
+                const phuong = document.getElementById('customPhuongXa') ? document.getElementById('customPhuongXa').value.trim() : '';
+                const soNha = document.getElementById('customSoNhaTenDuong') ? document.getElementById('customSoNhaTenDuong').value.trim() : '';
+                if (!tinh || !phuong || !soNha) {
+                    alert('Vui lòng nhập đầy đủ theo mẫu (Số nhà + Tên đường, Phường/Xã, Tỉnh/Thành phố) để hệ thống tính phí vận chuyển chính xác!');
+                    return false;
+                }
+                updateCustomCombinedAddress();
+            }
+            return true;
         }
 
         let shippingDebounceTimer = null;
