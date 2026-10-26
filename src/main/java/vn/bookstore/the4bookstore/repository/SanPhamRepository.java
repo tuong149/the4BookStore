@@ -191,7 +191,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     // ====================================================================
     // ĐỀ TÀI DBMS330284: GỌI USER-DEFINED FUNCTION (UDF) TỪ SQL SERVER
     // ====================================================================
-    @Query(value = "SELECT fn_TinhDiemDanhGiaTrungBinh(:maSP)", nativeQuery = true)
+    @Query(value = "SELECT dbo.fn_TinhDiemDanhGiaTrungBinh(:maSP)", nativeQuery = true)
     Double getAverageRatingByProductId(@Param("maSP") Integer maSP);
 
     @Query("SELECT sptg.sanPham FROM SanPhamTacGia sptg WHERE sptg.tacGia.maTacGia = :maTacGia")

@@ -2360,7 +2360,9 @@ BEGIN
         YEAR(ngay_dat) AS nam,
         MONTH(ngay_dat) AS thang,
         COUNT(*) AS tongDonHang,
-        SUM(CAST(tien_thuc_nhan_shop AS BIGINT)) AS tongDoanhThu
+        COALESCE(SUM(CAST(tong_tien AS BIGINT)), 0) AS tongDoanhThu,
+        COALESCE(SUM(CAST(tien_phi_san AS BIGINT)), 0) AS tongPhiSan,
+        COALESCE(SUM(CAST(tien_thuc_nhan_shop AS BIGINT)), 0) AS thucNhanShop
     FROM don_hang
     WHERE ma_shop = @p_ma_shop
       AND trang_thai IN ('DaGiao', 'HoanTat')

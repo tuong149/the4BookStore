@@ -36,7 +36,7 @@ public class Shop {
     @Column(length = 500)
     private String banner;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "nvarchar(max)")
     private String moTa;
 
     @Column(name = "dia_chi_shop", length = 255)

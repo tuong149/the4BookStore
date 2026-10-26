@@ -12,171 +12,90 @@ GO
 -- 1. BẢNG DỮ LIỆU & RÀNG BUỘC (TABLES & CONSTRAINTS)
 -- ====================================================================
 
--- Bảng 20: thanh_toan (Giao dịch tài chính thanh toán đơn hàng)
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+-- 1.1. Bảng thanh_toan (Giao dịch tài chính thanh toán đơn hàng)
 CREATE TABLE [dbo].[thanh_toan](
-	[ma_thanh_toan] [int] IDENTITY(1,1) NOT NULL,
-	[madh] [int] NOT NULL,
-	[ma_giao_dich] [varchar](100) COLLATE Vietnamese_CI_AS NULL,
-	[phuong_thuc] [nvarchar](30) COLLATE Vietnamese_CI_AS NOT NULL,
-	[so_tien] [int] NOT NULL,
-	[noi_dung] [nvarchar](255) COLLATE Vietnamese_CI_AS NULL,
-	[trang_thai] [nvarchar](30) COLLATE Vietnamese_CI_AS NOT NULL,
-	[ngay_thanh_toan] [datetime2](7) NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_thanh_toan] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[thanh_toan] ADD CONSTRAINT [DF_thanhtoan_trangthai] DEFAULT (N'ChoThanhToan') FOR [trang_thai];
-GO
-ALTER TABLE [dbo].[thanh_toan] WITH CHECK ADD CONSTRAINT [FK_thanh_toan_don_hang] FOREIGN KEY([madh])
-REFERENCES [dbo].[don_hang] ([madh])
-ON DELETE CASCADE;
-GO
-ALTER TABLE [dbo].[thanh_toan] CHECK CONSTRAINT [FK_thanh_toan_don_hang];
+    [ma_thanh_toan] INT IDENTITY(1,1) PRIMARY KEY,
+    [madh] INT NOT NULL,
+    [ma_giao_dich] VARCHAR(100) NULL,
+    [phuong_thuc] NVARCHAR(30) NOT NULL,
+    [so_tien] INT NOT NULL CHECK ([so_tien] >= 0),
+    [noi_dung] NVARCHAR(255) NULL,
+    [trang_thai] NVARCHAR(30) NOT NULL DEFAULT N'ChoThanhToan',
+    [ngay_thanh_toan] DATETIME2 NULL,
+    CONSTRAINT FK_thanh_toan_don_hang FOREIGN KEY ([madh]) REFERENCES [dbo].[don_hang]([madh]) ON DELETE CASCADE
+);
 GO
 
--- Bảng 21: danh_gia (Đánh giá nhận xét sản phẩm sau khi đơn hoàn tất)
+-- 1.2. Bảng danh_gia (Đánh giá nhận xét & chấm điểm sao của khách hàng)
 CREATE TABLE [dbo].[danh_gia](
-	[ma_danh_gia] [int] IDENTITY(1,1) NOT NULL,
-	[madh] [int] NOT NULL,
-	[makh] [int] NOT NULL,
-	[masp] [int] NOT NULL,
-	[so_sao] [int] NOT NULL,
-	[noi_dung] [nvarchar](1000) COLLATE Vietnamese_CI_AS NULL,
-	[hinh_anh_danh_gia] [nvarchar](500) COLLATE Vietnamese_CI_AS NULL,
-	[trang_thai] [nvarchar](30) COLLATE Vietnamese_CI_AS NOT NULL,
-	[ngay_danh_gia] [datetime2](7) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_danh_gia] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
- CONSTRAINT [UQ_danhgia_makh_masp_madh] UNIQUE NONCLUSTERED 
-(
-	[madh] ASC,
-	[makh] ASC,
-	[masp] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[danh_gia] ADD CONSTRAINT [DF_danhgia_trangthai] DEFAULT (N'HienThi') FOR [trang_thai];
-GO
-ALTER TABLE [dbo].[danh_gia] ADD CONSTRAINT [DF_danhgia_ngay] DEFAULT (sysutcdatetime()) FOR [ngay_danh_gia];
-GO
-ALTER TABLE [dbo].[danh_gia] WITH CHECK ADD CONSTRAINT [FK_danhgia_donhang] FOREIGN KEY([madh])
-REFERENCES [dbo].[don_hang] ([madh]);
-GO
-ALTER TABLE [dbo].[danh_gia] CHECK CONSTRAINT [FK_danhgia_donhang];
-GO
-ALTER TABLE [dbo].[danh_gia] WITH CHECK ADD CONSTRAINT [FK_danhgia_khachhang] FOREIGN KEY([makh])
-REFERENCES [dbo].[khach_hang] ([makh]);
-GO
-ALTER TABLE [dbo].[danh_gia] CHECK CONSTRAINT [FK_danhgia_khachhang];
-GO
-ALTER TABLE [dbo].[danh_gia] WITH CHECK ADD CONSTRAINT [FK_danhgia_sanpham] FOREIGN KEY([masp])
-REFERENCES [dbo].[san_pham] ([masp]);
-GO
-ALTER TABLE [dbo].[danh_gia] CHECK CONSTRAINT [FK_danhgia_sanpham];
-GO
-ALTER TABLE [dbo].[danh_gia] WITH CHECK ADD CONSTRAINT [CK_danhgia_sosao] CHECK (([so_sao]>=(1) AND [so_sao]<=(5)));
-GO
-ALTER TABLE [dbo].[danh_gia] CHECK CONSTRAINT [CK_danhgia_sosao];
+    [ma_danh_gia] INT IDENTITY(1,1) PRIMARY KEY,
+    [madh] INT NOT NULL,
+    [makh] INT NOT NULL,
+    [masp] INT NOT NULL,
+    [so_sao] INT NOT NULL CHECK ([so_sao] >= 1 AND [so_sao] <= 5),
+    [noi_dung] NVARCHAR(1000) NULL,
+    [hinh_anh_danh_gia] NVARCHAR(500) NULL,
+    [trang_thai] NVARCHAR(30) NOT NULL DEFAULT N'HienThi',
+    [ngay_danh_gia] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_danhgia_makh_masp_madh UNIQUE ([madh], [makh], [masp]),
+    CONSTRAINT FK_danhgia_donhang FOREIGN KEY ([madh]) REFERENCES [dbo].[don_hang]([madh]),
+    CONSTRAINT FK_danhgia_khachhang FOREIGN KEY ([makh]) REFERENCES [dbo].[khach_hang]([makh]),
+    CONSTRAINT FK_danhgia_sanpham FOREIGN KEY ([masp]) REFERENCES [dbo].[san_pham]([masp])
+);
 GO
 
--- Bảng 22: danh_gia_media (Hình ảnh/video đính kèm bài đánh giá)
+INSERT INTO danh_gia (madh, makh, masp, so_sao, noi_dung, trang_thai, ngay_danh_gia)
+VALUES (1, 1, 1, 5, N'Sách quá tuyệt vời 6 sao', N'HienThi', SYSUTCDATETIME());
+GO 
+
+-- 1.3. Bảng danh_gia_media (Hình ảnh/video đính kèm bài đánh giá)
 CREATE TABLE [dbo].[danh_gia_media](
-	[ma_media] [int] IDENTITY(1,1) NOT NULL,
-	[ma_danh_gia] [int] NOT NULL,
-	[url] [nvarchar](500) COLLATE Vietnamese_CI_AS NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_media] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[danh_gia_media] WITH CHECK ADD CONSTRAINT [FK_dgm_danh_gia] FOREIGN KEY([ma_danh_gia])
-REFERENCES [dbo].[danh_gia] ([ma_danh_gia])
-ON DELETE CASCADE;
-GO
-ALTER TABLE [dbo].[danh_gia_media] CHECK CONSTRAINT [FK_dgm_danh_gia];
+    [ma_media] INT IDENTITY(1,1) PRIMARY KEY,
+    [ma_danh_gia] INT NOT NULL,
+    [url] NVARCHAR(500) NOT NULL,
+    CONSTRAINT FK_dgm_danh_gia FOREIGN KEY ([ma_danh_gia]) REFERENCES [dbo].[danh_gia]([ma_danh_gia]) ON DELETE CASCADE
+);
 GO
 
--- Bảng 23: phieu_kiem_ke (Phiếu kiểm kê kho định kỳ của từng gian hàng Shop)
+-- 1.4. Bảng phieu_kiem_ke (Phiếu kiểm kê định kỳ tồn kho của từng gian hàng)
 CREATE TABLE [dbo].[phieu_kiem_ke](
-	[ma_phieu_kiem_ke] [int] IDENTITY(1,1) NOT NULL,
-	[ma_shop] [int] NOT NULL,
-	[ngay_kiem_ke] [datetime2](7) NOT NULL,
-	[ngay_phe_duyet] [datetime2](7) NULL,
-	[trang_thai] [nvarchar](30) COLLATE Vietnamese_CI_AS NOT NULL,
-	[ghi_chu] [nvarchar](500) COLLATE Vietnamese_CI_AS NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_phieu_kiem_ke] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[phieu_kiem_ke] ADD CONSTRAINT [DF_pkk_ngaykiemke] DEFAULT (sysutcdatetime()) FOR [ngay_kiem_ke];
-GO
-ALTER TABLE [dbo].[phieu_kiem_ke] ADD CONSTRAINT [DF_pkk_trangthai] DEFAULT (N'DangKiemKe') FOR [trang_thai];
-GO
-ALTER TABLE [dbo].[phieu_kiem_ke] WITH CHECK ADD CONSTRAINT [FK_pkk_shop] FOREIGN KEY([ma_shop])
-REFERENCES [dbo].[shop] ([ma_shop]);
-GO
-ALTER TABLE [dbo].[phieu_kiem_ke] CHECK CONSTRAINT [FK_pkk_shop];
+    [ma_phieu_kiem_ke] INT IDENTITY(1,1) PRIMARY KEY,
+    [ma_shop] INT NOT NULL,
+    [ngay_kiem_ke] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    [ngay_phe_duyet] DATETIME2 NULL,
+    [trang_thai] NVARCHAR(30) NOT NULL DEFAULT N'DangKiemKe',
+    [ghi_chu] NVARCHAR(500) NULL,
+    CONSTRAINT FK_pkk_shop FOREIGN KEY ([ma_shop]) REFERENCES [dbo].[shop]([ma_shop])
+);
 GO
 
--- Bảng 24: chi_tiet_kiem_ke (Chi tiết số lượng thực tế và chênh lệch từng đầu sách)
+-- 1.5. Bảng chi_tiet_kiem_ke (Chi tiết số lượng hệ thống và thực tế của từng đầu sách)
 CREATE TABLE [dbo].[chi_tiet_kiem_ke](
-	[ma_phieu_kiem_ke] [int] NOT NULL,
-	[masp] [int] NOT NULL,
-	[so_luong_he_thong] [int] NOT NULL,
-	[so_luong_thuc_te] [int] NOT NULL,
-	[chenh_lech] [int] NOT NULL,
-	[ly_do] [nvarchar](255) COLLATE Vietnamese_CI_AS NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_phieu_kiem_ke] ASC,
-	[masp] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] WITH CHECK ADD CONSTRAINT [FK_ctkk_phieu] FOREIGN KEY([ma_phieu_kiem_ke])
-REFERENCES [dbo].[phieu_kiem_ke] ([ma_phieu_kiem_ke])
-ON DELETE CASCADE;
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] CHECK CONSTRAINT [FK_ctkk_phieu];
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] WITH CHECK ADD CONSTRAINT [FK_ctkk_san_pham] FOREIGN KEY([masp])
-REFERENCES [dbo].[san_pham] ([masp]);
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] CHECK CONSTRAINT [FK_ctkk_san_pham];
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] WITH CHECK ADD CONSTRAINT [CK_ctkk_soluong] CHECK (([so_luong_he_thong]>=(0) AND [so_luong_thuc_te]>=(0)));
-GO
-ALTER TABLE [dbo].[chi_tiet_kiem_ke] CHECK CONSTRAINT [CK_ctkk_soluong];
+    [ma_phieu_kiem_ke] INT NOT NULL,
+    [masp] INT NOT NULL,
+    [so_luong_he_thong] INT NOT NULL CHECK ([so_luong_he_thong] >= 0),
+    [so_luong_thuc_te] INT NOT NULL CHECK ([so_luong_thuc_te] >= 0),
+    [chenh_lech] INT NOT NULL,
+    [ly_do] NVARCHAR(255) NULL,
+    PRIMARY KEY ([ma_phieu_kiem_ke], [masp]),
+    CONSTRAINT FK_ctkk_phieu FOREIGN KEY ([ma_phieu_kiem_ke]) REFERENCES [dbo].[phieu_kiem_ke]([ma_phieu_kiem_ke]) ON DELETE CASCADE,
+    CONSTRAINT FK_ctkk_san_pham FOREIGN KEY ([masp]) REFERENCES [dbo].[san_pham]([masp])
+);
 GO
 
--- Bảng 25: cau_hinh_he_thong (Cấu hình tỷ lệ hoa hồng sàn & tham số vận hành)
+-- 1.6. Bảng cau_hinh_he_thong (Cấu hình tham số vận hành sàn & tỷ lệ hoa hồng)
 CREATE TABLE [dbo].[cau_hinh_he_thong](
-	[ma_cau_hinh] [varchar](50) COLLATE Vietnamese_CI_AS NOT NULL,
-	[gia_tri] [nvarchar](255) COLLATE Vietnamese_CI_AS NOT NULL,
-	[mo_ta] [nvarchar](255) COLLATE Vietnamese_CI_AS NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ma_cau_hinh] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
+    [ma_cau_hinh] VARCHAR(50) PRIMARY KEY,
+    [gia_tri] NVARCHAR(255) NOT NULL,
+    [mo_ta] NVARCHAR(255) NULL
+);
 GO
 
 -- ====================================================================
--- 2. TỐI ƯU CHỈ MỤC & TRIGGERS KHO HÀNG / KINH TẾ
+-- 2. TỐI ƯU CHỈ MỤC & TRIGGERS (INDEX & TRIGGERS)
 -- ====================================================================
 
+-- Chỉ mục tối ưu truy vấn đánh giá theo sản phẩm và sắp xếp theo số sao giảm dần
 CREATE NONCLUSTERED INDEX [idx_danhgia_masp] ON [dbo].[danh_gia]([masp] ASC, [so_sao] DESC);
 GO
 
@@ -232,7 +151,7 @@ GO
 -- 3. HÀM TÍNH TOÁN KINH TẾ & BÁO CÁO (USER-DEFINED FUNCTIONS)
 -- ====================================================================
 
--- Hàm 1: Tính điểm đánh giá trung bình của sản phẩm
+-- Hàm 1: Tính điểm đánh giá trung bình của sản phẩm (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TinhDiemDanhGiaTrungBinh (@maSP INT)
 RETURNS FLOAT
 AS
@@ -245,7 +164,7 @@ BEGIN
 END;
 GO
 
--- Hàm 2: Đếm tổng số cuốn sách đã bán trên toàn hệ thống
+-- Hàm 2: Đếm tổng số cuốn sách đã bán trên toàn hệ thống (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TongSachDaBan()
 RETURNS BIGINT
 AS
@@ -259,7 +178,7 @@ BEGIN
 END;
 GO
 
--- Hàm 3: Tính tổng doanh thu toàn sàn theo khoảng thời gian
+-- Hàm 3: Tính tổng doanh thu toàn sàn theo khoảng thời gian (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TinhDoanhThu(
     @p_start_date DATETIME2,
     @p_end_date DATETIME2
@@ -276,7 +195,7 @@ BEGIN
 END;
 GO
 
--- Hàm 4: Đếm tổng số đơn hàng hợp lệ theo khoảng thời gian
+-- Hàm 4: Đếm tổng số đơn hàng hợp lệ theo khoảng thời gian (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_DemDonHang(
     @p_start_date DATETIME2,
     @p_end_date DATETIME2
@@ -293,7 +212,7 @@ BEGIN
 END;
 GO
 
--- Hàm 5: Tính phí sàn thu từ đơn hàng của gian hàng
+-- Hàm 5: Tính phí sàn thu từ đơn hàng của gian hàng (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TinhPhiSan (@tongTien INT, @maShop INT)
 RETURNS INT
 AS
@@ -305,7 +224,7 @@ BEGIN
 END;
 GO
 
--- Hàm 6: Tính tổng số tiền đã giảm theo mã khuyến mãi
+-- Hàm 6: Tính tổng số tiền đã giảm theo mã khuyến mãi (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TinhTienGiamKhuyenMai (@makm INT)
 RETURNS BIGINT
 AS
@@ -318,7 +237,7 @@ BEGIN
 END;
 GO
 
--- Hàm 7: Tính tổng doanh thu đơn hàng áp dụng mã khuyến mãi
+-- Hàm 7: Tính tổng doanh thu đơn hàng áp dụng mã khuyến mãi (Scalar Function)
 CREATE OR ALTER FUNCTION dbo.fn_TinhDoanhThuKhuyenMai (@makm INT)
 RETURNS BIGINT
 AS
@@ -331,7 +250,7 @@ BEGIN
 END;
 GO
 
--- Hàm 8 (Inline Table-Valued): Lấy danh sách sách của một Shop kèm danh mục & điểm đánh giá
+-- Hàm 8: Lấy danh sách sách của một Shop kèm danh mục & điểm đánh giá (Inline Table-Valued Function)
 CREATE OR ALTER FUNCTION dbo.fn_LayDanhSachSachCuaShop (@ma_shop INT)
 RETURNS TABLE
 AS
@@ -351,7 +270,7 @@ RETURN (
 );
 GO
 
--- Hàm 9 (Multi-Statement Table-Valued): Báo cáo doanh số chi tiết theo khoảng thời gian
+-- Hàm 9: Báo cáo doanh số chi tiết theo khoảng thời gian (Multi-Statement Table-Valued Function)
 CREATE OR ALTER FUNCTION dbo.fn_BaoCaoDoanhThuTheoKhoangNgay (
     @tu_ngay DATETIME2,
     @den_ngay DATETIME2
@@ -385,6 +304,8 @@ BEGIN
 END;
 GO
 
+SELECT * FROM dbo.fn_BaoCaoDoanhThuTheoKhoangNgay('2026-10-01', '2026-10-31');
+GO
 -- ====================================================================
 -- 4. KHUNG NHÌN TỔNG HỢP (VIEWS BÁO CÁO & GIÁM SÁT)
 -- ====================================================================
@@ -542,7 +463,9 @@ BEGIN
         YEAR(ngay_dat) AS nam,
         MONTH(ngay_dat) AS thang,
         COUNT(*) AS tongDonHang,
-        SUM(CAST(tien_thuc_nhan_shop AS BIGINT)) AS tongDoanhThu
+        COALESCE(SUM(CAST(tong_tien AS BIGINT)), 0) AS tongDoanhThu,
+        COALESCE(SUM(CAST(tien_phi_san AS BIGINT)), 0) AS tongPhiSan,
+        COALESCE(SUM(CAST(tien_thuc_nhan_shop AS BIGINT)), 0) AS thucNhanShop
     FROM don_hang
     WHERE ma_shop = @p_ma_shop
       AND trang_thai IN ('DaGiao', 'HoanTat')
@@ -555,18 +478,23 @@ GO
 -- 6. PHÂN QUYỀN TOÀN DIỆN TRÊN HỆ THỐNG (GRANT/DENY)
 -- ====================================================================
 
+-- 6.1. Phân quyền cho Khách Hàng (Role_KhachHang)
 GRANT SELECT, INSERT ON danh_gia TO Role_KhachHang;
 GRANT SELECT, INSERT ON danh_gia_media TO Role_KhachHang;
 GRANT SELECT ON vw_ThongKeDanhGiaSanPham TO Role_KhachHang;
 GRANT EXECUTE ON fn_TinhDiemDanhGiaTrungBinh TO Role_KhachHang;
+GRANT SELECT ON cau_hinh_he_thong TO Role_KhachHang;
 
+-- 6.2. Phân quyền cho Gian Hàng (Role_Vendor)
 GRANT SELECT, INSERT, UPDATE, DELETE ON phieu_kiem_ke TO Role_Vendor;
 GRANT SELECT, INSERT, UPDATE, DELETE ON chi_tiet_kiem_ke TO Role_Vendor;
 GRANT SELECT ON vw_CanhBaoTonKhoShop TO Role_Vendor;
 GRANT SELECT ON fn_LayDanhSachSachCuaShop TO Role_Vendor;
 GRANT EXECUTE ON sp_ShopXacNhanKiemKe TO Role_Vendor;
 GRANT EXECUTE ON sp_DoanhThuShopTheoThang TO Role_Vendor;
+GRANT SELECT ON cau_hinh_he_thong TO Role_Vendor;
 
+-- 6.3. Phân quyền cho Quản Lý Sàn (Role_Manager)
 GRANT SELECT ON vw_BaoCaoDoanhThuTheoThang TO Role_Manager;
 GRANT SELECT ON vw_DoanhThuTungShop TO Role_Manager;
 GRANT SELECT ON vw_ThongKeDanhGiaSanPham TO Role_Manager;
@@ -581,8 +509,7 @@ GRANT EXECUTE ON fn_TinhTienGiamKhuyenMai TO Role_Manager;
 GRANT EXECUTE ON fn_TinhDoanhThuKhuyenMai TO Role_Manager;
 GRANT SELECT ON fn_BaoCaoDoanhThuTheoKhoangNgay TO Role_Manager;
 
-GRANT SELECT ON cau_hinh_he_thong TO Role_KhachHang;
-GRANT SELECT ON cau_hinh_he_thong TO Role_Vendor;
+-- 6.4. Phân quyền cho Quản Trị Viên Hệ Thống (Role_Admin)
 GRANT SELECT, UPDATE ON cau_hinh_he_thong TO Role_Admin;
 GO
 
@@ -590,39 +517,44 @@ GO
 -- 7. DỮ LIỆU MẪU (SEED DATA: PAYMENTS, REVIEWS, INVENTORY & CONFIG)
 -- ====================================================================
 
+-- 7.1. Dữ liệu mẫu Thanh toán
 SET IDENTITY_INSERT [dbo].[thanh_toan] ON;
-INSERT [dbo].[thanh_toan] ([ma_thanh_toan], [madh], [ma_giao_dich], [phuong_thuc], [so_tien], [noi_dung], [trang_thai], [ngay_thanh_toan]) 
+INSERT INTO [dbo].[thanh_toan] ([ma_thanh_toan], [madh], [ma_giao_dich], [phuong_thuc], [so_tien], [noi_dung], [trang_thai], [ngay_thanh_toan]) 
 VALUES 
-(1, 1, N'COD_GHTK8829102', N'COD', 155000, N'Thanh toán khi nhận hàng đơn #1', N'DaThanhToan', CAST(N'2026-10-16T16:00:00' AS DateTime2)),
+(1, 1, 'COD_GHTK8829102', N'COD', 155000, N'Thanh toán khi nhận hàng đơn #1', N'DaThanhToan', '2026-10-16 16:00:00'),
 (2, 5, NULL, N'COD', 220000, N'Thanh toán đơn hàng #5', N'ChoThanhToan', NULL),
 (3, 6, NULL, N'COD', 195000, N'Thanh toán đơn hàng #6', N'ChoThanhToan', NULL),
 (4, 9, NULL, N'COD', 89000, N'Thanh toán đơn hàng #9', N'ChoThanhToan', NULL);
 SET IDENTITY_INSERT [dbo].[thanh_toan] OFF;
 GO
 
+-- 7.2. Dữ liệu mẫu Đánh giá sản phẩm
 SET IDENTITY_INSERT [dbo].[danh_gia] ON;
-INSERT [dbo].[danh_gia] ([ma_danh_gia], [madh], [makh], [masp], [so_sao], [noi_dung], [hinh_anh_danh_gia], [trang_thai], [ngay_danh_gia]) 
+INSERT INTO [dbo].[danh_gia] ([ma_danh_gia], [madh], [makh], [masp], [so_sao], [noi_dung], [hinh_anh_danh_gia], [trang_thai], [ngay_danh_gia]) 
 VALUES 
-(1, 6, 3, 14, 5, N'Sách đẹp, đóng gói cẩn thận, giao hàng siêu nhanh!', NULL, N'HienThi', CAST(N'2026-10-17T11:49:02' AS DateTime2)),
-(2, 9, 3, 13, 5, N'Sổ tay da Nhã Nam chất lượng rất tốt, bìa dày dặn!', NULL, N'HienThi', CAST(N'2026-10-17T11:56:18' AS DateTime2));
+(1, 6, 3, 14, 5, N'Sách đẹp, đóng gói cẩn thận, giao hàng siêu nhanh!', NULL, N'HienThi', '2026-10-17 11:49:02'),
+(2, 9, 3, 13, 5, N'Sổ tay da Nhã Nam chất lượng rất tốt, bìa dày dặn!', NULL, N'HienThi', '2026-10-17 11:56:18');
 SET IDENTITY_INSERT [dbo].[danh_gia] OFF;
 GO
 
-INSERT [dbo].[cau_hinh_he_thong] ([ma_cau_hinh], [gia_tri], [mo_ta]) 
+-- 7.3. Dữ liệu mẫu Cấu hình hệ thống
+INSERT INTO [dbo].[cau_hinh_he_thong] ([ma_cau_hinh], [gia_tri], [mo_ta]) 
 VALUES 
-(N'MIN_REVIEW_LENGTH', N'50', N'Số ký tự tối thiểu của bài đánh giá'),
-(N'PHI_SAN_MAC_DINH', N'5.0', N'Tỷ lệ hoa hồng sàn mặc định (%)');
+('MIN_REVIEW_LENGTH', N'50', N'Số ký tự tối thiểu của bài đánh giá'),
+('PHI_SAN_MAC_DINH', N'5.0', N'Tỷ lệ hoa hồng sàn mặc định (%)');
 GO
 
+-- 7.4. Dữ liệu mẫu Phiếu kiểm kê kho
 SET IDENTITY_INSERT [dbo].[phieu_kiem_ke] ON;
-INSERT [dbo].[phieu_kiem_ke] ([ma_phieu_kiem_ke], [ma_shop], [ngay_kiem_ke], [ngay_phe_duyet], [trang_thai], [ghi_chu]) 
+INSERT INTO [dbo].[phieu_kiem_ke] ([ma_phieu_kiem_ke], [ma_shop], [ngay_kiem_ke], [ngay_phe_duyet], [trang_thai], [ghi_chu]) 
 VALUES 
-(1, 1, CAST(N'2026-10-10T08:00:00' AS DateTime2), CAST(N'2026-10-10T11:30:00' AS DateTime2), N'DaKiemKe', N'Kiểm kê định kỳ đầu tháng 10/2026 gian hàng Kim Đồng'),
-(2, 2, CAST(N'2026-10-12T09:00:00' AS DateTime2), NULL, N'DangKiemKe', N'Kiểm kê đột xuất đầu sách văn học Nhã Nam');
+(1, 1, '2026-10-10 08:00:00', '2026-10-10 11:30:00', N'DaKiemKe', N'Kiểm kê định kỳ đầu tháng 10/2026 gian hàng Kim Đồng'),
+(2, 2, '2026-10-12 09:00:00', NULL, N'DangKiemKe', N'Kiểm kê đột xuất đầu sách văn học Nhã Nam');
 SET IDENTITY_INSERT [dbo].[phieu_kiem_ke] OFF;
 GO
 
-INSERT [dbo].[chi_tiet_kiem_ke] ([ma_phieu_kiem_ke], [masp], [so_luong_he_thong], [so_luong_thuc_te], [chenh_lech], [ly_do]) 
+-- 7.5. Dữ liệu mẫu Chi tiết kiểm kê
+INSERT INTO [dbo].[chi_tiet_kiem_ke] ([ma_phieu_kiem_ke], [masp], [so_luong_he_thong], [so_luong_thuc_te], [chenh_lech], [ly_do]) 
 VALUES 
 (1, 1, 50, 50, 0, N'Khớp số lượng tồn hệ thống'),
 (1, 2, 60, 60, 0, N'Khớp số lượng tồn hệ thống'),
@@ -630,5 +562,5 @@ VALUES
 (2, 6, 30, 30, 0, N'Khớp số lượng tồn hệ thống');
 GO
 
-PRINT N'>>> HOÀN THÀNH PHẦN 4: QUẢN LÝ KHO, THANH TOÁN & BÁO CÁO THỐNG KÊ (BÙI QUANG HÒA)!';
+PRINT N'>>> HOÀN THÀNH THIẾT LẬP PHẦN 4: QUẢN LÝ KHO, THANH TOÁN & BÁO CÁO THỐNG KÊ (BÙI QUANG HÒA)!';
 GO

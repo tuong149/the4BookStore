@@ -53,7 +53,7 @@ public class DataSeeder implements CommandLineRunner {
 
         if (jdbcTemplate != null) {
             try {
-                jdbcTemplate.execute("ALTER TABLE khach_hang MODIFY so_dien_thoai VARCHAR(20) NULL");
+                jdbcTemplate.execute("ALTER TABLE khach_hang ALTER COLUMN so_dien_thoai VARCHAR(20) NULL");
             } catch (Exception ignored) {}
         }
 

@@ -73,7 +73,7 @@ public class ReportService {
         Map<Integer, BigDecimal> dbMap = new HashMap<>();
 
         try {
-            String sql = "CALL sp_DoanhThuTheoThang()";
+            String sql = "EXEC dbo.sp_DoanhThuTheoThang";
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
@@ -105,7 +105,7 @@ public class ReportService {
 
     public List<TopSellingBookDTO> getTopSellingBooks() {
         try {
-            String sql = "CALL sp_TopSachBanChay(10)";
+            String sql = "EXEC dbo.sp_TopSachBanChay 10";
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
@@ -151,7 +151,7 @@ public class ReportService {
     }
 
     public List<Map<String, Object>> getShopMonthlyRevenue(Integer maShop) {
-        String sql = "CALL sp_DoanhThuShopTheoThang(:maShop)";
+        String sql = "EXEC dbo.sp_DoanhThuShopTheoThang :maShop";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("maShop", maShop);
         List<Object[]> results = query.getResultList();
@@ -163,8 +163,8 @@ public class ReportService {
             map.put("thang", row[1]);
             map.put("tongDonHang", row[2]);
             map.put("tongDoanhThu", row[3]);
-            map.put("tongPhiSan", row[4]);
-            map.put("thucNhanShop", row[5]);
+            map.put("tongPhiSan", row.length > 4 && row[4] != null ? row[4] : 0L);
+            map.put("thucNhanShop", row.length > 5 && row[5] != null ? row[5] : (row[3] != null ? row[3] : 0L));
             list.add(map);
         }
         return list;

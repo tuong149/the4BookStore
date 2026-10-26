@@ -88,10 +88,10 @@ import java.util.List;
     @Column(name = "trang_thai_thanh_toan", nullable = false, length = 30)
     private String trangThaiThanhToan = "ChuaThanhToan"; // ChuaThanhToan, DaThanhToan, DaHoanTien
 
-    @Column(name = "ly_do_tra_hang", columnDefinition = "TEXT")
+    @Column(name = "ly_do_tra_hang", length = 500)
     private String lyDoTraHang;
 
-    @Column(name = "phan_quyet_tranh_chap", columnDefinition = "TEXT")
+    @Column(name = "phan_quyet_tranh_chap", length = 500)
     private String phanQuyetTranhChap;
 
     @ManyToOne(fetch = FetchType.LAZY)

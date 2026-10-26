@@ -8,7 +8,7 @@ import vn.bookstore.the4bookstore.entity.ChiTietDonHangId;
 
 public interface ChiTietDonHangRepository extends JpaRepository<ChiTietDonHang, ChiTietDonHangId> {
 
-    @Query(value = "SELECT fn_TongSachDaBan()", nativeQuery = true)
+    @Query(value = "SELECT dbo.fn_TongSachDaBan()", nativeQuery = true)
     Long getTotalBooksSold();
 
     @Query("SELECT DISTINCT ct.donHang.maDH FROM ChiTietDonHang ct WHERE ct.sanPham.maSP = :maSP AND ct.donHang.khachHang.maKH = :maKH AND ct.donHang.trangThai IN ('DaGiao', 'HoanTat')")
