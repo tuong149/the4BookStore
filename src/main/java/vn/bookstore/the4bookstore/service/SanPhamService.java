@@ -99,7 +99,11 @@ public class SanPhamService {
 
     @Cacheable(value = "home_preview", key = "#loaiSP")
     public List<SanPham> getPreviewByLoaiSP(String loaiSP) {
-        return sanPhamRepository.findTop4ByLoaiSPAndTrangThaiIn(loaiSP, CUSTOMER_STATUSES);
+        return sanPhamRepository.findTopPreviewByLoaiSP(
+                loaiSP,
+                CUSTOMER_STATUSES,
+                org.springframework.data.domain.PageRequest.of(0, 8)
+        );
     }
 
     @Cacheable("guest_top_sold")

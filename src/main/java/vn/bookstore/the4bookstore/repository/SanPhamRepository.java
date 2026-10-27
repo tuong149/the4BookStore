@@ -88,6 +88,16 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
            "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong')")
     List<SanPham> findTop4ByLoaiSPAndTrangThaiIn(@Param("loaiSP") String loaiSP, @Param("trangThais") Collection<String> trangThais);
 
+    @EntityGraph(attributePaths = {"danhMuc", "shop"})
+    @Query("SELECT s FROM SanPham s WHERE (s.loaiSP = :loaiSP OR (:loaiSP = 'Sach' AND s.loaiSP IS NULL)) " +
+           "AND s.trangThai IN :trangThais " +
+           "AND (s.trangThaiKhoa = 'BinhThuong' OR s.trangThaiKhoa IS NULL) " +
+           "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong') " +
+           "ORDER BY s.ngayTao DESC")
+    List<SanPham> findTopPreviewByLoaiSP(@Param("loaiSP") String loaiSP,
+                                        @Param("trangThais") Collection<String> trangThais,
+                                        Pageable pageable);
+
     @Query("SELECT s FROM SanPham s WHERE s.loaiSP = :loaiSP AND s.trangThai = :trangThai " +
            "AND (s.trangThaiKhoa = 'BinhThuong' OR s.trangThaiKhoa IS NULL) " +
            "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong')")

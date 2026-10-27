@@ -6,7 +6,7 @@
 <body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
     <style>
-        .horizontal-scroll-category {
+        .horizontal-scroll-category, .carousel-track {
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
         }
@@ -233,11 +233,21 @@
                         </a>
                     </div>
 
-                    <div th:if="${guestTopSold != null and !guestTopSold.isEmpty()}"
-                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                        <div th:each="book : ${guestTopSold}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                    <div th:if="${guestTopSold != null and !guestTopSold.isEmpty()}" class="relative group/carousel">
+                        <button type="button" onclick="scrollCarousel(this, -1)"
+                                class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                        </button>
+                        <div class="carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                            <div th:each="book : ${guestTopSold}"
+                                 class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                            </div>
                         </div>
+                        <button type="button" onclick="scrollCarousel(this, 1)"
+                                class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </button>
                     </div>
                     <div th:unless="${guestTopSold != null and !guestTopSold.isEmpty()}"
                         class="py-10 text-center text-xs text-on-surface-variant bg-surface-container-lowest rounded-2xl border border-surface-container">
@@ -293,48 +303,67 @@
                         </button>
                     </div>
 
-                    <!-- Tab 1: Newest -->
-                    <div id="user-tab-content-newest"
-                        class="user-tab-pane grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                        <div th:each="book : ${top20Newest}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
-                        </div>
-                        <div th:if="${top20Newest == null or top20Newest.isEmpty()}"
-                            class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
-                        </div>
-                    </div>
+                    <!-- Top 20 Carousel Tracks -->
+                    <div class="relative group/carousel">
+                        <!-- Prev button -->
+                        <button type="button" onclick="scrollCarousel(this, -1)"
+                                class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                        </button>
 
-                    <!-- Tab 2: Best Selling -->
-                    <div id="user-tab-content-bestselling"
-                        class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                        <div th:each="book : ${top20BestSelling}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                        <!-- Tab 1: Newest -->
+                        <div id="user-tab-content-newest"
+                            class="user-tab-pane carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                            <div th:each="book : ${top20Newest}"
+                                 class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                            </div>
+                            <div th:if="${top20Newest == null or top20Newest.isEmpty()}"
+                                class="w-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
+                            </div>
                         </div>
-                        <div th:if="${top20BestSelling == null or top20BestSelling.isEmpty()}"
-                            class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
-                        </div>
-                    </div>
 
-                    <!-- Tab 3: Highest Rated -->
-                    <div id="user-tab-content-highestRated"
-                        class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                        <div th:each="book : ${top20HighestRated}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                        <!-- Tab 2: Best Selling -->
+                        <div id="user-tab-content-bestselling"
+                            class="user-tab-pane hidden carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                            <div th:each="book : ${top20BestSelling}"
+                                 class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                            </div>
+                            <div th:if="${top20BestSelling == null or top20BestSelling.isEmpty()}"
+                                class="w-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
+                            </div>
                         </div>
-                        <div th:if="${top20HighestRated == null or top20HighestRated.isEmpty()}"
-                            class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
-                        </div>
-                    </div>
 
-                    <!-- Tab 4: Most Favorited -->
-                    <div id="user-tab-content-mostFavorited"
-                        class="user-tab-pane hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                        <div th:each="book : ${top20MostFavorited}" class="h-full flex flex-col">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                        <!-- Tab 3: Highest Rated -->
+                        <div id="user-tab-content-highestRated"
+                            class="user-tab-pane hidden carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                            <div th:each="book : ${top20HighestRated}"
+                                 class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                            </div>
+                            <div th:if="${top20HighestRated == null or top20HighestRated.isEmpty()}"
+                                class="w-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
+                            </div>
                         </div>
-                        <div th:if="${top20MostFavorited == null or top20MostFavorited.isEmpty()}"
-                            class="col-span-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
+
+                        <!-- Tab 4: Most Favorited -->
+                        <div id="user-tab-content-mostFavorited"
+                            class="user-tab-pane hidden carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                            <div th:each="book : ${top20MostFavorited}"
+                                 class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                            </div>
+                            <div th:if="${top20MostFavorited == null or top20MostFavorited.isEmpty()}"
+                                class="w-full py-8 text-center text-xs text-on-surface-variant">Đang cập nhật...
+                            </div>
                         </div>
+
+                        <!-- Next button -->
+                        <button type="button" onclick="scrollCarousel(this, 1)"
+                                class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -355,10 +384,21 @@
                         <span class="material-symbols-outlined text-[16px]">chevron_right</span>
                     </a>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-space-sm md:gap-space-md">
-                    <div th:each="book : ${recentlyViewed}" class="h-full flex flex-col">
-                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                <div class="relative group/carousel">
+                    <button type="button" onclick="scrollCarousel(this, -1)"
+                            class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+                    <div class="carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                        <div th:each="book : ${recentlyViewed}"
+                             class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full">
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                        </div>
                     </div>
+                    <button type="button" onclick="scrollCarousel(this, 1)"
+                            class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
                 </div>
             </section>
 
@@ -386,13 +426,45 @@
                     </div>
                 </div>
 
-                <!-- Book Cards Grid Using Reusable Component -->
-                <div id="featuredBooksGrid"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md md:gap-space-lg">
-                    <div th:each="book : ${featuredBooks}" class="featured-card-wrapper h-full flex flex-col"
-                        th:attr="data-price=${book.giaBan}, data-name=${book.tenSP?.toLowerCase()}">
-                        <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                <!-- Book Cards Carousel Using Reusable Component (~4 sp visible, cuộn ngang mượt mà) -->
+                <div class="relative group/carousel">
+                    <!-- Prev button -->
+                    <button type="button" onclick="scrollCarousel(this, -1)"
+                            class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+
+                    <!-- Horizontal Carousel Track -->
+                    <div id="featuredBooksGrid"
+                         class="carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                        <div th:each="book : ${featuredBooks}"
+                             class="featured-card-wrapper w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col h-full"
+                             th:attr="data-price=${book.giaBan}, data-name=${book.tenSP?.toLowerCase()}">
+                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
+                        </div>
+
+                        <!-- Card Xem thêm vào /san-pham -->
+                        <div class="featured-end-card w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                            <a th:href="@{/san-pham(sort='newest')}"
+                               class="h-full min-h-[360px] rounded-2xl p-6 border-2 border-dashed border-primary/30 hover:border-primary bg-surface-container-low/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center text-center group cursor-pointer shadow-xs hover:shadow-md">
+                                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all shadow-xs mb-3">
+                                    <span class="material-symbols-outlined text-[28px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                </div>
+                                <span class="font-headline-sm font-bold text-base text-on-surface group-hover:text-primary transition-colors">Xem thêm tất cả</span>
+                                <span class="text-xs text-on-surface-variant mt-1">Sản phẩm tuyển chọn</span>
+                                <span class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary px-3 py-1.5 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span>Khám phá ngay</span>
+                                    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                </span>
+                            </a>
+                        </div>
                     </div>
+
+                    <!-- Next button -->
+                    <button type="button" onclick="scrollCarousel(this, 1)"
+                            class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
                 </div>
             </section>
 
@@ -554,24 +626,36 @@
                                 class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
                                 placeholder="Tìm theo tên sản phẩm, tác giả, ISBN..." />
                         </div>
-                        <!-- Dropdown: Danh mục (Phân loại chính) -->
+                        <!-- Dropdown: Danh mục (Phân loại chính / Danh mục lớn) -->
                         <select name="loaiSP" id="homeLoaiSPFilter"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
                             <option value="">Tất cả danh mục</option>
-                            <option value="Sach">Sách</option>
-                            <option value="VanPhongPham">Văn phòng phẩm</option>
-                            <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                            <th:block th:if="${allMajorCategories != null && !allMajorCategories.isEmpty()}">
+                                <option th:each="major : ${allMajorCategories}"
+                                        th:value="${major.maLoai}"
+                                        th:text="${major.tenLoai}">Tên danh mục</option>
+                            </th:block>
+                            <th:block th:unless="${allMajorCategories != null && !allMajorCategories.isEmpty()}">
+                                <option value="Sach">Sách</option>
+                                <option value="VanPhongPham">Văn phòng phẩm</option>
+                                <option value="QuaTang">Quà tặng &amp; Trang trí</option>
+                            </th:block>
                         </select>
-                        <!-- Dropdown: Loại sản phẩm -->
+                        <!-- Dropdown: Loại sản phẩm (Tự động liên kết 2 chiều với Danh mục lớn) -->
                         <select name="danhMuc" id="homeDanhMucFilter"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[180px]">
                             <option value="0">Tất cả loại sản phẩm</option>
-                            <option th:each="cat : ${categoriesSach}" th:value="${cat.maDanhMuc}" data-group="Sach"
-                                th:text="${cat.tenDanhMuc}">Loại</option>
-                            <option th:each="cat : ${categoriesVpp}" th:value="${cat.maDanhMuc}"
-                                data-group="VanPhongPham" th:text="${cat.tenDanhMuc}">Loại</option>
-                            <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}"
-                                data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
+                            <th:block th:if="${allActiveCategories != null && !allActiveCategories.isEmpty()}">
+                                <option th:each="cat : ${allActiveCategories}"
+                                        th:value="${cat.maDanhMuc}"
+                                        th:attr="data-group=${cat.loaiSP}"
+                                        th:text="${cat.tenDanhMuc}">Loại</option>
+                            </th:block>
+                            <th:block th:unless="${allActiveCategories != null && !allActiveCategories.isEmpty()}">
+                                <option th:each="cat : ${categoriesSach}" th:value="${cat.maDanhMuc}" data-group="Sach" th:text="${cat.tenDanhMuc}">Loại</option>
+                                <option th:each="cat : ${categoriesVpp}" th:value="${cat.maDanhMuc}" data-group="VanPhongPham" th:text="${cat.tenDanhMuc}">Loại</option>
+                                <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
+                            </th:block>
                         </select>
                         <!-- Dropdown Sắp xếp -->
                         <select name="sort"
@@ -590,179 +674,127 @@
                     </div>
                 </form>
 
-                <!-- ===== PHÂN MỤC 1: SÁCH ===== -->
-                <div class="mb-space-xl">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
-                        <div class="flex items-center gap-space-sm">
-                            <div
-                                class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
-                                <span class="material-symbols-outlined text-[24px]">menu_book</span>
+                <!-- ===== DANH MỤC SẢN PHẨM: HIỂN THỊ ĐỘNG TẤT CẢ DANH MỤC LỚN (CAROUSEL HÀNG NGANG ~4 SP, TỐI ĐA 8 SP + XEM THÊM) ===== -->
+                <th:block th:if="${majorPreviews != null && !majorPreviews.isEmpty()}">
+                    <th:block th:each="previewItem, iterStat : ${majorPreviews}">
+                        <div th:class="${iterStat.last ? 'mb-space-lg' : 'mb-space-xl'}">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                                <div class="flex items-center gap-space-sm">
+                                    <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                                        <span class="material-symbols-outlined text-[24px]" th:text="${previewItem.major.icon ?: 'category'}">category</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-headline-lg text-xl font-bold text-on-surface" th:text="${previewItem.major.tenLoai}">Tên Danh Mục</h3>
+                                        <p class="text-xs text-on-surface-variant mt-0.5" th:text="${previewItem.major.moTa ?: 'Khám phá các sản phẩm chất lượng'}">Mô tả danh mục</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 self-start md:self-auto">
+                                    <a th:href="@{${previewItem.major.slugUrl}}"
+                                       class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm">
+                                        <span th:text="'Xem tất cả ' + ${previewItem.major.tenLoai}">Xem tất cả</span>
+                                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Sách</h3>
-                                <p class="text-xs text-on-surface-variant mt-0.5">Tiểu thuyết, văn học, kỹ năng sống,
-                                    kinh tế, khoa học và lịch sử</p>
+
+                            <!-- Các loại con (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
+                            <div th:if="${!#lists.isEmpty(previewItem.subs)}" class="mb-space-md">
+                                <div class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
+                                    <span class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
+                                        <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
+                                        <span>Thể loại:</span>
+                                    </span>
+                                    
+                                    <a th:href="@{${previewItem.major.slugUrl}}"
+                                       class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">apps</span>
+                                        <span th:text="'Tất cả ' + ${previewItem.major.tenLoai}">Tất cả</span>
+                                    </a>
+
+                                    <a th:each="cat : ${previewItem.subs}"
+                                       th:href="@{${previewItem.major.slugUrl}(danhMuc=${cat.maDanhMuc})}"
+                                       th:text="${cat.tenDanhMuc}"
+                                       class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
+                                        Thể loại
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Danh sách sản phẩm cuộn ngang (~4 sp visible, tối đa 8 sp + Card Xem thêm) -->
+                            <div th:if="${!#lists.isEmpty(previewItem.previewProducts)}" class="relative group/carousel">
+                                <!-- Prev button -->
+                                <button type="button" onclick="scrollCarousel(this, -1)"
+                                        class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                                </button>
+
+                                <!-- Horizontal track -->
+                                <div class="carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                                    <!-- Tối đa 8 sản phẩm preview -->
+                                    <div th:each="prod : ${previewItem.previewProducts}"
+                                         class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                                        <div th:replace="~{fragments/common/product_card :: product_card(${prod})}" class="h-full"></div>
+                                    </div>
+
+                                    <!-- Card "Xem thêm tất cả" để vào đúng danh mục lớn / thể loại -->
+                                    <div class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                                        <a th:href="@{${previewItem.major.slugUrl}}"
+                                           class="h-full min-h-[360px] rounded-2xl p-6 border-2 border-dashed border-primary/30 hover:border-primary bg-surface-container-low/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center text-center group cursor-pointer shadow-xs hover:shadow-md">
+                                            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all shadow-xs mb-3">
+                                                <span class="material-symbols-outlined text-[28px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                            </div>
+                                            <span class="font-headline-sm font-bold text-base text-on-surface group-hover:text-primary transition-colors">Xem thêm tất cả</span>
+                                            <span class="text-xs text-on-surface-variant mt-1" th:text="${previewItem.major.tenLoai}">Ngành hàng</span>
+                                            <span class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary px-3 py-1.5 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-white transition-all">
+                                                <span>Khám phá ngay</span>
+                                                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                            </span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Next button -->
+                                <button type="button" onclick="scrollCarousel(this, 1)"
+                                        class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                                </button>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(previewItem.previewProducts)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
+                                <span class="material-symbols-outlined text-[40px] text-on-surface-variant" th:text="${previewItem.major.icon ?: 'category'}">category</span>
+                                <p class="text-sm text-on-surface-variant mt-2" th:text="'Chưa có sản phẩm nào thuộc ' + ${previewItem.major.tenLoai} + '.'">Chưa có sản phẩm.</p>
                             </div>
                         </div>
-                        <a th:href="@{/san-pham/sach}"
-                            class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm self-start md:self-auto">
-                            <span>Xem tất cả sách</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </a>
-                    </div>
 
-                    <!-- Các loại sách (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
-                    <div th:if="${!#lists.isEmpty(categoriesSach)}" class="mb-space-md">
-                        <div
-                            class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
-                            <span
-                                class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
-                                <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
-                                <span>Loại sách:</span>
-                            </span>
+                        <div th:if="${!iterStat.last}" class="h-px bg-surface-container my-space-xl"></div>
+                    </th:block>
+                </th:block>
+
+                <th:block th:unless="${majorPreviews != null && !majorPreviews.isEmpty()}">
+                    <div class="mb-space-xl">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
+                            <div class="flex items-center gap-space-sm">
+                                <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                                    <span class="material-symbols-outlined text-[24px]">menu_book</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-headline-lg text-xl font-bold text-on-surface">Sách</h3>
+                                    <p class="text-xs text-on-surface-variant mt-0.5">Tiểu thuyết, văn học, kỹ năng sống, kinh tế, khoa học và lịch sử</p>
+                                </div>
+                            </div>
                             <a th:href="@{/san-pham/sach}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-all shadow-xs flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">apps</span>
-                                <span>Tất cả sách</span>
-                            </a>
-                            <a th:each="cat : ${categoriesSach}" th:href="@{/san-pham/sach(danhMuc=${cat.maDanhMuc})}"
-                                th:text="${cat.tenDanhMuc}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
-                                Tiểu Thuyết &amp; Văn Học
+                                class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm self-start md:self-auto">
+                                <span>Xem tất cả sách</span>
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </a>
                         </div>
-                    </div>
-
-                    <div th:if="${!#lists.isEmpty(sachPreview)}"
-                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
-                        <th:block th:each="book : ${sachPreview}">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
-                        </th:block>
-                    </div>
-                    <div th:if="${#lists.isEmpty(sachPreview)}"
-                        class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
-                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">menu_book</span>
-                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sách nào.</p>
-                    </div>
-                </div>
-
-                <div class="h-px bg-surface-container my-space-xl"></div>
-
-                <!-- ===== PHÂN MỤC 2: VĂN PHÒNG PHẨM ===== -->
-                <div class="mb-space-xl">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
-                        <div class="flex items-center gap-space-sm">
-                            <div
-                                class="w-11 h-11 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shadow-xs">
-                                <span class="material-symbols-outlined text-[24px]">edit_note</span>
-                            </div>
-                            <div>
-                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Văn Phòng Phẩm</h3>
-                                <p class="text-xs text-on-surface-variant mt-0.5">Bút viết, sổ tay cao cấp, dụng cụ đọc
-                                    sách và làm việc</p>
+                        <div th:if="${!#lists.isEmpty(sachPreview)}" class="flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory carousel-track">
+                            <div th:each="book : ${sachPreview}" class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                                <div th:replace="~{fragments/common/product_card :: product_card(${book})}" class="h-full"></div>
                             </div>
                         </div>
-                        <a th:href="@{/san-pham/van-phong-pham}"
-                            class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
-                            <span>Xem tất cả VPP</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </a>
                     </div>
-
-                    <!-- Các loại VPP (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
-                    <div th:if="${!#lists.isEmpty(categoriesVpp)}" class="mb-space-md">
-                        <div
-                            class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
-                            <span
-                                class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
-                                <span class="material-symbols-outlined text-[16px] text-secondary">sell</span>
-                                <span>Loại VPP:</span>
-                            </span>
-                            <a th:href="@{/san-pham/van-phong-pham}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-secondary text-on-secondary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">apps</span>
-                                <span>Tất cả VPP</span>
-                            </a>
-                            <a th:each="cat : ${categoriesVpp}"
-                                th:href="@{/san-pham/van-phong-pham(danhMuc=${cat.maDanhMuc})}"
-                                th:text="${cat.tenDanhMuc}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-secondary hover:text-on-secondary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
-                                Sổ Tay
-                            </a>
-                        </div>
-                    </div>
-
-                    <div th:if="${!#lists.isEmpty(vppPreview)}"
-                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
-                        <th:block th:each="book : ${vppPreview}">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
-                        </th:block>
-                    </div>
-                    <div th:if="${#lists.isEmpty(vppPreview)}"
-                        class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
-                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">edit_note</span>
-                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm văn phòng phẩm nào.</p>
-                    </div>
-                </div>
-
-                <div class="h-px bg-surface-container my-space-xl"></div>
-
-                <!-- ===== PHÂN MỤC 3: QUÀ TẶNG & TRANG TRÍ ===== -->
-                <div class="mb-space-lg">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-space-md gap-space-sm">
-                        <div class="flex items-center gap-space-sm">
-                            <div
-                                class="w-11 h-11 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center shadow-xs">
-                                <span class="material-symbols-outlined text-[24px]">redeem</span>
-                            </div>
-                            <div>
-                                <h3 class="font-headline-lg text-xl font-bold text-on-surface">Quà Tặng &amp; Trang Trí
-                                </h3>
-                                <p class="text-xs text-on-surface-variant mt-0.5">Túi tote canvas, mô hình Book Nook,
-                                    trò chơi boardgame và quà tặng độc đáo</p>
-                            </div>
-                        </div>
-                        <a th:href="@{/san-pham/qua-tang}"
-                            class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-tertiary text-on-tertiary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm self-start md:self-auto">
-                            <span>Xem tất cả Quà tặng</span>
-                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </a>
-                    </div>
-
-                    <!-- Các loại Quà tặng & Trang trí (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
-                    <div th:if="${!#lists.isEmpty(categoriesQuaTang)}" class="mb-space-md">
-                        <div
-                            class="flex items-center gap-2 overflow-x-auto pb-2.5 scroll-smooth horizontal-scroll-category flex-nowrap">
-                            <span
-                                class="text-xs text-on-surface-variant font-bold shrink-0 flex items-center gap-1 pr-1">
-                                <span class="material-symbols-outlined text-[16px] text-tertiary">sell</span>
-                                <span>Loại quà tặng:</span>
-                            </span>
-                            <a th:href="@{/san-pham/qua-tang}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-tertiary text-on-tertiary text-xs font-semibold hover:opacity-90 transition-all shadow-xs flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">apps</span>
-                                <span>Tất cả Quà tặng</span>
-                            </a>
-                            <a th:each="cat : ${categoriesQuaTang}"
-                                th:href="@{/san-pham/qua-tang(danhMuc=${cat.maDanhMuc})}" th:text="${cat.tenDanhMuc}"
-                                class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-tertiary hover:text-on-tertiary text-on-surface text-xs font-medium transition-all border border-surface-container/60 hover:border-transparent hover:shadow-xs">
-                                Túi Tote
-                            </a>
-                        </div>
-                    </div>
-
-                    <div th:if="${!#lists.isEmpty(quaTangPreview)}"
-                        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
-                        <th:block th:each="book : ${quaTangPreview}">
-                            <div th:replace="~{fragments/common/product_card :: product_card(${book})}"></div>
-                        </th:block>
-                    </div>
-                    <div th:if="${#lists.isEmpty(quaTangPreview)}"
-                        class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
-                        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">redeem</span>
-                        <p class="text-sm text-on-surface-variant mt-2">Chưa có sản phẩm quà tặng nào.</p>
-                    </div>
-                </div>
+                </th:block>
             </section>
 
             <!-- 4. INDEPENDENT BOOKSTORE BENEFITS -->
@@ -901,6 +933,7 @@
         function sortFeaturedBooks(val) {
             const grid = document.getElementById('featuredBooksGrid');
             if (!grid) return;
+            const endCard = grid.querySelector('.featured-end-card');
             const cards = Array.from(grid.querySelectorAll('.featured-card-wrapper'));
             cards.sort((a, b) => {
                 if (val === 'price_asc') {
@@ -913,6 +946,8 @@
                 return 0;
             });
             cards.forEach(card => grid.appendChild(card));
+            if (endCard) grid.appendChild(endCard);
+            grid.scrollTo({ left: 0, behavior: 'smooth' });
         }
 
         // Category Pagination (1 trang 10 mục)
@@ -1000,26 +1035,64 @@
             });
         })();
 
-        // Dynamic category dropdown filter based on selected loaiSP
+        // Dynamic category dropdown filter with 2-way auto-sync
         (function initHomeCategoryToolbar() {
             const loaiSPSelect = document.getElementById('homeLoaiSPFilter');
             const dmSelect = document.getElementById('homeDanhMucFilter');
             if (!loaiSPSelect || !dmSelect) return;
 
             const allDmOptions = Array.from(dmSelect.querySelectorAll('option[data-group]'));
-            loaiSPSelect.addEventListener('change', function () {
-                const val = this.value;
+
+            function filterOptions(isInit, keepCurrentCat) {
+                const val = loaiSPSelect.value;
+                let hasCurrentSelected = false;
+
                 allDmOptions.forEach(opt => {
                     const group = opt.getAttribute('data-group');
                     if (!val || val === 'ALL' || group === val) {
                         opt.style.display = '';
+                        if (opt.value === dmSelect.value) {
+                            hasCurrentSelected = true;
+                        }
                     } else {
                         opt.style.display = 'none';
                     }
                 });
-                dmSelect.value = '0';
+
+                if (!isInit && !keepCurrentCat && val && !hasCurrentSelected) {
+                    dmSelect.value = '0';
+                }
+            }
+
+            // Khi người dùng chọn Danh mục lớn -> Lọc danh sách thể loại con
+            loaiSPSelect.addEventListener('change', () => filterOptions(false, false));
+
+            // KHI NGƯỜI DÙNG CHỌN THỂ LOẠI (VD: Manga) -> TỰ ĐỘNG CHUYỂN DANH MỤC LỚN (Sách)
+            dmSelect.addEventListener('change', () => {
+                if (dmSelect.value && dmSelect.value !== '0') {
+                    const selOpt = dmSelect.options[dmSelect.selectedIndex];
+                    if (selOpt) {
+                        const group = selOpt.getAttribute('data-group');
+                        if (group && loaiSPSelect.value !== group) {
+                            loaiSPSelect.value = group;
+                            filterOptions(false, true); // Giữ nguyên thể loại vừa chọn
+                        }
+                    }
+                }
             });
+
+            filterOptions(true, false);
         })();
+
+        function scrollCarousel(btn, direction) {
+            const parent = btn.parentElement;
+            if (!parent) return;
+            const tracks = Array.from(parent.querySelectorAll('.carousel-track'));
+            const track = tracks.find(t => !t.classList.contains('hidden') && t.offsetParent !== null) || tracks[0];
+            if (!track) return;
+            const scrollAmount = track.clientWidth * 0.8;
+            track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
 
         // ========== SĂN VOUCHER: Lưu mã AJAX ==========
         function saveVoucher(btn) {
@@ -1086,7 +1159,10 @@
                 const pane = document.getElementById('user-tab-content-' + t);
                 if (t === tabKey) {
                     if (btn) btn.className = 'user-tab-btn active px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center gap-1.5 shrink-0 bg-primary text-on-primary shadow-xs';
-                    if (pane) pane.classList.remove('hidden');
+                    if (pane) {
+                        pane.classList.remove('hidden');
+                        pane.scrollTo({ left: 0, behavior: 'smooth' });
+                    }
                 } else {
                     if (btn) btn.className = 'user-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center gap-1.5 shrink-0 bg-surface-container-low text-on-surface hover:bg-surface-container';
                     if (pane) pane.classList.add('hidden');

@@ -102,6 +102,14 @@ public class HomeController {
         model.addAttribute("featuredBooks", sanPhamService.getFeaturedBooks());
 
         // Section: Tất Cả Sản Phẩm (Previews & Subcategories)
+        List<ProductController.MajorCategoryPreview> majorPreviews = new java.util.ArrayList<>();
+        List<vn.bookstore.the4bookstore.entity.DanhMucLon> activeMajors = danhMucService.getActiveMajorCategories();
+        for (vn.bookstore.the4bookstore.entity.DanhMucLon major : activeMajors) {
+            List<DanhMuc> subs = sanPhamService.getCategoriesByLoaiSP(major.getMaLoai());
+            List<SanPham> preview = sanPhamService.getPreviewByLoaiSP(major.getMaLoai());
+            majorPreviews.add(new ProductController.MajorCategoryPreview(major, subs, preview));
+        }
+        model.addAttribute("majorPreviews", majorPreviews);
         model.addAttribute("sachPreview", sanPhamService.getPreviewByLoaiSP("Sach"));
         model.addAttribute("vppPreview", sanPhamService.getPreviewByLoaiSP("VanPhongPham"));
         model.addAttribute("quaTangPreview", sanPhamService.getPreviewByLoaiSP("QuaTang"));

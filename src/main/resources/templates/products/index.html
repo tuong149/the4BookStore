@@ -5,22 +5,22 @@
 <body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
 
     <style>
-        .horizontal-scroll-category {
+        .horizontal-scroll-category, .carousel-track {
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
         }
-        .horizontal-scroll-category::-webkit-scrollbar {
+        .horizontal-scroll-category::-webkit-scrollbar, .carousel-track::-webkit-scrollbar {
             height: 6px;
         }
-        .horizontal-scroll-category::-webkit-scrollbar-track {
+        .horizontal-scroll-category::-webkit-scrollbar-track, .carousel-track::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.03);
             border-radius: 9999px;
         }
-        .horizontal-scroll-category::-webkit-scrollbar-thumb {
+        .horizontal-scroll-category::-webkit-scrollbar-thumb, .carousel-track::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.15);
             border-radius: 9999px;
         }
-        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover {
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover, .carousel-track::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 0, 0, 0.3);
         }
     </style>
@@ -104,7 +104,7 @@
                 </div>
             </form>
 
-            <!-- ===== DANH MỤC SẢN PHẨM: HIỂN THỊ ĐỘNG TẤT CẢ DANH MỤC LỚN (SÁCH, VPP, QUÀ TẶNG, BOARDGAME...) ===== -->
+            <!-- ===== DANH MỤC SẢN PHẨM: HIỂN THỊ ĐỘNG TẤT CẢ DANH MỤC LỚN (CAROUSEL HÀNG NGANG ~4 SP, TỐI ĐA 8 SP + XEM THÊM) ===== -->
             <th:block th:if="${majorPreviews != null && !majorPreviews.isEmpty()}">
                 <th:block th:each="previewItem, iterStat : ${majorPreviews}">
                     <section th:class="${iterStat.last ? 'mb-space-lg' : 'mb-space-xl'}">
@@ -118,11 +118,13 @@
                                     <p class="text-xs text-on-surface-variant mt-0.5" th:text="${previewItem.major.moTa ?: 'Khám phá các sản phẩm chất lượng'}">Mô tả danh mục</p>
                                 </div>
                             </div>
-                            <a th:href="@{${previewItem.major.slugUrl}}"
-                               class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm self-start md:self-auto">
-                                <span th:text="'Xem tất cả ' + ${previewItem.major.tenLoai}">Xem tất cả</span>
-                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                            </a>
+                            <div class="flex items-center gap-2 self-start md:self-auto">
+                                <a th:href="@{${previewItem.major.slugUrl}}"
+                                   class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors shadow-sm">
+                                    <span th:text="'Xem tất cả ' + ${previewItem.major.tenLoai}">Xem tất cả</span>
+                                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Các loại con (Hiển thị tất cả loại & Scroll ngang mượt mà) -->
@@ -148,12 +150,46 @@
                             </div>
                         </div>
 
-                        <!-- Danh sách sản phẩm preview -->
-                        <div th:if="${!#lists.isEmpty(previewItem.previewProducts)}" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-space-md">
-                            <th:block th:each="prod : ${previewItem.previewProducts}">
-                                <div th:replace="~{fragments/common/product_card :: product_card(${prod})}"></div>
-                            </th:block>
+                        <!-- Danh sách sản phẩm cuộn ngang (~4 sp visible, tối đa 8 sp + Card Xem thêm) -->
+                        <div th:if="${!#lists.isEmpty(previewItem.previewProducts)}" class="relative group/carousel">
+                            <!-- Prev button -->
+                            <button type="button" onclick="scrollCarousel(this, -1)"
+                                    class="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                            </button>
+
+                            <!-- Horizontal track -->
+                            <div class="carousel-track flex items-stretch gap-space-md overflow-x-auto pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory">
+                                <!-- Tối đa 8 sản phẩm preview -->
+                                <div th:each="prod : ${previewItem.previewProducts}"
+                                     class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                                    <div th:replace="~{fragments/common/product_card :: product_card(${prod})}" class="h-full"></div>
+                                </div>
+
+                                <!-- Card "Xem thêm tất cả" để vào đúng danh mục lớn / thể loại -->
+                                <div class="w-[78%] sm:w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(25%-12px)] shrink-0 snap-start flex flex-col">
+                                    <a th:href="@{${previewItem.major.slugUrl}}"
+                                       class="h-full min-h-[360px] rounded-2xl p-6 border-2 border-dashed border-primary/30 hover:border-primary bg-surface-container-low/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center text-center group cursor-pointer shadow-xs hover:shadow-md">
+                                        <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all shadow-xs mb-3">
+                                            <span class="material-symbols-outlined text-[28px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                        </div>
+                                        <span class="font-headline-sm font-bold text-base text-on-surface group-hover:text-primary transition-colors">Xem thêm tất cả</span>
+                                        <span class="text-xs text-on-surface-variant mt-1" th:text="${previewItem.major.tenLoai}">Ngành hàng</span>
+                                        <span class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary px-3 py-1.5 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:text-white transition-all">
+                                            <span>Khám phá ngay</span>
+                                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Next button -->
+                            <button type="button" onclick="scrollCarousel(this, 1)"
+                                    class="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm border border-surface-container shadow-md text-on-surface hover:bg-primary hover:text-white transition-all items-center justify-center opacity-0 group-hover/carousel:opacity-100 cursor-pointer">
+                                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                            </button>
                         </div>
+
                         <div th:if="${#lists.isEmpty(previewItem.previewProducts)}" class="py-10 text-center bg-surface-container-lowest rounded-2xl border border-surface-container">
                             <span class="material-symbols-outlined text-[40px] text-on-surface-variant" th:text="${previewItem.major.icon ?: 'category'}">category</span>
                             <p class="text-sm text-on-surface-variant mt-2" th:text="'Chưa có sản phẩm nào thuộc ' + ${previewItem.major.tenLoai} + '.'">Chưa có sản phẩm.</p>
@@ -244,6 +280,15 @@
 
             filterOptions(true, false);
         })();
+
+        function scrollCarousel(btn, direction) {
+            const parent = btn.parentElement;
+            if (!parent) return;
+            const track = parent.querySelector('.carousel-track');
+            if (!track) return;
+            const scrollAmount = track.clientWidth * 0.8;
+            track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
