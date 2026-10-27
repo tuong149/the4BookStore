@@ -22,6 +22,13 @@ import org.springframework.security.core.Authentication;
 @RequestMapping("/san-pham")
 public class ProductController {
 
+    public record MajorCategoryPreview(
+            vn.bookstore.the4bookstore.entity.DanhMucLon major,
+            List<DanhMuc> subs,
+            List<SanPham> previewProducts
+    ) {}
+
+
     private final SanPhamService sanPhamService;
     private final TacGiaService tacGiaService;
     private final UserInteractionService userInteractionService;
@@ -59,25 +66,25 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        // BẮT BUỘC: Phải chọn danh mục trước thì mới cho chọn loại, và loại phải thuộc danh mục đó
-        if (loaiSP == null || loaiSP.isBlank() || "ALL".equalsIgnoreCase(loaiSP)) {
-            danhMuc = null; // Chưa chọn danh mục cha -> không cho chọn loại
-            tacGia = null;
-            nxb = null;
-        } else {
-            // Đã chọn danh mục: kiểm tra loại có thuộc danh mục này không
-            if (danhMuc != null && danhMuc > 0) {
-                final Integer catId = danhMuc;
-                boolean valid = sanPhamService.getCategoriesByLoaiSP(loaiSP).stream()
-                        .anyMatch(c -> c.getMaDanhMuc().equals(catId));
-                if (!valid) {
-                    danhMuc = null; // Loại không thuộc danh mục đã chọn -> reset
+        // TỰ ĐỘNG CHỌN DANH MỤC LỚN THEO THỂ LOẠI (Nếu người dùng chọn thể loại trước hoặc đổi thể loại)
+        if (danhMuc != null && danhMuc > 0) {
+            Optional<DanhMuc> catOpt = danhMucService.getById(danhMuc);
+            if (catOpt.isPresent() && catOpt.get().getLoaiSP() != null && !catOpt.get().getLoaiSP().isBlank()) {
+                String inferredLoai = catOpt.get().getLoaiSP();
+                if (loaiSP == null || loaiSP.isBlank() || "ALL".equalsIgnoreCase(loaiSP) || !loaiSP.equalsIgnoreCase(inferredLoai)) {
+                    loaiSP = inferredLoai;
                 }
             }
+        }
+
+        if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
             if (!"Sach".equalsIgnoreCase(loaiSP)) {
                 tacGia = null;
                 nxb = null;
             }
+        } else {
+            tacGia = null;
+            nxb = null;
         }
 
         boolean isFiltering = (q != null && !q.isBlank()) ||
@@ -132,7 +139,15 @@ public class ProductController {
             return "products/list";
         }
 
-        // Mặc định: hiện preview 3 Danh mục Cấp 1 kèm các loại Cấp 2
+        // Mặc định: hiện preview TẤT CẢ các Danh mục lớn (Sách, VPP, Quà tặng, Boardgame...)
+        List<MajorCategoryPreview> majorPreviews = new java.util.ArrayList<>();
+        List<vn.bookstore.the4bookstore.entity.DanhMucLon> activeMajors = danhMucService.getActiveMajorCategories();
+        for (vn.bookstore.the4bookstore.entity.DanhMucLon major : activeMajors) {
+            List<DanhMuc> subs = sanPhamService.getCategoriesByLoaiSP(major.getMaLoai());
+            List<SanPham> preview = sanPhamService.getPreviewByLoaiSP(major.getMaLoai());
+            majorPreviews.add(new MajorCategoryPreview(major, subs, preview));
+        }
+        model.addAttribute("majorPreviews",     majorPreviews);
         model.addAttribute("sachPreview",       sanPhamService.getPreviewByLoaiSP("Sach"));
         model.addAttribute("vppPreview",        sanPhamService.getPreviewByLoaiSP("VanPhongPham"));
         model.addAttribute("quaTangPreview",    sanPhamService.getPreviewByLoaiSP("QuaTang"));
@@ -213,6 +228,18 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             Model model) {
         buildGroupModel("QuaTang", "Quà Tặng & Trang Trí", "/san-pham/qua-tang", q, danhMuc, sort, page, model);
+        return "products/list";
+    }
+
+    // CẤP 1 — Danh mục Board Game & Đồ chơi
+    @GetMapping("/board-game")
+    public String boardGameList(
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(required = false) Integer danhMuc,
+            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+        buildGroupModel("BoardGame", "Board Game & Đồ Chơi", "/san-pham/board-game", q, danhMuc, sort, page, model);
         return "products/list";
     }
 

@@ -43,6 +43,7 @@ public class DanhMucLon {
         if ("Sach".equalsIgnoreCase(maLoai)) return "/san-pham/sach";
         if ("VanPhongPham".equalsIgnoreCase(maLoai)) return "/san-pham/van-phong-pham";
         if ("QuaTang".equalsIgnoreCase(maLoai)) return "/san-pham/qua-tang";
+        if ("BoardGame".equalsIgnoreCase(maLoai)) return "/san-pham/board-game";
         return "/san-pham?loaiSP=" + maLoai;
     }
 }

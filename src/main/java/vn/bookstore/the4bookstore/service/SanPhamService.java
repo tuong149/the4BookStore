@@ -132,17 +132,22 @@ public class SanPhamService {
                     if ("VanPhongPham".equalsIgnoreCase(loaiSP)) {
                         return name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ")
                                 || name.contains("văn phòng phẩm") || name.contains("vpp");
+                    } else if ("BoardGame".equalsIgnoreCase(loaiSP)) {
+                        return name.contains("boardgame") || name.contains("board game") || name.contains("trò chơi")
+                                || name.contains("đồ chơi") || name.contains("cờ");
                     } else if ("QuaTang".equalsIgnoreCase(loaiSP)) {
-                        return name.contains("túi") || name.contains("book nook") || name.contains("boardgame")
+                        return name.contains("túi") || name.contains("book nook")
                                 || name.contains("quà tặng") || name.contains("nến") || name.contains("decor")
                                 || name.contains("trang trí") || name.contains("đèn");
                     } else if ("Sach".equalsIgnoreCase(loaiSP)) {
                         boolean isVpp = name.contains("bút") || name.contains("sổ") || name.contains("dụng cụ")
                                 || name.contains("văn phòng phẩm") || name.contains("vpp");
-                        boolean isQt = name.contains("túi") || name.contains("book nook") || name.contains("boardgame")
+                        boolean isQt = name.contains("túi") || name.contains("book nook")
                                 || name.contains("quà tặng") || name.contains("nến") || name.contains("decor")
                                 || name.contains("trang trí") || name.contains("đèn");
-                        return !isVpp && !isQt;
+                        boolean isBg = name.contains("boardgame") || name.contains("board game") || name.contains("trò chơi")
+                                || name.contains("đồ chơi") || name.contains("cờ");
+                        return !isVpp && !isQt && !isBg;
                     }
                     return false;
                 })

@@ -48,6 +48,9 @@ public class DanhMuc {
         if ("QuaTang".equalsIgnoreCase(loaiSP)) {
             return "/san-pham/qua-tang?danhMuc=" + maDanhMuc;
         }
+        if ("BoardGame".equalsIgnoreCase(loaiSP)) {
+            return "/san-pham/board-game?danhMuc=" + maDanhMuc;
+        }
         if ("Sach".equalsIgnoreCase(loaiSP)) {
             return "/san-pham/sach?danhMuc=" + maDanhMuc;
         }
@@ -73,6 +76,7 @@ public class DanhMuc {
     public String getIcon() {
         if ("VanPhongPham".equalsIgnoreCase(loaiSP)) return "edit_note";
         if ("QuaTang".equalsIgnoreCase(loaiSP)) return "redeem";
+        if ("BoardGame".equalsIgnoreCase(loaiSP)) return "casino";
         if ("Sach".equalsIgnoreCase(loaiSP)) return "menu_book";
 
         if (tenDanhMuc != null) {

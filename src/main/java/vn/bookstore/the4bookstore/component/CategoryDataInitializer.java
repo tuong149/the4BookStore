@@ -45,7 +45,10 @@ public class CategoryDataInitializer {
             new StandardCategory("Đèn Đọc Sách & Phụ Kiện Sách", "Đèn LED kẹp sách bảo vệ mắt, giá đỡ sách thông minh và phụ kiện", "QuaTang"),
             new StandardCategory("Mô Hình Book Nook & Trang Trí", "Mô hình gỗ 3D Book Nook lắp ráp trang trí giá sách tinh tế", "QuaTang"),
             new StandardCategory("Túi Tote & Thời Trang Sách", "Túi vải canvas thời trang, áo thun và phụ kiện phong cách mọt sách", "QuaTang"),
-            new StandardCategory("Boardgame & Hộp Quà Tặng", "Trò chơi boardgame trí tuệ, set quà tặng độc đáo cho người yêu sách", "QuaTang")
+
+            // Board Game & Đồ Chơi
+            new StandardCategory("Boardgame & Hộp Quà Tặng", "Trò chơi boardgame trí tuệ, set quà tặng độc đáo cho người yêu sách", "BoardGame"),
+            new StandardCategory("Boardgame Trí Tuệ & Cờ", "Trò chơi boardgame chiến thuật, giải đố, thẻ bài và cờ trí tuệ", "BoardGame")
     );
 
     @EventListener(ApplicationReadyEvent.class)
@@ -66,6 +69,11 @@ public class CategoryDataInitializer {
                     dm.setLoaiSP("VanPhongPham");
                     dm.setMoTa("Sổ tay bìa da, sổ dot grid, sổ còng và vở ghi chép cao cấp");
                     changed = true;
+                } else if (name.toLowerCase().contains("boardgame") || name.toLowerCase().contains("board game")) {
+                    if (dm.getLoaiSP() == null || !dm.getLoaiSP().equalsIgnoreCase("BoardGame")) {
+                        dm.setLoaiSP("BoardGame");
+                        changed = true;
+                    }
                 } else {
                     for (StandardCategory std : STANDARD_CATEGORIES) {
                         if (std.name().equalsIgnoreCase(name)) {
@@ -116,15 +124,17 @@ public class CategoryDataInitializer {
         if (danhMucLonRepository.count() == 0) {
             DanhMucLon dmlSach = new DanhMucLon(null, "Sach", "Sách", "menu_book", "Ấn bản, tác phẩm, văn học, giáo trình...", true, 1);
             DanhMucLon dmlVpp = new DanhMucLon(null, "VanPhongPham", "Văn Phòng Phẩm", "edit_note", "Sổ tay, bút viết, bookmark, dụng cụ văn phòng...", true, 2);
-            DanhMucLon dmlQuaTang = new DanhMucLon(null, "QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, boardgame...", true, 3);
+            DanhMucLon dmlQuaTang = new DanhMucLon(null, "QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, phụ kiện...", true, 3);
+            DanhMucLon dmlBoardGame = new DanhMucLon(null, "BoardGame", "Board Game & Đồ Chơi", "casino", "Trò chơi boardgame trí tuệ, cờ chiến thuật, giải đố...", true, 4);
 
-            danhMucLonRepository.saveAll(List.of(dmlSach, dmlVpp, dmlQuaTang));
-            log.info("Đã khởi tạo 3 danh mục lớn tiêu chuẩn: Sách, Văn Phòng Phẩm, Quà Tặng & Trang Trí");
+            danhMucLonRepository.saveAll(List.of(dmlSach, dmlVpp, dmlQuaTang, dmlBoardGame));
+            log.info("Đã khởi tạo 4 danh mục lớn tiêu chuẩn: Sách, Văn Phòng Phẩm, Quà Tặng & Trang Trí, Board Game");
         } else {
-            // Đảm bảo tối thiểu 3 danh mục lớn cơ bản luôn có
+            // Đảm bảo các danh mục lớn cơ bản luôn có
             ensureMajorCategoryExists("Sach", "Sách", "menu_book", "Ấn bản, tác phẩm, văn học, giáo trình...", 1);
             ensureMajorCategoryExists("VanPhongPham", "Văn Phòng Phẩm", "edit_note", "Sổ tay, bút viết, bookmark, dụng cụ văn phòng...", 2);
-            ensureMajorCategoryExists("QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, boardgame...", 3);
+            ensureMajorCategoryExists("QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, phụ kiện...", 3);
+            ensureMajorCategoryExists("BoardGame", "Board Game & Đồ Chơi", "casino", "Trò chơi boardgame trí tuệ, cờ chiến thuật, giải đố...", 4);
         }
     }
 
