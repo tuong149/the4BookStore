@@ -12,7 +12,7 @@ Hệ quản trị CSDL: **Microsoft SQL Server 2022 / 2025** (T-SQL).
 | 1 | **Nguyễn Đặng Cao Tường** | 24110375 | Xác thực, Tài khoản, Gian hàng Shop, Sổ địa chỉ, Vận chuyển & RBAC | `01_CaoTuong_Auth_Security.sql` | **621 dòng** |
 | 2 | **Võ Thành Phát** | 24110300 | Danh mục, Tác giả, Sản phẩm, Giỏ hàng & Tối ưu hóa Chỉ mục (Indexes) | `02_ThanhPhat_Product_Catalog.sql` | **574 dòng** |
 | 3 | **Nguyễn Ngọc Thiện** | 24110335 | Mã giảm giá Freeship, Giao dịch Đặt hàng Checkout & Hủy đơn | `03_NgocThien_Cart_Checkout_Promotion.sql` | **596 dòng** |
-| 4 | **Bùi Quang Hòa** | 24110213 | Kiểm kê kho, Đánh giá, Thanh toán, Phí sàn & Báo cáo thống kê | `04_QuangHoa_Inventory_Reports_Dashboard.sql` | **578 dòng** |
+| 4 | **Bùi Quang Hòa** | 24110213 | Quản lý tồn kho, Đánh giá, Thanh toán, Phí sàn & Báo cáo thống kê | `04_QuangHoa_Inventory_Reports_Dashboard.sql` | **578 dòng** |
 
 ---
 

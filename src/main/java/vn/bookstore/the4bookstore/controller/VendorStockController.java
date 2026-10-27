@@ -8,7 +8,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Quản lý tồn kho sàn đa người bán:
- * Vendor tự quản lý tồn kho tại gian hàng (/vendor/inventory), không dùng yêu cầu cấp hàng tập trung.
+ * Vendor trực tiếp quản lý số lượng tồn của sản phẩm, không dùng yêu cầu cấp hàng tập trung.
  */
 @Controller
 @RequestMapping("/vendor/stock-requests")
@@ -18,6 +18,6 @@ public class VendorStockController {
     @GetMapping({"", "/**"})
     public String redirectStockRequests(RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("info", "Mô hình sàn đa người bán: Vendor trực tiếp quản trị tồn kho tại gian hàng.");
-        return "redirect:/vendor/inventory";
+        return "redirect:/vendor/products";
     }
 }

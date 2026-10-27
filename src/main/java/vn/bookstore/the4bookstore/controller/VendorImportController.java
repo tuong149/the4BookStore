@@ -33,7 +33,7 @@ public class VendorImportController {
     public ResponseEntity<?> submitImport() {
         return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
-                "error", "Chức năng nhập hàng tập trung đã được gỡ bỏ khỏi kênh người bán. Vui lòng quản lý tồn kho tại mục Kiểm Kê Kho hoặc sửa sản phẩm."
+                "error", "Chức năng nhập hàng tập trung đã được gỡ bỏ khỏi kênh người bán. Vui lòng quản lý số lượng tồn trong mục Sản phẩm."
         ));
     }
 

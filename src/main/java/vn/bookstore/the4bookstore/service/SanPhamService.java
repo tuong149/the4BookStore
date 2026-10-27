@@ -277,7 +277,7 @@ public class SanPhamService {
 
     /**
      * Xóa sản phẩm: Sử dụng Soft Delete (trangThai = 'DaXoa') để đảm bảo toàn vẹn dữ liệu
-     * cho toàn bộ các quan hệ (đơn hàng, giỏ hàng, kho hàng, kiểm kê, đánh giá).
+     * cho toàn bộ các quan hệ (đơn hàng, giỏ hàng, kho hàng, đánh giá).
      * Dọn dẹp sản phẩm khỏi các giỏ hàng hiện tại của khách hàng.
      */
     @Transactional

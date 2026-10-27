@@ -25,16 +25,6 @@
                     <span>Sản Phẩm</span>
                 </a>
 
-                <!-- 3. Kiểm kê kho -->
-                <a th:href="@{/vendor/inventory}"
-                   th:class="${activeTab == 'inventory'} ?
-                            'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-xs transition-all' :
-                            'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-emerald-700 hover:bg-emerald-50 transition-all'">
-                    <span class="material-symbols-outlined text-[18px]">fact_check</span>
-                    <span>Kiểm Kê Kho</span>
-                    <span th:class="${activeTab == 'inventory'} ? 'text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded-full bg-white/20 text-white' : 'text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800'">Tự Quản</span>
-                </a>
-
                 <!-- 4. Đơn hàng -->
                 <a th:href="@{/vendor/orders}"
                    th:class="${activeTab == 'orders'} ?

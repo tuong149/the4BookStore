@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
- * Quản lý kho đã được bàn giao hoàn toàn cho Vendor (Nhà bán hàng) tự kiểm kê và quản trị.
+ * Quản lý tồn kho sản phẩm thuộc trách nhiệm của Vendor (Nhà bán hàng).
  * Admin không còn quản lý kho tập trung, chuyển hướng toàn bộ truy cập /admin/kho về Dashboard.
  */
 @Controller
