@@ -298,6 +298,26 @@
             filterOptions(true, false);
         })();
 
+        (function initPriceInputsValidation() {
+            const form = document.querySelector('form[action*="/san-pham"]');
+            if (!form) return;
+            const inputTu = form.querySelector('input[name="giaTu"]');
+            const inputDen = form.querySelector('input[name="giaDen"]');
+            if (!inputTu || !inputDen) return;
+
+            function validatePrices() {
+                let tu = parseInt(inputTu.value, 10);
+                let den = parseInt(inputDen.value, 10);
+                if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                    inputDen.value = tu;
+                }
+            }
+
+            inputTu.addEventListener('change', validatePrices);
+            inputDen.addEventListener('change', validatePrices);
+            form.addEventListener('submit', validatePrices);
+        })();
+
         function scrollCarousel(btn, direction) {
             const parent = btn.parentElement;
             if (!parent) return;

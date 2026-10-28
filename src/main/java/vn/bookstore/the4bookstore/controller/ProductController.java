@@ -92,6 +92,12 @@ public class ProductController {
             nxb = null;
         }
 
+        if (giaTu != null && giaDen != null && giaTu > giaDen) {
+            int temp = giaTu;
+            giaTu = giaDen;
+            giaDen = temp;
+        }
+
         boolean isFiltering = (q != null && !q.isBlank()) ||
                               (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) ||
                               (danhMuc != null && danhMuc > 0) ||
@@ -192,6 +198,12 @@ public class ProductController {
             if (!tacGiaService.isAuthorInCategory(tacGia, validDanhMuc)) {
                 tacGia = null;
             }
+        }
+
+        if (giaTu != null && giaDen != null && giaTu > giaDen) {
+            int temp = giaTu;
+            giaTu = giaDen;
+            giaDen = temp;
         }
 
         int pageSize = 12;
@@ -334,6 +346,11 @@ public class ProductController {
             @RequestParam(required = false) Integer giaDen,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int size) {
+        if (giaTu != null && giaDen != null && giaTu > giaDen) {
+            int temp = giaTu;
+            giaTu = giaDen;
+            giaDen = temp;
+        }
         List<Map<String, Object>> items = sanPhamService.searchBooksWithProcedure(q, maDanhMuc, giaTu, giaDen, page, size);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -345,6 +362,11 @@ public class ProductController {
 
     private void buildGroupModel(String loaiSP, String groupName, String baseUrl,
                                   String q, Integer maDanhMuc, Integer giaTu, Integer giaDen, String sort, int page, Model model) {
+        if (giaTu != null && giaDen != null && giaTu > giaDen) {
+            int temp = giaTu;
+            giaTu = giaDen;
+            giaDen = temp;
+        }
         Integer validDanhMuc = maDanhMuc;
         if (validDanhMuc != null && validDanhMuc > 0) {
             final Integer checkId = validDanhMuc;

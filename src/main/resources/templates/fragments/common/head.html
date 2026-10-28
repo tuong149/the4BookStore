@@ -155,6 +155,46 @@
             background: #003316 !important;
             cursor: grabbing;
         }
+        /* Dual Range Slider Styles */
+        .price-slider-input {
+            pointer-events: none !important;
+            height: 0 !important;
+            outline: none !important;
+        }
+        .price-slider-input::-webkit-slider-thumb {
+            pointer-events: auto !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            width: 18px !important;
+            height: 18px !important;
+            border-radius: 50% !important;
+            background: #004c22 !important;
+            border: 2.5px solid #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+            cursor: grab !important;
+            transition: transform 0.1s ease;
+        }
+        .price-slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .price-slider-input::-webkit-slider-thumb:active {
+            cursor: grabbing !important;
+            transform: scale(1.25);
+        }
+        .price-slider-input::-moz-range-thumb {
+            pointer-events: auto !important;
+            width: 18px !important;
+            height: 18px !important;
+            border-radius: 50% !important;
+            background: #004c22 !important;
+            border: 2.5px solid #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+            cursor: grab !important;
+        }
+        .price-slider-input::-moz-range-thumb:active {
+            cursor: grabbing !important;
+            transform: scale(1.25);
+        }
     </style>
     <!-- SockJS & STOMP Client for Real-time Notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>

@@ -179,22 +179,55 @@
                             <span>Đặt lại</span>
                         </a>
                     </div>
-                    <!-- Quick Price Chips -->
-                    <div class="w-full flex items-center gap-1.5 flex-wrap pt-2 border-t border-surface-container/60 text-xs">
-                        <span class="text-on-surface-variant font-medium flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[15px] text-primary">sell</span>
-                            <span>Khoảng giá:</span>
-                        </span>
-                        <button type="button" onclick="setQuickPrice('', '')"
-                                th:class="${(giaTu == null || giaTu == 0) && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Tất cả</button>
-                        <button type="button" onclick="setQuickPrice(0, 100000)"
-                                th:class="${giaTu == 0 && giaDen == 100000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Dưới 100k</button>
-                        <button type="button" onclick="setQuickPrice(100000, 200000)"
-                                th:class="${giaTu == 100000 && giaDen == 200000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">100k - 200k</button>
-                        <button type="button" onclick="setQuickPrice(200000, 500000)"
-                                th:class="${giaTu == 200000 && giaDen == 500000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">200k - 500k</button>
-                        <button type="button" onclick="setQuickPrice(500000, '')"
-                                th:class="${giaTu == 500000 && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Trên 500k</button>
+                    <!-- Thanh kéo khoảng giá 2 đầu & Chọn khoảng giá nhanh -->
+                    <div class="w-full flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-surface-container/60 text-xs">
+                        <!-- Dual Range Slider Container -->
+                        <div class="flex items-center gap-3 flex-1 max-w-xl">
+                            <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+                                <span>Thanh trượt giá:</span>
+                            </span>
+                            <div class="relative flex-1 py-2 min-w-[150px]">
+                                <!-- Slider Background Track -->
+                                <div class="relative w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div id="priceSliderProgress" class="absolute top-0 bottom-0 bg-primary rounded-full" style="left: 0%; right: 0%;"></div>
+                                </div>
+                                <!-- Range inputs -->
+                                <input type="range" id="sliderGiaTu" min="0" max="2000000" step="10000"
+                                       th:value="${giaTu != null && giaTu > 0 ? (giaTu > 2000000 ? 2000000 : giaTu) : 0}"
+                                       class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-10"
+                                       oninput="onSliderGiaTuInput()"
+                                       onpointerdown="this.style.zIndex='25'"
+                                       onpointerup="updateSliderZIndex()">
+                                <input type="range" id="sliderGiaDen" min="0" max="2000000" step="10000"
+                                       th:value="${giaDen != null && giaDen > 0 ? (giaDen > 2000000 ? 2000000 : giaDen) : 2000000}"
+                                       class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-20"
+                                       oninput="onSliderGiaDenInput()"
+                                       onpointerdown="this.style.zIndex='25'"
+                                       onpointerup="updateSliderZIndex()">
+                            </div>
+                            <span id="sliderPriceLabel" class="text-[11px] text-on-surface-variant font-semibold shrink-0 min-w-[130px] text-right">
+                                0₫ - 2.000.000₫+
+                            </span>
+                        </div>
+
+                        <!-- Quick Price Chips -->
+                        <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+                            <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-primary">sell</span>
+                                <span>Nhanh:</span>
+                            </span>
+                            <button type="button" onclick="setQuickPrice('', '')"
+                                    th:class="${(giaTu == null || giaTu == 0) && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Tất cả</button>
+                            <button type="button" onclick="setQuickPrice(0, 100000)"
+                                    th:class="${giaTu == 0 && giaDen == 100000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Dưới 100k</button>
+                            <button type="button" onclick="setQuickPrice(100000, 200000)"
+                                    th:class="${giaTu == 100000 && giaDen == 200000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">100k - 200k</button>
+                            <button type="button" onclick="setQuickPrice(200000, 500000)"
+                                    th:class="${giaTu == 200000 && giaDen == 500000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">200k - 500k</button>
+                            <button type="button" onclick="setQuickPrice(500000, '')"
+                                    th:class="${giaTu == 500000 && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Trên 500k</button>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -280,14 +313,175 @@
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
     <script>
+        const MAX_SLIDER_PRICE = 2000000;
+
+        function formatMoney(amount) {
+            if (isNaN(amount) || amount == null) return '0₫';
+            return Number(amount).toLocaleString('vi-VN') + '₫';
+        }
+
+        function updateSliderProgressAndLabel() {
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+            const progress = document.getElementById('priceSliderProgress');
+            const label = document.getElementById('sliderPriceLabel');
+            if (!sliderTu || !sliderDen || !progress) return;
+
+            let minVal = parseInt(sliderTu.value, 10) || 0;
+            let maxVal = parseInt(sliderDen.value, 10) || MAX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                sliderTu.value = minVal;
+            }
+
+            const leftPercent = Math.min(100, Math.max(0, (minVal / MAX_SLIDER_PRICE) * 100));
+            const rightPercent = Math.min(100, Math.max(0, 100 - ((maxVal / MAX_SLIDER_PRICE) * 100)));
+
+            progress.style.left = leftPercent + '%';
+            progress.style.right = rightPercent + '%';
+
+            if (label) {
+                const textMin = formatMoney(minVal);
+                const textMax = maxVal >= MAX_SLIDER_PRICE ? (formatMoney(maxVal) + '+') : formatMoney(maxVal);
+                label.textContent = textMin + ' - ' + textMax;
+            }
+        }
+
+        function updateSliderZIndex() {
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+            if (!sliderTu || !sliderDen) return;
+            const tu = parseInt(sliderTu.value, 10) || 0;
+            const den = parseInt(sliderDen.value, 10) || MAX_SLIDER_PRICE;
+            if (tu >= den) {
+                if (tu >= MAX_SLIDER_PRICE * 0.9) {
+                    sliderTu.style.zIndex = '25';
+                    sliderDen.style.zIndex = '20';
+                } else {
+                    sliderTu.style.zIndex = '20';
+                    sliderDen.style.zIndex = '25';
+                }
+            } else {
+                sliderTu.style.zIndex = '15';
+                sliderDen.style.zIndex = '20';
+            }
+        }
+
+        function onSliderGiaTuInput() {
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+            const inputTu = document.getElementById('inputGiaTu');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (tu > den) {
+                tu = den;
+                sliderTu.value = tu;
+            }
+
+            if (inputTu) {
+                inputTu.value = tu > 0 ? tu : '';
+            }
+            updateSliderProgressAndLabel();
+            updateSliderZIndex();
+        }
+
+        function onSliderGiaDenInput() {
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+            const inputDen = document.getElementById('inputGiaDen');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (den < tu) {
+                den = tu;
+                sliderDen.value = den;
+            }
+
+            if (inputDen) {
+                inputDen.value = den >= MAX_SLIDER_PRICE ? '' : den;
+            }
+            updateSliderProgressAndLabel();
+            updateSliderZIndex();
+        }
+
         function setQuickPrice(min, max) {
             const inputGiaTu = document.getElementById('inputGiaTu');
             const inputGiaDen = document.getElementById('inputGiaDen');
-            if (inputGiaTu) inputGiaTu.value = (min !== '' && min !== null) ? min : '';
-            if (inputGiaDen) inputGiaDen.value = (max !== '' && max !== null) ? max : '';
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+
+            const numMin = (min !== '' && min !== null && !isNaN(min)) ? parseInt(min, 10) : 0;
+            const numMax = (max !== '' && max !== null && !isNaN(max)) ? parseInt(max, 10) : 0;
+
+            if (inputGiaTu) inputGiaTu.value = numMin > 0 ? numMin : '';
+            if (inputGiaDen) inputGiaDen.value = numMax > 0 ? numMax : '';
+
+            if (sliderTu) sliderTu.value = Math.min(numMin, MAX_SLIDER_PRICE);
+            if (sliderDen) sliderDen.value = numMax > 0 ? Math.min(numMax, MAX_SLIDER_PRICE) : MAX_SLIDER_PRICE;
+
+            updateSliderProgressAndLabel();
+
             const form = document.getElementById('filterForm');
             if (form) form.submit();
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputTu = document.getElementById('inputGiaTu');
+            const inputDen = document.getElementById('inputGiaDen');
+            const sliderTu = document.getElementById('sliderGiaTu');
+            const sliderDen = document.getElementById('sliderGiaDen');
+            const form = document.getElementById('filterForm');
+
+            function syncInputsToSliders() {
+                if (!inputTu || !inputDen) return;
+                let tu = parseInt(inputTu.value, 10);
+                let den = parseInt(inputDen.value, 10);
+
+                // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+                if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                    den = tu;
+                    inputDen.value = den;
+                }
+
+                if (sliderTu) {
+                    sliderTu.value = (!isNaN(tu) && tu > 0) ? Math.min(tu, MAX_SLIDER_PRICE) : 0;
+                }
+                if (sliderDen) {
+                    sliderDen.value = (!isNaN(den) && den > 0) ? Math.min(den, MAX_SLIDER_PRICE) : MAX_SLIDER_PRICE;
+                }
+                updateSliderProgressAndLabel();
+            }
+
+            if (inputTu) {
+                inputTu.addEventListener('change', syncInputsToSliders);
+            }
+            if (inputDen) {
+                inputDen.addEventListener('change', syncInputsToSliders);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if (inputTu && inputDen) {
+                        let tu = parseInt(inputTu.value, 10);
+                        let den = parseInt(inputDen.value, 10);
+                        if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                            inputDen.value = tu;
+                        }
+                    }
+                });
+            }
+
+            updateSliderProgressAndLabel();
+        });
 
         function onCategoryGroupChange(group, isInit, keepCurrentCat) {
             const catSelect = document.getElementById('filterDanhMuc');
