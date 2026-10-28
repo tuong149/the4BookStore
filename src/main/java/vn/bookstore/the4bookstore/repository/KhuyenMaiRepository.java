@@ -1,5 +1,6 @@
 package vn.bookstore.the4bookstore.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 
 public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
+    @EntityGraph(attributePaths = {"shop"})
     Optional<KhuyenMai> findByMaCode(String maCode);
 
     boolean existsByMaCode(String maCode);

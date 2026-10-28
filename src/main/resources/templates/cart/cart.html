@@ -126,6 +126,7 @@
                                  th:with="isLocked=${ct.sanPham.trangThaiKhoa == 'BiKhoaBoiAdmin' or ct.sanPham.trangThaiKhoa == 'Khoa' or ct.sanPham.trangThai == 'NgungBan' or (ct.sanPham.shop != null and ct.sanPham.shop.trangThai != 'HoatDong')}, isOutOfStock=${ct.sanPham.soLuongTon <= 0}"
                                  th:class="${isLocked or isOutOfStock} ? 'cart-item-row p-4 md:p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-surface-container-low/40 opacity-75' : 'cart-item-row p-4 md:p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-surface-container-lowest hover:bg-surface-container-low/20 transition-colors'"
                                  th:data-id="${ct.sanPham.maSP}"
+                                 th:data-shop-id="${ct.sanPham.shop != null ? ct.sanPham.shop.maShop : 1}"
                                  th:data-price="${ct.sanPham.giaBan}"
                                  th:data-qty="${ct.soLuong}"
                                  th:data-title="${ct.sanPham.tenSP}"
@@ -770,18 +771,33 @@
                 originalShippingFee = carrierFee;
             }
 
-            // 1. Calculate Order Discount (only on selectedSubtotal)
+            // 1. Calculate Order Discount (only on selectedSubtotal or Shop subtotal if Shop-scoped)
             let orderDiscountAmount = 0;
             if (activeOrderVoucher && selectedSubtotal > 0) {
+                let applicableSubtotal = selectedSubtotal;
+                if (activeOrderVoucher.maShop) {
+                    applicableSubtotal = 0;
+                    rows.forEach(row => {
+                        const cb = row.querySelector('.item-checkbox');
+                        if (cb && !cb.disabled && cb.checked) {
+                            const rowShopId = parseInt(row.getAttribute('data-shop-id')) || null;
+                            if (rowShopId === activeOrderVoucher.maShop) {
+                                const price = parseInt(row.getAttribute('data-price')) || 0;
+                                const qty = parseInt(row.getAttribute('data-qty')) || 0;
+                                applicableSubtotal += price * qty;
+                            }
+                        }
+                    });
+                }
                 const dt = activeOrderVoucher.loaiGiam;
                 if (dt === 'PhanTram') {
-                    orderDiscountAmount = Math.round(selectedSubtotal * (activeOrderVoucher.giaTriGiam / 100.0));
+                    orderDiscountAmount = Math.round(applicableSubtotal * (activeOrderVoucher.giaTriGiam / 100.0));
                     if (activeOrderVoucher.giamToiDa && orderDiscountAmount > activeOrderVoucher.giamToiDa) {
                         orderDiscountAmount = activeOrderVoucher.giamToiDa;
                     }
-                    if (orderDiscountAmount > selectedSubtotal) orderDiscountAmount = selectedSubtotal;
+                    if (orderDiscountAmount > applicableSubtotal) orderDiscountAmount = applicableSubtotal;
                 } else {
-                    orderDiscountAmount = Math.min(selectedSubtotal, activeOrderVoucher.giaTriGiam || activeOrderVoucher.discountAmount || 0);
+                    orderDiscountAmount = Math.min(applicableSubtotal, activeOrderVoucher.giaTriGiam || activeOrderVoucher.discountAmount || 0);
                 }
             }
 
@@ -837,7 +853,8 @@
                 if (orderDiscountAmount > 0) {
                     orderDiscountRow.style.display = 'flex';
                     if (summaryOrderDiscountLabel && activeOrderVoucher) {
-                        summaryOrderDiscountLabel.textContent = `Giảm giá sản phẩm (${activeOrderVoucher.code})`;
+                        const shopSuffix = activeOrderVoucher.tenShop ? ` - ${activeOrderVoucher.tenShop}` : '';
+                        summaryOrderDiscountLabel.textContent = `Giảm giá (${activeOrderVoucher.code}${shopSuffix})`;
                     }
                     if (summaryOrderDiscountEl) summaryOrderDiscountEl.textContent = `-${formatVND(orderDiscountAmount)}`;
                 } else {
@@ -878,7 +895,8 @@
                 if (orderDiscountAmount > 0) {
                     modalOrderDiscountRow.style.display = 'flex';
                     if (modalOrderDiscountLabel && activeOrderVoucher) {
-                        modalOrderDiscountLabel.textContent = `Giảm giá sản phẩm (${activeOrderVoucher.code}):`;
+                        const shopSuffix = activeOrderVoucher.tenShop ? ` - ${activeOrderVoucher.tenShop}` : '';
+                        modalOrderDiscountLabel.textContent = `Giảm giá (${activeOrderVoucher.code}${shopSuffix}):`;
                     }
                     if (modalOrderDiscount) modalOrderDiscount.textContent = `-${formatVND(orderDiscountAmount)}`;
                 } else {

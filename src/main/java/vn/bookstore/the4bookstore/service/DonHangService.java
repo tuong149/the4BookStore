@@ -235,10 +235,24 @@ public class DonHangService {
                 throw new RuntimeException("Mã [" + cleanCode + "] không phải là mã giảm giá sản phẩm! Vui lòng nhập vào ô mã vận chuyển.");
             }
 
+            boolean isShopScope = "SHOP".equalsIgnoreCase(km.getPhamVi()) && km.getShop() != null;
+            Integer voucherShopId = isShopScope ? km.getShop().getMaShop() : null;
+            int applicableSubtotal;
+
+            if (isShopScope) {
+                if (!itemsByShopId.containsKey(voucherShopId)) {
+                    String shopName = (km.getShop().getTenShop() != null) ? km.getShop().getTenShop() : ("#" + voucherShopId);
+                    throw new RuntimeException("Mã giảm giá [" + cleanCode + "] chỉ áp dụng cho sản phẩm thuộc gian hàng [" + shopName + "]!");
+                }
+                applicableSubtotal = shopSubtotals.get(voucherShopId);
+            } else {
+                applicableSubtotal = totalSubtotal;
+            }
+
             // Gọi UDF fn_KiemTraVoucherHopLe từ CSDL
             Boolean hopLeUDF = null;
             try {
-                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, null, totalSubtotal);
+                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, voucherShopId, applicableSubtotal);
             } catch (Exception ignored) {}
 
             if (Boolean.FALSE.equals(hopLeUDF)) {
@@ -254,8 +268,9 @@ public class DonHangService {
                 if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
                     throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết lượt sử dụng!");
                 }
-                if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
-                    throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
+                if (km.getDonToiThieu() != null && applicableSubtotal < km.getDonToiThieu()) {
+                    String shopSuffix = isShopScope ? (" của gian hàng [" + km.getShop().getTenShop() + "]") : "";
+                    throw new RuntimeException("Đơn hàng" + shopSuffix + " chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
                 }
                 throw new RuntimeException("Mã giảm giá [" + cleanCode + "] không hợp lệ hoặc không đủ điều kiện áp dụng!");
             }
@@ -263,7 +278,7 @@ public class DonHangService {
             // Tính tiền giảm bằng UDF fn_TinhTienGiamVoucher từ CSDL
             int calculatedDiscount = 0;
             try {
-                Integer dbDiscount = khuyenMaiRepository.tinhTienGiamVoucher(km.getMaKM(), totalSubtotal);
+                Integer dbDiscount = khuyenMaiRepository.tinhTienGiamVoucher(km.getMaKM(), applicableSubtotal);
                 if (dbDiscount != null && dbDiscount > 0) {
                     calculatedDiscount = dbDiscount;
                 }
@@ -271,17 +286,17 @@ public class DonHangService {
 
             if (calculatedDiscount <= 0) {
                 if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
-                    calculatedDiscount = (int) Math.round(totalSubtotal * (km.getGiaTriGiam() / 100.0));
+                    calculatedDiscount = (int) Math.round(applicableSubtotal * (km.getGiaTriGiam() / 100.0));
                     if (km.getGiamToiDa() != null && calculatedDiscount > km.getGiamToiDa()) {
                         calculatedDiscount = km.getGiamToiDa();
                     }
-                    if (calculatedDiscount > totalSubtotal) {
-                        calculatedDiscount = totalSubtotal;
+                    if (calculatedDiscount > applicableSubtotal) {
+                        calculatedDiscount = applicableSubtotal;
                     }
                 } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
-                    calculatedDiscount = Math.min(totalSubtotal, km.getGiaTriGiam());
+                    calculatedDiscount = Math.min(applicableSubtotal, km.getGiaTriGiam());
                 } else {
-                    calculatedDiscount = Math.min(totalSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
+                    calculatedDiscount = Math.min(applicableSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
                 }
             }
             totalOrderDiscount = calculatedDiscount;
@@ -312,10 +327,24 @@ public class DonHangService {
                 throw new RuntimeException("Không thể sử dụng cùng một mã cho cả 2 loại ưu đãi!");
             }
 
+            boolean isShopShippingScope = "SHOP".equalsIgnoreCase(km.getPhamVi()) && km.getShop() != null;
+            Integer shippingVoucherShopId = isShopShippingScope ? km.getShop().getMaShop() : null;
+            int applicableShippingSubtotal;
+
+            if (isShopShippingScope) {
+                if (!itemsByShopId.containsKey(shippingVoucherShopId)) {
+                    String shopName = (km.getShop().getTenShop() != null) ? km.getShop().getTenShop() : ("#" + shippingVoucherShopId);
+                    throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] chỉ áp dụng cho đơn hàng thuộc gian hàng [" + shopName + "]!");
+                }
+                applicableShippingSubtotal = shopSubtotals.get(shippingVoucherShopId);
+            } else {
+                applicableShippingSubtotal = totalSubtotal;
+            }
+
             // Gọi UDF fn_KiemTraVoucherHopLe từ CSDL
             Boolean hopLeUDF = null;
             try {
-                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, null, totalSubtotal);
+                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, shippingVoucherShopId, applicableShippingSubtotal);
             } catch (Exception ignored) {}
 
             if (Boolean.FALSE.equals(hopLeUDF)) {
@@ -331,8 +360,9 @@ public class DonHangService {
                 if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
                     throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết lượt sử dụng!");
                 }
-                if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
-                    throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
+                if (km.getDonToiThieu() != null && applicableShippingSubtotal < km.getDonToiThieu()) {
+                    String shopSuffix = isShopShippingScope ? (" của gian hàng [" + km.getShop().getTenShop() + "]") : "";
+                    throw new RuntimeException("Đơn hàng" + shopSuffix + " chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
                 }
                 throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] không hợp lệ hoặc không đủ điều kiện áp dụng!");
             }
@@ -354,15 +384,30 @@ public class DonHangService {
         int allocatedOrderDiscount = 0;
         int allocatedShippingDiscount = 0;
 
+        boolean isShopOrderVoucher = voucherOrder != null && "SHOP".equalsIgnoreCase(voucherOrder.getPhamVi()) && voucherOrder.getShop() != null;
+        Integer orderVoucherShopId = isShopOrderVoucher ? voucherOrder.getShop().getMaShop() : null;
+
+        boolean isShopShippingVoucher = voucherShipping != null && "SHOP".equalsIgnoreCase(voucherShipping.getPhamVi()) && voucherShipping.getShop() != null;
+        Integer shippingVoucherShopId = isShopShippingVoucher ? voucherShipping.getShop().getMaShop() : null;
+
         for (Map.Entry<Integer, List<ChiTietGioHang>> entry : itemsByShopId.entrySet()) {
             Integer sId = entry.getKey();
             List<ChiTietGioHang> shopItems = entry.getValue();
             int shopSub = shopSubtotals.get(sId);
             Shop shop = shopRepository.findById(sId).orElse(null);
 
-            // Phân bổ giảm giá sản phẩm theo tỷ lệ giá trị tiền hàng của từng Shop
+            // Phân bổ giảm giá sản phẩm theo từng Shop
             int shopOrderDiscount = 0;
-            if (totalOrderDiscount > 0 && totalSubtotal > 0) {
+            KhuyenMai orderKmForShop = null;
+
+            if (isShopOrderVoucher) {
+                // Voucher cấp Shop chỉ trừ đúng vào shop phát hành
+                if (sId.equals(orderVoucherShopId)) {
+                    shopOrderDiscount = Math.min(shopSub, totalOrderDiscount);
+                    orderKmForShop = voucherOrder;
+                }
+            } else if (totalOrderDiscount > 0 && totalSubtotal > 0) {
+                // Voucher toàn sàn phân bổ theo tỷ lệ giá trị tiền hàng của từng Shop
                 if (currentShopIdx == shopCount - 1) {
                     shopOrderDiscount = Math.max(0, totalOrderDiscount - allocatedOrderDiscount);
                 } else {
@@ -372,14 +417,22 @@ public class DonHangService {
                 if (shopOrderDiscount > shopSub) {
                     shopOrderDiscount = shopSub;
                 }
+                orderKmForShop = voucherOrder;
             }
 
             // Phí ship và giảm giá freeship cho shop theo khoảng cách:
             ShippingCalculationService.ShippingEstimate est = shopShippingEstimates.get(sId);
             int shopShippingFee = (est != null) ? est.getShippingFee() : 25000;
             int shopShippingDiscount = 0;
+            KhuyenMai shippingKmForShop = null;
+
             if (totalSubtotal >= FREE_SHIPPING_THRESHOLD) {
                 shopShippingDiscount = shopShippingFee;
+            } else if (isShopShippingVoucher) {
+                if (sId.equals(shippingVoucherShopId)) {
+                    shopShippingDiscount = Math.min(shopShippingFee, totalShippingDiscount);
+                    shippingKmForShop = voucherShipping;
+                }
             } else if (totalShippingDiscount > 0 && totalCalculatedShippingFee > 0) {
                 if (currentShopIdx == shopCount - 1) {
                     shopShippingDiscount = Math.min(shopShippingFee, Math.max(0, totalShippingDiscount - allocatedShippingDiscount));
@@ -387,6 +440,7 @@ public class DonHangService {
                     shopShippingDiscount = Math.min(shopShippingFee, (int) Math.round((double) shopShippingFee / totalCalculatedShippingFee * totalShippingDiscount));
                     allocatedShippingDiscount += shopShippingDiscount;
                 }
+                shippingKmForShop = voucherShipping;
             }
 
             int shopTienHangSauGiam = Math.max(0, shopSub - shopOrderDiscount);
@@ -413,8 +467,8 @@ public class DonHangService {
             donHang.setTienThucNhanShop(tienThucNhanShop);
             donHang.setTongTien(shopFinalTotal);
             donHang.setTienGiam(shopOrderDiscount);
-            donHang.setKhuyenMai(voucherOrder);
-            donHang.setKhuyenMaiFreeship(voucherShipping);
+            donHang.setKhuyenMai(orderKmForShop);
+            donHang.setKhuyenMaiFreeship(shippingKmForShop);
             donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
             if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
                 donHang.setTrangThai("ChoThanhToan");

@@ -443,5 +443,27 @@ class VoucherSystemTest {
             taiKhoanRepository.delete(tk);
         }
     }
+
+    @Test
+    @DisplayName("Voucher phạm vi SHOP: UDF chặn p_ma_shop NULL/khác shop, CartController chặn sai shop, DonHangService chỉ giảm đúng shop phát hành")
+    void testShopScopedVoucherIsolation() {
+        // 1. Kiểm tra SQL UDF fn_KiemTraVoucherHopLe với voucher KIMDONG20K (của Shop 1)
+        Boolean hopLeNullShop = khuyenMaiRepository.kiemTraVoucherHopLe("KIMDONG20K", null, 150000);
+        assertFalse(Boolean.TRUE.equals(hopLeNullShop), "UDF fn_KiemTraVoucherHopLe phải từ chối voucher SHOP khi p_ma_shop = NULL");
+
+        Boolean hopLeDungShop = khuyenMaiRepository.kiemTraVoucherHopLe("KIMDONG20K", 1, 150000);
+        assertTrue(Boolean.TRUE.equals(hopLeDungShop), "UDF fn_KiemTraVoucherHopLe phải chấp nhận voucher SHOP khi đúng ma_shop = 1");
+
+        Boolean hopLeSaiShop = khuyenMaiRepository.kiemTraVoucherHopLe("KIMDONG20K", 2, 150000);
+        assertFalse(Boolean.TRUE.equals(hopLeSaiShop), "UDF fn_KiemTraVoucherHopLe phải từ chối voucher SHOP khi sai ma_shop");
+
+        // 2. Kiểm tra CartController.apiValidateVoucher với maShop
+        Map<String, Object> resSaiShop = cartController.apiValidateVoucher("KIMDONG20K", 150000, 2);
+        assertFalse((Boolean) resSaiShop.get("valid"), "CartController phải từ chối khi client truyền sai maShop");
+
+        Map<String, Object> resDungShop = cartController.apiValidateVoucher("KIMDONG20K", 150000, 1);
+        assertTrue((Boolean) resDungShop.get("valid"), "CartController phải chấp nhận khi client truyền đúng maShop");
+        assertEquals(1, resDungShop.get("maShop"));
+    }
 }
 

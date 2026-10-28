@@ -72,6 +72,9 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
     @Query("SELECT COALESCE(SUM(d.tienPhiSan), 0) FROM DonHang d WHERE d.shop.maShop = :maShop AND (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat')")
     Long getShopPlatformFeePaid(@Param("maShop") Integer maShop);
 
+    @Query("SELECT COALESCE(SUM(d.tienPhiSan), 0) FROM DonHang d WHERE d.shop.maShop = :maShop AND (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat') AND (COALESCE(d.ngayHoanThanh, d.ngayDat) >= :startDate AND COALESCE(d.ngayHoanThanh, d.ngayDat) < :endDate)")
+    Long getShopPlatformFeeByDateRange(@Param("maShop") Integer maShop, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
     // --- MARKETPLACE ADMIN / MANAGER QUERIES ---
     @Query("SELECT COALESCE(SUM(d.tienPhiSan), 0) FROM DonHang d WHERE (d.trangThai = 'DaGiao' OR d.trangThai = 'HoanTat')")
     Long getTotalPlatformCommissionRevenue();

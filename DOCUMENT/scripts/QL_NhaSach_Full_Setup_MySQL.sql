@@ -561,7 +561,7 @@ BEGIN
           AND NOW() BETWEEN ngay_bat_dau AND ngay_ket_thuc
           AND (so_luong_toi_da IS NULL OR so_luong_da_dung < so_luong_toi_da)
           AND p_tong_tien >= don_toi_thieu
-          AND (pham_vi = 'TOAN_SAN' OR (pham_vi = 'SHOP' AND (p_ma_shop IS NULL OR ma_shop = p_ma_shop)))
+          AND (pham_vi = 'TOAN_SAN' OR (pham_vi = 'SHOP' AND p_ma_shop IS NOT NULL AND ma_shop = p_ma_shop))
     ) THEN
         SET v_hop_le = TRUE;
     END IF;

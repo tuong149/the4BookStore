@@ -342,14 +342,20 @@ public class CartController {
 
     // ==================== API Kiểm Tra Mã Giảm Giá ====================
     public Map<String, Object> apiValidateVoucher(String code, Integer subtotal) {
-        return apiValidateVoucher(code, subtotal, null);
+        return apiValidateVoucher(code, subtotal, null, null);
+    }
+
+    public Map<String, Object> apiValidateVoucher(String code, Integer subtotal, Integer maShop) {
+        return apiValidateVoucher(code, subtotal, maShop, null);
     }
 
     @PostMapping("/api/gio-hang/kiem-tra-voucher")
     @ResponseBody
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Map<String, Object> apiValidateVoucher(@RequestParam("code") String code,
                                                   @RequestParam(value = "subtotal", defaultValue = "0") Integer subtotal,
-                                                  @RequestParam(value = "maShop", required = false) Integer maShop) {
+                                                  @RequestParam(value = "maShop", required = false) Integer maShop,
+                                                  Authentication authentication) {
         Map<String, Object> result = new HashMap<>();
         if (code == null || code.trim().isEmpty()) {
             result.put("valid", false);
@@ -359,103 +365,144 @@ public class CartController {
 
         String cleanCode = code.trim().toUpperCase();
 
-        // 1. Kiểm tra tính hợp lệ qua Function SQL (fn_KiemTraVoucherHopLe)
-        Boolean hopLeUDF = null;
-        try {
-            hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, maShop, subtotal);
-        } catch (Exception ignored) {}
-
-        // 2. Tra cứu chi tiết mã khuyến mãi
+        // 1. Tra cứu chi tiết mã khuyến mãi trước để xác định phạm vi (SHOP hay TOAN_SAN)
         Optional<KhuyenMai> kmOpt = khuyenMaiRepository.findByMaCode(cleanCode);
-        if (kmOpt.isPresent()) {
-            KhuyenMai km = kmOpt.get();
-
-            // Nếu hàm SQL fn_KiemTraVoucherHopLe trả về FALSE, tìm nguyên nhân cụ thể để phản hồi chi tiết
-            if (Boolean.FALSE.equals(hopLeUDF)) {
-                if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
-                    result.put("valid", false);
-                    result.put("message", "Mã giảm giá đã hết hạn hoặc tạm ngưng sử dụng");
-                    return result;
-                }
-                if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
-                    result.put("valid", false);
-                    result.put("message", "Mã giảm giá chưa đến ngày áp dụng");
-                    return result;
-                }
-                if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
-                    result.put("valid", false);
-                    result.put("message", "Mã giảm giá đã hết hạn sử dụng");
-                    return result;
-                }
-                if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
-                    result.put("valid", false);
-                    result.put("message", "Mã giảm giá đã hết lượt sử dụng");
-                    return result;
-                }
-                if (km.getDonToiThieu() != null && subtotal < km.getDonToiThieu()) {
-                    result.put("valid", false);
-                    result.put("message", "Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()));
-                    return result;
-                }
-                if ("SHOP".equalsIgnoreCase(km.getPhamVi()) && km.getShop() != null) {
-                    if (maShop != null && !km.getShop().getMaShop().equals(maShop)) {
-                        result.put("valid", false);
-                        result.put("message", "Mã giảm giá chỉ áp dụng cho gian hàng " + (km.getShop().getTenShop() != null ? km.getShop().getTenShop() : ""));
-                        return result;
-                    }
-                }
-                result.put("valid", false);
-                result.put("message", "Mã giảm giá không đủ điều kiện áp dụng");
-                return result;
-            }
-
-            // 3. Tính tiền giảm qua Function SQL (fn_TinhTienGiamVoucher)
-            int discount = 0;
-            try {
-                Integer dbDiscount = khuyenMaiRepository.tinhTienGiamVoucher(km.getMaKM(), subtotal);
-                if (dbDiscount != null && dbDiscount > 0) {
-                    discount = dbDiscount;
-                }
-            } catch (Exception ignored) {}
-
-            // Fallback tính toán nếu UDF chưa trả kết quả
-            if (discount <= 0) {
-                if ("Freeship".equalsIgnoreCase(km.getLoaiGiam()) || km.isShippingDiscount()) {
-                    discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
-                } else if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
-                    discount = (int) Math.round(subtotal * (km.getGiaTriGiam() / 100.0));
-                    if (km.getGiamToiDa() != null && discount > km.getGiamToiDa()) {
-                        discount = km.getGiamToiDa();
-                    }
-                    if (discount > subtotal) {
-                        discount = subtotal;
-                    }
-                } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
-                    discount = Math.min(subtotal, km.getGiaTriGiam());
-                } else {
-                    discount = Math.min(subtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
-                }
-            }
-
-            result.put("valid", true);
-            result.put("code", cleanCode);
-            result.put("discountAmount", discount);
-            result.put("loaiGiam", km.getLoaiGiam());
-            result.put("voucherType", km.getVoucherType()); // ORDER_DISCOUNT hoặc SHIPPING_DISCOUNT
-            result.put("discountType", km.getDiscountType()); // PERCENTAGE hoặc FIXED_AMOUNT
-            result.put("giaTriGiam", km.getGiaTriGiam());
-            result.put("giamToiDa", km.getGiamToiDa());
-            result.put("maxDiscountValue", km.getGiamToiDa());
-            result.put("donToiThieu", km.getDonToiThieu());
-            result.put("minOrderValue", km.getDonToiThieu());
-            result.put("tenKM", km.getTenKM());
-            result.put("message", "Áp dụng thành công mã [" + cleanCode + "] - " + km.getTenKM());
+        if (kmOpt.isEmpty()) {
+            result.put("valid", false);
+            result.put("message", "Mã giảm giá không tồn tại hoặc không hợp lệ!");
             return result;
         }
 
-        // Chỉ chấp nhận mã được tạo trong trang Quản lý Khuyến Mãi của Admin
-        result.put("valid", false);
-        result.put("message", "Mã giảm giá không tồn tại hoặc không hợp lệ!");
+        KhuyenMai km = kmOpt.get();
+        boolean isShopScope = "SHOP".equalsIgnoreCase(km.getPhamVi()) && km.getShop() != null;
+        Integer effectiveShopId = isShopScope ? km.getShop().getMaShop() : null;
+        int effectiveSubtotal = (subtotal != null) ? subtotal : 0;
+
+        // Nếu là voucher cấp SHOP:
+        if (isShopScope) {
+            if (maShop != null) {
+                if (!effectiveShopId.equals(maShop)) {
+                    String sName = (km.getShop().getTenShop() != null) ? km.getShop().getTenShop() : ("#" + effectiveShopId);
+                    result.put("valid", false);
+                    result.put("message", "Mã giảm giá chỉ áp dụng cho gian hàng [" + sName + "]!");
+                    return result;
+                }
+            } else {
+                // maShop chưa được chỉ định từ client: kiểm tra xem giỏ hàng của khách có sản phẩm thuộc Shop này không
+                KhachHang kh = getCurrentKhachHang(authentication);
+                if (kh != null) {
+                    List<ChiTietGioHang> cartItems = gioHangService.getCartItems(kh);
+                    int shopSub = 0;
+                    if (cartItems != null) {
+                        for (ChiTietGioHang ct : cartItems) {
+                            if (ct.getSanPham() != null && ct.getSanPham().getShop() != null
+                                    && effectiveShopId.equals(ct.getSanPham().getShop().getMaShop())) {
+                                shopSub += (ct.getSanPham().getGiaBan() != null ? ct.getSanPham().getGiaBan() : 0) 
+                                        * (ct.getSoLuong() != null ? ct.getSoLuong() : 1);
+                            }
+                        }
+                    }
+                    if (shopSub == 0) {
+                        String sName = (km.getShop().getTenShop() != null) ? km.getShop().getTenShop() : "";
+                        result.put("valid", false);
+                        result.put("message", "Mã giảm giá chỉ áp dụng cho sản phẩm thuộc gian hàng [" + sName + "]. Hiện giỏ hàng chưa có sản phẩm của gian hàng này!");
+                        return result;
+                    }
+                    effectiveSubtotal = shopSub;
+                } else if (effectiveSubtotal <= 0) {
+                    String sName = (km.getShop().getTenShop() != null) ? km.getShop().getTenShop() : "";
+                    result.put("valid", false);
+                    result.put("message", "Mã giảm giá chỉ áp dụng cho gian hàng [" + sName + "]!");
+                    return result;
+                }
+            }
+        }
+
+        // 2. Kiểm tra tính hợp lệ qua Function SQL (fn_KiemTraVoucherHopLe)
+        Boolean hopLeUDF = null;
+        try {
+            hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, effectiveShopId, effectiveSubtotal);
+        } catch (Exception ignored) {}
+
+        // Nếu hàm SQL fn_KiemTraVoucherHopLe trả về FALSE, tìm nguyên nhân cụ thể để phản hồi chi tiết
+        if (Boolean.FALSE.equals(hopLeUDF)) {
+            if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
+                result.put("valid", false);
+                result.put("message", "Mã giảm giá đã hết hạn hoặc tạm ngưng sử dụng");
+                return result;
+            }
+            if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
+                result.put("valid", false);
+                result.put("message", "Mã giảm giá chưa đến ngày áp dụng");
+                return result;
+            }
+            if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
+                result.put("valid", false);
+                result.put("message", "Mã giảm giá đã hết hạn sử dụng");
+                return result;
+            }
+            if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
+                result.put("valid", false);
+                result.put("message", "Mã giảm giá đã hết lượt sử dụng");
+                return result;
+            }
+            if (km.getDonToiThieu() != null && effectiveSubtotal < km.getDonToiThieu()) {
+                String shopNameNotice = isShopScope ? (" của gian hàng [" + km.getShop().getTenShop() + "]") : "";
+                result.put("valid", false);
+                result.put("message", "Đơn hàng" + shopNameNotice + " chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()));
+                return result;
+            }
+            result.put("valid", false);
+            result.put("message", "Mã giảm giá không đủ điều kiện áp dụng");
+            return result;
+        }
+
+        // 3. Tính tiền giảm qua Function SQL (fn_TinhTienGiamVoucher) dựa trên effectiveSubtotal
+        int discount = 0;
+        try {
+            Integer dbDiscount = khuyenMaiRepository.tinhTienGiamVoucher(km.getMaKM(), effectiveSubtotal);
+            if (dbDiscount != null && dbDiscount > 0) {
+                discount = dbDiscount;
+            }
+        } catch (Exception ignored) {}
+
+        // Fallback tính toán nếu UDF chưa trả kết quả
+        if (discount <= 0) {
+            if ("Freeship".equalsIgnoreCase(km.getLoaiGiam()) || km.isShippingDiscount()) {
+                discount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
+            } else if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
+                discount = (int) Math.round(effectiveSubtotal * (km.getGiaTriGiam() / 100.0));
+                if (km.getGiamToiDa() != null && discount > km.getGiamToiDa()) {
+                    discount = km.getGiamToiDa();
+                }
+                if (discount > effectiveSubtotal) {
+                    discount = effectiveSubtotal;
+                }
+            } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
+                discount = Math.min(effectiveSubtotal, km.getGiaTriGiam());
+            } else {
+                discount = Math.min(effectiveSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
+            }
+        }
+
+        result.put("valid", true);
+        result.put("code", cleanCode);
+        result.put("discountAmount", discount);
+        result.put("loaiGiam", km.getLoaiGiam());
+        result.put("voucherType", km.getVoucherType()); // ORDER_DISCOUNT hoặc SHIPPING_DISCOUNT
+        result.put("discountType", km.getDiscountType()); // PERCENTAGE hoặc FIXED_AMOUNT
+        result.put("giaTriGiam", km.getGiaTriGiam());
+        result.put("giamToiDa", km.getGiamToiDa());
+        result.put("maxDiscountValue", km.getGiamToiDa());
+        result.put("donToiThieu", km.getDonToiThieu());
+        result.put("minOrderValue", km.getDonToiThieu());
+        result.put("tenKM", km.getTenKM());
+        result.put("phamVi", km.getPhamVi());
+        result.put("maShop", effectiveShopId);
+        result.put("tenShop", isShopScope ? km.getShop().getTenShop() : null);
+        result.put("message", isShopScope
+                ? ("Áp dụng thành công mã [" + cleanCode + "] cho gian hàng " + km.getShop().getTenShop())
+                : ("Áp dụng thành công mã [" + cleanCode + "] - " + km.getTenKM()));
         return result;
     }
 

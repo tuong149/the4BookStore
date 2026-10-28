@@ -86,8 +86,9 @@ public class VendorService {
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
 
         Long thisMonthRevenue = donHangRepository.getShopRevenueByDateRange(maShop, startOfMonth, endOfMonth);
+        Long thisMonthPlatformFee = donHangRepository.getShopPlatformFeeByDateRange(maShop, startOfMonth, endOfMonth);
         Long totalRevenue = donHangRepository.getShopRevenue(maShop);
-        Long platformFee = donHangRepository.getShopPlatformFeePaid(maShop);
+        Long totalPlatformFee = donHangRepository.getShopPlatformFeePaid(maShop);
 
         stats.put("totalBooks", totalBooks);
         stats.put("newOrders", newOrders);
@@ -102,8 +103,10 @@ public class VendorService {
         stats.put("disputeOrders", disputeOrders);
 
         stats.put("thisMonthRevenue", thisMonthRevenue != null ? thisMonthRevenue : 0L);
+        stats.put("thisMonthPlatformFee", thisMonthPlatformFee != null ? thisMonthPlatformFee : 0L);
+        stats.put("platformFee", thisMonthPlatformFee != null ? thisMonthPlatformFee : 0L);
         stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0L);
-        stats.put("platformFee", platformFee != null ? platformFee : 0L);
+        stats.put("totalPlatformFee", totalPlatformFee != null ? totalPlatformFee : 0L);
         stats.put("netPayout", (totalRevenue != null ? totalRevenue : 0L));
         stats.put("currentMonth", now.getMonthValue());
         stats.put("stockWarningCount", reportService.getShopStockWarnings(maShop).size());
