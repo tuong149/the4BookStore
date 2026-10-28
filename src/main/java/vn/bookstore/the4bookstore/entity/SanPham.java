@@ -57,7 +57,7 @@ public class SanPham {
     @Column(nullable = false)
     private Integer soLuongTon = 0;
     @Column(nullable = false)
-    private Integer mucTonToiThieu = 0;
+    private Integer mucTonToiThieu = 10;
     @Column(length = 1000)
     private String moTa;
     @ManyToOne(fetch = FetchType.LAZY)

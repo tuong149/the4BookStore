@@ -168,17 +168,18 @@
                                 <span class="material-symbols-outlined text-[12px]">lock</span>
                                 <span>Bị khóa</span>
                             </span>
-                            <span th:if="${sp.trangThaiKhoa == 'BinhThuong' or sp.trangThaiKhoa == null}" th:switch="${sp.trangThai}">
-                                <span th:case="'DangBan'" th:if="${sp.soLuongTon != null and sp.soLuongTon <= 5 and sp.soLuongTon > 0}"
-                                      class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold shadow-xs whitespace-nowrap">
-                                    Còn <span th:text="${sp.soLuongTon}"></span> sản phẩm
+                            <span th:if="${sp.trangThaiKhoa == 'BinhThuong' or sp.trangThaiKhoa == null}">
+                                <span th:if="${sp.soLuongTon == null or sp.soLuongTon <= 0 or sp.trangThai == 'HetHang'}"
+                                      class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap">
+                                    Hết hàng
                                 </span>
-                                <span th:case="'DangBan'" th:unless="${sp.soLuongTon != null and sp.soLuongTon <= 5}"
+                                <span th:if="${sp.trangThai != 'HetHang' and sp.soLuongTon != null and sp.soLuongTon > 0 and sp.soLuongTon < (sp.mucTonToiThieu != null and sp.mucTonToiThieu > 0 ? sp.mucTonToiThieu : 10)}"
+                                      class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs whitespace-nowrap animate-pulse">
+                                    Sắp hết (Còn <span th:text="${sp.soLuongTon}"></span>)
+                                </span>
+                                <span th:if="${sp.trangThai != 'HetHang' and sp.soLuongTon != null and sp.soLuongTon >= (sp.mucTonToiThieu != null and sp.mucTonToiThieu > 0 ? sp.mucTonToiThieu : 10)}"
                                       class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap">
                                     Đang bán
-                                </span>
-                                <span th:case="*" class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap">
-                                    Hết hàng
                                 </span>
                             </span>
                         </div>
@@ -300,7 +301,9 @@
                         </td>
                         <td class="p-4 text-on-surface-variant" th:text="${sp.danhMuc != null ? sp.danhMuc.tenDanhMuc : 'N/A'}">Danh mục</td>
                         <td class="p-4 font-bold text-primary font-mono" th:text="${#numbers.formatDecimal(sp.giaBan, 0, 'COMMA', 0, 'POINT')} + ' đ'">Giá</td>
-                        <td class="p-4 font-mono font-bold" th:text="${sp.soLuongTon}">0</td>
+                        <td class="p-4 font-mono font-bold"
+                            th:classappend="${sp.soLuongTon == null or sp.soLuongTon <= 0 ? 'text-rose-600 font-black' : (sp.soLuongTon < (sp.mucTonToiThieu != null and sp.mucTonToiThieu > 0 ? sp.mucTonToiThieu : 10) ? 'text-amber-600 font-black' : 'text-on-surface')}"
+                            th:text="${sp.soLuongTon}">0</td>
                         <td class="p-4 font-semibold text-emerald-600 font-mono" th:text="${sp.soLuongDaBan != null ? sp.soLuongDaBan : 0}">0</td>
                         <td class="p-4">
                             <span th:if="${sp.trangThaiKhoa == 'ChoDuyet'}" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 flex items-center gap-1 w-fit">
@@ -311,9 +314,15 @@
                                 <span class="material-symbols-outlined text-[12px]">lock</span>
                                 <span>Bị Sàn Khóa</span>
                             </span>
-                            <span th:if="${sp.trangThaiKhoa == 'BinhThuong' or sp.trangThaiKhoa == null}" th:switch="${sp.trangThai}">
-                                <span th:case="'DangBan'" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang bán</span>
-                                <span th:case="*" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700">Ngừng bán</span>
+                            <span th:if="${sp.trangThaiKhoa == 'BinhThuong' or sp.trangThaiKhoa == null}">
+                                <span th:if="${sp.soLuongTon == null or sp.soLuongTon <= 0 or sp.trangThai == 'HetHang'}"
+                                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">Hết hàng</span>
+                                <span th:if="${sp.trangThai != 'HetHang' and sp.soLuongTon != null and sp.soLuongTon > 0 and sp.soLuongTon < (sp.mucTonToiThieu != null and sp.mucTonToiThieu > 0 ? sp.mucTonToiThieu : 10)}"
+                                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Sắp hết hàng</span>
+                                <span th:if="${sp.trangThai != 'HetHang' and sp.soLuongTon != null and sp.soLuongTon >= (sp.mucTonToiThieu != null and sp.mucTonToiThieu > 0 ? sp.mucTonToiThieu : 10)}"
+                                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đang bán</span>
+                                <span th:if="${sp.trangThai == 'NgungBan'}"
+                                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700">Ngừng bán</span>
                             </span>
                         </td>
                         <td class="p-4 text-right">

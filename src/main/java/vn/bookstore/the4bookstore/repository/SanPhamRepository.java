@@ -192,7 +192,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     long countByDanhMuc_MaDanhMuc(Integer maDanhMuc);
 
-    @Query(value = "SELECT COUNT(*) FROM san_pham WHERE so_luong_ton <= muc_ton_toi_thieu AND trang_thai = 'DangBan'", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM san_pham WHERE so_luong_ton <= COALESCE(NULLIF(muc_ton_toi_thieu, 0), 10) AND trang_thai = 'DangBan'", nativeQuery = true)
     long countLowStock();
 
     @Query(value = "SELECT COUNT(*) FROM san_pham WHERE so_luong_ton = 0 AND trang_thai = 'DangBan'", nativeQuery = true)

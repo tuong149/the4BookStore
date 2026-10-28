@@ -639,14 +639,14 @@ SELECT
     s.ten_shop,
     s.so_dien_thoai AS sdt_shop,
     sp.so_luong_ton,
-    sp.muc_ton_toi_thieu,
+    COALESCE(NULLIF(sp.muc_ton_toi_thieu, 0), 10) AS muc_ton_toi_thieu,
     CASE 
         WHEN sp.so_luong_ton = 0 THEN 'HẾT HÀNG'
         ELSE 'SẮP HẾT'
     END AS muc_do_canh_bao
 FROM san_pham sp
 JOIN shop s ON sp.ma_shop = s.ma_shop
-WHERE sp.so_luong_ton <= sp.muc_ton_toi_thieu AND sp.trang_thai IN ('HoatDong', 'DangBan');
+WHERE sp.so_luong_ton <= COALESCE(NULLIF(sp.muc_ton_toi_thieu, 0), 10) AND sp.trang_thai IN ('HoatDong', 'DangBan');
 
 -- View 5: Thống kê đánh giá sách
 DROP VIEW IF EXISTS `vw_ThongKeDanhGiaSanPham`;

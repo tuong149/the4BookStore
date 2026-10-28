@@ -387,6 +387,7 @@ public class AdminController {
                     data.put("isbn", sp.getISBN() != null ? sp.getISBN() : "");
                     data.put("giaBan", sp.getGiaBan() != null ? sp.getGiaBan() : 0);
                     data.put("soLuongTon", sp.getSoLuongTon() != null ? sp.getSoLuongTon() : 0);
+                    data.put("mucTonToiThieu", sp.getMucTonToiThieu() != null ? sp.getMucTonToiThieu() : 10);
                     data.put("soLuongDaBan", sp.getSoLuongDaBan() != null ? sp.getSoLuongDaBan() : 0);
                     data.put("trangThai", sp.getTrangThai() != null ? sp.getTrangThai() : "DangBan");
                     data.put("trangThaiKhoa", sp.getTrangThaiKhoa() != null ? sp.getTrangThaiKhoa() : "BinhThuong");

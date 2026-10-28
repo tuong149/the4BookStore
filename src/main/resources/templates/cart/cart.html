@@ -172,10 +172,13 @@
                                         <span th:if="${isLocked}" class="bg-error/10 text-error px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-0.5">
                                             <span class="material-symbols-outlined text-[12px]">block</span>Tạm khóa / Gian hàng ngừng HĐ
                                         </span>
-                                        <span th:if="${!isLocked and isOutOfStock}" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-0.5">
+                                        <span th:if="${!isLocked and isOutOfStock}" class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-0.5">
                                             <span class="material-symbols-outlined text-[12px]">inventory_2</span>Hết hàng
                                         </span>
-                                        <span th:if="${!isLocked and !isOutOfStock}" class="text-tertiary font-label-sm text-[11px] font-semibold flex items-center gap-0.5">
+                                        <span th:if="${!isLocked and !isOutOfStock and ct.sanPham.soLuongTon != null and ct.sanPham.soLuongTon < (ct.sanPham.mucTonToiThieu != null && ct.sanPham.mucTonToiThieu > 0 ? ct.sanPham.mucTonToiThieu : 10)}" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-0.5 border border-amber-200">
+                                            <span class="material-symbols-outlined text-[12px] text-amber-600">warning</span>Sắp hết (Còn <span th:text="${ct.sanPham.soLuongTon}"></span>)
+                                        </span>
+                                        <span th:if="${!isLocked and !isOutOfStock and (ct.sanPham.soLuongTon == null or ct.sanPham.soLuongTon >= (ct.sanPham.mucTonToiThieu != null && ct.sanPham.mucTonToiThieu > 0 ? ct.sanPham.mucTonToiThieu : 10))}" class="text-tertiary font-label-sm text-[11px] font-semibold flex items-center gap-0.5">
                                             <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Còn hàng
                                         </span>
                                     </div>

@@ -174,11 +174,17 @@ public class ReportService {
     // VIEW 4: CẢNH BÁO TỒN KHO CỦA SHOP (vw_CanhBaoTonKhoShop LỌC THEO ma_shop)
     // ====================================================================
     public List<Map<String, Object>> getShopStockWarnings(Integer maShop) {
-        String sql = "SELECT masp, tensp, so_luong_ton, muc_ton_toi_thieu, muc_do_canh_bao " +
-                     "FROM vw_CanhBaoTonKhoShop WHERE ma_shop = :maShop " +
-                     "ORDER BY so_luong_ton ASC, masp ASC";
+        String sql = "SELECT sp.masp, sp.tensp, sp.so_luong_ton, " +
+                     "COALESCE(NULLIF(sp.muc_ton_toi_thieu, 0), 10) AS muc_ton_toi_thieu, " +
+                     "CASE WHEN sp.so_luong_ton = 0 THEN 'HẾT HÀNG' ELSE 'SẮP HẾT' END AS muc_do_canh_bao " +
+                     "FROM san_pham sp " +
+                     "WHERE sp.ma_shop = :maShop " +
+                     "AND sp.so_luong_ton <= COALESCE(NULLIF(sp.muc_ton_toi_thieu, 0), 10) " +
+                     "AND sp.trang_thai IN ('HoatDong', 'DangBan') " +
+                     "ORDER BY sp.so_luong_ton ASC, sp.masp ASC";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("maShop", maShop);
+        @SuppressWarnings("unchecked")
         List<Object[]> results = query.getResultList();
 
         List<Map<String, Object>> list = new ArrayList<>();

@@ -137,7 +137,7 @@
                                 <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md px-space-md py-2 pr-8 rounded-xl focus:outline-none shadow-sm cursor-pointer border border-transparent focus:border-primary/30" id="stockFilter">
                                     <option value="all">Táº¥t cáº£ tráº¡ng thÃ¡i kho</option>
                                     <option value="in_stock">CÃ²n HÃ ng (&gt; 5)</option>
-                                    <option value="low_stock">Sáº¯p Háº¿t (&le; 5)</option>
+                                    <option value="low_stock">Sắp Hết (&lt; 10)</option>
                                     <option value="out_of_stock">Háº¿t HÃ ng (0)</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
@@ -242,7 +242,7 @@
                                                 </div>
                                                 <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
                                                     <div class="h-full rounded-full transition-all duration-300" 
-                                                         th:classappend="${b.soLuongTon == 0 ? 'bg-error' : (b.soLuongTon <= 5 ? 'bg-secondary' : 'bg-primary')}" 
+                                                         th:classappend="${b.soLuongTon == 0 ? 'bg-error' : (b.soLuongTon < (b.mucTonToiThieu != null && b.mucTonToiThieu > 0 ? b.mucTonToiThieu : 10) ? 'bg-secondary' : 'bg-primary')}" 
                                                          th:style="'width: ' + (${b.soLuongTon} > 50 ? 100 : ${b.soLuongTon} * 2) + '%'"></div>
                                                 </div>
                                             </div>
@@ -253,11 +253,11 @@
                                         </td>
 
                                         <td class="py-3 px-space-md text-center">
-                                            <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon > 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-primary bg-primary-fixed/30 px-2.5 py-0.5 rounded-full">
+                                            <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon >= (b.mucTonToiThieu != null && b.mucTonToiThieu > 0 ? b.mucTonToiThieu : 10)}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-primary bg-primary-fixed/30 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
                                                 Äang BÃ¡n
                                             </span>
-                                            <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon > 0 && b.soLuongTon <= 5}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-secondary bg-secondary-fixed/40 px-2.5 py-0.5 rounded-full">
+                                            <span th:if="${b.trangThai == 'DangBan' && b.soLuongTon > 0 && b.soLuongTon < (b.mucTonToiThieu != null && b.mucTonToiThieu > 0 ? b.mucTonToiThieu : 10)}" class="inline-flex items-center gap-1 text-label-sm font-semibold text-secondary bg-secondary-fixed/40 px-2.5 py-0.5 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
                                                 Sáº¯p Háº¿t
                                             </span>

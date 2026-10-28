@@ -22,15 +22,15 @@
 
             <!-- Category Badge overlay -->
             <span th:if="${product.danhMuc != null}" th:text="${product.danhMuc.tenDanhMuc}"
-                th:classappend="${(product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon <= 5 and product.soLuongTon > 0) or (product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0)} ? 'max-w-[48%]' : 'max-w-[85%]'"
+                th:classappend="${(product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon > 0 and product.soLuongTon < (product.mucTonToiThieu != null and product.mucTonToiThieu > 0 ? product.mucTonToiThieu : 10)) or (product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0)} ? 'max-w-[48%]' : 'max-w-[85%]'"
                 class="absolute top-2 left-2 truncate px-2.5 py-0.5 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm text-[11px] font-bold text-primary shadow-xs whitespace-nowrap z-10">
                 Văn học
             </span>
 
             <!-- Stock status indicator -->
-            <span th:if="${product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon <= 5 and product.soLuongTon > 0}"
-                class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[10px] font-bold shadow-xs whitespace-nowrap z-10">
-                Chỉ còn <span th:text="${product.soLuongTon}"></span> sản phẩm
+            <span th:if="${product.trangThai != 'HetHang' and product.soLuongTon != null and product.soLuongTon > 0 and product.soLuongTon < (product.mucTonToiThieu != null and product.mucTonToiThieu > 0 ? product.mucTonToiThieu : 10)}"
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs whitespace-nowrap z-10 animate-pulse">
+                Chỉ còn <span th:text="${product.soLuongTon}"></span>
             </span>
             <span th:if="${product.trangThai == 'HetHang' or product.soLuongTon == null or product.soLuongTon <= 0}"
                 class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-xs whitespace-nowrap z-10">

@@ -192,6 +192,11 @@ public class VendorService {
             existing.setTenSP(sanPham.getTenSP());
             existing.setGiaBan(sanPham.getGiaBan());
             existing.setSoLuongTon(sanPham.getSoLuongTon());
+            if (sanPham.getMucTonToiThieu() != null && sanPham.getMucTonToiThieu() > 0) {
+                existing.setMucTonToiThieu(sanPham.getMucTonToiThieu());
+            } else if (existing.getMucTonToiThieu() == null || existing.getMucTonToiThieu() <= 0) {
+                existing.setMucTonToiThieu(10);
+            }
             existing.setMoTa(sanPham.getMoTa());
             existing.setISBN(sanPham.getISBN());
             if (sanPham.getLoaiSP() != null && !sanPham.getLoaiSP().isBlank()) {
@@ -221,6 +226,9 @@ public class VendorService {
             sanPham.setShop(shop);
             sanPham.setTrangThaiKhoa("BinhThuong");
             sanPham.setSoLuongDaBan(0);
+            if (sanPham.getMucTonToiThieu() == null || sanPham.getMucTonToiThieu() <= 0) {
+                sanPham.setMucTonToiThieu(10);
+            }
             sanPham.setNgayTao(LocalDateTime.now());
             if (sanPham.getHinhAnh() == null || sanPham.getHinhAnh().isBlank() || "/images/default-book.png".equals(sanPham.getHinhAnh())) {
                 sanPham.setHinhAnh("https://res.cloudinary.com/vkqtqiha/image/upload/v1791217232/the4bookstore/books/wqfgfnpkibjhi1vheb1n.png");
