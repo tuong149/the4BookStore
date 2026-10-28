@@ -96,15 +96,9 @@
                             <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
                         </th:block>
                     </select>
-                    <!-- Khoảng giá -->
-                    <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-2 rounded-xl border border-transparent">
-                        <span class="text-xs text-on-surface-variant font-medium shrink-0">Giá:</span>
-                        <input type="number" name="giaTu" id="prodIndexInputGiaTu" th:value="${giaTu}" min="0" step="5000" placeholder="Từ ₫"
-                               class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
-                        <span class="text-on-surface-variant text-xs">-</span>
-                        <input type="number" name="giaDen" id="prodIndexInputGiaDen" th:value="${giaDen}" min="0" step="5000" placeholder="Đến ₫"
-                               class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
-                    </div>
+                    <!-- Hidden inputs cho khoảng giá từ thanh trượt -->
+                    <input type="hidden" name="giaTu" id="prodIndexInputGiaTu" th:value="${giaTu}">
+                    <input type="hidden" name="giaDen" id="prodIndexInputGiaDen" th:value="${giaDen}">
 
                     <!-- Dropdown Sắp xếp -->
                     <select name="sort"
