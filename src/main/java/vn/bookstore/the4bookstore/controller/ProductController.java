@@ -16,6 +16,7 @@ import vn.bookstore.the4bookstore.entity.SanPham;
 import vn.bookstore.the4bookstore.service.DanhMucService;
 import vn.bookstore.the4bookstore.service.SanPhamService;
 import vn.bookstore.the4bookstore.entity.KhachHang;
+import vn.bookstore.the4bookstore.service.ReportService;
 import vn.bookstore.the4bookstore.service.TacGiaService;
 import vn.bookstore.the4bookstore.service.UserInteractionService;
 import org.springframework.security.core.Authentication;
@@ -38,6 +39,7 @@ public class ProductController {
     private final vn.bookstore.the4bookstore.service.ShopService shopService;
     private final vn.bookstore.the4bookstore.service.CurrentUserService currentUserService;
     private final DanhMucService danhMucService;
+    private final ReportService reportService;
 
     private KhachHang getCurrentKhachHang(Authentication auth, jakarta.servlet.http.HttpServletRequest request) {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) return null;
@@ -71,25 +73,23 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        // TỰ ĐỘNG CHỌN DANH MỤC LỚN THEO THỂ LOẠI (Nếu người dùng chọn thể loại trước hoặc đổi thể loại)
-        if (danhMuc != null && danhMuc > 0) {
-            Optional<DanhMuc> catOpt = danhMucService.getById(danhMuc);
-            if (catOpt.isPresent() && catOpt.get().getLoaiSP() != null && !catOpt.get().getLoaiSP().isBlank()) {
-                String inferredLoai = catOpt.get().getLoaiSP();
-                if (loaiSP == null || loaiSP.isBlank() || "ALL".equalsIgnoreCase(loaiSP) || !loaiSP.equalsIgnoreCase(inferredLoai)) {
-                    loaiSP = inferredLoai;
+        if (loaiSP == null || loaiSP.isBlank() || "ALL".equalsIgnoreCase(loaiSP)) {
+            danhMuc = null;
+            tacGia = null;
+            nxb = null;
+        } else {
+            if (danhMuc != null && danhMuc > 0) {
+                final Integer catId = danhMuc;
+                boolean valid = sanPhamService.getCategoriesByLoaiSP(loaiSP).stream()
+                        .anyMatch(c -> c.getMaDanhMuc().equals(catId));
+                if (!valid) {
+                    danhMuc = null;
                 }
             }
-        }
-
-        if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
             if (!"Sach".equalsIgnoreCase(loaiSP)) {
                 tacGia = null;
                 nxb = null;
             }
-        } else {
-            tacGia = null;
-            nxb = null;
         }
 
         if (giaTu != null && giaDen != null && giaTu > giaDen) {
@@ -322,22 +322,38 @@ public class ProductController {
         List<vn.bookstore.the4bookstore.entity.DanhGia> reviews = userInteractionService.getReviewsForProduct(sanPham);
         Double avgRating = userInteractionService.getAverageRating(sanPham);
 
+        Map<String, Object> reviewStats = reportService.getProductReviewStatsView(id);
+        if (reviewStats != null) {
+            model.addAttribute("reviewStats", reviewStats);
+            if (reviewStats.get("diemSaoTrungBinh") != null) {
+                avgRating = ((Number) reviewStats.get("diemSaoTrungBinh")).doubleValue();
+            }
+            if (reviewStats.get("tongLuotDanhGia") != null) {
+                reviews = userInteractionService.getReviewsForProduct(sanPham);
+            }
+        }
+
         model.addAttribute("sanPham", sanPham);
         model.addAttribute("relatedBooks", sanPhamService.getRelatedBooks(sanPham, 4));
         model.addAttribute("isFavorite", isFavorite);
         model.addAttribute("reviews", reviews);
-        model.addAttribute("reviewCount", reviews.size());
+        model.addAttribute("reviewCount", (reviewStats != null && reviewStats.get("tongLuotDanhGia") != null)
+                ? ((Number) reviewStats.get("tongLuotDanhGia")).intValue() : reviews.size());
         model.addAttribute("avgRating", avgRating);
-        Map<String, Object> reviewStats = sanPhamService.getProductReviewStats(id);
-        if (reviewStats != null) {
-            model.addAttribute("reviewStats", reviewStats);
-        }
         model.addAttribute("eligibleOrderIds", eligibleOrderIds);
         model.addAttribute("canReview", !eligibleOrderIds.isEmpty());
         model.addAttribute("hasPurchased", hasPurchased);
         model.addAttribute("isLoggedIn", kh != null);
 
         return "products/detail";
+    }
+
+    // API lấy thống kê đánh giá sản phẩm qua View SQL vw_ThongKeDanhGiaSanPham
+    @GetMapping("/api/san-pham/{id}/review-stats")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> apiGetProductReviewStats(@PathVariable Integer id) {
+        Map<String, Object> stats = reportService.getProductReviewStatsView(id);
+        return stats != null ? ResponseEntity.ok(stats) : ResponseEntity.notFound().build();
     }
 
     // API tìm kiếm sản phẩm phân trang qua Stored Procedure sp_TimKiemSachPhanTrang

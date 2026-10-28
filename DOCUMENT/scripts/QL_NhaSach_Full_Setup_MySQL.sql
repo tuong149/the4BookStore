@@ -155,34 +155,6 @@ CREATE TABLE `san_pham_tac_gia` (
     CONSTRAINT `FK_sptg_tacgia` FOREIGN KEY (`ma_tac_gia`) REFERENCES `tac_gia` (`ma_tac_gia`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 9. Bảng: phieu_kiem_ke
-DROP TABLE IF EXISTS `phieu_kiem_ke`;
-CREATE TABLE `phieu_kiem_ke` (
-    `ma_phieu_kiem_ke` INT AUTO_INCREMENT PRIMARY KEY,
-    `ma_shop` INT NOT NULL,
-    `ngay_kiem_ke` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `ngay_phe_duyet` DATETIME NULL,
-    `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DangKiemKe',
-    `ghi_chu` VARCHAR(500) NULL,
-    CONSTRAINT `FK_kiemke_shop` FOREIGN KEY (`ma_shop`) REFERENCES `shop` (`ma_shop`) ON DELETE CASCADE,
-    CONSTRAINT `CK_kiemke_trangthai` CHECK (`trang_thai` IN ('DaHuy', 'DaCanBang', 'DangKiemKe'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 10. Bảng: chi_tiet_kiem_ke
-DROP TABLE IF EXISTS `chi_tiet_kiem_ke`;
-CREATE TABLE `chi_tiet_kiem_ke` (
-    `ma_phieu_kiem_ke` INT NOT NULL,
-    `masp` INT NOT NULL,
-    `so_luong_he_thong` INT NOT NULL,
-    `so_luong_thuc_te` INT NOT NULL,
-    `chenh_lech` INT NOT NULL DEFAULT 0,
-    `ly_do` VARCHAR(500) NULL,
-    PRIMARY KEY (`ma_phieu_kiem_ke`, `masp`),
-    CONSTRAINT `FK_ctkk_phieu` FOREIGN KEY (`ma_phieu_kiem_ke`) REFERENCES `phieu_kiem_ke` (`ma_phieu_kiem_ke`) ON DELETE CASCADE,
-    CONSTRAINT `FK_ctkk_sanpham` FOREIGN KEY (`masp`) REFERENCES `san_pham` (`masp`),
-    CONSTRAINT `CK_ctkk_soluongthucte` CHECK (`so_luong_thuc_te` >= 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- 11. Bảng: nha_van_chuyen
 DROP TABLE IF EXISTS `nha_van_chuyen`;
 CREATE TABLE `nha_van_chuyen` (
@@ -834,36 +806,6 @@ proc_label: BEGIN
     COMMIT;
 END$$
 
--- 6. Thủ tục: sp_ShopXacNhanKiemKe
-DROP PROCEDURE IF EXISTS `sp_ShopXacNhanKiemKe`$$
-CREATE PROCEDURE `sp_ShopXacNhanKiemKe`(IN p_ma_phieu_kiem_ke INT, IN p_ma_shop INT)
-proc_label: BEGIN
-    START TRANSACTION;
-
-    IF NOT EXISTS (
-        SELECT 1 FROM phieu_kiem_ke 
-        WHERE ma_phieu_kiem_ke = p_ma_phieu_kiem_ke AND ma_shop = p_ma_shop
-    ) THEN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phiếu kiểm kê không tồn tại hoặc không thuộc quyền quản lý của Shop!';
-        LEAVE proc_label;
-    END IF;
-
-    -- Cập nhật số lượng thực tế sang tồn kho san_pham
-    UPDATE san_pham sp
-    JOIN chi_tiet_kiem_ke ctkk ON sp.masp = ctkk.masp
-    SET sp.so_luong_ton = ctkk.so_luong_thuc_te
-    WHERE ctkk.ma_phieu_kiem_ke = p_ma_phieu_kiem_ke;
-
-    -- Đổi trạng thái phiếu kiểm kê
-    UPDATE phieu_kiem_ke
-    SET trang_thai = 'DaCanBang',
-        ngay_phe_duyet = NOW()
-    WHERE ma_phieu_kiem_ke = p_ma_phieu_kiem_ke;
-
-    COMMIT;
-END$$
-
 -- 7. Thủ tục: sp_DatHangVaTruTonKho
 DROP PROCEDURE IF EXISTS `sp_DatHangVaTruTonKho`$$
 CREATE PROCEDURE `sp_DatHangVaTruTonKho`(
@@ -1152,15 +1094,6 @@ INSERT INTO `san_pham_tac_gia` (`masp`, `ma_tac_gia`, `thu_tu_tac_gia`) VALUES
 (10, 1, 1),
 (11, 2, 1),
 (12, 5, 1);
-
--- 9. phieu_kiem_ke
-INSERT INTO `phieu_kiem_ke` (`ma_phieu_kiem_ke`, `ma_shop`, `ngay_kiem_ke`, `ngay_phe_duyet`, `trang_thai`, `ghi_chu`) VALUES
-(1, 1, '2026-10-01 00:00:00', NULL, 'DangKiemKe', 'Kiểm kê định kỳ đầu tháng 10 của Shop Kim Đồng');
-
--- 10. chi_tiet_kiem_ke
-INSERT INTO `chi_tiet_kiem_ke` (`ma_phieu_kiem_ke`, `masp`, `so_luong_he_thong`, `so_luong_thuc_te`, `chenh_lech`, `ly_do`) VALUES
-(1, 1, 50, 48, -2, 'Rách bìa 2 cuốn phải thanh lý'),
-(1, 2, 35, 35, 0, 'Khớp số lượng');
 
 -- 11. nha_van_chuyen
 INSERT INTO `nha_van_chuyen` (`ma_nvc`, `ten_nvc`, `phi_co_ban`, `thoi_gian_du_kien`, `trang_thai`) VALUES

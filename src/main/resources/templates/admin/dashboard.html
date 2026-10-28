@@ -422,6 +422,73 @@
 
                     </div>
 
+                    <!-- Báo Cáo Doanh Thu Theo Khoảng Ngày (sp_BaoCaoDoanhThuTheoKhoangNgay) -->
+                    <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-surface-container/60">
+                        <div class="p-space-md md:p-space-lg border-b border-surface-container/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-primary text-[22px]">date_range</span>
+                                        <span>Báo Cáo Doanh Thu Theo Khoảng Ngày</span>
+                                    </h2>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                                        sp_BaoCaoDoanhThuTheoKhoangNgay
+                                    </span>
+                                </div>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Thống kê chi tiết số đơn, doanh số, phí sàn và doanh thu thực nhận theo từng gian hàng</p>
+                            </div>
+
+                            <!-- Bộ Lọc Khoảng Ngày -->
+                            <form method="get" th:action="@{/admin/dashboard}" class="flex flex-wrap items-center gap-2">
+                                <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-xl border border-surface-container text-xs">
+                                    <label class="font-semibold text-on-surface-variant">Từ:</label>
+                                    <input type="date" name="fromDate" th:value="${revenueFromDate}" class="bg-transparent text-on-surface font-semibold focus:outline-none">
+                                </div>
+                                <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-xl border border-surface-container text-xs">
+                                    <label class="font-semibold text-on-surface-variant">Đến:</label>
+                                    <input type="date" name="toDate" th:value="${revenueToDate}" class="bg-transparent text-on-surface font-semibold focus:outline-none">
+                                </div>
+                                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-container text-xs transition-all flex items-center gap-1 shadow-xs cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                                    <span>Lọc</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-surface-container/60 bg-surface-container-low/40 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                                        <th class="py-3 px-space-md">MÃ SHOP</th>
+                                        <th class="py-3 px-space-md">GIAN HÀNG</th>
+                                        <th class="py-3 px-space-md text-right">SỐ ĐƠN</th>
+                                        <th class="py-3 px-space-md text-right">TỔNG TIỀN BÁN</th>
+                                        <th class="py-3 px-space-md text-right">PHÍ THU SÀN</th>
+                                        <th class="py-3 px-space-md text-right">SHOP THỰC NHẬN</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container/40">
+                                    <tr th:if="${revenueByDateRange == null or #lists.isEmpty(revenueByDateRange)}">
+                                        <td colspan="6" class="py-8 text-center text-on-surface-variant text-xs">
+                                            Không có dữ liệu phát sinh doanh thu trong khoảng ngày đã chọn.
+                                        </td>
+                                    </tr>
+                                    <tr th:each="row : ${revenueByDateRange}" class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="py-3 px-space-md font-mono text-xs font-bold text-on-surface-variant" th:text="'#' + ${row.maShop}">#1</td>
+                                        <td class="py-3 px-space-md font-semibold text-xs text-on-surface" th:text="${row.tenShop}">Gian hàng</td>
+                                        <td class="py-3 px-space-md text-right font-black text-xs text-primary tabular-nums" th:text="${row.soDon} + ' đơn'">0 đơn</td>
+                                        <td class="py-3 px-space-md text-right font-bold text-xs text-on-surface tabular-nums"
+                                            th:text="${row.tongTienBan != null ? #numbers.formatDecimal(row.tongTienBan, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">0 ₫</td>
+                                        <td class="py-3 px-space-md text-right font-semibold text-xs text-rose-700 tabular-nums"
+                                            th:text="${row.phiSan != null ? #numbers.formatDecimal(row.phiSan, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">0 ₫</td>
+                                        <td class="py-3 px-space-md text-right font-black text-xs text-emerald-700 tabular-nums"
+                                            th:text="${row.shopNhan != null ? #numbers.formatDecimal(row.shopNhan, 0, 'POINT', 0, 'COMMA') + ' ₫' : '0 ₫'}">0 ₫</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>

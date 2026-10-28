@@ -455,16 +455,6 @@ public class VendorService {
         }
     }
 
-    // --- XÁC NHẬN PHIẾU KIỂM KÊ (GỌI SP sp_ShopXacNhanKiemKe) ---
-    @Transactional
-    public void xacNhanPhieuKiemKe(Integer maPhieuKiemKe, Integer maShop) {
-        String sql = "CALL sp_ShopXacNhanKiemKe(:maPhieu, :maShop)";
-        entityManager.createNativeQuery(sql)
-                .setParameter("maPhieu", maPhieuKiemKe)
-                .setParameter("maShop", maShop)
-                .executeUpdate();
-    }
-
     // Ngoại lệ A3: Shop từ chối yêu cầu hủy của khách -> Giữ nguyên DaXacNhan để tiếp tục giao
     public DonHang tuChoiHuyDon(Integer maDH, Integer maShop, String lyDo) {
         DonHang dh = checkAndGetShopOrder(maDH, maShop);

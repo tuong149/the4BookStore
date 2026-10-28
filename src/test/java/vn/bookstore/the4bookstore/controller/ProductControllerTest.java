@@ -35,6 +35,7 @@ class ProductControllerTest {
     @MockitoBean private DanhMucService danhMucService;
     @MockitoBean private TacGiaService tacGiaService;
     @MockitoBean private ShopService shopService;
+    @MockitoBean private ReportService reportService;
 
     @MockitoBean private SanPhamRepository sanPhamRepository;
     @MockitoBean private DanhMucRepository danhMucRepository;

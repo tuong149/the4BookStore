@@ -456,32 +456,75 @@ public class DonHangService {
             int tienPhiSan = (dbFee != null) ? dbFee : (int) Math.round(shopSub * (chietKhauApp.doubleValue() / 100.0));
             int tienThucNhanShop = Math.max(0, shopTienHangSauGiam - tienPhiSan);
 
-            DonHang donHang = new DonHang();
-            donHang.setKhachHang(khachHang);
-            donHang.setShop(shop);
-            donHang.setNhaVanChuyen(nvc);
-            donHang.setPhiVanChuyen(shopShippingFee);
-            donHang.setTienGiamFreeship(shopShippingDiscount);
-            donHang.setChietKhauAppPhanTram(chietKhauApp);
-            donHang.setTienPhiSan(tienPhiSan);
-            donHang.setTienThucNhanShop(tienThucNhanShop);
-            donHang.setTongTien(shopFinalTotal);
-            donHang.setTienGiam(shopOrderDiscount);
-            donHang.setKhuyenMai(orderKmForShop);
-            donHang.setKhuyenMaiFreeship(shippingKmForShop);
-            donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
-            if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
-                donHang.setTrangThai("ChoThanhToan");
-                donHang.setTrangThaiThanhToan("ChuaThanhToan");
-            } else {
-                donHang.setTrangThai("ChoXuLy");
-                donHang.setTrangThaiThanhToan("ChuaThanhToan");
+            DonHang donHang = null;
+            try {
+                // Ưu tiên tạo đơn hàng và chốt phí sàn qua Stored Procedure sp_DatHangVaTruTonKho
+                Integer spMaDH = executeSpDatHangVaTruTonKho(
+                        khachHang != null ? khachHang.getMaKH() : null,
+                        sId,
+                        nvc != null ? nvc.getMaNvc() : null,
+                        orderKmForShop != null ? orderKmForShop.getMaKM() : null,
+                        shippingKmForShop != null ? shippingKmForShop.getMaKM() : null,
+                        diaChiGiao,
+                        soDienThoaiGiao,
+                        shopFinalTotal,
+                        shopShippingFee,
+                        shopOrderDiscount,
+                        shopShippingDiscount,
+                        phuongThuc
+                );
+                if (spMaDH != null) {
+                    donHang = donHangRepository.findById(spMaDH).orElse(null);
+                    if (donHang != null) {
+                        donHang.setKhachHang(khachHang);
+                        donHang.setShop(shop);
+                        donHang.setNhaVanChuyen(nvc);
+                        donHang.setKhuyenMai(orderKmForShop);
+                        donHang.setKhuyenMaiFreeship(shippingKmForShop);
+                        // ghiChu không có cột trong bảng don_hang
+                        if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+                            donHang.setTrangThai("ChoThanhToan");
+                            donHang.setTrangThaiThanhToan("ChuaThanhToan");
+                        } else {
+                            donHang.setTrangThai("ChoXuLy");
+                            donHang.setTrangThaiThanhToan("ChuaThanhToan");
+                        }
+                        donHang = donHangRepository.save(donHang);
+                    }
+                }
+            } catch (Exception ex) {
+                // Fallback nếu SP gặp sự cố hoặc môi trường không hỗ trợ thủ tục
             }
-            donHang.setNgayDat(LocalDateTime.now());
-            donHang.setDiaChiGiao(diaChiGiao);
-            donHang.setSoDienThoaiGiao(soDienThoaiGiao);
 
-            donHang = donHangRepository.save(donHang);
+            if (donHang == null) {
+                donHang = new DonHang();
+                donHang.setKhachHang(khachHang);
+                donHang.setShop(shop);
+                donHang.setNhaVanChuyen(nvc);
+                donHang.setPhiVanChuyen(shopShippingFee);
+                donHang.setTienGiamFreeship(shopShippingDiscount);
+                donHang.setChietKhauAppPhanTram(chietKhauApp);
+                donHang.setTienPhiSan(tienPhiSan);
+                donHang.setTienThucNhanShop(tienThucNhanShop);
+                donHang.setTongTien(shopFinalTotal);
+                donHang.setTienGiam(shopOrderDiscount);
+                donHang.setKhuyenMai(orderKmForShop);
+                donHang.setKhuyenMaiFreeship(shippingKmForShop);
+                donHang.setPhuongThucThanhToan(phuongThuc != null ? phuongThuc : "COD");
+                if ("VIETQR".equalsIgnoreCase(phuongThuc) || "ChuyenKhoan".equalsIgnoreCase(phuongThuc)) {
+                    donHang.setTrangThai("ChoThanhToan");
+                    donHang.setTrangThaiThanhToan("ChuaThanhToan");
+                } else {
+                    donHang.setTrangThai("ChoXuLy");
+                    donHang.setTrangThaiThanhToan("ChuaThanhToan");
+                }
+                donHang.setNgayDat(LocalDateTime.now());
+                donHang.setDiaChiGiao(diaChiGiao);
+                donHang.setSoDienThoaiGiao(soDienThoaiGiao);
+                // ghiChu không có cột trong bảng don_hang
+
+                donHang = donHangRepository.save(donHang);
+            }
 
             // Chi tiết đơn hàng và trừ tồn kho
             List<ChiTietDonHang> chiTietList = new ArrayList<>();

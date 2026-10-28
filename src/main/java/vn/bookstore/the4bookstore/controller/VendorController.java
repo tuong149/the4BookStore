@@ -800,19 +800,5 @@ public class VendorController {
         return "redirect:/vendor/promotions";
     }
 
-    // --- XÁC NHẬN PHIẾU KIỂM KÊ (GỌI SP sp_ShopXacNhanKiemKe) ---
-    @PostMapping("/inventory/confirm/{id}")
-    public String confirmInventory(@PathVariable("id") Integer id, Authentication auth, RedirectAttributes ra) {
-        Shop shop = getCurrentShop(auth);
-        String redirect = checkShopAccess(shop);
-        if (redirect != null) return redirect;
-        try {
-            vendorService.xacNhanPhieuKiemKe(id, shop.getMaShop());
-            ra.addFlashAttribute("successMessage", "Đã xác nhận phiếu kiểm kê #" + id + " thành công qua thủ tục sp_ShopXacNhanKiemKe!");
-        } catch (Exception ex) {
-            ra.addFlashAttribute("errorMessage", "Lỗi xác nhận kiểm kê: " + ex.getMessage());
-        }
-        return "redirect:/vendor/dashboard";
-    }
 }
 

@@ -273,6 +273,10 @@
                             <div class="text-xs text-on-surface-variant border-l border-surface-container pl-4">
                                 <p class="font-bold text-on-surface" th:text="${reviewCount} + ' Lượt đánh giá'">0 Lượt đánh giá</p>
                                 <p class="text-[11px] mt-0.5">100% từ người mua đã nhận hàng thành công</p>
+                                <span th:if="${reviewStats != null}" class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <span class="material-symbols-outlined text-[12px]">verified</span>
+                                    Xác thực từ CSDL
+                                </span>
                             </div>
                         </div>
                     </div>

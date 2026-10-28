@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -93,7 +94,27 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            Model model) {
+        LocalDate effectiveFrom = fromDate != null ? fromDate : LocalDate.now().minusDays(30);
+        LocalDate effectiveTo = toDate != null ? toDate : LocalDate.now();
+        if (effectiveFrom.isAfter(effectiveTo)) {
+            LocalDate tmp = effectiveFrom;
+            effectiveFrom = effectiveTo;
+            effectiveTo = tmp;
+        }
+        try {
+            LocalDateTime fromDateTime = effectiveFrom.atStartOfDay();
+            LocalDateTime toDateTime = effectiveTo.atTime(23, 59, 59);
+            List<Map<String, Object>> revenueByDateRange = reportService.getRevenueByDateRangeProcedure(fromDateTime, toDateTime);
+            model.addAttribute("revenueByDateRange", revenueByDateRange != null ? revenueByDateRange : java.util.Collections.emptyList());
+        } catch (Exception e) {
+            model.addAttribute("revenueByDateRange", java.util.Collections.emptyList());
+        }
+        model.addAttribute("revenueFromDate", effectiveFrom.toString());
+        model.addAttribute("revenueToDate", effectiveTo.toString());
         try {
             model.addAttribute("thisMonthRevenue", reportService.getThisMonthRevenue());
         } catch (Exception e) {
@@ -371,6 +392,13 @@ public class AdminController {
                     data.put("trangThaiKhoa", sp.getTrangThaiKhoa() != null ? sp.getTrangThaiKhoa() : "BinhThuong");
                     data.put("moTa", sp.getMoTa() != null ? sp.getMoTa() : "");
                     data.put("ngayTao", sp.getNgayTao() != null ? sp.getNgayTao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "");
+                    try {
+                        Map<String, Object> reviewStats = reportService.getProductReviewStatsView(sp.getMaSP());
+                        if (reviewStats != null) {
+                            data.put("diemSaoTrungBinh", reviewStats.get("diemSaoTrungBinh"));
+                            data.put("tongLuotDanhGia", reviewStats.get("tongLuotDanhGia"));
+                        }
+                    } catch (Exception ignored) {}
                     return ResponseEntity.ok(data);
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -702,6 +730,24 @@ public class AdminController {
     }
 
 
+
+    // API Báo Cáo Doanh Thu Theo Khoảng Ngày (sp_BaoCaoDoanhThuTheoKhoangNgay)
+    @GetMapping("/api/reports/revenue-range")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> apiGetRevenueByDateRange(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        LocalDate effectiveFrom = fromDate != null ? fromDate : LocalDate.now().minusDays(30);
+        LocalDate effectiveTo = toDate != null ? toDate : LocalDate.now();
+        if (effectiveFrom.isAfter(effectiveTo)) {
+            LocalDate tmp = effectiveFrom;
+            effectiveFrom = effectiveTo;
+            effectiveTo = tmp;
+        }
+        LocalDateTime fromDateTime = effectiveFrom.atStartOfDay();
+        LocalDateTime toDateTime = effectiveTo.atTime(23, 59, 59);
+        return ResponseEntity.ok(reportService.getRevenueByDateRangeProcedure(fromDateTime, toDateTime));
+    }
 
     @GetMapping("/api/notifications")
     @ResponseBody
