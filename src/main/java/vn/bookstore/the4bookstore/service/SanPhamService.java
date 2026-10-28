@@ -243,6 +243,29 @@ public class SanPhamService {
         return searchAndFilter(loaiSP, keyword, maDanhMuc, maTacGia, sortBy, page, size);
     }
 
+    public Page<SanPham> searchAndFilter(
+            String loaiSP,
+            String keyword,
+            Integer maDanhMuc,
+            Integer maTacGia,
+            Integer maNXB,
+            Integer giaTu,
+            Integer giaDen,
+            String sortBy,
+            int page,
+            int size) {
+        Sort sort = buildSort(sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        Integer dm = (maDanhMuc != null && maDanhMuc > 0) ? maDanhMuc : null;
+        Integer tg = (maTacGia != null && maTacGia > 0) ? maTacGia : null;
+        Integer gt = (giaTu != null && giaTu > 0) ? giaTu : null;
+        Integer gd = (giaDen != null && giaDen > 0) ? giaDen : null;
+        String lsp = (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) ? loaiSP.trim() : null;
+
+        return sanPhamRepository.searchAndFilterWithPrice(lsp, kw, dm, tg, gt, gd, pageable);
+    }
+
     public Page<SanPham> searchAndFilterByGroup(
             String loaiSP,
             String keyword,

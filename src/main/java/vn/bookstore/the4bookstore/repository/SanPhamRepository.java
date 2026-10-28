@@ -313,6 +313,29 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                                           @Param("moderationStatus") String moderationStatus,
                                           Pageable pageable);
 
+    @Query("SELECT DISTINCT s FROM SanPham s " +
+           "LEFT JOIN s.danhMuc dm " +
+           "WHERE s.trangThai IN ('DangBan', 'HetHang') " +
+           "AND (s.trangThaiKhoa = 'BinhThuong' OR s.trangThaiKhoa IS NULL) " +
+           "AND (s.shop IS NULL OR s.shop.trangThai = 'HoatDong') " +
+           "AND (:loaiSP IS NULL OR :loaiSP = '' OR :loaiSP = 'ALL' OR s.loaiSP = :loaiSP) " +
+           "AND (:maDanhMuc IS NULL OR :maDanhMuc = 0 OR dm.maDanhMuc = :maDanhMuc) " +
+           "AND (:maTacGia IS NULL OR :maTacGia = 0 OR EXISTS (SELECT 1 FROM SanPhamTacGia sptg WHERE sptg.sanPham = s AND sptg.tacGia.maTacGia = :maTacGia)) " +
+           "AND (:giaTu IS NULL OR s.giaBan >= :giaTu) " +
+           "AND (:giaDen IS NULL OR s.giaBan <= :giaDen) " +
+           "AND (:keyword IS NULL OR :keyword = '' OR " +
+           "     LOWER(s.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "     LOWER(s.ISBN) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "     EXISTS (SELECT 1 FROM SanPhamTacGia sptg2 WHERE sptg2.sanPham = s AND LOWER(sptg2.tacGia.tenTacGia) LIKE LOWER(CONCAT('%', :keyword, '%'))))")
+    Page<SanPham> searchAndFilterWithPrice(
+            @Param("loaiSP") String loaiSP,
+            @Param("keyword") String keyword,
+            @Param("maDanhMuc") Integer maDanhMuc,
+            @Param("maTacGia") Integer maTacGia,
+            @Param("giaTu") Integer giaTu,
+            @Param("giaDen") Integer giaDen,
+            Pageable pageable);
+
     long countByShop_MaShopAndTrangThaiKhoa(Integer maShop, String trangThaiKhoa);
 
     @Query("SELECT COUNT(s) FROM SanPham s WHERE LOWER(s.loaiSP) = LOWER(:loaiSP)")

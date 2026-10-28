@@ -42,31 +42,31 @@
                     <span class="material-symbols-outlined text-[16px] text-primary">category</span>
                     <span>Danh mục:</span>
                 </span>
-                <a th:href="@{/san-pham(q=${keyword}, sort=${sortBy})}"
+                <a th:href="@{/san-pham(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                    class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs">
                     Tất cả danh mục
                 </a>
                 <th:block th:if="${allMajorCategories != null && !allMajorCategories.isEmpty()}">
                     <a th:each="major : ${allMajorCategories}"
-                       th:href="@{${major.slugUrl}(q=${keyword}, sort=${sortBy})}"
+                       th:href="@{${major.slugUrl}(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                        th:text="${major.tenLoai}"
                        class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">
                         Tên danh mục
                     </a>
                 </th:block>
                 <th:block th:unless="${allMajorCategories != null && !allMajorCategories.isEmpty()}">
-                    <a th:href="@{/san-pham/sach(q=${keyword}, sort=${sortBy})}"
+                    <a th:href="@{/san-pham/sach(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                        class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">Sách</a>
-                    <a th:href="@{/san-pham/van-phong-pham(q=${keyword}, sort=${sortBy})}"
+                    <a th:href="@{/san-pham/van-phong-pham(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                        class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">Văn phòng phẩm</a>
-                    <a th:href="@{/san-pham/qua-tang(q=${keyword}, sort=${sortBy})}"
+                    <a th:href="@{/san-pham/qua-tang(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                        class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all">Quà tặng &amp; Trang trí</a>
                 </th:block>
             </div>
 
             <!-- Pill Filters khi ĐÃ CHỌN Danh mục: Hiển thị các loại thuộc Danh mục đó -->
             <div th:if="${loaiSP != null && loaiSP != '' && loaiSP != 'ALL' && !#lists.isEmpty(categories)}" class="flex items-center gap-2 overflow-x-auto py-2 px-3 mb-space-md bg-surface-container-lowest rounded-2xl border border-surface-container/60 shadow-xs flex-nowrap scroll-smooth">
-                <a th:href="@{/san-pham(q=${keyword}, sort=${sortBy})}"
+                <a th:href="@{/san-pham(q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy})}"
                    class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold flex items-center gap-1 transition-all">
                     <span class="material-symbols-outlined text-[14px]">arrow_back</span>
                     <span>Tất cả danh mục</span>
@@ -75,12 +75,12 @@
                     <span class="material-symbols-outlined text-[16px] text-primary">sell</span>
                     <span th:text="${'Loại ' + (groupName ?: 'sản phẩm') + ':'}">Loại:</span>
                 </span>
-                <a th:href="@{${baseUrl}(loaiSP=${loaiSP}, q=${keyword}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
+                <a th:href="@{${baseUrl}(loaiSP=${loaiSP}, q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
                    th:class="${selectedDanhMuc == null || selectedDanhMuc == 0} ? 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs' : 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all'">
                     <span th:text="${'Tất cả ' + (groupName ?: 'loại')}">Tất cả loại</span>
                 </a>
                 <a th:each="cat : ${categories}"
-                   th:href="@{${baseUrl}(loaiSP=${loaiSP}, danhMuc=${cat.maDanhMuc}, q=${keyword}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
+                   th:href="@{${baseUrl}(loaiSP=${loaiSP}, danhMuc=${cat.maDanhMuc}, q=${keyword}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy}, tacGia=${selectedTacGia}, nxb=${selectedNxb})}"
                    th:text="${cat.tenDanhMuc}"
                    th:class="${selectedDanhMuc != null && selectedDanhMuc == cat.maDanhMuc} ? 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs' : 'shrink-0 whitespace-nowrap px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition-all'">
                     Văn học
@@ -149,6 +149,16 @@
                         </select>
                     </div>
 
+                                        <!-- Khoảng giá -->
+                    <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-2 rounded-xl border border-transparent">
+                        <span class="text-xs text-on-surface-variant font-medium shrink-0">Giá:</span>
+                        <input type="number" name="giaTu" id="inputGiaTu" th:value="${giaTu}" min="0" step="5000" placeholder="Từ ₫"
+                               class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
+                        <span class="text-on-surface-variant text-xs">-</span>
+                        <input type="number" name="giaDen" id="inputGiaDen" th:value="${giaDen}" min="0" step="5000" placeholder="Đến ₫"
+                               class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
+                    </div>
+
                     <!-- Sắp xếp -->
                     <select name="sort"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[130px]">
@@ -168,6 +178,23 @@
                             <span class="material-symbols-outlined text-[18px]">restart_alt</span>
                             <span>Đặt lại</span>
                         </a>
+                    </div>
+                    <!-- Quick Price Chips -->
+                    <div class="w-full flex items-center gap-1.5 flex-wrap pt-2 border-t border-surface-container/60 text-xs">
+                        <span class="text-on-surface-variant font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px] text-primary">sell</span>
+                            <span>Khoảng giá:</span>
+                        </span>
+                        <button type="button" onclick="setQuickPrice('', '')"
+                                th:class="${(giaTu == null || giaTu == 0) && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Tất cả</button>
+                        <button type="button" onclick="setQuickPrice(0, 100000)"
+                                th:class="${giaTu == 0 && giaDen == 100000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Dưới 100k</button>
+                        <button type="button" onclick="setQuickPrice(100000, 200000)"
+                                th:class="${giaTu == 100000 && giaDen == 200000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">100k - 200k</button>
+                        <button type="button" onclick="setQuickPrice(200000, 500000)"
+                                th:class="${giaTu == 200000 && giaDen == 500000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">200k - 500k</button>
+                        <button type="button" onclick="setQuickPrice(500000, '')"
+                                th:class="${giaTu == 500000 && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Trên 500k</button>
                     </div>
                 </div>
             </form>
@@ -231,17 +258,17 @@
             <!-- Pagination -->
             <div th:if="${totalPages > 1}" class="flex items-center justify-center gap-space-xs mt-space-xl flex-wrap">
                 <a th:if="${currentPage > 0}"
-                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${currentPage - 1})}"
+                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy}, page=${currentPage - 1})}"
                    class="flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors">
                     <span class="material-symbols-outlined text-[18px]">chevron_left</span><span>Trước</span>
                 </a>
                 <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${i})}"
+                    <a th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy}, page=${i})}"
                        th:text="${i + 1}"
                        th:class="${i == currentPage} ? 'px-3.5 py-2 rounded-xl bg-primary text-on-primary text-sm font-bold shadow-sm' : 'px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors'">1</a>
                 </th:block>
                 <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, sort=${sortBy}, page=${currentPage + 1})}"
+                   th:href="@{${baseUrl}(q=${keyword}, loaiSP=${loaiSP}, danhMuc=${selectedDanhMuc}, tacGia=${selectedTacGia}, nxb=${selectedNxb}, giaTu=${giaTu}, giaDen=${giaDen}, sort=${sortBy}, page=${currentPage + 1})}"
                    class="flex items-center gap-1 px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-sm font-semibold transition-colors">
                     <span>Tiếp</span><span class="material-symbols-outlined text-[18px]">chevron_right</span>
                 </a>
@@ -253,6 +280,15 @@
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
 
     <script>
+        function setQuickPrice(min, max) {
+            const inputGiaTu = document.getElementById('inputGiaTu');
+            const inputGiaDen = document.getElementById('inputGiaDen');
+            if (inputGiaTu) inputGiaTu.value = (min !== '' && min !== null) ? min : '';
+            if (inputGiaDen) inputGiaDen.value = (max !== '' && max !== null) ? max : '';
+            const form = document.getElementById('filterForm');
+            if (form) form.submit();
+        }
+
         function onCategoryGroupChange(group, isInit, keepCurrentCat) {
             const catSelect = document.getElementById('filterDanhMuc');
             const defaultCatOpt = document.getElementById('defaultCatOption');
