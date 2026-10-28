@@ -122,6 +122,10 @@ public class ProductController {
         model.addAttribute("authors",           tacGiaService.getAuthorsByLoaiSP("Sach"));
         model.addAttribute("authorCategoryMap", tacGiaService.getAuthorCategoryMap());
         model.addAttribute("publishers",        List.of());
+        model.addAttribute("giaTu",             giaTu);
+        model.addAttribute("giaDen",            giaDen);
+        model.addAttribute("keyword",           q != null ? q : "");
+        model.addAttribute("sortBy",            sort);
 
         if (loaiSP != null && !loaiSP.isBlank() && !"ALL".equalsIgnoreCase(loaiSP)) {
             model.addAttribute("categories", sanPhamService.getCategoriesByLoaiSP(loaiSP));

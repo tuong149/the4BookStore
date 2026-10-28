@@ -628,11 +628,12 @@
                 </div>
 
                 <!-- Filter & Search Toolbar -->
-                <form method="get" th:action="@{/san-pham}"
+                <!-- Filter & Search Toolbar -->
+                <form id="homeFilterForm" method="get" th:action="@{/san-pham}"
                     class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
-                    <div class="flex flex-col lg:flex-row gap-space-sm items-stretch lg:items-center">
+                    <div class="flex flex-col lg:flex-row flex-wrap gap-space-sm items-stretch lg:items-center">
                         <!-- Search Input -->
-                        <div class="relative flex-1">
+                        <div class="relative flex-1 min-w-[200px]">
                             <span
                                 class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
                             <input type="text" name="q"
@@ -670,6 +671,15 @@
                                 <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
                             </th:block>
                         </select>
+                        <!-- Khoảng giá -->
+                        <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-2 rounded-xl border border-transparent">
+                            <span class="text-xs text-on-surface-variant font-medium shrink-0">Giá:</span>
+                            <input type="number" name="giaTu" id="homeInputGiaTu" min="0" step="5000" placeholder="Từ ₫"
+                                   class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
+                            <span class="text-on-surface-variant text-xs">-</span>
+                            <input type="number" name="giaDen" id="homeInputGiaDen" min="0" step="5000" placeholder="Đến ₫"
+                                   class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
+                        </div>
                         <!-- Dropdown Sắp xếp -->
                         <select name="sort"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[150px]">
@@ -684,6 +694,55 @@
                             <span class="material-symbols-outlined text-[18px]">filter_alt</span>
                             <span>Tìm &amp; Lọc</span>
                         </button>
+                    </div>
+
+                    <!-- Thanh kéo khoảng giá 2 đầu & Chọn khoảng giá nhanh (Row 2) -->
+                    <div class="w-full flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 mt-3 border-t border-surface-container/60 text-xs">
+                        <!-- Dual Range Slider Container -->
+                        <div class="flex items-center gap-3 flex-1 max-w-xl">
+                            <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+                                <span>Thanh trượt giá:</span>
+                            </span>
+                            <div class="relative flex-1 py-2 min-w-[150px]">
+                                <!-- Slider Background Track -->
+                                <div class="relative w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div id="homePriceSliderProgress" class="absolute top-0 bottom-0 bg-primary rounded-full" style="left: 0%; right: 0%;"></div>
+                                </div>
+                                <!-- Range inputs -->
+                                <input type="range" id="homeSliderGiaTu" min="0" max="2000000" step="10000" value="0"
+                                       class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-10"
+                                       oninput="onHomeSliderGiaTuInput()"
+                                       onpointerdown="this.style.zIndex='25'"
+                                       onpointerup="updateHomeSliderZIndex()">
+                                <input type="range" id="homeSliderGiaDen" min="0" max="2000000" step="10000" value="2000000"
+                                       class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-20"
+                                       oninput="onHomeSliderGiaDenInput()"
+                                       onpointerdown="this.style.zIndex='25'"
+                                       onpointerup="updateHomeSliderZIndex()">
+                            </div>
+                            <span id="homeSliderPriceLabel" class="text-[11px] text-on-surface-variant font-semibold shrink-0 min-w-[130px] text-right">
+                                0₫ - 2.000.000₫+
+                            </span>
+                        </div>
+
+                        <!-- Quick Price Chips -->
+                        <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+                            <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-primary">sell</span>
+                                <span>Nhanh:</span>
+                            </span>
+                            <button type="button" onclick="setHomeQuickPrice('', '')"
+                                    class="px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs transition-all">Tất cả</button>
+                            <button type="button" onclick="setHomeQuickPrice(0, 100000)"
+                                    class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all">Dưới 100k</button>
+                            <button type="button" onclick="setHomeQuickPrice(100000, 200000)"
+                                    class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all">100k - 200k</button>
+                            <button type="button" onclick="setHomeQuickPrice(200000, 500000)"
+                                    class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all">200k - 500k</button>
+                            <button type="button" onclick="setHomeQuickPrice(500000, '')"
+                                    class="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all">Trên 500k</button>
+                        </div>
                     </div>
                 </form>
 
@@ -1047,6 +1106,173 @@
                 goToPage(p);
             });
         })();
+
+        // ========== DUAL RANGE SLIDER CHO TRANG CHỦ ==========
+        const MAX_HOME_SLIDER_PRICE = 2000000;
+
+        function formatHomeMoney(amount) {
+            if (isNaN(amount) || amount == null) return '0₫';
+            return Number(amount).toLocaleString('vi-VN') + '₫';
+        }
+
+        function updateHomeSliderProgressAndLabel() {
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+            const progress = document.getElementById('homePriceSliderProgress');
+            const label = document.getElementById('homeSliderPriceLabel');
+            if (!sliderTu || !sliderDen || !progress) return;
+
+            let minVal = parseInt(sliderTu.value, 10) || 0;
+            let maxVal = parseInt(sliderDen.value, 10) || MAX_HOME_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                sliderTu.value = minVal;
+            }
+
+            const leftPercent = Math.min(100, Math.max(0, (minVal / MAX_HOME_SLIDER_PRICE) * 100));
+            const rightPercent = Math.min(100, Math.max(0, 100 - ((maxVal / MAX_HOME_SLIDER_PRICE) * 100)));
+
+            progress.style.left = leftPercent + '%';
+            progress.style.right = rightPercent + '%';
+
+            if (label) {
+                const textMin = formatHomeMoney(minVal);
+                const textMax = maxVal >= MAX_HOME_SLIDER_PRICE ? (formatHomeMoney(maxVal) + '+') : formatHomeMoney(maxVal);
+                label.textContent = textMin + ' - ' + textMax;
+            }
+        }
+
+        function updateHomeSliderZIndex() {
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+            if (!sliderTu || !sliderDen) return;
+            const tu = parseInt(sliderTu.value, 10) || 0;
+            const den = parseInt(sliderDen.value, 10) || MAX_HOME_SLIDER_PRICE;
+            if (tu >= den) {
+                if (tu >= MAX_HOME_SLIDER_PRICE * 0.9) {
+                    sliderTu.style.zIndex = '25';
+                    sliderDen.style.zIndex = '20';
+                } else {
+                    sliderTu.style.zIndex = '20';
+                    sliderDen.style.zIndex = '25';
+                }
+            } else {
+                sliderTu.style.zIndex = '15';
+                sliderDen.style.zIndex = '20';
+            }
+        }
+
+        function onHomeSliderGiaTuInput() {
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+            const inputTu = document.getElementById('homeInputGiaTu');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_HOME_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (tu > den) {
+                tu = den;
+                sliderTu.value = tu;
+            }
+
+            if (inputTu) {
+                inputTu.value = tu > 0 ? tu : '';
+            }
+            updateHomeSliderProgressAndLabel();
+            updateHomeSliderZIndex();
+        }
+
+        function onHomeSliderGiaDenInput() {
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+            const inputDen = document.getElementById('homeInputGiaDen');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_HOME_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (den < tu) {
+                den = tu;
+                sliderDen.value = den;
+            }
+
+            if (inputDen) {
+                inputDen.value = den >= MAX_HOME_SLIDER_PRICE ? '' : den;
+            }
+            updateHomeSliderProgressAndLabel();
+            updateHomeSliderZIndex();
+        }
+
+        function setHomeQuickPrice(min, max) {
+            const inputGiaTu = document.getElementById('homeInputGiaTu');
+            const inputGiaDen = document.getElementById('homeInputGiaDen');
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+
+            const numMin = (min !== '' && min !== null && !isNaN(min)) ? parseInt(min, 10) : 0;
+            const numMax = (max !== '' && max !== null && !isNaN(max)) ? parseInt(max, 10) : 0;
+
+            if (inputGiaTu) inputGiaTu.value = numMin > 0 ? numMin : '';
+            if (inputGiaDen) inputGiaDen.value = numMax > 0 ? numMax : '';
+
+            if (sliderTu) sliderTu.value = Math.min(numMin, MAX_HOME_SLIDER_PRICE);
+            if (sliderDen) sliderDen.value = numMax > 0 ? Math.min(numMax, MAX_HOME_SLIDER_PRICE) : MAX_HOME_SLIDER_PRICE;
+
+            updateHomeSliderProgressAndLabel();
+
+            const form = document.getElementById('homeFilterForm');
+            if (form) form.submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputTu = document.getElementById('homeInputGiaTu');
+            const inputDen = document.getElementById('homeInputGiaDen');
+            const sliderTu = document.getElementById('homeSliderGiaTu');
+            const sliderDen = document.getElementById('homeSliderGiaDen');
+            const form = document.getElementById('homeFilterForm');
+
+            function syncHomeInputsToSliders() {
+                if (!inputTu || !inputDen) return;
+                let tu = parseInt(inputTu.value, 10);
+                let den = parseInt(inputDen.value, 10);
+
+                // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+                if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                    den = tu;
+                    inputDen.value = den;
+                }
+
+                if (sliderTu) {
+                    sliderTu.value = (!isNaN(tu) && tu > 0) ? Math.min(tu, MAX_HOME_SLIDER_PRICE) : 0;
+                }
+                if (sliderDen) {
+                    sliderDen.value = (!isNaN(den) && den > 0) ? Math.min(den, MAX_HOME_SLIDER_PRICE) : MAX_HOME_SLIDER_PRICE;
+                }
+                updateHomeSliderProgressAndLabel();
+            }
+
+            if (inputTu) inputTu.addEventListener('change', syncHomeInputsToSliders);
+            if (inputDen) inputDen.addEventListener('change', syncHomeInputsToSliders);
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if (inputTu && inputDen) {
+                        let tu = parseInt(inputTu.value, 10);
+                        let den = parseInt(inputDen.value, 10);
+                        if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                            inputDen.value = tu;
+                        }
+                    }
+                });
+            }
+
+            updateHomeSliderProgressAndLabel();
+        });
 
         // Dynamic category dropdown filter with 2-way auto-sync
         (function initHomeCategoryToolbar() {

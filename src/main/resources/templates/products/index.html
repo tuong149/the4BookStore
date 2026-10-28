@@ -55,12 +55,13 @@
             </div>
 
             <!-- Filter & Search Toolbar -->
-            <form method="get" th:action="@{/san-pham}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
-                <div class="flex flex-col lg:flex-row gap-space-sm items-stretch lg:items-center">
+            <!-- Filter & Search Toolbar -->
+            <form id="prodIndexFilterForm" method="get" th:action="@{/san-pham}" class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container/60 mb-space-xl">
+                <div class="flex flex-col lg:flex-row flex-wrap gap-space-sm items-stretch lg:items-center">
                     <!-- Search Input -->
-                    <div class="relative flex-1">
+                    <div class="relative flex-1 min-w-[200px]">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant pointer-events-none">search</span>
-                        <input type="text" name="q"
+                        <input type="text" name="q" th:value="${keyword}"
                                class="w-full bg-surface-container-low pl-9 pr-space-md py-2.5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent"
                                placeholder="Tìm theo tên sản phẩm, tác giả, ISBN..."/>
                     </div>
@@ -95,29 +96,80 @@
                             <option th:each="cat : ${categoriesQuaTang}" th:value="${cat.maDanhMuc}" data-group="QuaTang" th:text="${cat.tenDanhMuc}">Loại</option>
                         </th:block>
                     </select>
-                                        <!-- Khoảng giá -->
+                    <!-- Khoảng giá -->
                     <div class="flex items-center gap-1.5 bg-surface-container-low px-3 py-2 rounded-xl border border-transparent">
                         <span class="text-xs text-on-surface-variant font-medium shrink-0">Giá:</span>
-                        <input type="number" name="giaTu" min="0" step="5000" placeholder="Từ ₫"
+                        <input type="number" name="giaTu" id="prodIndexInputGiaTu" th:value="${giaTu}" min="0" step="5000" placeholder="Từ ₫"
                                class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
                         <span class="text-on-surface-variant text-xs">-</span>
-                        <input type="number" name="giaDen" min="0" step="5000" placeholder="Đến ₫"
+                        <input type="number" name="giaDen" id="prodIndexInputGiaDen" th:value="${giaDen}" min="0" step="5000" placeholder="Đến ₫"
                                class="w-20 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none text-right">
                     </div>
 
                     <!-- Dropdown Sắp xếp -->
                     <select name="sort"
                             class="bg-surface-container-low text-on-surface text-sm px-space-md py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary/40 border border-transparent cursor-pointer min-w-[150px]">
-                        <option value="newest">Mới nhất</option>
-                        <option value="price_asc">Giá tăng dần</option>
-                        <option value="price_desc">Giá giảm dần</option>
-                        <option value="name_asc">Tên A-Z</option>
+                        <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                        <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Giá tăng dần</option>
+                        <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Giá giảm dần</option>
+                        <option value="name_asc" th:selected="${sortBy == 'name_asc'}">Tên A-Z</option>
                     </select>
                     <!-- Nút Lọc / Tìm kiếm -->
                     <button type="submit" class="bg-primary text-on-primary px-space-lg py-2.5 rounded-xl text-sm font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm shrink-0">
                         <span class="material-symbols-outlined text-[18px]">filter_alt</span>
                         <span>Tìm &amp; Lọc</span>
                     </button>
+                </div>
+
+                <!-- Thanh kéo khoảng giá 2 đầu & Chọn khoảng giá nhanh (Row 2) -->
+                <div class="w-full flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 mt-3 border-t border-surface-container/60 text-xs">
+                    <!-- Dual Range Slider Container -->
+                    <div class="flex items-center gap-3 flex-1 max-w-xl">
+                        <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+                            <span>Thanh trượt giá:</span>
+                        </span>
+                        <div class="relative flex-1 py-2 min-w-[150px]">
+                            <!-- Slider Background Track -->
+                            <div class="relative w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                                <div id="prodIndexPriceSliderProgress" class="absolute top-0 bottom-0 bg-primary rounded-full" style="left: 0%; right: 0%;"></div>
+                            </div>
+                            <!-- Range inputs -->
+                            <input type="range" id="prodIndexSliderGiaTu" min="0" max="2000000" step="10000"
+                                   th:value="${giaTu != null && giaTu > 0 ? (giaTu > 2000000 ? 2000000 : giaTu) : 0}"
+                                   class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-10"
+                                   oninput="onProdIndexSliderGiaTuInput()"
+                                   onpointerdown="this.style.zIndex='25'"
+                                   onpointerup="updateProdIndexSliderZIndex()">
+                            <input type="range" id="prodIndexSliderGiaDen" min="0" max="2000000" step="10000"
+                                   th:value="${giaDen != null && giaDen > 0 ? (giaDen > 2000000 ? 2000000 : giaDen) : 2000000}"
+                                   class="price-slider-input absolute top-1/2 -translate-y-1/2 left-0 w-full appearance-none bg-transparent m-0 z-20"
+                                   oninput="onProdIndexSliderGiaDenInput()"
+                                   onpointerdown="this.style.zIndex='25'"
+                                   onpointerup="updateProdIndexSliderZIndex()">
+                        </div>
+                        <span id="prodIndexSliderPriceLabel" class="text-[11px] text-on-surface-variant font-semibold shrink-0 min-w-[130px] text-right">
+                            0₫ - 2.000.000₫+
+                        </span>
+                    </div>
+
+                    <!-- Quick Price Chips -->
+                    <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+                        <span class="text-on-surface-variant font-medium shrink-0 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[15px] text-primary">sell</span>
+                            <span>Nhanh:</span>
+                        </span>
+                        <button type="button" onclick="setProdIndexQuickPrice('', '')"
+                                th:class="${(giaTu == null || giaTu == 0) && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Tất cả</button>
+                        <button type="button" onclick="setProdIndexQuickPrice(0, 100000)"
+                                th:class="${giaTu == 0 && giaDen == 100000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Dưới 100k</button>
+                        <button type="button" onclick="setProdIndexQuickPrice(100000, 200000)"
+                                th:class="${giaTu == 100000 && giaDen == 200000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">100k - 200k</button>
+                        <button type="button" onclick="setProdIndexQuickPrice(200000, 500000)"
+                                th:class="${giaTu == 200000 && giaDen == 500000} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">200k - 500k</button>
+                        <button type="button" onclick="setProdIndexQuickPrice(500000, '')"
+                                th:class="${giaTu == 500000 && (giaDen == null || giaDen == 0)} ? 'px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-xs' : 'px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-all'">Trên 500k</button>
+                    </div>
                 </div>
             </form>
 
@@ -298,25 +350,171 @@
             filterOptions(true, false);
         })();
 
-        (function initPriceInputsValidation() {
-            const form = document.querySelector('form[action*="/san-pham"]');
-            if (!form) return;
-            const inputTu = form.querySelector('input[name="giaTu"]');
-            const inputDen = form.querySelector('input[name="giaDen"]');
-            if (!inputTu || !inputDen) return;
+        const MAX_PROD_INDEX_SLIDER_PRICE = 2000000;
 
-            function validatePrices() {
-                let tu = parseInt(inputTu.value, 10);
-                let den = parseInt(inputDen.value, 10);
-                if (!isNaN(tu) && !isNaN(den) && tu > den) {
-                    inputDen.value = tu;
-                }
+        function formatProdIndexMoney(amount) {
+            if (isNaN(amount) || amount == null) return '0₫';
+            return Number(amount).toLocaleString('vi-VN') + '₫';
+        }
+
+        function updateProdIndexSliderProgressAndLabel() {
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+            const progress = document.getElementById('prodIndexPriceSliderProgress');
+            const label = document.getElementById('prodIndexSliderPriceLabel');
+            if (!sliderTu || !sliderDen || !progress) return;
+
+            let minVal = parseInt(sliderTu.value, 10) || 0;
+            let maxVal = parseInt(sliderDen.value, 10) || MAX_PROD_INDEX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                sliderTu.value = minVal;
             }
 
-            inputTu.addEventListener('change', validatePrices);
-            inputDen.addEventListener('change', validatePrices);
-            form.addEventListener('submit', validatePrices);
-        })();
+            const leftPercent = Math.min(100, Math.max(0, (minVal / MAX_PROD_INDEX_SLIDER_PRICE) * 100));
+            const rightPercent = Math.min(100, Math.max(0, 100 - ((maxVal / MAX_PROD_INDEX_SLIDER_PRICE) * 100)));
+
+            progress.style.left = leftPercent + '%';
+            progress.style.right = rightPercent + '%';
+
+            if (label) {
+                const textMin = formatProdIndexMoney(minVal);
+                const textMax = maxVal >= MAX_PROD_INDEX_SLIDER_PRICE ? (formatProdIndexMoney(maxVal) + '+') : formatProdIndexMoney(maxVal);
+                label.textContent = textMin + ' - ' + textMax;
+            }
+        }
+
+        function updateProdIndexSliderZIndex() {
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+            if (!sliderTu || !sliderDen) return;
+            const tu = parseInt(sliderTu.value, 10) || 0;
+            const den = parseInt(sliderDen.value, 10) || MAX_PROD_INDEX_SLIDER_PRICE;
+            if (tu >= den) {
+                if (tu >= MAX_PROD_INDEX_SLIDER_PRICE * 0.9) {
+                    sliderTu.style.zIndex = '25';
+                    sliderDen.style.zIndex = '20';
+                } else {
+                    sliderTu.style.zIndex = '20';
+                    sliderDen.style.zIndex = '25';
+                }
+            } else {
+                sliderTu.style.zIndex = '15';
+                sliderDen.style.zIndex = '20';
+            }
+        }
+
+        function onProdIndexSliderGiaTuInput() {
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+            const inputTu = document.getElementById('prodIndexInputGiaTu');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_PROD_INDEX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (tu > den) {
+                tu = den;
+                sliderTu.value = tu;
+            }
+
+            if (inputTu) {
+                inputTu.value = tu > 0 ? tu : '';
+            }
+            updateProdIndexSliderProgressAndLabel();
+            updateProdIndexSliderZIndex();
+        }
+
+        function onProdIndexSliderGiaDenInput() {
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+            const inputDen = document.getElementById('prodIndexInputGiaDen');
+            if (!sliderTu || !sliderDen) return;
+
+            let tu = parseInt(sliderTu.value, 10) || 0;
+            let den = parseInt(sliderDen.value, 10) || MAX_PROD_INDEX_SLIDER_PRICE;
+
+            // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+            if (den < tu) {
+                den = tu;
+                sliderDen.value = den;
+            }
+
+            if (inputDen) {
+                inputDen.value = den >= MAX_PROD_INDEX_SLIDER_PRICE ? '' : den;
+            }
+            updateProdIndexSliderProgressAndLabel();
+            updateProdIndexSliderZIndex();
+        }
+
+        function setProdIndexQuickPrice(min, max) {
+            const inputGiaTu = document.getElementById('prodIndexInputGiaTu');
+            const inputGiaDen = document.getElementById('prodIndexInputGiaDen');
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+
+            const numMin = (min !== '' && min !== null && !isNaN(min)) ? parseInt(min, 10) : 0;
+            const numMax = (max !== '' && max !== null && !isNaN(max)) ? parseInt(max, 10) : 0;
+
+            if (inputGiaTu) inputGiaTu.value = numMin > 0 ? numMin : '';
+            if (inputGiaDen) inputGiaDen.value = numMax > 0 ? numMax : '';
+
+            if (sliderTu) sliderTu.value = Math.min(numMin, MAX_PROD_INDEX_SLIDER_PRICE);
+            if (sliderDen) sliderDen.value = numMax > 0 ? Math.min(numMax, MAX_PROD_INDEX_SLIDER_PRICE) : MAX_PROD_INDEX_SLIDER_PRICE;
+
+            updateProdIndexSliderProgressAndLabel();
+
+            const form = document.getElementById('prodIndexFilterForm');
+            if (form) form.submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputTu = document.getElementById('prodIndexInputGiaTu');
+            const inputDen = document.getElementById('prodIndexInputGiaDen');
+            const sliderTu = document.getElementById('prodIndexSliderGiaTu');
+            const sliderDen = document.getElementById('prodIndexSliderGiaDen');
+            const form = document.getElementById('prodIndexFilterForm');
+
+            function syncProdIndexInputsToSliders() {
+                if (!inputTu || !inputDen) return;
+                let tu = parseInt(inputTu.value, 10);
+                let den = parseInt(inputDen.value, 10);
+
+                // ĐIỀU KIỆN: GIÁ CUỐI >= GIÁ ĐẦU
+                if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                    den = tu;
+                    inputDen.value = den;
+                }
+
+                if (sliderTu) {
+                    sliderTu.value = (!isNaN(tu) && tu > 0) ? Math.min(tu, MAX_PROD_INDEX_SLIDER_PRICE) : 0;
+                }
+                if (sliderDen) {
+                    sliderDen.value = (!isNaN(den) && den > 0) ? Math.min(den, MAX_PROD_INDEX_SLIDER_PRICE) : MAX_PROD_INDEX_SLIDER_PRICE;
+                }
+                updateProdIndexSliderProgressAndLabel();
+            }
+
+            if (inputTu) inputTu.addEventListener('change', syncProdIndexInputsToSliders);
+            if (inputDen) inputDen.addEventListener('change', syncProdIndexInputsToSliders);
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if (inputTu && inputDen) {
+                        let tu = parseInt(inputTu.value, 10);
+                        let den = parseInt(inputDen.value, 10);
+                        if (!isNaN(tu) && !isNaN(den) && tu > den) {
+                            inputDen.value = tu;
+                        }
+                    }
+                });
+            }
+
+            updateProdIndexSliderProgressAndLabel();
+        });
 
         function scrollCarousel(btn, direction) {
             const parent = btn.parentElement;
