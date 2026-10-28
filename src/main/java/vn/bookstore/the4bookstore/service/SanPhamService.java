@@ -12,7 +12,10 @@ import vn.bookstore.the4bookstore.entity.SanPham;
 import vn.bookstore.the4bookstore.repository.*;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @Transactional(readOnly = true)
@@ -301,5 +304,63 @@ public class SanPhamService {
         try {
             chiTietGioHangRepository.deleteBySanPham_MaSP(maSP);
         } catch (Exception ignored) {}
+    }
+
+    // ====================================================================
+    // THỦ TỤC 9: sp_TimKiemSachPhanTrang
+    // ====================================================================
+    public List<Map<String, Object>> searchBooksWithProcedure(String keyword, Integer maDanhMuc, Integer giaTu, Integer giaDen, int pageIndex, int pageSize) {
+        String sql = "CALL sp_TimKiemSachPhanTrang(:kw, :dm, :tu, :den, :pIndex, :pSize)";
+        jakarta.persistence.Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("kw", (keyword != null && !keyword.isBlank()) ? keyword.trim() : null);
+        query.setParameter("dm", maDanhMuc);
+        query.setParameter("tu", giaTu);
+        query.setParameter("den", giaDen);
+        query.setParameter("pIndex", pageIndex > 0 ? pageIndex : 1);
+        query.setParameter("pSize", pageSize > 0 ? pageSize : 12);
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        List<Map<String, Object>> list = new ArrayList<>();
+        if (results != null) {
+            for (Object[] row : results) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("masp", row[0]);
+                map.put("tensp", row[1]);
+                map.put("giaBan", row[2]);
+                map.put("hinhAnh", row[3]);
+                map.put("soLuongTon", row[4]);
+                map.put("soLuongDaBan", row[5]);
+                map.put("maShop", row[6]);
+                map.put("tenShop", row[7]);
+                map.put("tenDanhMuc", row[8]);
+                map.put("diemSao", row[9]);
+                list.add(map);
+            }
+        }
+        return list;
+    }
+
+    // ====================================================================
+    // VIEW 5: vw_ThongKeDanhGiaSanPham
+    // ====================================================================
+    public Map<String, Object> getProductReviewStats(Integer maSP) {
+        if (maSP == null) return null;
+        try {
+            String sql = "SELECT masp, tensp, ten_shop, tong_luot_danh_gia, diem_sao_trung_binh " +
+                         "FROM vw_ThongKeDanhGiaSanPham WHERE masp = :masp";
+            jakarta.persistence.Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("masp", maSP);
+            Object[] row = (Object[]) query.getSingleResult();
+            Map<String, Object> map = new HashMap<>();
+            map.put("masp", row[0]);
+            map.put("tensp", row[1]);
+            map.put("tenShop", row[2]);
+            map.put("tongLuotDanhGia", row[3]);
+            map.put("diemSaoTrungBinh", row[4]);
+            return map;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

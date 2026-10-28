@@ -242,9 +242,15 @@ public class VendorController {
         String redirect = checkShopAccess(shop);
         if (redirect != null) return redirect;
 
-        Map<String, Object> stats = vendorService.getShopDashboardStats(shop.getMaShop());
+        Integer maShop = shop.getMaShop();
+        Map<String, Object> stats = vendorService.getShopDashboardStats(maShop);
+        List<Map<String, Object>> monthlyRevenue = vendorService.getShopMonthlyRevenue(maShop);
+        List<Map<String, Object>> stockWarnings = vendorService.getShopStockWarnings(maShop);
+
         model.addAttribute("shop", shop);
         model.addAttribute("stats", stats);
+        model.addAttribute("monthlyRevenue", monthlyRevenue);
+        model.addAttribute("stockWarnings", stockWarnings);
         return "vendor/dashboard";
     }
 
@@ -786,6 +792,21 @@ public class VendorController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/vendor/promotions";
+    }
+
+    // --- XÁC NHẬN PHIẾU KIỂM KÊ (GỌI SP sp_ShopXacNhanKiemKe) ---
+    @PostMapping("/inventory/confirm/{id}")
+    public String confirmInventory(@PathVariable("id") Integer id, Authentication auth, RedirectAttributes ra) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+        try {
+            vendorService.xacNhanPhieuKiemKe(id, shop.getMaShop());
+            ra.addFlashAttribute("successMessage", "Đã xác nhận phiếu kiểm kê #" + id + " thành công qua thủ tục sp_ShopXacNhanKiemKe!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", "Lỗi xác nhận kiểm kê: " + ex.getMessage());
+        }
+        return "redirect:/vendor/dashboard";
     }
 }
 

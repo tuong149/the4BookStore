@@ -34,4 +34,13 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
     @org.springframework.data.jpa.repository.Modifying
     @Query("UPDATE KhuyenMai km SET km.shop = null WHERE km.shop.maShop = :maShop")
     void detachShopFromPromotions(@Param("maShop") Integer maShop);
+
+    // ====================================================================
+    // GỌI USER-DEFINED FUNCTION (UDF) TỪ CSDL MYSQL
+    // ====================================================================
+    @Query(value = "SELECT fn_KiemTraVoucherHopLe(:maCode, :maShop, :tongTien)", nativeQuery = true)
+    Boolean kiemTraVoucherHopLe(@Param("maCode") String maCode, @Param("maShop") Integer maShop, @Param("tongTien") Integer tongTien);
+
+    @Query(value = "SELECT fn_TinhTienGiamVoucher(:maKM, :tongTien)", nativeQuery = true)
+    Integer tinhTienGiamVoucher(@Param("maKM") Integer maKM, @Param("tongTien") Integer tongTien);
 }

@@ -34,6 +34,7 @@ public class VendorService {
     private final TacGiaRepository tacGiaRepository;
     private final SanPhamTacGiaRepository sanPhamTacGiaRepository;
     private final vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository;
+    private final ReportService reportService;
 
     public VendorService(ShopRepository shopRepository,
                          SanPhamRepository sanPhamRepository,
@@ -44,7 +45,8 @@ public class VendorService {
                          ThanhToanRepository thanhToanRepository,
                          TacGiaRepository tacGiaRepository,
                          SanPhamTacGiaRepository sanPhamTacGiaRepository,
-                         vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository) {
+                         vn.bookstore.the4bookstore.repository.VoucherDaLuuRepository voucherDaLuuRepository,
+                         ReportService reportService) {
         this.shopRepository = shopRepository;
         this.sanPhamRepository = sanPhamRepository;
         this.donHangRepository = donHangRepository;
@@ -55,6 +57,7 @@ public class VendorService {
         this.tacGiaRepository = tacGiaRepository;
         this.sanPhamTacGiaRepository = sanPhamTacGiaRepository;
         this.voucherDaLuuRepository = voucherDaLuuRepository;
+        this.reportService = reportService;
     }
 
     // --- DASHBOARD THỐNG KÊ CỦA SHOP ---
@@ -62,7 +65,11 @@ public class VendorService {
     public Map<String, Object> getShopDashboardStats(Integer maShop) {
         Map<String, Object> stats = new HashMap<>();
 
-        long totalBooks = sanPhamRepository.countActiveByShop(maShop);
+        Integer activeBookCount = null;
+        try {
+            activeBookCount = shopRepository.countActiveBooksByShop(maShop);
+        } catch (Exception ignored) {}
+        long totalBooks = (activeBookCount != null) ? activeBookCount.longValue() : sanPhamRepository.countActiveByShop(maShop);
         long newOrders = donHangRepository.countByShop_MaShopAndTrangThaiIn(maShop, List.of("DonHangMoi", "ChoXuLy"));
         long confirmedOrders = donHangRepository.countByShop_MaShopAndTrangThai(maShop, "DaXacNhan");
         long pickedUpOrders = donHangRepository.countByShop_MaShopAndTrangThai(maShop, "DaLayHang");
@@ -99,8 +106,21 @@ public class VendorService {
         stats.put("platformFee", platformFee != null ? platformFee : 0L);
         stats.put("netPayout", (totalRevenue != null ? totalRevenue : 0L));
         stats.put("currentMonth", now.getMonthValue());
+        stats.put("stockWarningCount", reportService.getShopStockWarnings(maShop).size());
 
         return stats;
+    }
+
+    // --- BÁO CÁO DOANH THU THEO THÁNG CỦA SHOP (GỌI SP sp_DoanhThuShopTheoThang) ---
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getShopMonthlyRevenue(Integer maShop) {
+        return reportService.getShopMonthlyRevenue(maShop);
+    }
+
+    // --- BẢNG CẢNH BÁO TỒN KHO CỦA SHOP (TRUY VẤN VIEW vw_CanhBaoTonKhoShop LỌC THEO ma_shop) ---
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getShopStockWarnings(Integer maShop) {
+        return reportService.getShopStockWarnings(maShop);
     }
 
     // --- QUẢN LÝ SẢN PHẨM CỦA SHOP ---
@@ -338,7 +358,12 @@ public class VendorService {
             dh.setMaVanDon(prefix + "-" + dh.getMaDH() + "-" + (System.currentTimeMillis() % 100000));
         }
 
-        return donHangRepository.save(dh);
+        try {
+            donHangRepository.executeSpShopXacNhanDonHang(maDH, maShop, dh.getMaVanDon());
+            return donHangRepository.findById(maDH).orElse(dh);
+        } catch (Exception ignored) {
+            return donHangRepository.save(dh);
+        }
     }
 
     // 2. Đã lấy hàng / Đang đóng gói: Bàn giao shipper
@@ -373,12 +398,16 @@ public class VendorService {
         dh.setNgayHoanThanh(LocalDateTime.now());
         dh.setTrangThaiThanhToan("DaThanhToan");
 
-        // Tính phí sàn và tiền thực nhận ví shop
+        // Tính phí sàn (gọi fn_TinhPhiSan) và tiền thực nhận ví shop
         BigDecimal feeRate = (dh.getShop() != null && dh.getShop().getChietKhauPhanTram() != null)
                 ? dh.getShop().getChietKhauPhanTram()
                 : new BigDecimal("5.00");
         int tongTien = dh.getTongTien() != null ? dh.getTongTien() : 0;
-        int feeAmount = feeRate.multiply(new BigDecimal(tongTien)).divide(new BigDecimal(100), java.math.RoundingMode.HALF_UP).intValue();
+        Integer dbFee = null;
+        try {
+            dbFee = donHangRepository.calculatePlatformFee(tongTien, maShop);
+        } catch (Exception ignored) {}
+        int feeAmount = (dbFee != null) ? dbFee : feeRate.multiply(new BigDecimal(tongTien)).divide(new BigDecimal(100), java.math.RoundingMode.HALF_UP).intValue();
 
         dh.setChietKhauAppPhanTram(feeRate);
         dh.setTienPhiSan(feeAmount);
@@ -387,36 +416,50 @@ public class VendorService {
         return donHangRepository.save(dh);
     }
 
-    // Ngoại lệ A1: Shop chủ động hủy (do hết hàng đột xuất) -> Nhả tồn kho
+    // Ngoại lệ A1: Shop chủ động hủy (do hết hàng đột xuất) -> Nhả tồn kho (gọi sp_HuyDonHang)
     public DonHang huyDonHang(Integer maDH, Integer maShop, String lyDo) {
         DonHang dh = checkAndGetShopOrder(maDH, maShop);
-        dh.setTrangThai("DaHuy");
-        dh.setLyDoHuy(lyDo != null && !lyDo.isBlank() ? lyDo : "Shop hết hàng đột xuất");
-
-        // Hoàn lại tồn kho
-        releaseOrderStock(dh);
-
-        if ("DaThanhToan".equalsIgnoreCase(dh.getTrangThaiThanhToan())) {
-            dh.setTrangThaiThanhToan("DaHoanTien");
+        String reason = (lyDo != null && !lyDo.isBlank()) ? lyDo : "Shop hết hàng đột xuất";
+        try {
+            donHangRepository.executeSpHuyDonHang(maDH, reason);
+            return donHangRepository.findById(maDH).orElse(dh);
+        } catch (Exception ignored) {
+            dh.setTrangThai("DaHuy");
+            dh.setLyDoHuy(reason);
+            releaseOrderStock(dh);
+            if ("DaThanhToan".equalsIgnoreCase(dh.getTrangThaiThanhToan())) {
+                dh.setTrangThaiThanhToan("DaHoanTien");
+            }
+            return donHangRepository.save(dh);
         }
-
-        return donHangRepository.save(dh);
     }
 
-    // Ngoại lệ A2: Shop chấp nhận yêu cầu hủy từ khách (khi đơn đã xác nhận) -> Nhả tồn kho
+    // Ngoại lệ A2: Shop chấp nhận yêu cầu hủy từ khách -> Nhả tồn kho (gọi sp_HuyDonHang)
     public DonHang chapNhanHuyDon(Integer maDH, Integer maShop) {
         DonHang dh = checkAndGetShopOrder(maDH, maShop);
-        dh.setTrangThai("DaHuy");
-        dh.setLyDoHuy((dh.getLyDoHuy() != null ? dh.getLyDoHuy() + " (" : "") + "Shop chấp nhận hủy" + (dh.getLyDoHuy() != null ? ")" : ""));
-
-        // Hoàn lại tồn kho
-        releaseOrderStock(dh);
-
-        if ("DaThanhToan".equalsIgnoreCase(dh.getTrangThaiThanhToan())) {
-            dh.setTrangThaiThanhToan("DaHoanTien");
+        String reason = (dh.getLyDoHuy() != null ? dh.getLyDoHuy() + " (" : "") + "Shop chấp nhận hủy" + (dh.getLyDoHuy() != null ? ")" : "");
+        try {
+            donHangRepository.executeSpHuyDonHang(maDH, reason);
+            return donHangRepository.findById(maDH).orElse(dh);
+        } catch (Exception ignored) {
+            dh.setTrangThai("DaHuy");
+            dh.setLyDoHuy(reason);
+            releaseOrderStock(dh);
+            if ("DaThanhToan".equalsIgnoreCase(dh.getTrangThaiThanhToan())) {
+                dh.setTrangThaiThanhToan("DaHoanTien");
+            }
+            return donHangRepository.save(dh);
         }
+    }
 
-        return donHangRepository.save(dh);
+    // --- XÁC NHẬN PHIẾU KIỂM KÊ (GỌI SP sp_ShopXacNhanKiemKe) ---
+    @Transactional
+    public void xacNhanPhieuKiemKe(Integer maPhieuKiemKe, Integer maShop) {
+        String sql = "CALL sp_ShopXacNhanKiemKe(:maPhieu, :maShop)";
+        entityManager.createNativeQuery(sql)
+                .setParameter("maPhieu", maPhieuKiemKe)
+                .setParameter("maShop", maShop)
+                .executeUpdate();
     }
 
     // Ngoại lệ A3: Shop từ chối yêu cầu hủy của khách -> Giữ nguyên DaXacNhan để tiếp tục giao

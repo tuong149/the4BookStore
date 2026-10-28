@@ -73,8 +73,8 @@
             <span th:text="${successMessage}"></span>
         </div>
 
-        <!-- 2. KPI Financial Cards (3 Thẻ tài chính & quy mô đồng đều) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- 2. KPI Financial & Inventory Cards (4 Thẻ cân đối) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <!-- Thẻ 1: Doanh Thu Tháng Này -->
             <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
@@ -84,11 +84,11 @@
                             <span class="material-symbols-outlined text-[22px]">payments</span>
                         </div>
                     </div>
-                    <div class="text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.thisMonthRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    <div class="text-2xl font-black text-emerald-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.thisMonthRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
                 </div>
                 <div class="pt-4 mt-4 border-t border-surface-container/60 text-[11px] text-on-surface-variant flex items-center gap-1">
                     <span class="material-symbols-outlined text-[14px] text-emerald-600">check_circle</span>
-                    <span th:text="'Đơn hoàn tất trong tháng ' + ${stats.currentMonth} + ' (đã trừ phí sàn)'">Đã khấu trừ phí sàn từ các đơn hoàn tất</span>
+                    <span th:text="'Tháng ' + ${stats.currentMonth} + ' (thực nhận)'">Thực nhận shop</span>
                 </div>
             </div>
 
@@ -96,16 +96,16 @@
             <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Chiết Khấu Sàn Đã Nộp</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Chiết Khấu Sàn</span>
                         <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
                             <span class="material-symbols-outlined text-[22px]">receipt_long</span>
                         </div>
                     </div>
-                    <div class="text-2xl lg:text-3xl font-black text-amber-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.platformFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    <div class="text-2xl font-black text-amber-600 tracking-tight" th:text="${#numbers.formatDecimal(stats.platformFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
                 </div>
                 <div class="pt-4 mt-4 border-t border-surface-container/60 text-[11px] text-on-surface-variant flex items-center gap-1">
                     <span class="material-symbols-outlined text-[14px] text-amber-600">percent</span>
-                    <span th:text="'Mức phí sàn quy định: ' + ${shop.chietKhauPhanTram != null ? shop.chietKhauPhanTram : '5.0'} + '% / đơn thành công'">Phí sàn 5.0%</span>
+                    <span th:text="'Phí sàn: ' + ${shop.chietKhauPhanTram != null ? shop.chietKhauPhanTram : '5.0'} + '%'">Phí sàn 5.0%</span>
                 </div>
             </div>
 
@@ -118,14 +118,35 @@
                             <span class="material-symbols-outlined text-[22px]">inventory_2</span>
                         </div>
                     </div>
-                    <div class="text-2xl lg:text-3xl font-black text-blue-600 tracking-tight" th:text="${stats.totalBooks} + ' sản phẩm'">0 sản phẩm</div>
+                    <div class="text-2xl font-black text-blue-600 tracking-tight" th:text="${stats.totalBooks} + ' sản phẩm'">0 sản phẩm</div>
                 </div>
                 <div class="pt-4 mt-4 border-t border-surface-container/60 flex items-center justify-between text-[11px]">
-                    <span class="text-on-surface-variant">Sản phẩm trong kho</span>
+                    <span class="text-on-surface-variant">Trong kho</span>
                     <a th:href="@{/vendor/products/add}" class="font-bold text-primary hover:underline flex items-center gap-0.5">
-                        <span>+ Đăng sản phẩm mới</span>
-                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        <span>+ Đăng mới</span>
+                        <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
                     </a>
+                </div>
+            </div>
+
+            <!-- Thẻ 4: Cảnh Báo Tồn Kho -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Cảnh Báo Tồn Kho</span>
+                        <div class="w-10 h-10 rounded-2xl flex items-center justify-center" th:classappend="${stats.stockWarningCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}">
+                            <span class="material-symbols-outlined text-[22px]" th:text="${stats.stockWarningCount > 0 ? 'warning' : 'verified'}">warning</span>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black tracking-tight" th:classappend="${stats.stockWarningCount > 0 ? 'text-rose-600' : 'text-emerald-600'}" th:text="${stats.stockWarningCount} + ' sản phẩm'">0 sản phẩm</div>
+                </div>
+                <div class="pt-4 mt-4 border-t border-surface-container/60 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant" th:text="${stats.stockWarningCount > 0 ? 'Chạm ngưỡng tối thiểu' : 'Tồn kho an toàn'}">Trạng thái</span>
+                    <a href="#canh-bao-ton-kho" class="font-bold text-rose-600 hover:underline flex items-center gap-0.5" th:if="${stats.stockWarningCount > 0}">
+                        <span>Xem chi tiết</span>
+                        <span class="material-symbols-outlined text-[13px]">arrow_downward</span>
+                    </a>
+                    <span th:if="${stats.stockWarningCount == 0}" class="text-emerald-700 font-semibold">Tối ưu</span>
                 </div>
             </div>
         </div>
@@ -222,27 +243,157 @@
             </div>
         </div>
 
-        <!-- 4. Lối Tắt Quản Trị Nhanh (Grid 3 cột rộng rãi, card cân đối) -->
+        <!-- 4. Biểu Đồ Doanh Thu Theo Tháng & Báo Cáo Đối Soát (sp_DoanhThuShopTheoThang) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Cột trái (2 phần): Biểu đồ doanh thu thực nhận qua các tháng -->
+            <div class="lg:col-span-2 bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-surface-container">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">trending_up</span>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-on-surface">Biểu Đồ Doanh Thu Gian Hàng</h2>
+                                <p class="text-[11px] text-on-surface-variant">Thực nhận Shop và Phí sàn theo từng tháng (Stored Procedure)</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-semibold px-2.5 py-1 bg-surface-container rounded-xl text-on-surface-variant self-start sm:self-auto">sp_DoanhThuShopTheoThang</span>
+                    </div>
+                    <div class="relative w-full h-64 md:h-72">
+                        <canvas id="vendorRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải (1 phần): Bảng tóm tắt doanh số các tháng gần nhất -->
+            <div class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm flex flex-col">
+                <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-surface-container">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-on-surface">Chi Tiết Báo Cáo Tháng</h2>
+                        <p class="text-[11px] text-on-surface-variant">Thực nhận sau khi trừ phí sàn</p>
+                    </div>
+                </div>
+                <div class="overflow-y-auto max-h-72 space-y-3 pr-1">
+                    <div th:if="${monthlyRevenue == null or monthlyRevenue.isEmpty()}" class="py-12 text-center text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-outline text-3xl block mb-2">query_stats</span>
+                        Chưa có dữ liệu doanh thu đơn hoàn tất.
+                    </div>
+                    <div th:each="m : ${monthlyRevenue}" class="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container/60 hover:bg-surface-container transition-all">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-bold text-on-surface" th:text="'Tháng ' + ${m.thang} + '/' + ${m.nam}">Tháng 10/2026</span>
+                            <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md" th:text="${m.tongDonHang} + ' đơn'">0 đơn</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-on-surface-variant">Thực nhận:</span>
+                            <span class="font-black text-emerald-600" th:text="${#numbers.formatDecimal(m.thucNhanShop, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-on-surface-variant mt-1.5 pt-1.5 border-t border-surface-container/40">
+                            <span>Tổng: <strong th:text="${#numbers.formatDecimal(m.tongDoanhThu, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></span>
+                            <span>Phí sàn: <strong class="text-amber-600" th:text="${#numbers.formatDecimal(m.tongPhiSan, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Bảng Cảnh Báo Tồn Kho (vw_CanhBaoTonKhoShop) -->
+        <div id="canh-bao-ton-kho" class="bg-surface-container-lowest p-6 rounded-3xl border border-surface-container shadow-sm mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-3 border-b border-surface-container">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">warning</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-bold text-on-surface">Cảnh Báo Tồn Kho &amp; Hết Hàng</h2>
+                            <span th:if="${stockWarnings != null and !stockWarnings.isEmpty()}" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700" th:text="${stockWarnings.size()} + ' sản phẩm cần xử lý'">0 cảnh báo</span>
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant">Sản phẩm có tồn kho chạm hoặc thấp hơn mức tồn tối thiểu quy định (View vw_CanhBaoTonKhoShop)</p>
+                    </div>
+                </div>
+                <a th:href="@{/vendor/products}" class="text-xs font-bold text-primary hover:underline flex items-center gap-1 self-start sm:self-auto">
+                    <span>Quản lý toàn bộ kho hàng</span>
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- Khi không có sản phẩm nào chạm ngưỡng cảnh báo -->
+            <div th:if="${stockWarnings == null or stockWarnings.isEmpty()}" class="py-8 text-center">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-[24px]">verified</span>
+                </div>
+                <p class="text-xs font-bold text-emerald-800">Kho hàng an toàn</p>
+                <p class="text-[11px] text-on-surface-variant mt-0.5">Tất cả sản phẩm đang bán của gian hàng đều đạt mức tồn kho trên mức tối thiểu.</p>
+            </div>
+
+            <!-- Bảng danh sách cảnh báo tồn kho -->
+            <div th:if="${stockWarnings != null and !stockWarnings.isEmpty()}" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-surface-container text-on-surface-variant text-[11px] uppercase tracking-wider">
+                            <th class="py-3 px-3 font-bold">Mã SP</th>
+                            <th class="py-3 px-3 font-bold">Tên Sản Phẩm</th>
+                            <th class="py-3 px-3 font-bold text-center">Tồn Hiện Tại</th>
+                            <th class="py-3 px-3 font-bold text-center">Định Mức Tối Thiểu</th>
+                            <th class="py-3 px-3 font-bold text-center">Mức Cảnh Báo</th>
+                            <th class="py-3 px-3 font-bold text-right">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container/60">
+                        <tr th:each="sp : ${stockWarnings}" class="hover:bg-surface-container-low transition-colors">
+                            <td class="py-3 px-3 font-semibold text-outline" th:text="'#' + ${sp.masp}">#1</td>
+                            <td class="py-3 px-3">
+                                <span class="font-bold text-on-surface block" th:text="${sp.tensp}">Tên sách</span>
+                            </td>
+                            <td class="py-3 px-3 text-center">
+                                <span class="font-black text-sm" th:classappend="${sp.soLuongTon == 0 ? 'text-rose-600' : 'text-amber-600'}" th:text="${sp.soLuongTon}">0</span>
+                            </td>
+                            <td class="py-3 px-3 text-center text-on-surface-variant font-medium" th:text="${sp.mucTonToiThieu}">5</td>
+                            <td class="py-3 px-3 text-center">
+                                <span th:if="${sp.mucDoCanhBao == 'HẾT HÀNG'}" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+                                    HẾT HÀNG
+                                </span>
+                                <span th:if="${sp.mucDoCanhBao != 'HẾT HÀNG'}" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-200">
+                                    SẮP HẾT
+                                </span>
+                            </td>
+                            <td class="py-3 px-3 text-right">
+                                <a th:href="@{'/vendor/products/edit/' + ${sp.masp}}" class="px-3 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white font-bold text-[11px] transition-all inline-flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[13px]">edit</span>
+                                    <span>Nhập kho</span>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 6. Lối Tắt Quản Trị Nhanh (Grid 4 cột rộng rãi, card cân đối) -->
         <div>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-bold uppercase tracking-wider text-on-surface-variant">Danh Mục Quản Trị Gian Hàng</h2>
-                <span class="text-xs text-outline">5 phân hệ chức năng</span>
+                <span class="text-xs text-outline">Lối tắt thao tác nhanh</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- 1. Sản Phẩm -->
                 <a th:href="@{/vendor/products}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
                     <div class="flex items-center gap-3.5">
                         <span class="w-12 h-12 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">inventory_2</span>
                         <div>
                             <h3 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">Kho Sản Phẩm</h3>
-                            <p class="text-xs text-on-surface-variant mt-0.5">Thêm mới, sửa giá &amp; đăng sản phẩm</p>
+                            <p class="text-xs text-on-surface-variant mt-0.5">Thêm mới, sửa giá &amp; đăng bán</p>
                         </div>
                     </div>
                     <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
                 </a>
 
-                <!-- 4. Đơn Hàng -->
+                <!-- 2. Đơn Hàng -->
                 <a th:href="@{/vendor/orders}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
                     <div class="flex items-center gap-3.5">
                         <span class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">local_shipping</span>
@@ -254,7 +405,7 @@
                     <span class="material-symbols-outlined text-outline group-hover:text-indigo-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
                 </a>
 
-                <!-- 5. Voucher Shop -->
+                <!-- 3. Voucher Shop -->
                 <a th:href="@{/vendor/promotions}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
                     <div class="flex items-center gap-3.5">
                         <span class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">confirmation_number</span>
@@ -266,7 +417,7 @@
                     <span class="material-symbols-outlined text-outline group-hover:text-amber-600 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
                 </a>
 
-                <!-- 6. Hồ Sơ Shop -->
+                <!-- 4. Hồ Sơ Shop -->
                 <a th:href="@{/vendor/profile}" class="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container hover:shadow-md hover:-translate-y-1 transition-all flex items-center justify-between gap-4 group">
                     <div class="flex items-center gap-3.5">
                         <span class="w-12 h-12 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:!text-white transition-all flex items-center justify-center material-symbols-outlined text-[24px]">store</span>
@@ -282,5 +433,102 @@
     </main>
 
     <footer th:replace="~{fragments/common/footer :: common_footer}"></footer>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const rawMonthly = /*[[${monthlyRevenue}]]*/ [];
+            const ctx = document.getElementById('vendorRevenueChart');
+            if (!ctx) return;
+
+            let labels = [];
+            let netRevenues = [];
+            let platformFees = [];
+
+            if (rawMonthly && rawMonthly.length > 0) {
+                // Sắp xếp tăng dần theo thời gian (từ tháng cũ đến tháng mới nhất) để hiển thị biểu đồ dòng thời gian
+                const sorted = rawMonthly.slice().reverse();
+                labels = sorted.map(item => 'Tháng ' + (item.thang < 10 ? '0' + item.thang : item.thang) + '/' + item.nam);
+                netRevenues = sorted.map(item => item.thucNhanShop || 0);
+                platformFees = sorted.map(item => item.tongPhiSan || 0);
+            } else {
+                const now = new Date();
+                const currentMonth = now.getMonth() + 1;
+                for (let i = 1; i <= currentMonth; i++) {
+                    labels.push('Tháng ' + (i < 10 ? '0' + i : i));
+                    netRevenues.push(0);
+                    platformFees.push(0);
+                }
+            }
+
+            Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            Chart.defaults.color = '#707a6f';
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Thực nhận Shop (đ)',
+                            data: netRevenues,
+                            backgroundColor: '#10b981',
+                            borderRadius: 8,
+                            maxBarThickness: 36
+                        },
+                        {
+                            label: 'Phí sàn (đ)',
+                            data: platformFees,
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 8,
+                            maxBarThickness: 36
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#141b2b',
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    return ' ' + context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) return (value / 1000000).toFixed(1) + ' tr';
+                                    if (value >= 1000) return (value / 1000).toFixed(0) + ' k';
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        /*]]>*/
+    </script>
 </body>
 </html>

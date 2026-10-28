@@ -27,6 +27,9 @@ public class DonHangService {
     private final NhaVanChuyenRepository nhaVanChuyenRepository;
     private final ShippingCalculationService shippingCalculationService;
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
     public DonHangService(DonHangRepository donHangRepository,
                           ChiTietDonHangRepository chiTietDonHangRepository,
                           SanPhamRepository sanPhamRepository,
@@ -231,35 +234,57 @@ public class DonHangService {
             if (!km.isOrderDiscount()) {
                 throw new RuntimeException("Mã [" + cleanCode + "] không phải là mã giảm giá sản phẩm! Vui lòng nhập vào ô mã vận chuyển.");
             }
-            if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
-                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
-            }
-            if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
-                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] chưa đến ngày áp dụng!");
-            }
-            if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
-                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết hạn sử dụng!");
-            }
-            if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
-                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết lượt sử dụng!");
-            }
-            if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
-                throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
+
+            // Gọi UDF fn_KiemTraVoucherHopLe từ CSDL
+            Boolean hopLeUDF = null;
+            try {
+                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, null, totalSubtotal);
+            } catch (Exception ignored) {}
+
+            if (Boolean.FALSE.equals(hopLeUDF)) {
+                if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
+                    throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
+                }
+                if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
+                    throw new RuntimeException("Mã giảm giá [" + cleanCode + "] chưa đến ngày áp dụng!");
+                }
+                if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
+                    throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết hạn sử dụng!");
+                }
+                if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
+                    throw new RuntimeException("Mã giảm giá [" + cleanCode + "] đã hết lượt sử dụng!");
+                }
+                if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
+                    throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã [" + cleanCode + "]!");
+                }
+                throw new RuntimeException("Mã giảm giá [" + cleanCode + "] không hợp lệ hoặc không đủ điều kiện áp dụng!");
             }
 
-            if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
-                totalOrderDiscount = (int) Math.round(totalSubtotal * (km.getGiaTriGiam() / 100.0));
-                if (km.getGiamToiDa() != null && totalOrderDiscount > km.getGiamToiDa()) {
-                    totalOrderDiscount = km.getGiamToiDa();
+            // Tính tiền giảm bằng UDF fn_TinhTienGiamVoucher từ CSDL
+            int calculatedDiscount = 0;
+            try {
+                Integer dbDiscount = khuyenMaiRepository.tinhTienGiamVoucher(km.getMaKM(), totalSubtotal);
+                if (dbDiscount != null && dbDiscount > 0) {
+                    calculatedDiscount = dbDiscount;
                 }
-                if (totalOrderDiscount > totalSubtotal) {
-                    totalOrderDiscount = totalSubtotal;
+            } catch (Exception ignored) {}
+
+            if (calculatedDiscount <= 0) {
+                if ("PhanTram".equalsIgnoreCase(km.getLoaiGiam())) {
+                    calculatedDiscount = (int) Math.round(totalSubtotal * (km.getGiaTriGiam() / 100.0));
+                    if (km.getGiamToiDa() != null && calculatedDiscount > km.getGiamToiDa()) {
+                        calculatedDiscount = km.getGiamToiDa();
+                    }
+                    if (calculatedDiscount > totalSubtotal) {
+                        calculatedDiscount = totalSubtotal;
+                    }
+                } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
+                    calculatedDiscount = Math.min(totalSubtotal, km.getGiaTriGiam());
+                } else {
+                    calculatedDiscount = Math.min(totalSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
                 }
-            } else if ("TienCoDinh".equalsIgnoreCase(km.getLoaiGiam())) {
-                totalOrderDiscount = Math.min(totalSubtotal, km.getGiaTriGiam());
-            } else {
-                totalOrderDiscount = Math.min(totalSubtotal, km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 0);
             }
+            totalOrderDiscount = calculatedDiscount;
 
             km.setSoLuongDaDung(km.getSoLuongDaDung() != null ? km.getSoLuongDaDung() + 1 : 1);
             khuyenMaiRepository.save(km);
@@ -286,20 +311,30 @@ public class DonHangService {
             if (voucherOrder != null && voucherOrder.getMaCode().equalsIgnoreCase(cleanCode)) {
                 throw new RuntimeException("Không thể sử dụng cùng một mã cho cả 2 loại ưu đãi!");
             }
-            if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
-                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
-            }
-            if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
-                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] chưa đến ngày áp dụng!");
-            }
-            if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
-                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn sử dụng!");
-            }
-            if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
-                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết lượt sử dụng!");
-            }
-            if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
-                throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
+
+            // Gọi UDF fn_KiemTraVoucherHopLe từ CSDL
+            Boolean hopLeUDF = null;
+            try {
+                hopLeUDF = khuyenMaiRepository.kiemTraVoucherHopLe(cleanCode, null, totalSubtotal);
+            } catch (Exception ignored) {}
+
+            if (Boolean.FALSE.equals(hopLeUDF)) {
+                if (!"HoatDong".equalsIgnoreCase(km.getTrangThai())) {
+                    throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn hoặc tạm ngưng sử dụng!");
+                }
+                if (km.getNgayBatDau() != null && LocalDateTime.now().isBefore(km.getNgayBatDau())) {
+                    throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] chưa đến ngày áp dụng!");
+                }
+                if (km.getNgayKetThuc() != null && LocalDateTime.now().isAfter(km.getNgayKetThuc())) {
+                    throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết hạn sử dụng!");
+                }
+                if (km.getSoLuongToiDa() != null && km.getSoLuongDaDung() != null && km.getSoLuongDaDung() >= km.getSoLuongToiDa()) {
+                    throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] đã hết lượt sử dụng!");
+                }
+                if (km.getDonToiThieu() != null && totalSubtotal < km.getDonToiThieu()) {
+                    throw new RuntimeException("Đơn hàng chưa đạt mức tối thiểu " + String.format("%,d đ", km.getDonToiThieu()) + " để áp dụng mã vận chuyển [" + cleanCode + "]!");
+                }
+                throw new RuntimeException("Mã vận chuyển [" + cleanCode + "] không hợp lệ hoặc không đủ điều kiện áp dụng!");
             }
 
             int maxFreeshipDiscount = km.getGiaTriGiam() != null ? km.getGiaTriGiam() : 30000;
@@ -359,8 +394,12 @@ public class DonHangService {
             int shopFinalTotal = Math.max(0, shopTienHangSauGiam + shopPhiShipSauGiam);
 
             java.math.BigDecimal chietKhauApp = (shop != null && shop.getChietKhauPhanTram() != null)
-                    ? shop.getChietKhauPhanTram() : new java.math.BigDecimal("10.00");
-            int tienPhiSan = (int) Math.round(shopSub * (chietKhauApp.doubleValue() / 100.0));
+                    ? shop.getChietKhauPhanTram() : new java.math.BigDecimal("5.00");
+            Integer dbFee = null;
+            try {
+                dbFee = donHangRepository.calculatePlatformFee(shopSub, sId);
+            } catch (Exception ignored) {}
+            int tienPhiSan = (dbFee != null) ? dbFee : (int) Math.round(shopSub * (chietKhauApp.doubleValue() / 100.0));
             int tienThucNhanShop = Math.max(0, shopTienHangSauGiam - tienPhiSan);
 
             DonHang donHang = new DonHang();
@@ -491,26 +530,64 @@ public class DonHangService {
             throw new RuntimeException("Chỉ có thể hủy trực tiếp đơn hàng ở trạng thái 'Đơn mới / Chờ xử lý'!");
         }
 
-        // Hoàn lại tồn kho và số lượng đã bán
-        if (donHang.getChiTietDonHangs() != null) {
-            for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
-                if (ct.getSanPham() != null && ct.getSoLuong() != null) {
-                    sanPhamRepository.increaseStock(ct.getSanPham().getMaSP(), ct.getSoLuong());
-                    SanPham sp = sanPhamRepository.findById(ct.getSanPham().getMaSP()).orElse(null);
-                    if (sp != null && sp.getSoLuongDaBan() != null) {
-                        sp.setSoLuongDaBan(Math.max(0, sp.getSoLuongDaBan() - ct.getSoLuong()));
-                        sanPhamRepository.save(sp);
+        String reason = (lyDoHuy != null && !lyDoHuy.isBlank()) ? lyDoHuy : "Khách hàng tự hủy";
+        try {
+            // Gọi Stored Procedure sp_HuyDonHang (hoàn tồn kho, voucher, cập nhật DaHuy)
+            donHangRepository.executeSpHuyDonHang(maDH, reason);
+            if ("DaThanhToan".equalsIgnoreCase(donHang.getTrangThaiThanhToan())) {
+                DonHang updated = donHangRepository.findById(maDH).orElse(donHang);
+                updated.setTrangThaiThanhToan("DaHoanTien");
+                donHangRepository.save(updated);
+            }
+        } catch (Exception ex) {
+            // Fallback nếu SP gặp sự cố
+            if (donHang.getChiTietDonHangs() != null) {
+                for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
+                    if (ct.getSanPham() != null && ct.getSoLuong() != null) {
+                        sanPhamRepository.increaseStock(ct.getSanPham().getMaSP(), ct.getSoLuong());
+                        SanPham sp = sanPhamRepository.findById(ct.getSanPham().getMaSP()).orElse(null);
+                        if (sp != null && sp.getSoLuongDaBan() != null) {
+                            sp.setSoLuongDaBan(Math.max(0, sp.getSoLuongDaBan() - ct.getSoLuong()));
+                            sanPhamRepository.save(sp);
+                        }
                     }
                 }
             }
-        }
 
-        donHang.setTrangThai("DaHuy");
-        if ("DaThanhToan".equalsIgnoreCase(donHang.getTrangThaiThanhToan())) {
-            donHang.setTrangThaiThanhToan("DaHoanTien");
+            donHang.setTrangThai("DaHuy");
+            if ("DaThanhToan".equalsIgnoreCase(donHang.getTrangThaiThanhToan())) {
+                donHang.setTrangThaiThanhToan("DaHoanTien");
+            }
+            donHang.setLyDoHuy(reason);
+            donHangRepository.save(donHang);
         }
-        donHang.setLyDoHuy(lyDoHuy != null && !lyDoHuy.isBlank() ? lyDoHuy : "Khách hàng tự hủy");
-        donHangRepository.save(donHang);
+    }
+
+    // --- TẠO ĐƠN HÀNG QUA THỦ TỤC sp_DatHangVaTruTonKho ---
+    @Transactional
+    public Integer executeSpDatHangVaTruTonKho(Integer maKH, Integer maShop, Integer maNVC,
+                                               Integer maKM, Integer maKMFreeship,
+                                               String diaChiGiao, String sdtGiao,
+                                               int tongTien, int phiShip, int tienGiam, int tienGiamFreeship,
+                                               String phuongThuc) {
+        String sql = "CALL sp_DatHangVaTruTonKho(:makh, :maShop, :maNvc, :makm, :maKmFreeship, :diaChi, :sdt, :tongTien, :phiShip, :tienGiam, :tienGiamFreeship, :phuongThuc, @newMaDH)";
+        entityManager.createNativeQuery(sql)
+                .setParameter("makh", maKH)
+                .setParameter("maShop", maShop)
+                .setParameter("maNvc", maNVC)
+                .setParameter("makm", maKM)
+                .setParameter("maKmFreeship", maKMFreeship)
+                .setParameter("diaChi", diaChiGiao)
+                .setParameter("sdt", sdtGiao)
+                .setParameter("tongTien", tongTien)
+                .setParameter("phiShip", phiShip)
+                .setParameter("tienGiam", tienGiam)
+                .setParameter("tienGiamFreeship", tienGiamFreeship)
+                .setParameter("phuongThuc", phuongThuc)
+                .executeUpdate();
+
+        Object res = entityManager.createNativeQuery("SELECT @newMaDH").getSingleResult();
+        return res != null ? ((Number) res).intValue() : null;
     }
 
     private void markVoucherUsedInWallet(KhachHang khachHang, KhuyenMai km) {

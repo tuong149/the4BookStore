@@ -302,4 +302,31 @@ public class KhuyenMaiService {
         if (str == null) return "";
         return str.replace("\"", "\"\"");
     }
+
+    // ====================================================================
+    // TÍCH HỢP HÀM KIỂM TRA & TÍNH TIỀN GIẢM VOUCHER TỪ CSDL (UDF)
+    // ====================================================================
+    public boolean kiemTraVoucherHopLe(String maCode, Integer maShop, Integer tongTien) {
+        if (maCode == null || maCode.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            Boolean hopLe = khuyenMaiRepository.kiemTraVoucherHopLe(maCode.trim().toUpperCase(), maShop, tongTien);
+            return Boolean.TRUE.equals(hopLe);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public int tinhTienGiamVoucher(Integer maKM, Integer tongTien) {
+        if (maKM == null || tongTien == null || tongTien <= 0) {
+            return 0;
+        }
+        try {
+            Integer discount = khuyenMaiRepository.tinhTienGiamVoucher(maKM, tongTien);
+            return discount != null ? discount : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

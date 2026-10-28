@@ -124,6 +124,15 @@ public class AdminController {
         } catch (Exception e) {
             model.addAttribute("totalSold", 0L);
         }
+        try {
+            model.addAttribute("monthlyReportView", reportService.getMonthlyRevenueReportView());
+        } catch (Exception ignored) {}
+        try {
+            model.addAttribute("shopRevenuesView", reportService.getShopRevenuesView());
+        } catch (Exception ignored) {}
+        try {
+            model.addAttribute("topBooksView", reportService.getTopSellingBooksView(10));
+        } catch (Exception ignored) {}
 
         long totalBooks = 0;
         try {

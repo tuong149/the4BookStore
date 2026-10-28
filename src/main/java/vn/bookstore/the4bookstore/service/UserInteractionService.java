@@ -21,6 +21,9 @@ public class UserInteractionService {
     private final DonHangRepository donHangRepository;
     private final ChiTietDonHangRepository chiTietDonHangRepository;
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
     public UserInteractionService(SanPhamYeuThichRepository yeuThichRepository,
                                   SanPhamDaXemRepository daXemRepository,
                                   SanPhamRepository sanPhamRepository,
@@ -102,14 +105,20 @@ public class UserInteractionService {
                 .stream().map(SanPhamDaXem::getSanPham).collect(Collectors.toList());
     }
 
-    // Cron job tự động dọn dẹp các bản ghi đã xem quá 1 tiếng định kỳ mỗi 15 phút
+    // Cron job tự động dọn dẹp các bản ghi đã xem quá 1 tiếng định kỳ mỗi 15 phút (gọi sp_DonDepSanPhamDaXem)
     @org.springframework.scheduling.annotation.Scheduled(fixedRate = 15 * 60 * 1000)
     @Transactional
     public void cleanupExpiredRecentlyViewed() {
         try {
-            LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
-            daXemRepository.deleteByThoiGianXemBefore(oneHourAgo);
-        } catch (Exception ignored) {}
+            entityManager.createNativeQuery("CALL sp_DonDepSanPhamDaXem(:soGio)")
+                    .setParameter("soGio", 1)
+                    .executeUpdate();
+        } catch (Exception ignored) {
+            try {
+                LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+                daXemRepository.deleteByThoiGianXemBefore(oneHourAgo);
+            } catch (Exception ignored2) {}
+        }
     }
 
     // --- ĐÁNH GIÁ SẢN PHẨM ĐÃ MUA ---
@@ -176,7 +185,11 @@ public class UserInteractionService {
 
     @Transactional(readOnly = true)
     public Double getAverageRating(SanPham sanPham) {
-        if (sanPham == null) return 5.0;
+        if (sanPham == null || sanPham.getMaSP() == null) return 5.0;
+        try {
+            Double avg = sanPhamRepository.getAverageRatingByProductId(sanPham.getMaSP());
+            if (avg != null) return Math.round(avg * 10.0) / 10.0;
+        } catch (Exception ignored) {}
         Double avg = danhGiaRepository.findAverageRatingBySanPham(sanPham);
         return avg != null ? Math.round(avg * 10.0) / 10.0 : 5.0;
     }

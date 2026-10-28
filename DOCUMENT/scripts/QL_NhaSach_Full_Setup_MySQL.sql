@@ -548,7 +548,7 @@ END$$
 
 -- 9. Hàm: fn_KiemTraVoucherHopLe
 DROP FUNCTION IF EXISTS `fn_KiemTraVoucherHopLe`$$
-CREATE FUNCTION `fn_KiemTraVoucherHopLe`(p_ma_code VARCHAR(50), p_ma_shop INT, p_tong_tien INT)
+CREATE FUNCTION n_KiemTraVoucherHopLe(p_ma_code VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, p_ma_shop INT, p_tong_tien INT)
 RETURNS BOOLEAN
 DETERMINISTIC
 READS SQL DATA
@@ -561,7 +561,7 @@ BEGIN
           AND NOW() BETWEEN ngay_bat_dau AND ngay_ket_thuc
           AND (so_luong_toi_da IS NULL OR so_luong_da_dung < so_luong_toi_da)
           AND p_tong_tien >= don_toi_thieu
-          AND (pham_vi = 'TOAN_SAN' OR (pham_vi = 'SHOP' AND ma_shop = p_ma_shop))
+          AND (pham_vi = 'TOAN_SAN' OR (pham_vi = 'SHOP' AND (p_ma_shop IS NULL OR ma_shop = p_ma_shop)))
     ) THEN
         SET v_hop_le = TRUE;
     END IF;
@@ -575,7 +575,7 @@ RETURNS INT
 DETERMINISTIC
 READS SQL DATA
 BEGIN
-    DECLARE v_loai_giam VARCHAR(20);
+    DECLARE v_loai_giam VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     DECLARE v_gia_tri INT;
     DECLARE v_giam_toi_da INT;
     DECLARE v_tien_giam INT DEFAULT 0;
@@ -611,8 +611,8 @@ DELIMITER ;
 DROP VIEW IF EXISTS `vw_BaoCaoDoanhThuTheoThang`;
 CREATE VIEW `vw_BaoCaoDoanhThuTheoThang` AS
 SELECT 
-    YEAR(ngay_dat) AS nam,
-    MONTH(ngay_dat) AS thang,
+    YEAR(COALESCE(ngay_hoan_thanh, ngay_dat)) AS nam,
+    MONTH(COALESCE(ngay_hoan_thanh, ngay_dat)) AS thang,
     COUNT(madh) AS tong_so_don,
     SUM(CASE WHEN trang_thai IN ('GiaoThanhCong', 'HoanTat', 'DaGiao') AND (trang_thai_thanh_toan IS NULL OR trang_thai_thanh_toan != 'DaHoanTien') THEN 1 ELSE 0 END) AS so_don_thanh_cong,
     SUM(CASE WHEN trang_thai = 'DaHuy' THEN 1 ELSE 0 END) AS so_don_huy,
@@ -937,7 +937,7 @@ END$$
 -- 9. Thủ tục: sp_TimKiemSachPhanTrang
 DROP PROCEDURE IF EXISTS `sp_TimKiemSachPhanTrang`$$
 CREATE PROCEDURE `sp_TimKiemSachPhanTrang`(
-    IN p_tu_khoa VARCHAR(100),
+    IN p_tu_khoa VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_ma_danh_muc INT,
     IN p_gia_tu INT,
     IN p_gia_den INT,

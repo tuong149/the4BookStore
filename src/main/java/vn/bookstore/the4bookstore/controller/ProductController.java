@@ -7,6 +7,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.bookstore.the4bookstore.entity.DanhMuc;
 import vn.bookstore.the4bookstore.entity.SanPham;
@@ -283,12 +286,35 @@ public class ProductController {
         model.addAttribute("reviews", reviews);
         model.addAttribute("reviewCount", reviews.size());
         model.addAttribute("avgRating", avgRating);
+        Map<String, Object> reviewStats = sanPhamService.getProductReviewStats(id);
+        if (reviewStats != null) {
+            model.addAttribute("reviewStats", reviewStats);
+        }
         model.addAttribute("eligibleOrderIds", eligibleOrderIds);
         model.addAttribute("canReview", !eligibleOrderIds.isEmpty());
         model.addAttribute("hasPurchased", hasPurchased);
         model.addAttribute("isLoggedIn", kh != null);
 
         return "products/detail";
+    }
+
+    // API tìm kiếm sản phẩm phân trang qua Stored Procedure sp_TimKiemSachPhanTrang
+    @GetMapping("/api/san-pham/tim-kiem-sp")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> apiSearchProductsWithProcedure(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer maDanhMuc,
+            @RequestParam(required = false) Integer giaTu,
+            @RequestParam(required = false) Integer giaDen,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        List<Map<String, Object>> items = sanPhamService.searchBooksWithProcedure(q, maDanhMuc, giaTu, giaDen, page, size);
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", items);
+        response.put("page", page);
+        response.put("size", size);
+        return ResponseEntity.ok(response);
     }
 
     private void buildGroupModel(String loaiSP, String groupName, String baseUrl,
