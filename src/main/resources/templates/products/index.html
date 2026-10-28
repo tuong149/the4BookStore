@@ -8,20 +8,27 @@
         .horizontal-scroll-category, .carousel-track {
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
         }
         .horizontal-scroll-category::-webkit-scrollbar, .carousel-track::-webkit-scrollbar {
-            height: 6px;
+            display: block !important;
+            height: 8px;
         }
         .horizontal-scroll-category::-webkit-scrollbar-track, .carousel-track::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.03);
+            background: #f1f5f9;
             border-radius: 9999px;
         }
         .horizontal-scroll-category::-webkit-scrollbar-thumb, .carousel-track::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.15);
+            background: #94a3b8;
             border-radius: 9999px;
+            cursor: grab;
         }
         .horizontal-scroll-category::-webkit-scrollbar-thumb:hover, .carousel-track::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
+            background: #004c22;
+        }
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:active, .carousel-track::-webkit-scrollbar-thumb:active {
+            background: #003316;
+            cursor: grabbing;
         }
     </style>
 

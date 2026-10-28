@@ -94,7 +94,67 @@
             }
             body { overscroll-behavior: none; }
         }
-        ::-webkit-scrollbar { display: none; }
+                /* Thanh cuộn ngang luôn hiển thị rõ nét để người dùng chuột có thể kéo qua */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+            width: 0;
+        }
+
+        .carousel-track,
+        .horizontal-scroll-category,
+        .admin-table-scroll,
+        .overflow-x-auto,
+        [class*="overflow-x-auto"] {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
+        }
+
+        .carousel-track::-webkit-scrollbar,
+        .horizontal-scroll-category::-webkit-scrollbar,
+        .admin-table-scroll::-webkit-scrollbar,
+        .overflow-x-auto::-webkit-scrollbar,
+        [class*="overflow-x-auto"]::-webkit-scrollbar {
+            display: block !important;
+            height: 8px !important;
+        }
+
+        .carousel-track::-webkit-scrollbar-track,
+        .horizontal-scroll-category::-webkit-scrollbar-track,
+        .admin-table-scroll::-webkit-scrollbar-track,
+        .overflow-x-auto::-webkit-scrollbar-track,
+        [class*="overflow-x-auto"]::-webkit-scrollbar-track {
+            background: #f1f5f9 !important;
+            border-radius: 9999px !important;
+        }
+
+        .carousel-track::-webkit-scrollbar-thumb,
+        .horizontal-scroll-category::-webkit-scrollbar-thumb,
+        .admin-table-scroll::-webkit-scrollbar-thumb,
+        .overflow-x-auto::-webkit-scrollbar-thumb,
+        [class*="overflow-x-auto"]::-webkit-scrollbar-thumb {
+            background: #94a3b8 !important;
+            border-radius: 9999px !important;
+            cursor: grab;
+        }
+
+        .carousel-track::-webkit-scrollbar-thumb:hover,
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover,
+        .admin-table-scroll::-webkit-scrollbar-thumb:hover,
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+        [class*="overflow-x-auto"]::-webkit-scrollbar-thumb:hover {
+            background: #004c22 !important;
+        }
+
+        .carousel-track::-webkit-scrollbar-thumb:active,
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:active,
+        .admin-table-scroll::-webkit-scrollbar-thumb:active,
+        .overflow-x-auto::-webkit-scrollbar-thumb:active,
+        [class*="overflow-x-auto"]::-webkit-scrollbar-thumb:active {
+            background: #003316 !important;
+            cursor: grabbing;
+        }
     </style>
     <!-- SockJS & STOMP Client for Real-time Notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>

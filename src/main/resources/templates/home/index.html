@@ -9,24 +9,37 @@
         .horizontal-scroll-category, .carousel-track {
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
         }
 
-        .horizontal-scroll-category::-webkit-scrollbar {
-            height: 6px;
+        .horizontal-scroll-category::-webkit-scrollbar,
+        .carousel-track::-webkit-scrollbar {
+            display: block !important;
+            height: 8px;
         }
 
-        .horizontal-scroll-category::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.03);
+        .horizontal-scroll-category::-webkit-scrollbar-track,
+        .carousel-track::-webkit-scrollbar-track {
+            background: #f1f5f9;
             border-radius: 9999px;
         }
 
-        .horizontal-scroll-category::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.15);
+        .horizontal-scroll-category::-webkit-scrollbar-thumb,
+        .carousel-track::-webkit-scrollbar-thumb {
+            background: #94a3b8;
             border-radius: 9999px;
+            cursor: grab;
         }
 
-        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:hover,
+        .carousel-track::-webkit-scrollbar-thumb:hover {
+            background: #004c22;
+        }
+
+        .horizontal-scroll-category::-webkit-scrollbar-thumb:active,
+        .carousel-track::-webkit-scrollbar-thumb:active {
+            background: #003316;
+            cursor: grabbing;
         }
     </style>
 
@@ -1169,6 +1182,52 @@
                 }
             });
         }
+
+        // ========== KÉO BẰNG CHUỘT (DRAG-TO-SCROLL) CHO CÁC KHUNG SÁCH NGANG ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.carousel-track').forEach(track => {
+                let isDown = false;
+                let startX, scrollLeft;
+                let isDragging = false;
+
+                track.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    isDown = true;
+                    isDragging = false;
+                    startX = e.pageX - track.offsetLeft;
+                    scrollLeft = track.scrollLeft;
+                    track.style.cursor = 'grabbing';
+                    track.style.userSelect = 'none';
+                });
+
+                window.addEventListener('mouseup', () => {
+                    if (isDown) {
+                        isDown = false;
+                        track.style.cursor = '';
+                        track.style.removeProperty('user-select');
+                        setTimeout(() => { isDragging = false; }, 50);
+                    }
+                });
+
+                track.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - track.offsetLeft;
+                    const walk = (x - startX) * 1.5;
+                    if (Math.abs(walk) > 5) {
+                        isDragging = true;
+                    }
+                    track.scrollLeft = scrollLeft - walk;
+                });
+
+                track.addEventListener('click', (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }, true);
+            });
+        });
     </script>
 </body>
 

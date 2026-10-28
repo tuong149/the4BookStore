@@ -95,7 +95,17 @@ public class VendorController {
     }
 
     private String checkShopAccess(Shop shop) {
-        if (shop == null) return "redirect:/vendor/register";
+        if (shop == null) {
+            org.springframework.security.core.Authentication auth =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getAuthorities().stream().anyMatch(a ->
+                    a.getAuthority().equals("ROLE_ADMIN")
+                    || a.getAuthority().equals("ROLE_MANAGER")
+                    || a.getAuthority().equals("ROLE_QUANLY"))) {
+                return "redirect:/admin";
+            }
+            return "redirect:/vendor/register";
+        }
         if ("ChoDuyet".equalsIgnoreCase(shop.getTrangThai())) {
             return "redirect:/vendor/pending";
         }
@@ -125,10 +135,6 @@ public class VendorController {
         Optional<Shop> userShop = shopService.findByTaiKhoan(user);
         if (userShop.isPresent()) {
             return userShop.get();
-        }
-        // Nếu user có vai trò ADMIN, MANAGER hoặc QUANLY mà chưa có shop riêng, tự động liên kết với Shop 1 (The4BookStore Official)
-        if ("ADMIN".equalsIgnoreCase(user.getVaiTro()) || "MANAGER".equalsIgnoreCase(user.getVaiTro()) || "QUANLY".equalsIgnoreCase(user.getVaiTro())) {
-            return shopService.findById(1).orElse(null);
         }
         return null;
     }

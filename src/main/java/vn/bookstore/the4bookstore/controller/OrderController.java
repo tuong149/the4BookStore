@@ -139,9 +139,6 @@ public class OrderController {
         if (userShop.isPresent()) {
             return userShop.get();
         }
-        if ("ADMIN".equalsIgnoreCase(tk.getVaiTro()) || "MANAGER".equalsIgnoreCase(tk.getVaiTro()) || "QUANLY".equalsIgnoreCase(tk.getVaiTro())) {
-            return shopRepository.findById(1).orElse(null);
-        }
         return null;
     }
 
