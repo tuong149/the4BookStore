@@ -213,7 +213,7 @@
                 <!-- Right Actions: Admin Link, Cart, User Auth Status -->
                 <div class="flex items-center gap-space-md shrink-0">
                     <!-- Quick Admin / Staff Button (Chỉ hiển thị cho người có thẩm quyền quản trị/kho) -->
-                    <a sec:authorize="hasAnyRole('ADMIN', 'QUANLY')" th:href="@{/admin/dashboard}" class="inline-flex items-center gap-1 px-space-sm py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors shadow-sm">
+                    <a sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'QUANLY')" th:href="@{/admin/dashboard}" class="inline-flex items-center gap-1 px-space-sm py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors shadow-sm">
                         <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
                         <span>Quản Trị</span>
                     </a>
