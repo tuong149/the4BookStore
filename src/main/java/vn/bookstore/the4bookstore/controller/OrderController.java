@@ -318,7 +318,7 @@ public class OrderController {
         dh.setTienThucNhanShop(Math.max(0, tongTien - feeAmount));
 
         donHangRepository.save(dh);
-        redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn đã xác nhận nhận hàng! Đơn hàng đã hoàn tất thành công. Bạn có thể để lại đánh giá cho sản phẩm ngay bây giờ.");
+        redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn đã xác nhận nhận hàng! Đơn hàng đã chuyển sang trạng thái Hoàn tất. Nếu phát hiện sản phẩm có lỗi, bạn vẫn có 48 giờ để gửi Yêu cầu Trả hàng / Hoàn tiền.");
         return "redirect:/don-hang/" + id;
     }
 
@@ -344,10 +344,15 @@ public class OrderController {
             return "redirect:/don-hang/" + id;
         }
 
+        if (!dh.isConHanTraHang()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đơn hàng đã quá thời hạn cho phép Yêu cầu Trả hàng / Hoàn tiền (tối đa 48 giờ kể từ khi giao/nhận hàng)!");
+            return "redirect:/don-hang/" + id;
+        }
+
         dh.setTrangThai("TraHangHoanTien");
         dh.setLyDoTraHang(lyDoTraHang != null ? lyDoTraHang.trim() : "Khách hàng yêu cầu đổi trả");
         donHangRepository.save(dh);
-        redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu Trả hàng - Hoàn tiền đã gửi đến hệ thống xử lý thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu Trả hàng - Hoàn tiền đã gửi đến hệ thống xử lý thành công! Shop và Ban Quản Lý sẽ kiểm tra và giải quyết.");
         return "redirect:/don-hang/" + id;
     }
 

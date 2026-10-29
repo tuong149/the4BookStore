@@ -257,6 +257,7 @@ CREATE TABLE `don_hang` (
     `ly_do_tu_choi` VARCHAR(500) NULL,
     `ngay_dat` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `ngay_xac_nhan` DATETIME NULL,
+    `ngay_giao_hang` DATETIME NULL,
     `ngay_hoan_thanh` DATETIME NULL,
     `ly_do_tra_hang` LONGTEXT NULL,
     `phan_quyet_tranh_chap` LONGTEXT NULL,

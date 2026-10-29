@@ -398,6 +398,9 @@ public class VendorService {
     public DonHang daGiaoHang(Integer maDH, Integer maShop) {
         DonHang dh = checkAndGetShopOrder(maDH, maShop);
         dh.setTrangThai("DaGiao");
+        if (dh.getNgayGiaoHang() == null) {
+            dh.setNgayGiaoHang(LocalDateTime.now());
+        }
         dh.setTrangThaiThanhToan("DaThanhToan");
         return donHangRepository.save(dh);
     }

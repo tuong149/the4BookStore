@@ -53,6 +53,8 @@ import java.util.List;
     @Column(length = 500)
     private String lyDoHuy;
     private LocalDateTime ngayXacNhan;
+    @Column(name = "ngay_giao_hang")
+    private LocalDateTime ngayGiaoHang;
     private LocalDateTime ngayHoanThanh;
 
     @Column(name = "ma_van_don", length = 50)
@@ -117,6 +119,29 @@ import java.util.List;
     public String getTenDangNhapKhachHang() {
         if (khachHang != null && khachHang.getTaiKhoan() != null) {
             return khachHang.getTaiKhoan().getTenDangNhap();
+        }
+        return null;
+    }
+
+    public boolean isConHanTraHang() {
+        if ("DaGiao".equalsIgnoreCase(trangThai)) {
+            return true;
+        }
+        if ("HoanTat".equalsIgnoreCase(trangThai)) {
+            LocalDateTime baseTime = ngayHoanThanh != null ? ngayHoanThanh : (ngayGiaoHang != null ? ngayGiaoHang : ngayDat);
+            return baseTime != null && LocalDateTime.now().isBefore(baseTime.plusHours(48));
+        }
+        return false;
+    }
+
+    public LocalDateTime getHanTraHang() {
+        if ("DaGiao".equalsIgnoreCase(trangThai)) {
+            LocalDateTime base = ngayGiaoHang != null ? ngayGiaoHang : ngayDat;
+            return base != null ? base.plusHours(48) : null;
+        }
+        if ("HoanTat".equalsIgnoreCase(trangThai)) {
+            LocalDateTime base = ngayHoanThanh != null ? ngayHoanThanh : (ngayGiaoHang != null ? ngayGiaoHang : ngayDat);
+            return base != null ? base.plusHours(48) : null;
         }
         return null;
     }

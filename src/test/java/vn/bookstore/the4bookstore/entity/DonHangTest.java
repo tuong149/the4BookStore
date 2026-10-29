@@ -3,6 +3,8 @@ package vn.bookstore.the4bookstore.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DonHangTest {
@@ -62,5 +64,46 @@ class DonHangTest {
         dh.setKhachHang(kh);
 
         assertTrue(dh.isKhachHangBiKhoa());
+    }
+
+    @Test
+    @DisplayName("isConHanTraHang returns true for DaGiao orders")
+    void testConHanTraHangDaGiao() {
+        DonHang dh = new DonHang();
+        dh.setTrangThai("DaGiao");
+        dh.setNgayGiaoHang(LocalDateTime.now().minusHours(10));
+        assertTrue(dh.isConHanTraHang());
+        assertNotNull(dh.getHanTraHang());
+    }
+
+    @Test
+    @DisplayName("isConHanTraHang returns true for HoanTat orders within 48 hours")
+    void testConHanTraHangHoanTatWithin48h() {
+        DonHang dh = new DonHang();
+        dh.setTrangThai("HoanTat");
+        dh.setNgayHoanThanh(LocalDateTime.now().minusHours(24));
+        assertTrue(dh.isConHanTraHang());
+        assertNotNull(dh.getHanTraHang());
+    }
+
+    @Test
+    @DisplayName("isConHanTraHang returns false for HoanTat orders past 48 hours")
+    void testConHanTraHangHoanTatPast48h() {
+        DonHang dh = new DonHang();
+        dh.setTrangThai("HoanTat");
+        dh.setNgayHoanThanh(LocalDateTime.now().minusHours(50));
+        assertFalse(dh.isConHanTraHang());
+        assertNotNull(dh.getHanTraHang());
+    }
+
+    @Test
+    @DisplayName("isConHanTraHang returns false for other statuses like ChoXuLy, DaHuy")
+    void testConHanTraHangOtherStatuses() {
+        DonHang dh = new DonHang();
+        dh.setTrangThai("ChoXuLy");
+        assertFalse(dh.isConHanTraHang());
+
+        dh.setTrangThai("DaHuy");
+        assertFalse(dh.isConHanTraHang());
     }
 }

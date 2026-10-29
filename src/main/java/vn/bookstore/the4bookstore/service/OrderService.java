@@ -35,7 +35,11 @@ public class OrderService {
         String oldStatus = dh.getTrangThai();
         dh.setTrangThai(status);
 
-        if ("DaGiao".equals(status) || "HoanTat".equals(status)) {
+        if ("DaGiao".equals(status)) {
+            if (dh.getNgayGiaoHang() == null) {
+                dh.setNgayGiaoHang(LocalDateTime.now());
+            }
+        } else if ("HoanTat".equals(status)) {
             if (dh.getNgayHoanThanh() == null) {
                 dh.setNgayHoanThanh(LocalDateTime.now());
             }
@@ -143,5 +147,70 @@ public class OrderService {
         } catch (Exception ignored) {
         }
     }
-}
 
+    @Transactional
+    public DonHang completeOrder(DonHang dh) {
+        dh.setTrangThai("HoanTat");
+        if (dh.getNgayHoanThanh() == null) {
+            dh.setNgayHoanThanh(LocalDateTime.now());
+        }
+        dh.setTrangThaiThanhToan("DaThanhToan");
+
+        Integer maShop = dh.getShop() != null ? dh.getShop().getMaShop() : null;
+        java.math.BigDecimal feeRate = (dh.getShop() != null && dh.getShop().getChietKhauPhanTram() != null)
+                ? dh.getShop().getChietKhauPhanTram()
+                : new java.math.BigDecimal("5.00");
+        int tongTien = dh.getTongTien() != null ? dh.getTongTien() : 0;
+        Integer dbFee = null;
+        try {
+            if (maShop != null) {
+                dbFee = donHangRepository.calculatePlatformFee(tongTien, maShop);
+            }
+        } catch (Exception ignored) {}
+        int feeAmount = (dbFee != null) ? dbFee : feeRate.multiply(new java.math.BigDecimal(tongTien)).divide(new java.math.BigDecimal(100), java.math.RoundingMode.HALF_UP).intValue();
+
+        dh.setChietKhauAppPhanTram(feeRate);
+        dh.setTienPhiSan(feeAmount);
+        dh.setTienThucNhanShop(Math.max(0, tongTien - feeAmount));
+
+        DonHang saved = donHangRepository.save(dh);
+
+        try {
+            if (messagingTemplate != null) {
+                OrderNotificationDTO noti = OrderNotificationDTO.builder()
+                        .maDH(saved.getMaDH())
+                        .tenKhachHang(saved.getKhachHang() != null ? saved.getKhachHang().getHoTen() : "Khách hàng")
+                        .soDienThoai(saved.getSoDienThoaiGiao())
+                        .diaChiGiao(saved.getDiaChiGiao())
+                        .tongTien(saved.getTongTien())
+                        .trangThai(saved.getTrangThai())
+                        .ngayDat(saved.getNgayDat())
+                        .maShop(maShop)
+                        .tenShop(saved.getShop() != null ? saved.getShop().getTenShop() : null)
+                        .message("Đơn hàng #" + saved.getMaDH() + " đã hoàn tất thành công")
+                        .build();
+                messagingTemplate.convertAndSend("/topic/orders", noti);
+                if (maShop != null) {
+                    messagingTemplate.convertAndSend("/topic/shop/" + maShop + "/orders", noti);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return saved;
+    }
+
+    // Tự động hoàn tất các đơn hàng đã giao quá 2 ngày (48 giờ)
+    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 15 * 60 * 1000, initialDelay = 60 * 1000)
+    @Transactional
+    public void autoFinalizeDeliveredOrders() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(2);
+        java.util.List<DonHang> deliveredOrders = donHangRepository.findDeliveredOrdersBefore(threshold);
+        if (deliveredOrders != null && !deliveredOrders.isEmpty()) {
+            for (DonHang dh : deliveredOrders) {
+                try {
+                    completeOrder(dh);
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+}

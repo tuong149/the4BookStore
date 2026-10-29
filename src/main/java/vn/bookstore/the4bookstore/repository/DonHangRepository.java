@@ -81,6 +81,9 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
 
     Page<DonHang> findByTrangThaiIn(List<String> trangThais, Pageable pageable);
 
+    @Query("SELECT d FROM DonHang d WHERE d.trangThai = 'DaGiao' AND COALESCE(d.ngayGiaoHang, d.ngayDat) <= :threshold")
+    List<DonHang> findDeliveredOrdersBefore(@Param("threshold") LocalDateTime threshold);
+
     @Query(value = "SELECT fn_TinhPhiSan(:tongTien, :maShop)", nativeQuery = true)
     Integer calculatePlatformFee(@Param("tongTien") Integer tongTien, @Param("maShop") Integer maShop);
 

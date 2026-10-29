@@ -427,12 +427,16 @@
 
                         <!-- Confirm Received button for DaGiao orders (Hoàn tất) -->
                         <div th:if="${donHang.trangThai == 'DaGiao'}">
-                            <form th:action="@{'/don-hang/' + ${donHang.maDH} + '/da-nhan-hang'}" method="post" onsubmit="return confirm('Bạn xác nhận đã nhận được đầy đủ sản phẩm và hài lòng với đơn hàng? Đơn hàng sẽ được hoàn tất.');">
+                            <form th:action="@{'/don-hang/' + ${donHang.maDH} + '/da-nhan-hang'}" method="post" onsubmit="return confirm('Bạn xác nhận đã nhận được kiện hàng? Đơn hàng sẽ được chuyển sang Hoàn tất (bạn vẫn có 48 giờ để gửi yêu cầu Trả hàng nếu có lỗi).');">
                                 <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                                     <span class="material-symbols-outlined text-[18px]">task_alt</span>
                                     <span>Đã nhận được hàng</span>
                                 </button>
                             </form>
+                            <p class="text-[11px] text-center text-on-surface-variant mt-1.5 flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[13px] text-amber-600">info</span>
+                                <span>Tự động hoàn tất sau 2 ngày nếu không khiếu nại</span>
+                            </p>
                         </div>
 
                         <!-- Review button for HoanTat or DaGiao orders -->
@@ -444,13 +448,23 @@
                             </a>
                         </div>
 
-                        <!-- Return/Refund button for DaGiao orders -->
-                        <div th:if="${donHang.trangThai == 'DaGiao'}">
+                        <!-- Return/Refund button for DaGiao orders OR HoanTat orders within return window (48h) -->
+                        <div th:if="${donHang.conHanTraHang}">
                             <button type="button" onclick="document.getElementById('returnModal').classList.remove('hidden'); document.getElementById('returnModal').classList.add('flex');"
                                     class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 font-bold text-xs hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 cursor-pointer">
                                 <span class="material-symbols-outlined text-[18px]">replay</span>
                                 <span>Yêu cầu Trả hàng / Hoàn tiền</span>
                             </button>
+                            <p class="text-[11px] text-center text-purple-600 mt-1 flex items-center justify-center gap-1" th:if="${donHang.hanTraHang != null}">
+                                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                                <span>Hạn khiếu nại lỗi đến: <strong th:text="${#temporals.format(donHang.hanTraHang, 'dd/MM/yyyy HH:mm')}">--</strong></span>
+                            </p>
+                        </div>
+
+                        <!-- Past return window notice for completed orders -->
+                        <div th:if="${donHang.trangThai == 'HoanTat' and !donHang.conHanTraHang}" class="text-center py-2 px-3 bg-surface-container-low rounded-xl text-xs text-on-surface-variant flex items-center justify-center gap-1.5 border border-surface-container">
+                            <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                            <span>Đơn hàng đã hoàn tất (Hết hạn đổi trả)</span>
                         </div>
 
                         <!-- Cancel button only for ChoXuLy orders (Trực tiếp) -->
