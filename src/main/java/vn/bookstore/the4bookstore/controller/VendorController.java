@@ -758,8 +758,13 @@ public class VendorController {
         try {
             vendorService.createShopPromotion(shop.getMaShop(), km);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo mã khuyến mãi của shop thành công!");
-        } catch (Exception ex) {
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            String code = (km.getMaCode() != null) ? km.getMaCode().trim().toUpperCase() : "";
+            redirectAttributes.addFlashAttribute("errorMessage", "Mã voucher '" + code + "' đã tồn tại trên hệ thống! Vui lòng chọn mã khác.");
+        } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể tạo voucher: " + ex.getMessage());
         }
         return "redirect:/vendor/promotions";
     }

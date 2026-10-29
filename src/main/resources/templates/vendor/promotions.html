@@ -46,8 +46,11 @@
                     </div>
 
                     <div>
-                        <label class="block font-bold text-on-surface-variant mb-1">Mã Voucher (Code) <span class="text-error">*</span></label>
-                        <input type="text" name="maCode" required placeholder="SHOP20K" style="text-transform:uppercase"
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-bold text-on-surface-variant">Mã Voucher (Code) <span class="text-error">*</span></label>
+                            <span class="text-[10px] text-on-surface-variant/80">Mã riêng cho shop (VD: FS_KIMDONG, SHOP20K)</span>
+                        </div>
+                        <input type="text" name="maCode" id="vendorMaCode" required placeholder="VD: SHOP20K hoặc FS_SHOP" style="text-transform:uppercase"
                                class="w-full px-3.5 py-2.5 rounded-xl border border-surface-container bg-surface-container-low font-bold text-primary focus:ring-2 focus:ring-primary"/>
                     </div>
 
@@ -171,24 +174,41 @@
             const giamToiDaInput = document.querySelector('input[name="giamToiDa"]');
             if (!select) return;
 
+            const codeInput = document.getElementById('vendorMaCode');
             if (select.value === 'Freeship') {
                 if (inputVal && (!inputVal.value || inputVal.value === '20000')) {
                     inputVal.value = '30000';
                 }
                 if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 30000 (Tối đa)';
+                if (codeInput && (!codeInput.value || codeInput.value === 'FREESHIP')) {
+                    codeInput.placeholder = 'VD: FS_SHOP hoặc SHIP30K (tránh đặt trùng FREESHIP của sàn)';
+                }
             } else if (select.value === 'PhanTram') {
                 if (inputVal && parseInt(inputVal.value) > 100) {
                     inputVal.value = '10';
                 }
                 if (giamToiDaInput) giamToiDaInput.placeholder = 'VD: 50000 (Chống lỗ khi giảm %)';
+                if (codeInput && !codeInput.value) {
+                    codeInput.placeholder = 'VD: GIAM15 hoặc SHOP15';
+                }
             } else {
                 if (giamToiDaInput) giamToiDaInput.placeholder = 'Không cần thiết khi giảm tiền cố định';
+                if (codeInput && !codeInput.value) {
+                    codeInput.placeholder = 'VD: SHOP20K';
+                }
             }
         }
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function(e) {
+                    const codeInput = document.getElementById('vendorMaCode');
+                    if (codeInput && codeInput.value.trim().toUpperCase() === 'FREESHIP') {
+                        e.preventDefault();
+                        alert("Mã 'FREESHIP' đã được sử dụng làm mã miễn phí vận chuyển toàn sàn của hệ thống! Vui lòng đặt mã riêng cho Shop của bạn (ví dụ: FS_SHOP, SHIP30K) để tránh trùng lặp.");
+                        codeInput.focus();
+                        return false;
+                    }
                     const startInput = document.querySelector('input[name="ngayBatDau"]');
                     const endInput = document.querySelector('input[name="ngayKetThuc"]');
                     if (startInput && endInput && startInput.value && endInput.value) {

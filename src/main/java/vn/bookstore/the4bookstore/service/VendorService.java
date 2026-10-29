@@ -534,6 +534,25 @@ public class VendorService {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));
 
+        if (km.getMaCode() == null || km.getMaCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập mã voucher!");
+        }
+
+        String cleanCode = km.getMaCode().trim().toUpperCase();
+        km.setMaCode(cleanCode);
+
+        if (khuyenMaiRepository.existsByMaCode(cleanCode)) {
+            String shopPrefix = (shop.getSlug() != null && !shop.getSlug().isBlank())
+                    ? shop.getSlug().replace("-", "_").toUpperCase()
+                    : ("SHOP" + shop.getMaShop());
+            throw new IllegalArgumentException("Mã voucher '" + cleanCode + "' đã tồn tại trên sàn (đã được Admin hoặc Shop khác sử dụng)! Vui lòng chọn mã riêng cho shop (ví dụ: " + shopPrefix + "_" + cleanCode + " hoặc FS_" + shopPrefix + ").");
+        }
+
+        if (km.getTenKM() == null || km.getTenKM().trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập tên chương trình khuyến mãi!");
+        }
+        km.setTenKM(km.getTenKM().trim());
+
         if (km.getNgayBatDau() != null && km.getNgayKetThuc() != null) {
             if (km.getNgayBatDau().isAfter(km.getNgayKetThuc())) {
                 throw new IllegalArgumentException("Thời gian bắt đầu không được muộn hơn thời gian kết thúc!");
