@@ -581,6 +581,19 @@ public class VendorController {
         return "vendor/orders";
     }
 
+    @GetMapping("/orders/{id}/print")
+    public String printOrder(Authentication auth, @PathVariable Integer id, Model model) {
+        Shop shop = getCurrentShop(auth);
+        String redirect = checkShopAccess(shop);
+        if (redirect != null) return redirect;
+
+        DonHang dh = vendorService.getShopOrder(id, shop.getMaShop());
+        model.addAttribute("shop", shop);
+        model.addAttribute("donHang", dh);
+        model.addAttribute("items", dh.getChiTietDonHangs());
+        return "vendor/order_print";
+    }
+
     @PostMapping("/orders/{id}/confirm-payment")
     public String confirmPayment(Authentication auth, @PathVariable Integer id, RedirectAttributes redirectAttributes) {
         Shop shop = getCurrentShop(auth);

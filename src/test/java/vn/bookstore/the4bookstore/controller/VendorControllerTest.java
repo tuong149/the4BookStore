@@ -165,4 +165,26 @@ class VendorControllerTest {
 
         verify(vendorService, times(1)).saveShopProduct(eq(1), any(), any(), eq("Dale Carnegie"));
     }
+
+    @Test
+    @WithMockUser(username = "customer", roles = {"VENDOR"})
+    @DisplayName("Vendor in vận đơn thành công, trả về view vendor/order_print")
+    void testPrintOrder_Success() throws Exception {
+        Shop shop = new Shop();
+        shop.setMaShop(1);
+        shop.setTrangThai("HoatDong");
+        when(shopService.findByTaiKhoan(any())).thenReturn(Optional.of(shop));
+
+        vn.bookstore.the4bookstore.entity.DonHang dh = new vn.bookstore.the4bookstore.entity.DonHang();
+        dh.setMaDH(101);
+        dh.setShop(shop);
+        dh.setMaVanDon("GHTK-1-101");
+        dh.setChiTietDonHangs(java.util.Collections.emptyList());
+        when(vendorService.getShopOrder(101, 1)).thenReturn(dh);
+
+        mockMvc.perform(get("/vendor/orders/101/print"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("vendor/order_print"))
+                .andExpect(model().attributeExists("shop", "donHang", "items"));
+    }
 }

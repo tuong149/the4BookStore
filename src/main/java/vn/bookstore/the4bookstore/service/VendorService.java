@@ -518,6 +518,22 @@ public class VendorService {
         }
     }
 
+    public DonHang getShopOrder(Integer maDH, Integer maShop) {
+        DonHang dh = checkAndGetShopOrder(maDH, maShop);
+        if (dh.getChiTietDonHangs() != null) {
+            dh.getChiTietDonHangs().size();
+        }
+        if (dh.getMaVanDon() == null || dh.getMaVanDon().isBlank()) {
+            String carrierCode = (dh.getNhaVanChuyen() != null && dh.getNhaVanChuyen().getTenNvc() != null)
+                    ? dh.getNhaVanChuyen().getTenNvc().replaceAll("[^A-Za-z0-9]", "").toUpperCase()
+                    : "TBS";
+            if (carrierCode.length() > 5) carrierCode = carrierCode.substring(0, 5);
+            dh.setMaVanDon(carrierCode + "-" + maShop + "-" + (10000 + (dh.getMaDH() % 90000)));
+            dh = donHangRepository.save(dh);
+        }
+        return dh;
+    }
+
     private DonHang checkAndGetShopOrder(Integer maDH, Integer maShop) {
         DonHang dh = donHangRepository.findById(maDH)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng: " + maDH));

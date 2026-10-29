@@ -227,10 +227,13 @@
                         </form>
 
                         <!-- 2. Đã xác nhận: In phiếu & Bàn giao shipper -->
-                        <button th:if="${dh.trangThai == 'DaXacNhan'}" type="button" onclick="window.print()" class="px-3 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high transition-all flex items-center gap-1 cursor-pointer">
+                        <a th:if="${dh.trangThai == 'DaXacNhan' or dh.trangThai == 'DaLayHang' or dh.trangThai == 'DangGiao' or dh.trangThai == 'DaGiao' or dh.trangThai == 'HoanTat'}" 
+                           th:href="@{'/vendor/orders/' + ${dh.maDH} + '/print'}" 
+                           target="_blank" 
+                           class="px-3 py-2 bg-surface-container text-on-surface font-bold text-xs rounded-xl hover:bg-surface-container-high hover:text-primary transition-all flex items-center gap-1 cursor-pointer">
                             <span class="material-symbols-outlined text-sm">print</span>
-                            <span>In Phiếu Đóng Gói</span>
-                        </button>
+                            <span>In Vận Đơn</span>
+                        </a>
                         <form th:if="${dh.trangThai == 'DaXacNhan'}" th:action="@{'/vendor/orders/' + ${dh.maDH} + '/pickup'}" method="post">
                             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 shadow-sm transition-all flex items-center gap-1 cursor-pointer">
                                 <span class="material-symbols-outlined text-sm">local_shipping</span>

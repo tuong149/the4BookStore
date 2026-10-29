@@ -242,6 +242,34 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/{id}/print")
+    public String printOrder(@PathVariable("id") Integer id,
+                             Authentication authentication,
+                             Model model) {
+        try {
+            DonHang donHang = donHangService.getOrderById(id);
+            KhachHang kh = getCurrentKhachHang(authentication);
+
+            boolean isBuyer = (kh != null && donHang.getKhachHang() != null && donHang.getKhachHang().getMaKH().equals(kh.getMaKH()));
+            boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_MANAGER") || a.getAuthority().equals("ROLE_QUANLY"));
+
+            Shop shop = getCurrentShop(authentication);
+            boolean isShopOwner = (shop != null && donHang.getShop() != null && donHang.getShop().getMaShop().equals(shop.getMaShop()));
+
+            if (!isBuyer && !isAdmin && !isShopOwner) {
+                return "redirect:/don-hang";
+            }
+
+            model.addAttribute("shop", donHang.getShop());
+            model.addAttribute("donHang", donHang);
+            model.addAttribute("items", donHang.getChiTietDonHangs());
+            return "vendor/order_print";
+        } catch (Exception e) {
+            return "redirect:/don-hang";
+        }
+    }
+
     // ==================== Hủy đơn hàng & Yêu cầu hủy ====================
 
     @PostMapping("/{id}/huy")
