@@ -171,6 +171,7 @@ public class ShopService {
         shopRepository.save(shop);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void khoaShop(Integer maShop) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop"));
@@ -186,6 +187,7 @@ public class ShopService {
         }
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void moKhoaShop(Integer maShop) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop"));
@@ -201,7 +203,7 @@ public class ShopService {
         }
     }
 
-    @org.springframework.cache.annotation.CacheEvict(value = "pendingShopCount", allEntries = true)
+    @org.springframework.cache.annotation.CacheEvict(value = {"pendingShopCount", "book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void xoaShop(Integer maShop) {
         Shop shop = shopRepository.findById(maShop)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shop: " + maShop));

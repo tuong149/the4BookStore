@@ -66,7 +66,12 @@ public class UserInteractionService {
     @Transactional(readOnly = true)
     public List<SanPham> getFavorites(KhachHang khachHang) {
         return yeuThichRepository.findByKhachHangOrderByNgayThichDesc(khachHang)
-                .stream().map(SanPhamYeuThich::getSanPham).collect(Collectors.toList());
+                .stream()
+                .map(SanPhamYeuThich::getSanPham)
+                .filter(sp -> sp != null && !"DaXoa".equalsIgnoreCase(sp.getTrangThai()) && !"NgungBan".equalsIgnoreCase(sp.getTrangThai()))
+                .filter(sp -> "BinhThuong".equalsIgnoreCase(sp.getTrangThaiKhoa()) || sp.getTrangThaiKhoa() == null)
+                .filter(sp -> sp.getShop() == null || "HoatDong".equalsIgnoreCase(sp.getShop().getTrangThai()))
+                .collect(Collectors.toList());
     }
 
     // --- SẢN PHẨM ĐÃ XEM (RECENTLY VIEWED - LƯU TRONG 1 TIẾNG) ---
@@ -102,7 +107,12 @@ public class UserInteractionService {
         // Chỉ lấy các sản phẩm đã xem trong vòng 1 tiếng
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
         return daXemRepository.findTop10ByKhachHangAndThoiGianXemAfterOrderByThoiGianXemDesc(khachHang, oneHourAgo)
-                .stream().map(SanPhamDaXem::getSanPham).collect(Collectors.toList());
+                .stream()
+                .map(SanPhamDaXem::getSanPham)
+                .filter(sp -> sp != null && !"DaXoa".equalsIgnoreCase(sp.getTrangThai()) && !"NgungBan".equalsIgnoreCase(sp.getTrangThai()))
+                .filter(sp -> "BinhThuong".equalsIgnoreCase(sp.getTrangThaiKhoa()) || sp.getTrangThaiKhoa() == null)
+                .filter(sp -> sp.getShop() == null || "HoatDong".equalsIgnoreCase(sp.getShop().getTrangThai()))
+                .collect(Collectors.toList());
     }
 
     // Cron job tự động dọn dẹp các bản ghi đã xem quá 1 tiếng định kỳ mỗi 15 phút (gọi sp_DonDepSanPhamDaXem)

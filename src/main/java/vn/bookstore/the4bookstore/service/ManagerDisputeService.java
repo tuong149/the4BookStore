@@ -33,6 +33,7 @@ public class ManagerDisputeService {
     }
 
     // --- KIỂM DUYỆT & KHÓA SẢN PHẨM CỦA SHOP ---
+    @org.springframework.cache.annotation.CacheEvict(value = {"book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void duyetSanPham(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
@@ -40,6 +41,7 @@ public class ManagerDisputeService {
         sanPhamRepository.save(sp);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void khoaSanPham(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
@@ -47,6 +49,7 @@ public class ManagerDisputeService {
         sanPhamRepository.save(sp);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"book_of_the_month", "home_featured_books", "home_preview", "guest_top_sold"}, allEntries = true)
     public void moKhoaSanPham(Integer maSP) {
         SanPham sp = sanPhamRepository.findById(maSP)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));

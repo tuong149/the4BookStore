@@ -173,7 +173,7 @@ public class VendorService {
             sanPham.setISBN("BK-" + (System.currentTimeMillis() % 100000000));
         }
         if (sanPham.getMucTonToiThieu() == null) {
-            sanPham.setMucTonToiThieu(0);
+            sanPham.setMucTonToiThieu(10);
         }
         if (sanPham.getSoLuongTon() == null) {
             sanPham.setSoLuongTon(0);

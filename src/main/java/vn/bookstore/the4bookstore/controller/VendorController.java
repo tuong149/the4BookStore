@@ -497,7 +497,7 @@ public class VendorController {
                     sp.setGiaBan(giaBan);
                     sp.setSoLuongTon(tonKho);
                     sp.setSoLuongDaBan(0);
-                    sp.setMucTonToiThieu(5);
+                    sp.setMucTonToiThieu(10);
                     sp.setLoaiSP(loaiSP);
                     sp.setMoTa(moTa);
                     sp.setTrangThai("DangBan");
