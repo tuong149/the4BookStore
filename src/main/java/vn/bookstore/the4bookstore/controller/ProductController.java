@@ -274,7 +274,7 @@ public class ProductController {
         return "products/list";
     }
 
-    // CẤP 1 — Danh mục Board Game & Đồ chơi
+    // CẤP 1 — Danh mục Board Game & Đồ chơi (tự động chuyển hướng về Quà Tặng & Trang Trí)
     @GetMapping("/board-game")
     public String boardGameList(
             @RequestParam(defaultValue = "") String q,
@@ -284,8 +284,7 @@ public class ProductController {
             @RequestParam(defaultValue = "newest") String sort,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
-        buildGroupModel("BoardGame", "Board Game & Đồ Chơi", "/san-pham/board-game", q, danhMuc, giaTu, giaDen, sort, page, model);
-        return "products/list";
+        return "redirect:/san-pham/qua-tang" + (danhMuc != null ? "?danhMuc=" + danhMuc : "");
     }
 
     // Chi tiết sản phẩm

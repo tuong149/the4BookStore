@@ -3,6 +3,7 @@ package vn.bookstore.the4bookstore.component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import vn.bookstore.the4bookstore.entity.DanhMuc;
 import vn.bookstore.the4bookstore.entity.DanhMucLon;
 import vn.bookstore.the4bookstore.repository.DanhMucLonRepository;
 import vn.bookstore.the4bookstore.repository.DanhMucRepository;
+import vn.bookstore.the4bookstore.repository.SanPhamRepository;
 
 import java.util.List;
 
@@ -19,10 +21,14 @@ public class CategoryDataInitializer {
     private static final Logger log = LoggerFactory.getLogger(CategoryDataInitializer.class);
     private final DanhMucRepository danhMucRepository;
     private final DanhMucLonRepository danhMucLonRepository;
+    private final SanPhamRepository sanPhamRepository;
 
-    public CategoryDataInitializer(DanhMucRepository danhMucRepository, DanhMucLonRepository danhMucLonRepository) {
+    public CategoryDataInitializer(DanhMucRepository danhMucRepository,
+                                   DanhMucLonRepository danhMucLonRepository,
+                                   SanPhamRepository sanPhamRepository) {
         this.danhMucRepository = danhMucRepository;
         this.danhMucLonRepository = danhMucLonRepository;
+        this.sanPhamRepository = sanPhamRepository;
     }
 
     private record StandardCategory(String name, String desc, String loaiSP) {}
@@ -44,77 +50,51 @@ public class CategoryDataInitializer {
             // Quà Tặng & Trang Trí
             new StandardCategory("Đèn Đọc Sách & Phụ Kiện Sách", "Đèn LED kẹp sách bảo vệ mắt, giá đỡ sách thông minh và phụ kiện", "QuaTang"),
             new StandardCategory("Mô Hình Book Nook & Trang Trí", "Mô hình gỗ 3D Book Nook lắp ráp trang trí giá sách tinh tế", "QuaTang"),
-            new StandardCategory("Túi Tote & Thời Trang Sách", "Túi vải canvas thời trang, áo thun và phụ kiện phong cách mọt sách", "QuaTang"),
-
-            // Board Game & Đồ Chơi
-            new StandardCategory("Boardgame & Hộp Quà Tặng", "Trò chơi boardgame trí tuệ, set quà tặng độc đáo cho người yêu sách", "BoardGame"),
-            new StandardCategory("Boardgame Trí Tuệ & Cờ", "Trò chơi boardgame chiến thuật, giải đố, thẻ bài và cờ trí tuệ", "BoardGame")
+            new StandardCategory("Túi Tote & Thời Trang Sách", "Túi vải canvas thời trang, áo thun và phụ kiện phong cách mọt sách", "QuaTang")
     );
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
+    @CacheEvict(value = {"allActiveCategories", "categories", "categoriesByLoaiSP", "home_preview", "allMajorCategories", "allActiveMajorCategories"}, allEntries = true)
     public void syncStandardCategories() {
         try {
-            // 0. Khởi tạo các Danh Mục Lớn (Ngành hàng) tiêu chuẩn nếu chưa có
+            // 1. Dọn dẹp tàn dư BoardGame tự tạo cũ nếu có
+            cleanupDeprecatedBoardGame();
+
+            // 2. Khởi tạo 3 Danh Mục Lớn tiêu chuẩn (Sách, VPP, Quà Tặng) CHỈ KHI bảng danh mục lớn đang trống
             initStandardMajorCategories();
 
-            // 1. Cập nhật các danh mục con hiện có nếu thiếu loaiSP hoặc tên chưa chuẩn
-            List<DanhMuc> currentList = danhMucRepository.findAll();
-            for (DanhMuc dm : currentList) {
-                boolean changed = false;
-                String name = dm.getTenDanhMuc() != null ? dm.getTenDanhMuc().trim() : "";
-
-                if (name.equalsIgnoreCase("Sổ tay")) {
-                    dm.setTenDanhMuc("Sổ Tay & Vở Viết");
-                    dm.setLoaiSP("VanPhongPham");
-                    dm.setMoTa("Sổ tay bìa da, sổ dot grid, sổ còng và vở ghi chép cao cấp");
-                    changed = true;
-                } else if (name.toLowerCase().contains("boardgame") || name.toLowerCase().contains("board game")) {
-                    if (dm.getLoaiSP() == null || !dm.getLoaiSP().equalsIgnoreCase("BoardGame")) {
-                        dm.setLoaiSP("BoardGame");
-                        changed = true;
-                    }
-                } else {
-                    for (StandardCategory std : STANDARD_CATEGORIES) {
-                        if (std.name().equalsIgnoreCase(name)) {
-                            if (dm.getLoaiSP() == null || dm.getLoaiSP().isBlank() || !std.loaiSP().equalsIgnoreCase(dm.getLoaiSP())) {
-                                dm.setLoaiSP(std.loaiSP());
-                                changed = true;
-                            }
-                            if (dm.getMoTa() == null || dm.getMoTa().isBlank()) {
-                                dm.setMoTa(std.desc());
-                                changed = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if (dm.getTrangThai() == null) {
-                    dm.setTrangThai(true);
-                    changed = true;
-                }
-
-                if (changed) {
-                    danhMucRepository.save(dm);
-                }
-            }
-
-            // 2. Thêm các danh mục con chuẩn còn thiếu
-            List<DanhMuc> refreshedList = danhMucRepository.findAll();
-            for (StandardCategory std : STANDARD_CATEGORIES) {
-                boolean exists = refreshedList.stream()
-                        .anyMatch(d -> d.getTenDanhMuc() != null && d.getTenDanhMuc().trim().equalsIgnoreCase(std.name()));
-                if (!exists) {
+            // 3. Khởi tạo danh mục con tiêu chuẩn CHỈ KHI cơ sở dữ liệu chưa có danh mục nào
+            if (danhMucRepository.count() == 0) {
+                for (StandardCategory std : STANDARD_CATEGORIES) {
                     DanhMuc newDm = new DanhMuc();
                     newDm.setTenDanhMuc(std.name());
                     newDm.setMoTa(std.desc());
                     newDm.setLoaiSP(std.loaiSP());
                     newDm.setTrangThai(true);
                     danhMucRepository.save(newDm);
-                    log.info("Khởi tạo danh mục tiêu chuẩn: '{}' [{}]", std.name(), std.loaiSP());
+                    log.info("Khởi tạo danh mục tiêu chuẩn lần đầu: '{}' [{}]", std.name(), std.loaiSP());
+                }
+            } else {
+                // Đã có dữ liệu: Tôn trọng hoàn toàn thao tác của Admin (không tự ý thêm lại các danh mục Admin đã xóa)
+                // Chỉ chuẩn hóa an toàn các trường bắt buộc nếu đang rỗng
+                List<DanhMuc> currentList = danhMucRepository.findAll();
+                for (DanhMuc dm : currentList) {
+                    boolean changed = false;
+                    if (dm.getLoaiSP() == null || dm.getLoaiSP().isBlank()) {
+                        dm.setLoaiSP("Sach");
+                        changed = true;
+                    }
+                    if (dm.getTrangThai() == null) {
+                        dm.setTrangThai(true);
+                        changed = true;
+                    }
+                    if (changed) {
+                        danhMucRepository.save(dm);
+                    }
                 }
             }
+
         } catch (Exception e) {
             log.warn("Không thể đồng bộ danh mục lúc khởi động: {}", e.getMessage());
         }
@@ -125,24 +105,38 @@ public class CategoryDataInitializer {
             DanhMucLon dmlSach = new DanhMucLon(null, "Sach", "Sách", "menu_book", "Ấn bản, tác phẩm, văn học, giáo trình...", true, 1);
             DanhMucLon dmlVpp = new DanhMucLon(null, "VanPhongPham", "Văn Phòng Phẩm", "edit_note", "Sổ tay, bút viết, bookmark, dụng cụ văn phòng...", true, 2);
             DanhMucLon dmlQuaTang = new DanhMucLon(null, "QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, phụ kiện...", true, 3);
-            DanhMucLon dmlBoardGame = new DanhMucLon(null, "BoardGame", "Board Game & Đồ Chơi", "casino", "Trò chơi boardgame trí tuệ, cờ chiến thuật, giải đố...", true, 4);
 
-            danhMucLonRepository.saveAll(List.of(dmlSach, dmlVpp, dmlQuaTang, dmlBoardGame));
-            log.info("Đã khởi tạo 4 danh mục lớn tiêu chuẩn: Sách, Văn Phòng Phẩm, Quà Tặng & Trang Trí, Board Game");
-        } else {
-            // Đảm bảo các danh mục lớn cơ bản luôn có
-            ensureMajorCategoryExists("Sach", "Sách", "menu_book", "Ấn bản, tác phẩm, văn học, giáo trình...", 1);
-            ensureMajorCategoryExists("VanPhongPham", "Văn Phòng Phẩm", "edit_note", "Sổ tay, bút viết, bookmark, dụng cụ văn phòng...", 2);
-            ensureMajorCategoryExists("QuaTang", "Quà Tặng & Trang Trí", "redeem", "Đèn đọc sách, mô hình book nook, túi tote, phụ kiện...", 3);
-            ensureMajorCategoryExists("BoardGame", "Board Game & Đồ Chơi", "casino", "Trò chơi boardgame trí tuệ, cờ chiến thuật, giải đố...", 4);
+            danhMucLonRepository.saveAll(List.of(dmlSach, dmlVpp, dmlQuaTang));
+            log.info("Đã khởi tạo 3 danh mục lớn tiêu chuẩn: Sách, Văn Phòng Phẩm, Quà Tặng & Trang Trí");
         }
     }
 
-    private void ensureMajorCategoryExists(String maLoai, String tenLoai, String icon, String moTa, int thuTu) {
-        if (!danhMucLonRepository.existsByMaLoai(maLoai)) {
-            DanhMucLon dml = new DanhMucLon(null, maLoai, tenLoai, icon, moTa, true, thuTu);
-            danhMucLonRepository.save(dml);
-            log.info("Bổ sung danh mục lớn: '{}' [{}]", tenLoai, maLoai);
+    private void cleanupDeprecatedBoardGame() {
+        try {
+            // Xóa hoặc chuyển các danh mục con mang loaiSP = 'BoardGame'
+            List<DanhMuc> bgCategories = danhMucRepository.findByLoaiSP("BoardGame");
+            for (DanhMuc dm : bgCategories) {
+                long productCount = sanPhamRepository.countByDanhMuc_MaDanhMuc(dm.getMaDanhMuc());
+                if (productCount == 0) {
+                    danhMucRepository.delete(dm);
+                    log.info("Đã dọn dẹp danh mục con tự tạo cũ: '{}'", dm.getTenDanhMuc());
+                } else {
+                    dm.setLoaiSP("QuaTang");
+                    danhMucRepository.save(dm);
+                    log.info("Chuyển danh mục '{}' từ BoardGame về Quà Tặng do có sản phẩm", dm.getTenDanhMuc());
+                }
+            }
+
+            // Xóa danh mục lớn BoardGame nếu không có sản phẩm liên kết
+            danhMucLonRepository.findByMaLoai("BoardGame").ifPresent(dml -> {
+                long productCount = sanPhamRepository.countByLoaiSPIgnoreCase("BoardGame");
+                if (productCount == 0) {
+                    danhMucLonRepository.delete(dml);
+                    log.info("Đã dọn dẹp danh mục lớn 'BoardGame' tự động tạo cũ");
+                }
+            });
+        } catch (Exception ex) {
+            log.warn("Lỗi khi dọn dẹp BoardGame cũ: {}", ex.getMessage());
         }
     }
 }

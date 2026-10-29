@@ -49,7 +49,7 @@ public class DanhMuc {
             return "/san-pham/qua-tang?danhMuc=" + maDanhMuc;
         }
         if ("BoardGame".equalsIgnoreCase(loaiSP)) {
-            return "/san-pham/board-game?danhMuc=" + maDanhMuc;
+            return "/san-pham/qua-tang?danhMuc=" + maDanhMuc;
         }
         if ("Sach".equalsIgnoreCase(loaiSP)) {
             return "/san-pham/sach?danhMuc=" + maDanhMuc;
